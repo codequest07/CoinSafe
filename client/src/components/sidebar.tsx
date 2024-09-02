@@ -1,14 +1,13 @@
 import { Link, NavLink } from "react-router-dom";
-import { Card, CardContent, CardHeader } from "./ui/card";
 import MemoLogo from "@/icons/Logo";
 import { NavLinks } from "@/lib/data";
-import MemoChrome from "@/icons/Chrome";
+import ExtensionCard from "./ExtensionCard";
 
 const Sidebar = () => {
   return (
     <main>
       <div className="grid min-h-screen w-full md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr]">
-        <div className="hidden border-r p-2 border-[#13131373]  bg-[#13131373]  md:block">
+        <div className="hidden rounded-2xl border-r p-2 border-[#13131373]  bg-[#13131373]  md:block">
           <div className="flex h-full max-h-screen shadow-lg  rounded-xl  flex-col gap-2">
             <div className="flex items-center py-12 px-4 lg:h-[60px] lg:px-6">
               <Link to="/" className="flex items-center gap-2 font-semibold">
@@ -34,27 +33,7 @@ const Sidebar = () => {
             </div>
 
             <div className="mt-auto p-4">
-              <Card
-                x-chunk="dashboard-02-chunk-0"
-                className="flex flex-col items-center justify-center bg-[#092324] text-white p-1 rounded-lg shadow-lg">
-                <CardHeader className="flex items-center justify-center">
-                  <MemoChrome className="w-20 h-20" />
-                </CardHeader>
-                <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-                  <div className="text-center mb-4">
-                    <p className="text-lg font-semibold">Save automatically</p>
-                    <p className="text-sm">
-                      Start saving automatically with our all new crowe wallet
-                      extension
-                    </p>
-                  </div>
-                  <div className="flex justify-center">
-                    <button className="bg-white text-black font-semibold py-2 px-6 rounded-full">
-                      Download
-                    </button>
-                  </div>
-                </CardContent>
-              </Card>
+              <ExtensionCard />
             </div>
           </div>
         </div>

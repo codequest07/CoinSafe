@@ -32,3 +32,40 @@ export const NavLinks = [
     label: "Rewards",
   },
 ];
+
+export const savings = [
+  {
+    date: "23rd Sept, 2024",
+    items: [
+      {
+        symbol: "USDC",
+        name: "USD Coin",
+        amount: "5.9483",
+        value: "$5.00",
+      },
+      {
+        symbol: "USDC",
+        name: "USD Coin",
+        amount: "5.9483",
+        value: "$5.00",
+      },
+    ],
+  },
+  {
+    date: "23rd Sept, 2024",
+    items: [
+      {
+        symbol: "USDC",
+        name: "USD Coin",
+        amount: "5.9483",
+        value: "$5.00",
+      },
+      {
+        symbol: "USDC",
+        name: "USD Coin",
+        amount: "5.9483",
+        value: "$5.00",
+      },
+    ],
+  },
+];
