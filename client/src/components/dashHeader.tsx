@@ -4,15 +4,15 @@ import { Menu } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { NavLinks } from "@/lib/data";
-import MemoLogo from "@/icons/Logo";
 import MemoTrustWallet from "@/icons/TrustWallet";
 import MemoSmile from "@/icons/Smile";
 import MemoChrome from "@/icons/Chrome";
+import MemoLogo from "@/icons/Logo";
 
 const DashHeader = () => {
   return (
     <main>
-      <header className="flex justify-end h-14 items-center gap-4 border-b dark:border-b-[#000000] dark:bg-[#000000] lg:h-[80px]">
+      <header className="flex justify-end h-14 items-center bg-[#13131373] rounded-2xl shadow-xl gap-4 border-b border-b-[#000000] lg:h-[80px]">
         <Sheet>
           <SheetContent side="left" className="flex flex-col bg-[#13131373]">
             <nav className="grid gap-2 text-lg font-medium">

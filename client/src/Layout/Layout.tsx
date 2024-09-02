@@ -5,11 +5,11 @@ import { Outlet } from "react-router-dom";
 
 const Layout = () => {
   return (
-    <div className="h-screen flex">
+    <div className="h-screen bg-[#010104] flex">
       <Sidebar />
       <main className="flex flex-col w-full">
         <DashHeader />
-        <div className="bg-[#F7F7F7] flex-grow  overflow-y-auto overflow-x-hidden">
+        <div className="bg-[#010104] flex-grow  overflow-y-auto overflow-x-hidden">
           <Outlet />
         </div>
       </main>
