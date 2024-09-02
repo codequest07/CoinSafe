@@ -1,9 +1,17 @@
 import AssetTable from "@/components/AssetTable";
+import ScheduledSavings from "@/components/ScheduledSavingsCard";
 
 const Home = () => {
   return (
     <main>
-      <AssetTable />
+      <div className="sm:flex space-x-4">
+        <div className="w-2/3">
+          <AssetTable />
+        </div>
+        <div className="w-1/3">
+          <ScheduledSavings />
+        </div>
+      </div>
     </main>
   );
 };
