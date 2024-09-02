@@ -7,6 +7,7 @@ import MemoTrustWallet from "@/icons/TrustWallet";
 import MemoSmile from "@/icons/Smile";
 import MemoLogo from "@/icons/Logo";
 import ExtensionCard from "./ExtensionCard";
+import SmileFace from "./Smile";
 
 const DashHeader = () => {
   return (
@@ -52,7 +53,7 @@ const DashHeader = () => {
                 {/* Username and days badge */}
                 <div className="flex  items-center">
                   <span className="text-sm text-gray-400">u/jumpingjack</span>
-                  <span className="text-xs bg-[#2A2A2A] text-orange-500 py-1 px-2 rounded-full">
+                  <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
                     1000 days 🔥
                   </span>
                 </div>
@@ -61,14 +62,14 @@ const DashHeader = () => {
                   <span>Why haven't you saved today? Ehn fine girl?</span>
                 </div>
               </div>
-
               <div className="flex items-center sm:space-x-3">
                 {/* Icons for connected wallets */}
+                <SmileFace />
 
-                <Button className="bg-transparent hover:bg-transparent border py-5 border-[#7F7F7F] rounded-2xl">
+                {/* <Button className="bg-transparent hover:bg-transparent border py-5 border-[#7F7F7F] rounded-2xl">
                   connected wallets <MemoTrustWallet className="w-8 h-8" />
                 </Button>
-                <MemoSmile className="w-12 h-12" />
+                <MemoSmile className="w-12 h-12" /> */}
               </div>
             </div>
           </div>
