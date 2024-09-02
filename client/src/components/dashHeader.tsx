@@ -3,8 +3,6 @@ import { Button } from "./ui/button";
 import { Menu } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { NavLinks } from "@/lib/data";
-import MemoTrustWallet from "@/icons/TrustWallet";
-import MemoSmile from "@/icons/Smile";
 import MemoLogo from "@/icons/Logo";
 import ExtensionCard from "./ExtensionCard";
 import SmileFace from "./Smile";
