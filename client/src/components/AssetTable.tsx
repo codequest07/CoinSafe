@@ -20,13 +20,13 @@ export default function AssetTable() {
   const savedAssets = allAssets.filter((asset) => asset.saved);
 
   return (
-    <div className="bg-[#13131373] border border-[#13131373] p-4 rounded-[2rem] text-white ">
-      <div className="mx-auto">
+    <div className="bg-[#010104] border border-[#13131373] p-4 rounded-[2rem] text-white ">
+      <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">Assets</h1>
 
         {/* Tabs Component */}
-        <Tabs defaultValue="all-assets" className="w-full">
-          <TabsList className="flex space-x-4 bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
+        <Tabs defaultValue="all-assets" className="w-full ">
+          <TabsList className="sm:flex space-x-4 hidden bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="all-assets"
               className="text-white px-4 py-2 rounded-full">
@@ -79,7 +79,7 @@ function AssetTableContent({ assets }: { assets: Asset[] }) {
     <div className="bg-[#010104] p-4 rounded-lg">
       <CardContent>
         <Table>
-          <TableHeader className="text-[#CACACA]">
+          <TableHeader className="bg-[#1E1E1E99]  text-[#CACACA]">
             <TableRow>
               <TableHead>Ticker</TableHead>
               <TableHead>Amount</TableHead>
