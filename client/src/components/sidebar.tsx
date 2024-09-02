@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import MemoLogo from "@/icons/Logo";
 import { NavLinks } from "@/lib/data";
 import MemoChrome from "@/icons/Chrome";
-import MemoBeta from "@/icons/Beta";
 
 const Sidebar = () => {
   return (
@@ -14,7 +13,6 @@ const Sidebar = () => {
             <div className="flex items-center py-12 px-4 lg:h-[60px] lg:px-6">
               <Link to="/" className="flex items-center gap-2 font-semibold">
                 <MemoLogo className="w-40 h-40" />
-                {/* <MemoBeta className="w-10 h-10" /> */}
               </Link>
             </div>
             <div className="flex-1">

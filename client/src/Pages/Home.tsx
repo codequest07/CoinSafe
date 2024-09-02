@@ -1,9 +1,9 @@
-import ComingSoon from "@/components/Coming-Soon";
+import AssetTable from "@/components/AssetTable";
 
 const Home = () => {
   return (
     <main>
-      <ComingSoon />
+      <AssetTable />
     </main>
   );
 };
