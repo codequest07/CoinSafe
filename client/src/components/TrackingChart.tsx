@@ -26,7 +26,7 @@ const TrackingChart = () => {
     const data = [
         {
           date: '10/12/2024',
-          uv: 2500,
+          uv: 0,
           pv: 2400,
           amt: 2400,
         },
@@ -153,8 +153,9 @@ const TrackingChart = () => {
                         </linearGradient>
                     </defs>
                     {/* <CartesianGrid strokeDasharray="3 3" /> */}
-                    <XAxis dataKey="name" tick={false} axisLine={{ stroke: '#114124' }} padding={{ left: 0, right: 0 }} />
-                    <YAxis tick={false} padding={{ top: 0, bottom: 0 }} />
+                    {/* #114124 */}
+                    <XAxis dataKey="name" tick={false} axisLine={{ stroke: '#000000' }} padding={{ left: -70, right: -20 }} />
+                    <YAxis tick={false} padding={{ top: 0, bottom: -40 }} axisLine={{ stroke: '#000000' }} />
                     <Tooltip />
                     <Area type="monotone" dataKey="uv" stroke="#00C750" fill="url(#colorUv)" />
                 </AreaChart>
