@@ -9,20 +9,21 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import SaveAsset from "./SaveAsset";
-
 import React from "react";
+
+interface SavingOptionProps {
+  isFirstModalOpen: boolean;
+  setIsFirstModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isSecondModalOpen: boolean;
+  setIsSecondModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
 export default function SavingOption({
   isFirstModalOpen,
   setIsFirstModalOpen,
   isSecondModalOpen,
   setIsSecondModalOpen,
-}: {
-  isFirstModalOpen: boolean;
-  setIsFirstModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isSecondModalOpen: boolean;
-  setIsSecondModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+}: SavingOptionProps) {
   const openSecondModal = () => {
     setIsFirstModalOpen(false);
     setIsSecondModalOpen(true);
