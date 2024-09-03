@@ -1,17 +1,14 @@
-// import React from 'react';
+
 import { 
-    // LineChart, 
-    // Line, 
+
     ResponsiveContainer, 
     Tooltip, 
     YAxis, 
     XAxis, 
-    // CartesianGrid, 
     AreaChart, 
     Area } from "recharts";
 import {
     DropdownMenu,
-    // DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
