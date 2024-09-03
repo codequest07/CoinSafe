@@ -25,7 +25,8 @@ export default {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				foreground: 'hsl(var(--primary-foreground))',
+				"app-green": "rgba(0, 199, 80, 1)"
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
