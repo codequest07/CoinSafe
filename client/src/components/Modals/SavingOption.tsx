@@ -1,6 +1,5 @@
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -9,25 +8,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
 import SaveAsset from "./SaveAsset";
 
-export default function SavingOption() {
-  const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
-  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+import React from "react";
 
-
+export default function SavingOption({
+  isFirstModalOpen,
+  setIsFirstModalOpen,
+  isSecondModalOpen,
+  setIsSecondModalOpen,
+}: {
+  isFirstModalOpen: boolean;
+  setIsFirstModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isSecondModalOpen: boolean;
+  setIsSecondModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const openSecondModal = () => {
     setIsFirstModalOpen(false);
     setIsSecondModalOpen(true);
   };
+
   return (
     <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" onClick={() => setIsFirstModalOpen(true)}>
-          Save Options
-        </Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] border-0 bg-[#09090B]">
         <DialogHeader>
           <DialogTitle className="text-white">

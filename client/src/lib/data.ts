@@ -3,6 +3,8 @@ import MemoPortfolio from "@/icons/Portfolio";
 import MemoReward from "@/icons/Reward";
 import MemoStaking from "@/icons/Staking";
 import MemoVault from "@/icons/Vault";
+import MemoMagicPen from "@/icons/MagicPen";
+import MemoChrome from "@/icons/Chrome";
 
 export type Asset = {
   symbol: string;
@@ -12,6 +14,14 @@ export type Asset = {
   autosaved: boolean;
 };
 
+interface SavingsCardData {
+  id?: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  icon: any;
+}
+
 export const NavLinks = [
   {
     to: "/",
@@ -19,9 +29,9 @@ export const NavLinks = [
     label: "Dashboard",
   },
   {
-    to: "/portfolio",
+    to: "/wallet",
     icon: MemoPortfolio,
-    label: "Portfolio",
+    label: "Wallet",
   },
   {
     to: "/vault",
@@ -138,5 +148,21 @@ export const allAssets = [
     staked: false,
     liquid: false,
     saved: true,
+  },
+];
+
+export const SavingsOverviewData: SavingsCardData[] = [
+  {
+    title: "Saving just got smarter",
+    description:
+      "Our AI analyzes your spending to create a custom savings plan.",
+    buttonText: "Get started",
+    icon: MemoMagicPen,
+  },
+  {
+    title: "Even more seamless",
+    description: "Get our extension for more seamless saving while you spend",
+    buttonText: "Download",
+    icon: MemoChrome,
   },
 ];

@@ -4,8 +4,8 @@ import { Menu } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { NavLinks } from "@/lib/data";
 import MemoLogo from "@/icons/Logo";
-import ExtensionCard from "./ExtensionCard";
 import SmileFace from "./Smile";
+import ExtensionCard from "./Cards/ExtensionCard";
 
 const DashHeader = () => {
   return (

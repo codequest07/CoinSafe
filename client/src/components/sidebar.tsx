@@ -1,7 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import MemoLogo from "@/icons/Logo";
 import { NavLinks } from "@/lib/data";
-import ExtensionCard from "./ExtensionCard";
+import ExtensionCard from "./Cards/ExtensionCard";
 
 const Sidebar = () => {
   return (

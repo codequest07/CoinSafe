@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader } from "./ui/card";
 import MemoChrome from "@/icons/Chrome";
+import { Card, CardContent, CardHeader } from "../ui/card";
 const ExtensionCard = () => {
   return (
     <div>
