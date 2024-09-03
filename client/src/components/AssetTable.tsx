@@ -20,7 +20,7 @@ export default function AssetTable() {
   const savedAssets = allAssets.filter((asset) => asset.saved);
 
   return (
-    <div className="bg-[#010104] border border-[#13131373] p-4 rounded-[2rem] text-white ">
+    <div className="bg-[#010104] border border-[#13131373] p-4 rounded-[2rem] text-white w-full">
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">Assets</h1>
 
@@ -76,7 +76,7 @@ export default function AssetTable() {
 
 function AssetTableContent({ assets }: { assets: Asset[] }) {
   return (
-    <div className="bg-[#010104] p-4 rounded-lg">
+    <div className="bg-[#010104] w-full p-4 rounded-lg">
       <CardContent>
         <Table>
           <TableHeader className="bg-[#1E1E1E99]  text-[#CACACA]">
@@ -87,6 +87,11 @@ function AssetTableContent({ assets }: { assets: Asset[] }) {
               <TableHead>
                 <span className="sr-only">Actions</span>
               </TableHead>
+              <TableHead className="sr-only">Ticker</TableHead>
+              <TableHead className="sr-only">Ticker</TableHead>
+              <TableHead className="sr-only">Ticker</TableHead>
+              <TableHead className="sr-only">Ticker</TableHead>
+              <TableHead className="sr-only">Ticker</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="text-[#F1F1F1]">
