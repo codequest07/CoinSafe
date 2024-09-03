@@ -9,6 +9,17 @@ import {
     // CartesianGrid, 
     AreaChart, 
     Area } from "recharts";
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    } from "@/components/ui/dropdown-menu"
+import { MdArrowDropDown } from "react-icons/md";
+
 
 const TrackingChart = () => {
 
@@ -58,40 +69,104 @@ const TrackingChart = () => {
       ];
 
   return (
-    <div className="w-full h-[160px]">
+    <div className="w-full border-[1px] border-[#FFFFFF17] p-6 rounded-[12px]">
+        <div className="w-full">
+            <div className="flex justify-between items-center pb-10 text-white">
+                <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99]">
+                    
+                    <DropdownMenu>
+                    <DropdownMenuTrigger className="text-sm flex items-center outline-none">
+                        <div>
+                            All Networks
+                        </div>
+                        <div>
+                            <MdArrowDropDown />
+                        </div>
+                    </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>Profile</DropdownMenuItem>
+                            <DropdownMenuItem>Billing</DropdownMenuItem>
+                            <DropdownMenuItem>Team</DropdownMenuItem>
+                            <DropdownMenuItem>Subscription</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99] text-sm">Deposit</div>
+                    <div className="rounded-[100px] px-3 py-[6px] bg-[#FFFFFFE5] text-[#010104] text-sm">Save</div>
+                </div>
+            </div>
 
-        <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-            width={500}
-            height={400}
-            data={data}
-            margin={{
-                top: 10,
-                right: 30,
-                left: 0,
-                bottom: 0,
-            }}
-            >
-                <defs>
-                    <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="100%" stopColor="#114124" stopOpacity={1} />
-                        <stop offset="100%" stopColor="#030B06" stopOpacity={1} />
-                    </linearGradient>
-                </defs>
-                {/* <CartesianGrid strokeDasharray="3 3" /> */}
-                <XAxis dataKey="name" tick={false} />
-                <YAxis tick={false} />
-                <Tooltip />
-                <Area type="monotone" dataKey="uv" stroke="#00C750" fill="url(#colorUv)" />
-            </AreaChart>
-            {/* <LineChart width={600} height={300} data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                <Line type="monotone" dataKey="uv" stroke="rgba(0, 199, 80, 1)" />
-                
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-            </LineChart> */}
-        </ResponsiveContainer>
+            <div className="flex justify-between pb-6 border-b-[1px] border-[#FFFFFF17]">
+                <div className="">
+                    <div className="text-[#CACACA] font-light text-sm pb-4">Total wallet balance</div>
+                    <div>
+                        <span className="text-[#F1F1F1] text-3xl pr-2">$6,456.98</span><span className="text-[#CACACA] font-light text-xs">USD</span>
+                    </div>
+                    <div className="text-xs pt-2">
+                        <span className="text-[#48FF91]">{"+18%"}</span>
+                        <span className="text-[#7F7F7F]">24h</span>
+                    </div>
+                </div>
+                <div className="border-x-[1px] border-[#FFFFFF17] px-[150px]">
+                    <div className="text-[#CACACA] font-light text-sm pb-4">Vault balance</div>
+                    <div>
+                        <span className="text-[#F1F1F1] text-3xl pr-2">$6,456.98</span><span className="text-[#CACACA] font-light text-xs">USD</span>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2">
+                        <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
+                        <span className="text-[#7F7F7F] text-xs">67% of total wallet balance</span>
+                    </div>
+                </div>
+                <div>
+                    <div className="text-[#CACACA] font-light text-sm pb-4">Available balance</div>
+                    <div>
+                        <span className="text-[#F1F1F1] text-3xl pr-2">$6,456.98</span><span className="text-[#CACACA] font-light text-xs">USD</span>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2">
+                        <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
+                        <span className="text-[#7F7F7F] text-xs">15% of total wallet balance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div className="w-full h-[160px]">
+            <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                // width={500}
+                // height={400}
+                data={data}
+                margin={{
+                    top: 0,
+                    right: 0,
+                    left: 0,
+                    bottom: 0,
+                }}
+                >
+                    <defs>
+                        <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="100%" stopColor="#114124" stopOpacity={1} />
+                            <stop offset="100%" stopColor="#030B06" stopOpacity={1} />
+                        </linearGradient>
+                    </defs>
+                    {/* <CartesianGrid strokeDasharray="3 3" /> */}
+                    <XAxis dataKey="name" tick={false} axisLine={{ stroke: '#114124' }} padding={{ left: 0, right: 0 }} />
+                    <YAxis tick={false} padding={{ top: 0, bottom: 0 }} />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="uv" stroke="#00C750" fill="url(#colorUv)" />
+                </AreaChart>
+                {/* <LineChart width={600} height={300} data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                    <Line type="monotone" dataKey="uv" stroke="rgba(0, 199, 80, 1)" />
+                    
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                </LineChart> */}
+            </ResponsiveContainer>
+        </div>
     </div>
   )
 }
