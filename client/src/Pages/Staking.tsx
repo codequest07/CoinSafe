@@ -1,10 +1,9 @@
-// import ComingSoon from "@/components/Coming-Soon";
-import SavingOption from "@/components/Modals/SavingOption";
+import ComingSoon from "@/components/Coming-Soon";
 
 const Staking = () => {
   return (
     <div>
-      <SavingOption />
+      <ComingSoon />
     </div>
   );
 };
