@@ -1,8 +1,10 @@
 import ComingSoon from "@/components/Coming-Soon";
+import TrackingChart from "@/components/TrackingChart";
 
 const Home = () => {
   return (
-    <main>
+    <main className="">
+      <TrackingChart />
       <ComingSoon />
     </main>
   );

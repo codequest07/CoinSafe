@@ -6,7 +6,7 @@ import {
     Tooltip, 
     YAxis, 
     XAxis, 
-    CartesianGrid, 
+    // CartesianGrid, 
     AreaChart, 
     Area } from "recharts";
 
@@ -58,9 +58,9 @@ const TrackingChart = () => {
       ];
 
   return (
-    <div className="border-2 h-[160px]">
+    <div className="w-full h-[160px]">
 
-        <ResponsiveContainer>
+        <ResponsiveContainer width="100%" height="100%">
             <AreaChart
             width={500}
             height={400}
@@ -78,11 +78,11 @@ const TrackingChart = () => {
                         <stop offset="100%" stopColor="#030B06" stopOpacity={1} />
                     </linearGradient>
                 </defs>
-            {/* <CartesianGrid strokeDasharray="3 3" /> */}
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Area type="monotone" dataKey="uv" stroke="#00C750" fill="url(#colorUv)" />
+                {/* <CartesianGrid strokeDasharray="3 3" /> */}
+                <XAxis dataKey="name" tick={false} />
+                <YAxis tick={false} />
+                <Tooltip />
+                <Area type="monotone" dataKey="uv" stroke="#00C750" fill="url(#colorUv)" />
             </AreaChart>
             {/* <LineChart width={600} height={300} data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                 <Line type="monotone" dataKey="uv" stroke="rgba(0, 199, 80, 1)" />
