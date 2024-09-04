@@ -1,6 +1,7 @@
 import AssetTable from "@/components/AssetTable";
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
 import CurrencyBreakdown from "@/components/CurrencyBreakdown";
+import TransactionHistory from "@/components/TransactionHistory";
 import WalletBalance from "@/components/WalletBalance";
 
 const Portfolio = () => {
@@ -12,6 +13,7 @@ const Portfolio = () => {
         <CurrencyBreakdown />
       </div>
       <AssetTable />
+      <TransactionHistory />
     </div>
   );
 };
