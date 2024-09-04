@@ -6,6 +6,7 @@ body {
   background-color: #010104;
   font-family: "Archivo", sans-serif;
   font-optical-sizing: auto;
+  overflow-x: hidden;
 }
 @layer base {
   :root {

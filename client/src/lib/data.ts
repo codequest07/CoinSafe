@@ -11,6 +11,16 @@ import MemoSolana from "@/icons/Solana";
 import MemoTxnUp from "@/icons/TxnUp";
 import MemoBnb from "@/icons/Bnb";
 
+import b1 from "@/icons/badges/b1.svg";
+import b2 from "@/icons/badges/b2.svg";
+import b3 from "@/icons/badges/b3.svg";
+import b4 from "@/icons/badges/b4.svg";
+import b5 from "@/icons/badges/b5.svg";
+import b6 from "@/icons/badges/b6.svg";
+import b7 from "@/icons/badges/b7.svg";
+import b8 from "@/icons/badges/b8.svg";
+import b9 from "@/icons/badges/b9.svg";
+import b10 from "@/icons/badges/b10.svg";
 export type Asset = {
   symbol: string;
   name: string;
@@ -161,7 +171,7 @@ export const vaultAssets = [
     symbol: "AVAX",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    maturityDate: '25 Sept, 2024',
+    maturityDate: "25 Sept, 2024",
     value: "≈ $ 5.00",
     claimableAmount: "0.00234 AVAX",
     autosaved: true,
@@ -173,7 +183,7 @@ export const vaultAssets = [
     symbol: "AVAX",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    maturityDate: '25 Sept, 2024',
+    maturityDate: "25 Sept, 2024",
     value: "≈ $ 5.00",
     claimableAmount: "0.00234 AVAX",
     autosaved: true,
@@ -185,7 +195,7 @@ export const vaultAssets = [
     symbol: "AVAX",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    maturityDate: '25 Sept, 2024',
+    maturityDate: "25 Sept, 2024",
     value: "≈ $ 5.00",
     claimableAmount: "0.00234 AVAX",
     autosaved: true,
@@ -197,7 +207,7 @@ export const vaultAssets = [
     symbol: "AVAX",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    maturityDate: '25 Sept, 2024',
+    maturityDate: "25 Sept, 2024",
     value: "≈ $ 5.00",
     claimableAmount: "0.00234 AVAX",
     autosaved: true,
@@ -209,7 +219,7 @@ export const vaultAssets = [
     symbol: "AVAX",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    maturityDate: '25 Sept, 2024',
+    maturityDate: "25 Sept, 2024",
     value: "≈ $ 5.00",
     claimableAmount: "0.00234 AVAX",
     autosaved: true,
@@ -224,7 +234,7 @@ export const savingsHistoryAssets = [
     symbol: "AVAX",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    action: 'Unlock',
+    action: "Unlock",
     value: "≈ $ 5.00",
     tokenTypeShort: "0.00234 AVAX",
     tokenTypeFull: "Ethereum",
@@ -234,7 +244,7 @@ export const savingsHistoryAssets = [
     symbol: "AVAX",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    action: 'Autosave',
+    action: "Autosave",
     value: "≈ $ 5.00",
     tokenTypeShort: "ERC20",
     tokenTypeFull: "Ethereum",
@@ -244,7 +254,7 @@ export const savingsHistoryAssets = [
     symbol: "SOL",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    action: 'Claim',
+    action: "Claim",
     value: "≈ $ 5.00",
     tokenTypeShort: "SPL Token",
     tokenTypeFull: "Solana",
@@ -254,7 +264,7 @@ export const savingsHistoryAssets = [
     symbol: "AVAX",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    action: 'One-time save',
+    action: "One-time save",
     value: "≈ $ 5.00",
     tokenTypeShort: "0.00234 AVAX",
     tokenTypeFull: "Ethereum",
@@ -264,7 +274,7 @@ export const savingsHistoryAssets = [
     symbol: "AVAX",
     name: "Avalanche",
     amount: "0.00234 AVAX",
-    action: 'Unlock',
+    action: "Unlock",
     value: "≈ $ 5.00",
     tokenTypeShort: "0.00234 AVAX",
     tokenTypeFull: "Ethereum",
@@ -379,5 +389,93 @@ export const TransactionHistoryData = [
     time: "17:00",
     status: "Completed",
     txnIcon: MemoTxnUp,
+  },
+];
+
+export const rewards = [
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "Claimed",
+    icon: b1,
+  },
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "Claimed",
+    icon: b2,
+  },
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "Claim",
+    icon: b3,
+  },
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "17,000 - 180,000 points",
+    icon: b4,
+  },
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "17,000 - 180,000 points",
+    icon: b5,
+  },
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "17,000 - 180,000 points",
+    icon: b6,
+  },
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "Claimed",
+    icon: b7,
+  },
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "17,000 - 180,000 points",
+    icon: b8,
+  },
+];
+
+export const myReward = [
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "Exhausted",
+    icon: b9,
+  },
+  {
+    title: "Original sage",
+    amount: "$2 gas coverage",
+    status: "Active",
+    icon: b10,
+  },
+];
+
+export const PercentageCardData = [
+  {
+    title: "Savings points",
+    amount: "5,827,034.00",
+    link: "find out ",
+    text: "how points will be used",
+  },
+  {
+    title: "Referral points",
+    amount: "5,827,034.00",
+    link: "refer",
+    text: "more people to get more points",
+    badge: "1100",
+  },
+  {
+    title: "Points multiplier",
+    amount: "1.2 x",
+    link: "find out ",
+    text: "how points will be used",
   },
 ];
