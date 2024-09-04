@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "@/components/ui/button";
 import MemoSmile from "@/icons/Smile";
 import MemoSmile2 from "@/icons/Smile2";
@@ -9,9 +10,12 @@ export default function SmileFace() {
   return (
     <div className="flex items-center sm:space-x-3">
       {/* Button for connected wallets */}
-      <Button className="bg-transparent hover:bg-transparent border py-5 border-[#7F7F7F] rounded-2xl">
-        Connected wallets
-      </Button>
+      <div>
+        <ConnectButton />
+      </div>
+      {/* <Button className="bg-transparent hover:bg-transparent border py-5 border-[#7F7F7F] rounded-2xl">
+        Connect wallet
+      </Button> */}
 
       {/* Icon with hover effect */}
       <div
