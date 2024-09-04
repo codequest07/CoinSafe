@@ -1,6 +1,5 @@
 import AssetVaultTable from "@/components/AssetVaultTable";
 import ClaimCard from "@/components/ClaimCard";
-import ComingSoon from "@/components/Coming-Soon";
 import CurrencyBreakdown from "@/components/CurrencyBreakdown";
 import SavingsHistoryTable from "@/components/SavingsHistoryTable";
 import SavingsPerformance from "@/components/SavingsPerformance";
