@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.19;
-
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -8,14 +5,11 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 contract Savings is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    // Define custom errors
     error AddressZeroDetected();
     error ZeroValueNotAllowed();
-    error CantSendToZeroAddress();
     error InsufficientFunds();
-    error InsufficientContractBalance();
-    error NotOwner();
     error InvalidTokenAddress();
+    error NotOwner();
 
     address public owner;
 
@@ -44,27 +38,35 @@ contract Savings is ReentrancyGuard {
         uint256 endTimestamp;
     }
 
-    // Mappings for storing various states
+    struct SpendAndSavePlan {
+        address token;
+        uint balance;
+        uint8 percentage;
+        uint duration;
+    }
+
+
     mapping(address => uint256) public depositBalances;
     mapping(address => Safe) public savings;
     mapping(address => bool) public acceptedTokens;
-    mapping(address => uint256) public balancesPool;
+    //mapping(address => uint256) public balancesPool;
     mapping(address => FrequentSavings) public frequentSavings;
-    mapping(address => Deposit[]) public deposits;
+    //mapping(address => Deposit[]) public deposits;
     mapping(bytes32 => address) public tokenAddresses;
+    mapping(address => SpendAndSavePlan) public userSpendAndSave;
 
-    // Events for tracking actions
+
     event DepositSuccessful(address indexed user, address indexed token, uint256 amount);
     event SavedSuccessfully(address indexed user, address indexed token, uint256 amount, uint256 duration);
     event SavingsTriggered(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, bytes32 tokenType, uint256 amount);
+    event SpendAndSave(address indexed user, address indexed token, uint256 amountSaved);
 
-    // Constructor to set initial token addresses and contract owner
     constructor(address _erc20TokenAddress, address _liskTokenAddress, address _safuTokenAddress) {
+        owner = msg.sender;
         tokenAddresses[keccak256("ERC20")] = _erc20TokenAddress;
         tokenAddresses[keccak256("LSK")] = _liskTokenAddress;
         tokenAddresses[keccak256("SAFU")] = _safuTokenAddress;
-        owner = msg.sender;
     }
 
     modifier onlyOwner() {
@@ -73,6 +75,7 @@ contract Savings is ReentrancyGuard {
         }
         _;
     }
+    
 
     function addAcceptedToken(address _token) external onlyOwner {
         acceptedTokens[_token] = true;
@@ -80,6 +83,18 @@ contract Savings is ReentrancyGuard {
 
     function removeAcceptedToken(address _token) external onlyOwner {
         acceptedTokens[_token] = false;
+    }
+
+    function createSpendAndSaveplan(address _token, uint8 _percentage, uint _duration)  returns () {
+
+        require(percentage <= 100, "Invalid saving percentage");
+
+        userSpendAndSave[msg.sender] = SpendAndSave({
+            token = _token,
+            balance = 0,
+            percentage = _percentage,
+            duration = _duration
+        })
     }
 
     function depositToPool(uint256 _amount, address _token) external {
@@ -134,41 +149,83 @@ contract Savings is ReentrancyGuard {
     }
 
     function triggerScheduledSavings(address user) external nonReentrant {
-        FrequentSavings storage savingsData = frequentSavings[user];
-        uint256 amount = savingsData.amount;
+        FrequentSavings storage savings = frequentSavings[user];
+        uint256 amount = savings.amount;
 
-        require(block.timestamp >= savingsData.nextTimestamp, "Savings interval not reached yet");
-        require(balancesPool[user] >= amount, "Insufficient balance in pool");
+        require(block.timestamp >= savings.nextTimestamp, "Savings interval not reached yet");
+        require(depositBalances[user] >= amount, "Insufficient balance in pool");
 
-        // Update state before making any external calls or changes
-        balancesPool[user] -= amount;
+        depositBalances[user] -= amount;
 
-        // Add the amount to the user's deposits
-        deposits[user].push(Deposit({
+        depositBalances[user].push(Deposit({
             amount: amount,
-            endTimestamp: block.timestamp + savingsData.duration
+            endTimestamp: block.timestamp + savings.duration
         }));
 
-        // Update the next timestamp for the next savings interval
-        savingsData.nextTimestamp += savingsData.interval;
+        savings.nextTimestamp += savings.interval;
 
         emit SavingsTriggered(user, amount);
     }
 
     function withdrawFromPool(bytes32 tokenType, uint256 amount) external nonReentrant {
         require(amount > 0, "Withdrawal amount must be greater than zero");
-        require(balancesPool[msg.sender] >= amount, "Insufficient balance in pool");
+        require(depositBalances[msg.sender] >= amount, "Insufficient balance in pool");
 
-        // Get the token address based on the token type
         address tokenAddress = tokenAddresses[tokenType];
         require(tokenAddress != address(0), "Token type not supported");
 
-        // Deduct the amount from the user's balance in the pool
-        balancesPool[msg.sender] -= amount;
+        depositBalances[msg.sender] -= amount;
 
-        // Transfer the tokens back to the user's wallet
+        //should this be only IERC20 and should i add the recipeint of the transactions
+
         IERC20(tokenAddress).safeTransfer(msg.sender, amount);
 
         emit Withdrawn(msg.sender, tokenType, amount);
     }
+
+
+    function spendAndSave(
+        uint256 amount,
+    ) external nonReentrant {
+        require(amount > 0, "Amount must be greater than zero");
+
+        SpendAndSavePlan storage spendAndSavePlan = userSpendAndSave[msg.sender];
+
+        address tokenAddress = spendAndSavePlan.token;
+        require(tokenAddress != address(0), "Token type not supported");
+        // Fetch user's saving percentage
+        uint256 savingPercentage = spendAndSavePlan.percentage;
+
+        // Calculate the amount to save
+        uint256 amountToSave = (amount * savingPercentage) / 100;
+
+        // Transfer the saving amount from user's wallet to the contract
+        if (amountToSave > 0) {
+
+            // IERC20(tokenAddress).safeTransferFrom(msg.sender, address(this), amountToSave);
+            deposit(tokenAddress, amountToSave);
+
+            depositBalances[msg.sender] -= amountToSave;
+
+            // Save the transferred amount
+            save(tokenAddress, amountToSave, duration, typeName);
+
+            savings[msg.sender] += amountToSave;
+
+            emit SpendAndSave(msg.sender, tokenAddress, amountToSave);
+        };
+
+        };
+
+        // Get the contract balance
+    function getContractBalance(address _token) external view returns (uint256) {
+        return IERC20(_token).balanceOf(address(this));
+    }
+
+    // Get the user's savings balance
+    function getUserSavingsBalance(address user) external view returns (uint256) {
+        return depositBalances[user];
+    }
+
 }
+        
