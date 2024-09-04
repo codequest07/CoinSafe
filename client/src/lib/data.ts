@@ -479,3 +479,46 @@ export const PercentageCardData = [
     text: "how points will be used",
   },
 ];
+
+export const ClaimAssetsData = [
+  {
+    amount: "0.00234 AVAX",
+    percentage: "≈ $ 5.00",
+    icons: MemoAvax,
+    token: "AVAX",
+    network: "Avalanche",
+    status: "Claim",
+  },
+  {
+    amount: "0.00234 AVAX",
+    percentage: "≈ $ 5.00",
+    icons: MemoAvax,
+    token: "AVAX",
+    network: "Avalanche",
+    status: "Claim",
+  },
+  {
+    amount: "0.00234 AVAX",
+    percentage: "≈ $ 5.00",
+    icons: MemoAvax,
+    token: "AVAX",
+    network: "Avalanche",
+    status: "Claim",
+  },
+  {
+    amount: "0.00234 AVAX",
+    percentage: "≈ $ 5.00",
+    icons: MemoAvax,
+    token: "AVAX",
+    network: "Avalanche",
+    status: "Claim",
+  },
+  {
+    amount: "0.00234 AVAX",
+    percentage: "≈ $ 5.00",
+    icons: MemoAvax,
+    token: "AVAX",
+    network: "Avalanche",
+    status: "Claim",
+  },
+];
