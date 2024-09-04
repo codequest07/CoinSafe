@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Button } from "@/components/ui/button";
 import MemoSmile from "@/icons/Smile";
 import MemoSmile2 from "@/icons/Smile2";
 
