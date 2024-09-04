@@ -59,8 +59,6 @@ const Vault = () => {
       <div>
         <SavingsHistoryTable />
       </div>
-
-      <ComingSoon />
     </div>
   );
 };
