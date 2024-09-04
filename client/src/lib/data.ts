@@ -5,6 +5,11 @@ import MemoStaking from "@/icons/Staking";
 import MemoVault from "@/icons/Vault";
 import MemoMagicPen from "@/icons/MagicPen";
 import MemoChrome from "@/icons/Chrome";
+import MemoAvax from "@/icons/Avax";
+
+import MemoSolana from "@/icons/Solana";
+import MemoTxnUp from "@/icons/TxnUp";
+import MemoBnb from "@/icons/Bnb";
 
 export type Asset = {
   symbol: string;
@@ -280,5 +285,99 @@ export const SavingsOverviewData: SavingsCardData[] = [
     description: "Get our extension for more seamless saving while you spend",
     buttonText: "Download",
     icon: MemoChrome,
+  },
+];
+
+export const TransactionHistoryData = [
+  {
+    type: "Deposit",
+    amount: "0.00234 AVAX",
+    percentage: "≈ $ 5.00",
+    icons: MemoAvax,
+    hash: "0x78f....68fc",
+    token: "ERC 20",
+    network: "Ethereum",
+    date: "25 Sept, 2024",
+    time: "17:00",
+    status: "Completed",
+    txnIcon: MemoTxnUp,
+  },
+  {
+    type: "Staked",
+    amount: "450.002 SOL",
+    percentage: "≈ $ 4,506.00",
+    icons: MemoSolana,
+    hash: "0x78f....68fc",
+    token: "TRX 20",
+    network: "Tron",
+    date: "26 Sept, 2024",
+    time: "17:00",
+    status: "Processing",
+    txnIcon: MemoTxnUp,
+  },
+  {
+    type: "Staked",
+    amount: "450.002 SOL",
+    percentage: "≈ $ 4,506.00",
+    icons: MemoSolana,
+    hash: "0x78f....68fc",
+    token: "TRX 20",
+    network: "Tron",
+    date: "25 Sept, 2024",
+    time: "17:00",
+    status: "Processing",
+    txnIcon: MemoTxnUp,
+  },
+  {
+    type: "Staked",
+    amount: "450.002 SOL",
+    percentage: "≈ $ 4,506.00",
+    icons: MemoSolana,
+    hash: "0x78f....68fc",
+    token: "TRX 20",
+    network: "Tron",
+    date: "25 Sept, 2024",
+    time: "17:00",
+    status: "Failed",
+    txnIcon: MemoTxnUp,
+  },
+  {
+    type: "Deposit",
+    amount: "0.00234 AVAX",
+    percentage: "≈ $ 5.00",
+    icons: MemoAvax,
+    hash: "0x78f....68fc",
+    token: "ERC 20",
+    network: "Ethereum",
+    date: "26 Sept, 2024",
+    time: "17:00",
+    status: "Completed",
+    txnIcon: MemoTxnUp,
+  },
+  {
+    type: "Deposit",
+    amount: "0.00234 AVAX",
+    percentage: "≈ $ 5.00",
+    icons: MemoAvax,
+    hash: "0x78f....68fc",
+    token: "ERC 20",
+    network: "Ethereum",
+    date: "26 Sept, 2024",
+    time: "17:00",
+    status: "Completed",
+    txnIcon: MemoTxnUp,
+  },
+  {
+    type: "Deposit",
+    amount: "0.00234 BNB",
+    percentage: "≈ $ 5.00",
+    icons: MemoBnb,
+    hash: "0x78f....68fc",
+    token: "BNB",
+    network: "Binance",
+    date: "26 Sept, 2024",
+    time: "17:00",
+    status: "Completed",
+    txnIcon: MemoTxnUp,
   },
 ];
