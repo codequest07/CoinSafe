@@ -18,16 +18,15 @@ import {
 import { MdArrowDropDown } from "react-icons/md";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
+import Deposit from "./Modals/Deposit";
 
 const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
- 
-
-
-
+  const openDepositModal = () => setIsDepositModalOpen(true);
 
   const data = [
     {
@@ -97,7 +96,9 @@ const TrackingChart = () => {
             </DropdownMenu>
           </div>
           <div className="flex items-center gap-2">
-            <Button className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer">
+            <Button
+              onClick={openDepositModal}
+              className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer">
               Deposit
             </Button>
             <Button
@@ -199,6 +200,11 @@ const TrackingChart = () => {
         setIsFirstModalOpen={setIsFirstModalOpen}
         isSecondModalOpen={isSecondModalOpen}
         setIsSecondModalOpen={setIsSecondModalOpen}
+      />
+      <Deposit
+        isDepositModalOpen={isDepositModalOpen}
+        setIsDepositModalOpen={setIsDepositModalOpen}
+        onBack={() => {}}
       />
     </div>
   );

@@ -1,17 +1,20 @@
-import { Orbit } from "lucide-react";
-
+import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+import { Button } from "./ui/button";
 export default function ComingSoon() {
   return (
     <div className="h-svh dark:bg-[#000000]">
-      <div className="m-auto flex h-full w-full flex-col items-center justify-center gap-2">
-        <Orbit size={72} className="text-white" />
-        <h1 className="text-4xl font-bold text-white leading-tight">
-          Coming Soon 👀
+      <div className=" flex h-[90vh] w-full flex-col items-center justify-center gap-2">
+        <MemoComingSoonIcon className="w-[70%] h-[55vh] text-white" />
+        <h1 className="text-3xl font-bold my-2 text-white leading-tight">
+          We’re in the kitchen!
         </h1>
-        <p className="text-center text-muted-foreground">
-          This page has not been created yet. <br />
-          Stay tuned though!
+        <p className="text-center w-[43%] text-muted-foreground">
+          We’re in the kitchen, putting the final touches on this feature. We’ll
+          let you know as soon as it ready! Continue saving for now.
         </p>
+        <Button className="rounded-[2rem] my-2 py-5 px-6 bg-[#FFFFFF2B] font-[300] hover:bg-[#FFFFFF2B]">
+          Continue saving
+        </Button>
       </div>
     </div>
   );

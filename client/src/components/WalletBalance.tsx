@@ -8,9 +8,13 @@ import {
 import { Button } from "./ui/button";
 import SavingOption from "./Modals/SavingOption";
 import { useState } from "react";
+import Deposit from "./Modals/Deposit";
 export default function WalletBalance() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+
+  const openDepositModal = () => setIsDepositModalOpen(true);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   return (
@@ -69,7 +73,9 @@ export default function WalletBalance() {
           <Button className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
             Withdraws
           </Button>
-          <Button className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
+          <Button
+            onClick={openDepositModal}
+            className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
             Deposit
           </Button>
           <Button
@@ -85,6 +91,13 @@ export default function WalletBalance() {
         setIsFirstModalOpen={setIsFirstModalOpen}
         isSecondModalOpen={isSecondModalOpen}
         setIsSecondModalOpen={setIsSecondModalOpen}
+      />
+
+      {/* deposit Modal */}
+      <Deposit
+        isDepositModalOpen={isDepositModalOpen}
+        setIsDepositModalOpen={setIsDepositModalOpen}
+        onBack={() => {}}
       />
     </div>
   );
