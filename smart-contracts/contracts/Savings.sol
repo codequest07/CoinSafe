@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract Savings {
+
     using SafeERC20 for IERC20;
 
     error AddressZeroDetected();
@@ -57,6 +58,7 @@ contract Savings {
     }
 
     function depositToPool(uint256 _amount, address _token) external {
+        
         if (msg.sender == address(0)) {
             revert AddressZeroDetected();
         }
@@ -106,4 +108,6 @@ contract Savings {
 
         emit SavedSuccessfully(msg.sender, _token, _amount, _duration);
     }
+
+
 }
