@@ -1,10 +1,9 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-
-import ApproveDeposit from "./ApproveDeposit";
 import MemoAvax from "@/icons/Avax";
 import { ClaimAssetsData } from "@/lib/data";
+import UnlockSavings from "./UnlockSavings";
 
 export default function ClaimAssets({
   isDepositModalOpen,
@@ -14,10 +13,10 @@ export default function ClaimAssets({
   setIsDepositModalOpen: (open: boolean) => void;
   onBack: () => void;
 }) {
-  const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
 
-  const openThirdModal = () => {
-    setIsThirdModalOpen(true);
+  const openUnlockModal = () => {
+    setIsUnlockModalOpen(true);
     setIsDepositModalOpen(false);
   };
 
@@ -45,6 +44,7 @@ export default function ClaimAssets({
                   <span className="text-xs">{items.percentage}</span>
                 </div>
                 <Button
+                  onClick={openUnlockModal} // Call function to open UnlockSavings
                   variant="link"
                   className="text-[#79E7BA] text-base hover:text-[#79E7BA] ">
                   {items.status}
@@ -54,9 +54,11 @@ export default function ClaimAssets({
           </div>
         ))}
       </DialogContent>
-      <ApproveDeposit
-        isOpen={isThirdModalOpen}
-        onClose={() => setIsThirdModalOpen(false)}
+
+      {/* Unlock Savings Modal */}
+      <UnlockSavings
+        isDepositModalOpen={isUnlockModalOpen}
+        setIsDepositModalOpen={setIsUnlockModalOpen} // Control the UnlockSavings modal state
       />
     </Dialog>
   );
