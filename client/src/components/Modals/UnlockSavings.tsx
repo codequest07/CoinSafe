@@ -4,41 +4,38 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import ApproveDeposit from "./ApproveDeposit";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select";
-import { useState } from "react";
-import MemoBackIcon from "@/icons/BackIcon";
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import MemoRipple from "@/icons/Ripple";
-import ApproveDeposit from "./ApproveDeposit";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 
-export default function Deposit({
+export default function UnlockSavings({
   isDepositModalOpen,
   setIsDepositModalOpen,
-  onBack,
 }: {
   isDepositModalOpen: boolean;
   setIsDepositModalOpen: (open: boolean) => void;
-  onBack: () => void;
 }) {
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
 
   const openThirdModal = () => {
-    setIsThirdModalOpen(true);
-    setIsDepositModalOpen(false);
+    setIsThirdModalOpen(true); // Open ApproveDeposit modal
+    setIsDepositModalOpen(false); // Close current modal
   };
 
   return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
-        <DialogTitle className="text-white flex items-center space-x-3">
-          <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" />
-          <p>Deposit assets</p>
+        <DialogTitle className="text-white flex items-center">
+          <p>Claim all assets</p>
         </DialogTitle>
         <div className="p-8 text-gray-700">
           {/* Amount Section */}
@@ -83,11 +80,35 @@ export default function Deposit({
           {/* Wallet Balance Section */}
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-[300] text-gray-300">
-              Deposit assets: <span className="text-gray-400">3000 XRP</span>
+              Saved balance: <span className="text-gray-400">3000 XRP</span>
             </div>
-            <div className="text-sm text-green-400 cursor-pointer">Max</div>
+            <div className="text-sm text-green-400 cursor-pointer">
+              Unlock all
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex text-gray-400 flex-col justify-between items-start">
+              <span className="text-sm font-[400]">Maturity date</span>
+              <span className="font-[300] text-xs">25 Sept, 2024 17:00</span>
+            </div>
+
+            <Badge className="bg-[#79E7BA17] rounded-[2rem] mt-4">
+              6 days left
+            </Badge>
+          </div>
+          <div className="flex items-center my-5 justify-between">
+            <div className="flex text-gray-400 flex-col justify-between items-start">
+              <span className="text-sm font-[400]">Breaking fee</span>
+              <span className="font-[300] text-sm">0.00234 AVAX</span>
+              <span className="font-[300] text-xs">1% of unlocked amount</span>
+            </div>
+
+            <Badge className="bg-[#79E7BA17] rounded-[2rem] mt-4">
+              ≈ $ 5.00
+            </Badge>
           </div>
         </div>
+
         <DialogFooter>
           <Button
             onClick={() => setIsDepositModalOpen(false)}
@@ -97,14 +118,15 @@ export default function Deposit({
           </Button>
           <div>
             <Button
-              onClick={openThirdModal}
+              onClick={openThirdModal} // Call function to open ApproveDeposit modal
               className="text-black px-8 rounded-[2rem]"
               variant="outline">
-              Deposit assets
+              Unlock savings
             </Button>
           </div>
         </DialogFooter>
       </DialogContent>
+
       <ApproveDeposit
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
