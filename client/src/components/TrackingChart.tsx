@@ -21,7 +21,7 @@ import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
 // import coinSafeAbi from '../abi/coinsafe.json';
 // import { CoinSafeContract } from "@/lib/contract";
-// import { useAccount, useBalance, useReadContract, useReadContracts, } from "wagmi";
+import { useAccount } from "wagmi";
 // import { injected } from "wagmi/connectors";
 // import { liskSepolia } from "viem/chains";
 // import { erc20Abi } from "viem";
@@ -30,7 +30,7 @@ const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  // const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
 
   // const result = useReadContracts({
   //   contracts: [
@@ -142,7 +142,7 @@ const TrackingChart = () => {
               Total wallet balance
             </div>
             <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2">$6,456.98</span>
+              <span className="text-[#F1F1F1] text-3xl pr-2">${isConnected ? "6,456.98" : "0.00"}</span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
             <div className="text-xs pt-2">
@@ -155,7 +155,7 @@ const TrackingChart = () => {
               Vault balance
             </div>
             <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2">$6,456.98</span>
+              <span className="text-[#F1F1F1] text-3xl pr-2">${isConnected ? "6,456.98" : "0.00"}</span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
             <div className="flex items-center gap-2 pt-2">
@@ -170,7 +170,7 @@ const TrackingChart = () => {
               Available balance
             </div>
             <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2">$6,456.98</span>
+              <span className="text-[#F1F1F1] text-3xl pr-2">${isConnected ? "6,456.98" : "0.00"}</span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
             <div className="flex items-center gap-2 pt-2">
@@ -184,41 +184,45 @@ const TrackingChart = () => {
       </div>
 
       <div className="w-full h-[160px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={data}
-            margin={{
-              top: 0,
-              right: 0,
-              left: 0,
-              bottom: 0,
-            }}>
-            <defs>
-              <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="100%" stopColor="#114124" stopOpacity={1} />
-                <stop offset="100%" stopColor="#030B06" stopOpacity={1} />
-              </linearGradient>
-            </defs>
-            <XAxis
-              dataKey="name"
-              tick={false}
-              axisLine={{ stroke: "#000000" }}
-              padding={{ left: -70, right: -20 }}
-            />
-            <YAxis
-              tick={false}
-              padding={{ top: 0, bottom: -40 }}
-              axisLine={{ stroke: "#000000" }}
-            />
-            <Tooltip />
-            <Area
-              type="monotone"
-              dataKey="uv"
-              stroke="#00C750"
-              fill="url(#colorUv)"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        {isConnected && 
+          <>  
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={data}
+                margin={{
+                  top: 0,
+                  right: 0,
+                  left: 0,
+                  bottom: 0,
+                }}>
+                <defs>
+                  <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="100%" stopColor="#114124" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#030B06" stopOpacity={1} />
+                  </linearGradient>
+                </defs>
+                <XAxis
+                  dataKey="name"
+                  tick={false}
+                  axisLine={{ stroke: "#000000" }}
+                  padding={{ left: -70, right: -20 }}
+                />
+                <YAxis
+                  tick={false}
+                  padding={{ top: 0, bottom: -40 }}
+                  axisLine={{ stroke: "#000000" }}
+                />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="uv"
+                  stroke="#00C750"
+                  fill="url(#colorUv)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </>
+        }
       </div>
 
       {/* SavingOption Modal */}
