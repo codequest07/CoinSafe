@@ -7,26 +7,53 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MdArrowDropDown } from "react-icons/md";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuLabel,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu";
+// import { MdArrowDropDown } from "react-icons/md";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
+// import coinSafeAbi from '../abi/coinsafe.json';
+// import { CoinSafeContract } from "@/lib/contract";
+// import { useAccount, useBalance, useReadContract, useReadContracts, } from "wagmi";
+// import { injected } from "wagmi/connectors";
+// import { liskSepolia } from "viem/chains";
+// import { erc20Abi } from "viem";
 
 const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  // const { isConnected, address } = useAccount();
+
+  // const result = useReadContracts({
+  //   contracts: [
+  //     {
+  //       abi: coinSafeAbi.abi,
+  //       address: CoinSafeContract.address as `0x${string}`,
+  //       functionName: 'getUserBalances',
+  //       args: [
+  //         address
+  //       ]
+  //     }
+  //   ]
+    
+  // })
+
+  // const {data:balance, isError, isLoading } = useBalance({ address: result?.data[0].result[0]?.token as `0x${string}`})
+
+  // console.log(balance);
+
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
+
 
   const data = [
     {
@@ -76,8 +103,8 @@ const TrackingChart = () => {
   return (
     <div className="w-full border-[1px] border-[#FFFFFF17] p-6 rounded-[12px]">
       <div className="w-full">
-        <div className="flex justify-between items-center pb-10 text-white">
-          <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99]">
+        <div className="flex justify-end items-center pb-10 text-white">
+          {/* <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99]">
             <DropdownMenu>
               <DropdownMenuTrigger className="text-sm flex items-center outline-none">
                 <div>All Networks</div>
@@ -94,7 +121,7 @@ const TrackingChart = () => {
                 <DropdownMenuItem>Subscription</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </div> */}
           <div className="flex items-center gap-2">
             <Button
               onClick={openDepositModal}

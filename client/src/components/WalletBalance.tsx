@@ -9,6 +9,12 @@ import { Button } from "./ui/button";
 import SavingOption from "./Modals/SavingOption";
 import { useState } from "react";
 import Deposit from "./Modals/Deposit";
+// import { getBalance } from "viem/actions";
+// import { useAccount, useWriteContract } from 'wagmi';
+// import coinSafeAbi from '../abi/coinsafe.json';
+// import { createPublicClient } from "viem";
+// import { CoinSafeContract } from "@/lib/contract";
+
 export default function WalletBalance() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
@@ -17,6 +23,30 @@ export default function WalletBalance() {
   const openDepositModal = () => setIsDepositModalOpen(true);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
+
+  // const { address, isConnected } = useAccount();
+  // const { data: hash, writeContract } = useWriteContract();
+
+  // const client = createPublicClient({
+  //   chain: mainnet,
+  //   transport: http(),
+  // })
+  // const balance = await getBalance(client, {
+  //   address: '0xA0Cf798816D4b9b9866b5330EEa46a18382f251e',
+  // })
+
+  // async function submit(e: React.FormEvent<HTMLFormElement>) { 
+  //   e.preventDefault() 
+  //   const formData = new FormData(e.target as HTMLFormElement) 
+  //   const tokenId = formData.get('tokenId') as string 
+  //   writeContract({
+  //     address: `0x${CoinSafeContract.address}`,
+  //     abi:coinSafeAbi,
+  //     functionName: 'depositToPool',
+  //     args: [BigInt(tokenId)],
+  //   })
+  // } 
+
   return (
     <div className="bg-black text-white p-6 flex flex-col ">
       <div className="">
