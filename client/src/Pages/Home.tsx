@@ -53,7 +53,7 @@ const Home = () => {
         </div>
 
         <div className="flex py-3">
-          <div className="sm:w-2/3">
+          <div className="sm:w-2/3 overflow-hidden">
             <AssetTable />
           </div>
           <div className="sm:w-1/3 p-3">
