@@ -44,23 +44,23 @@ export const NavLinks = [
     label: "Dashboard",
   },
   {
-    to: "/wallet",
+    to: "/dashboard/wallet",
     icon: MemoPortfolio,
     label: "Wallet",
   },
   {
-    to: "/vault",
+    to: "/dashboard/vault",
     icon: MemoVault,
     label: "Vault",
   },
 
   {
-    to: "/staking",
+    to: "/dashboard/staking",
     icon: MemoStaking,
     label: "Staking",
   },
   {
-    to: "/rewards",
+    to: "/dashboard/rewards",
     icon: MemoReward,
     label: "Rewards",
   },

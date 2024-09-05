@@ -7,31 +7,25 @@ import { BrowserRouter } from "react-router-dom";
 import '@rainbow-me/rainbowkit/styles.css';
 import {
   darkTheme,
-  getDefaultConfig,
+  // getDefaultConfig,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
-import {
-  mainnet,
-  polygon,
-  optimism,
-  arbitrum,
-  base,
-  sepolia,
-  liskSepolia,
-  lisk
-} from 'wagmi/chains';
+// import {
+//   mainnet,
+//   polygon,
+//   optimism,
+//   arbitrum,
+//   base,
+//   sepolia,
+//   liskSepolia,
+//   lisk
+// } from 'wagmi/chains';
 import {
   QueryClientProvider,
   QueryClient,
 } from "@tanstack/react-query";
-
-const config = getDefaultConfig({
-  appName: 'CoinSafe',
-  projectId: 'YOUR_PROJECT_ID',
-  chains: [mainnet, polygon, optimism, arbitrum, base, lisk, liskSepolia, sepolia],
-  ssr: false, // If your dApp uses server side rendering (SSR)
-});
+import { config } from "./lib/config.ts";
 
 const queryClient = new QueryClient();
 
