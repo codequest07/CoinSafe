@@ -13,12 +13,15 @@ const App = () => {
   return (
     <div className="bg-[#010104]">
       <Routes>
-      <Route path="/" element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/wallet" element={<Portfolio />} />
-          <Route path="/vault" element={<Vault />} />
-          <Route path="/staking" element={<Staking />} />
-          <Route path="/rewards" element={<Rewards />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/extension" element={<Extension />} /> extension
+        <Route path="/dashboard" element={<Layout />}>
+          <Route path="/dashboard/" element={<Home />} />
+          <Route path="/dashboard/wallet" element={<Portfolio />} />
+          <Route path="/dashboard/vault" element={<Vault />} />
+          <Route path="/dashboard/staking" element={<Staking />} />
+          <Route path="/dashboard/rewards" element={<Rewards />} />
+          <Route path="/dashboard/rewards/my-rewards" element={<MyRewards />} />
         </Route>
       </Routes>
     </div>
