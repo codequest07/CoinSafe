@@ -101,7 +101,6 @@ contract Savings is ReentrancyGuard {
         }
         _;
     }
-
     modifier onlyTrustedForwarder() {
         if (msg.sender != trustedForwarder) {
             revert UnauthorizedCaller();
