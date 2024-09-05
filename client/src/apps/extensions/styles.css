@@ -1,0 +1,470 @@
+/* Reset default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 300px;
+  font-family: Arial, sans-serif;
+  background: #010104;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  padding-top: 23px;
+  gap: 12px;
+  margin-bottom: 250px;
+}
+
+.header-1 {
+  display: flex;
+  justify-content: center;
+  padding-top: 23px;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.app-name {
+  font-family: "Archivo", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+span {
+  color: #ffffff17;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0)
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  padding: 20px;
+  margin: 0 14px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 100px;
+}
+
+.card-content {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 24px, 20px, 24px, 20px;
+}
+
+.card-content h1 {
+  font-family: "Archivo", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.card-content p {
+  font-family: "Archivo", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #a0a0a0;
+  padding-bottom: 10px;
+  padding-top: 6px;
+}
+
+.permissions-btn {
+  background-color: #ffffffe5;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.permissions-btn a {
+  color: #010104;
+  font-family: "Archivo", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.background-image {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 0;
+}
+
+/* Second Page */
+
+.content2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-content-2 {
+  display: flex;
+  justify-content: space-between;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0)
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 6px;
+  border: 1px solid #7df5b917;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  padding: 16px;
+  margin: 0 14px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 12px;
+  gap: 153.78px;
+}
+
+.address {
+  font-family: "Archivo", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #f1f1f1;
+}
+
+.card-content-3 {
+  margin-left: 0.5px;
+  width: 268px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0)
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 6px;
+  border: 1px solid #7df5b917;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  padding: 16px;
+  font-family: "Archivo", sans-serif;
+  margin: 15px;
+}
+.header-2 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  line-height: 13.06px;
+}
+.header-2 img {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  color: white;
+}
+.header-2 p {
+  font-family: "Archivo", sans-serif;
+  color: #f1f1f1;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0;
+}
+.permission-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.permission-item span {
+  color: white;
+  font-size: 12px;
+}
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #484848;
+  transition: 0.4s;
+  border-radius: 20px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #48ff91;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #48ff9126;
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.sub-h {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 268px;
+  height: 60px;
+  padding: 0 10px;
+  margin-top: 10px;
+  margin-bottom: 150px;
+}
+
+.sub-h p {
+  color: #a0a0a0;
+  font-family: "Archivo", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.permissions-btn1 {
+  background-color: #ffffffe5;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  margin: 24px;
+}
+
+.permissions-btn1 a {
+  color: #010104;
+  font-family: "Archivo", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+/* Third Page */
+
+.header-3 {
+  display: flex;
+  justify-content: center;
+  padding-top: 23px;
+  gap: 12px;
+  margin-bottom: 98.36px;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sub-h1 {
+  justify-content: center;
+  align-items: center;
+  width: 268px;
+  height: 60px;
+  padding: 0 10px;
+  margin-top: 10px;
+  margin-bottom: 200px;
+}
+
+.sub-h1 h1 {
+  justify-content: center;
+  align-items: center;
+  color: #f1f1f1;
+  font-family: "Archivo", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 17.41px;
+  margin: 8px;
+}
+
+.sub-h1 p {
+  color: #a0a0a0;
+  font-family: "Archivo", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Fourth Page */
+
+.card-content-4 {
+  margin-left: 0.5px;
+  width: 268px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0)
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 6px;
+  border: 1px solid #7df5b917;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  padding: 16px;
+  font-family: "Archivo", sans-serif;
+  margin: 15px;
+  margin-bottom: 200px;
+}
+.header-4 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  line-height: 13.06px;
+}
+
+.header-4 p {
+  font-family: "Archivo", sans-serif;
+  line-height: 20px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #f1f1f1;
+}
+
+.button {
+  display: flex;
+}
+.permissions-btn3 {
+  background-color: #ffffffe5;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  border-radius: 30px;
+  cursor: pointer;
+  margin: 24px;
+}
+
+.permissions-btn3 a {
+  color: #010104;
+  font-family: "Archivo", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+/* .card-content-3 {
+  display: flex;
+  margin-left: 0.5px;
+  width: 268px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0)
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 6px;
+  border: 1px solid #7df5b917;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  padding: 16px;
+  margin: 0 14px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 100px;
+}
+
+.card-content-3 img {
+  width: 14px;
+  height: 14px;
+  color: white;
+  margin-right: 0.5em;
+}
+
+.security-safe {
+  color: #f1f1f1;
+  gap: 153.78px;
+}
+
+.permission-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.permission-item span {
+  color: white;
+  font-size: 14px;
+}
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #484848;
+  transition: 0.4s;
+  border-radius: 20px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #4caf50;
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+} */
