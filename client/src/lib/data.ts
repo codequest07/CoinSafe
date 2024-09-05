@@ -39,7 +39,7 @@ interface SavingsCardData {
 
 export const NavLinks = [
   {
-    to: "/",
+    to: "/dashboard",
     icon: MemoDashboard,
     label: "Dashboard",
   },
