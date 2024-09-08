@@ -8,6 +8,30 @@ body {
   font-optical-sizing: auto;
   overflow-x: hidden;
 }
+
+/* Hide scrollbar but still allow scrolling */
+.no-scrollbar {
+  /* For Firefox */
+  scrollbar-width: none;
+  /* For IE and Edge */
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  /* For Chrome, Safari, and Opera */
+  display: none;
+}
+
+.scrollable-element {
+  overflow-y: scroll; /* or auto if you only want it to appear when needed */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollable-element::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
