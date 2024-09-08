@@ -5,7 +5,7 @@ import WhisperSetupCard from "@/components/Cards/WhisperSetupCard";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
-import PoweredBy from "@/components/Poweredby";
+import PoweredBy from "@/components/PoweredBy";
 import TrackProgress from "@/components/TrackProgress";
 
 const LandingPage = () => {
