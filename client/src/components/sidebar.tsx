@@ -20,6 +20,7 @@ const Sidebar = () => {
                   <NavLink
                     key={link.label}
                     to={link.to}
+                    end
                     className={({ isActive }) =>
                       isActive
                         ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-3  text-[#F1F1F1]  bg-[#1E1E1E99]   transition-all "
