@@ -1,5 +1,5 @@
 {
-  "dependencies": {
-    "dotenv": "^16.4.5"
+  "devDependencies": {
+    "@types/aos": "^3.0.7"
   }
 }
