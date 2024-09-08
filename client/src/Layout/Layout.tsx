@@ -13,7 +13,7 @@ const Layout = () => {
         <div className="p-4 shadow-md ">
           <DashHeader />
         </div>
-        <div className="bg-[#010104] flex-grow  overflow-y-auto overflow-x-hidden">
+        <div className="bg-[#010104] flex-grow  overflow-y-auto overflow-x-hidden no-scrollbar">
           <Outlet />
         </div>
       </main>
