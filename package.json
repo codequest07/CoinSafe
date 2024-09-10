@@ -1,5 +1,7 @@
 {
-  "devDependencies": {
-    "@types/aos": "^3.0.7"
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.20.0"
   }
 }
