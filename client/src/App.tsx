@@ -8,6 +8,7 @@ import Rewards from "./Pages/Rewards";
 import MyRewards from "./Pages/MyRewards";
 import LandingPage from "./Pages/LandingPage";
 import Extension from "./Pages/Extension";
+import SaveSense from "./Pages/SaveSense";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
           <Route path="/dashboard/staking" element={<Staking />} />
           <Route path="/dashboard/rewards" element={<Rewards />} />
           <Route path="/dashboard/rewards/my-rewards" element={<MyRewards />} />
+          <Route path="/dashboard/SaveSense" element={<SaveSense />} />
         </Route>
       </Routes>
     </div>
