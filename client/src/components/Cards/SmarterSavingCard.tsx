@@ -1,14 +1,11 @@
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SavingsOverviewData } from "@/lib/data";
-import { main } from "../../apps/index.ts";
-import { useAccount } from "wagmi";
 import { useState } from "react";
 import Loading from "../Modals/loading-screen.tsx";
 import SaveSenseResp from "../Modals/SaveSenseResp.tsx";
 
 export default function SmarterSavingCard() {
-  const { address } = useAccount();
   const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
   const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
 
