@@ -23,29 +23,6 @@ export default function SmarterSavingCard() {
 
   const closeSaveSenseModal = () => setIsSaveSenseModalOpen(false);
 
-  const handleButtonClick = async () => {
-    if (!address) {
-      console.log("No wallet address available.");
-      return;
-    }
-
-    try {
-      const savingsPlan = await main(`0x${address}`);
-      if (savingsPlan) {
-        console.log("Savings plan generated successfully:", savingsPlan);
-      } else {
-        console.log("No savings plan was generated.");
-      }
-    } catch (error) {
-      console.error(
-        "Error generating savings plan:",
-        error instanceof Error ? error.message : error
-      );
-    } finally {
-      console.log("Process completed.");
-    }
-  };
-
   return (
     <div className="grid grid-cols-2 gap-3 pb-2">
       {SavingsOverviewData.map((items, index) => (
