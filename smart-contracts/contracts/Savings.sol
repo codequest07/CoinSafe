@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 /**
  * @title Savings
  * @dev A contract for managing various savings plans including automated savings using Gelato
- */
+*/
 
 contract Savings is ReentrancyGuard {
 
@@ -60,6 +60,7 @@ contract Savings is ReentrancyGuard {
     struct Balances {
         address token;
         uint256 balance;
+        // add bool to check if auosaved
     }
 
     mapping(address => Balances[]) depositBalances;
@@ -92,8 +93,6 @@ contract Savings is ReentrancyGuard {
         acceptedTokens[_liskTokenAddress] = true;
         acceptedTokens[_safuTokenAddress] = true;
     }
-
-    // npx hardhat ignition deploy ignition/modules/Lock.ts --network sepolia --deployment-id sepolia-deployment
 
     modifier onlyOwner() {
         if (msg.sender != owner) {
@@ -149,7 +148,7 @@ contract Savings is ReentrancyGuard {
      * @param _token Address of the token to be used
      * @param _percentage Percentage of spend to save
      * @param _duration Duration of the savings plan
-     */
+    */
     function createSpendAndSavePlan(address _token, uint8 _percentage, uint256 _duration) external {
         if (!acceptedTokens[_token]) revert InvalidTokenAddress();
         if (_percentage == 0 || _percentage > 100) revert InvalidPercentage();
@@ -181,7 +180,6 @@ contract Savings is ReentrancyGuard {
 
         emit AutomatedSavingSet(msg.sender, _token, _amount, _frequency);
     }
-
 
 
     /**
@@ -365,8 +363,9 @@ contract Savings is ReentrancyGuard {
      * @param _token Address of the token to withdraw
      * @param _amount Amount to withdraw
      * @param _acceptEarlyWithdrawalFee Whether the user accepts the early withdrawal fee
-     */
-    function withdrawSavings(address _token, uint256 _amount, bool _acceptEarlyWithdrawalFee) external nonReentrant {
+    */
+    function withdrawSavings(address _token, uint256 _amount, bool _acceptEarlyWithdrawalFee, string memory _type) external nonReentrant {
+
         Safe storage userSafe = savings[msg.sender];
 
         if (userSafe.amount == 0 || userSafe.token != _token) revert InvalidWithdrawal();
