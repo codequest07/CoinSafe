@@ -34,16 +34,14 @@ export default function SaveAsset({
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
 
   const [amount, setAmount] = useState(0);
-  const [ token, setToken ] = useState("");
+  const [token, setToken] = useState("");
   // const [savingsType, setSavingsType] = useState("")
 
   const handleTokenSelect = (value: string) => {
     setToken(value);
-  }
+  };
 
-  const handleTabChange = () => {
-
-  }
+  const handleTabChange = () => {};
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -51,12 +49,15 @@ export default function SaveAsset({
   };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#13131373]">
+      <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#09090B]">
         <DialogTitle className="text-white flex items-center space-x-3">
           <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" />
           <p>Save your assets</p>
         </DialogTitle>
-        <Tabs defaultValue="one-time" onValueChange={() => handleTabChange()} className="w-full">
+        <Tabs
+          defaultValue="one-time"
+          onValueChange={() => handleTabChange()}
+          className="w-full">
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
@@ -82,7 +83,7 @@ export default function SaveAsset({
                       type="text"
                       id="amount"
                       value={amount}
-                      onChange={(e:any) => setAmount(e.target.value)}
+                      onChange={(e: any) => setAmount(e.target.value)}
                       defaultValue={0}
                       className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
                     />
@@ -105,8 +106,12 @@ export default function SaveAsset({
                           <p>USDT</p>
                         </div>
                       </SelectItem>
-                      <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">LSK</SelectItem>
-                      <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">SAFU</SelectItem>
+                      <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                        LSK
+                      </SelectItem>
+                      <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
+                        SAFU
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -226,23 +231,27 @@ export default function SaveAsset({
                       </div>
                     </div>
                     <div className="ml-4">
-                    <Select onValueChange={handleTokenSelect}>
-                      <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
-                        <div className="flex items-center">
-                          {/* <MemoRipple className="mr-2" /> */}
-                          <SelectValue placeholder="Select Token" />
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
-                          <div className="flex items-center space-x-2">
-                            <p>USDT</p>
+                      <Select onValueChange={handleTokenSelect}>
+                        <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
+                          <div className="flex items-center">
+                            {/* <MemoRipple className="mr-2" /> */}
+                            <SelectValue placeholder="Select Token" />
                           </div>
-                        </SelectItem>
-                        <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">LSK</SelectItem>
-                        <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">SAFU</SelectItem>
-                      </SelectContent>
-                    </Select>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
+                            <div className="flex items-center space-x-2">
+                              <p>USDT</p>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                            LSK
+                          </SelectItem>
+                          <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
+                            SAFU
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -299,7 +308,8 @@ export default function SaveAsset({
             <Button
               onClick={openThirdModal}
               className="text-black px-8 rounded-[2rem]"
-              variant="outline" disabled={token==""}>
+              variant="outline"
+              disabled={token == ""}>
               Save assets
             </Button>
           </div>

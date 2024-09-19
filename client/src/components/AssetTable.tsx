@@ -29,26 +29,22 @@ export default function AssetTable() {
           <TabsList className="sm:flex space-x-4 hidden bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="all-assets"
-              className="text-white px-4 py-2 rounded-full"
-            >
+              className="text-white px-4 py-2 rounded-full">
               All assets
             </TabsTrigger>
             <TabsTrigger
               value="liquid-assets"
-              className="text-white px-4 py-2 rounded-full"
-            >
+              className="text-white px-4 py-2 rounded-full">
               Liquid assets
             </TabsTrigger>
             <TabsTrigger
               value="staked-assets"
-              className="text-white px-4 py-2 rounded-full"
-            >
+              className="text-white px-4 py-2 rounded-full">
               Staked assets
             </TabsTrigger>
             <TabsTrigger
               value="saved-assets"
-              className="text-white px-4 py-2 rounded-full"
-            >
+              className="text-white px-4 py-2 rounded-full">
               Saved assets
             </TabsTrigger>
           </TabsList>
@@ -82,42 +78,41 @@ function AssetTableContent({ assets }: { assets: Asset[] }) {
   return (
     <div className="bg-[#010104] w-full p-4 rounded-lg">
       <CardContent>
-        <Table>
-          <TableHeader className="bg-[#1E1E1E99]  text-[#CACACA]">
-            <TableRow>
-              <TableHead>Ticker</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead className="hidden md:table-cell">Autosaved</TableHead>
-              <TableHead>
+        <Table className="w-full">
+          {" "}
+          {/* Ensure table takes full width */}
+          <TableHeader className="bg-[#1E1E1E99] text-[#CACACA]">
+            <TableRow className="w-full">
+              <TableHead className="w-1/4">Ticker</TableHead>
+              <TableHead className="w-1/4">Amount</TableHead>
+              <TableHead className="hidden md:table-cell w-1/4">
+                Autosaved
+              </TableHead>
+              <TableHead className="w-1/4">
                 <span className="sr-only">Actions</span>
               </TableHead>
-              <TableHead className="sr-only">Ticker</TableHead>
-              <TableHead className="sr-only">Ticker</TableHead>
-              <TableHead className="sr-only">Ticker</TableHead>
-              <TableHead className="sr-only">Ticker</TableHead>
-              <TableHead className="sr-only">Ticker</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="text-[#F1F1F1]">
+          <TableBody className="text-[#F1F1F1] w-full">
             {assets.map((asset, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">
-                  <div className="flex items-center space-x-4">
+              <TableRow key={index} className="w-full">
+                <TableCell className="w-1/4">
+                  <div className="flex items-center space-x-4 w-full">
                     <MemoAvax className="w-6 h-6" />
-                    <div>
+                    <div className="flex-grow">
                       <p className="font-[400] text-base">{asset.symbol}</p>
                       <span className="font-[400] text-xs">{asset.name}</span>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>
-                  <div className="flex flex-col">
+                <TableCell className="w-1/4">
+                  <div className="flex flex-col w-full">
                     <p>{asset.amount}</p>
                     <span className="text-xs">{asset.value}</span>
                   </div>
                 </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <div className="flex items-center">
+                <TableCell className="hidden md:table-cell w-1/4">
+                  <div className="flex items-center w-full">
                     <span className="mr-2">
                       {asset.autosaved ? "Yes" : "No"}
                     </span>
@@ -128,11 +123,11 @@ function AssetTableContent({ assets }: { assets: Asset[] }) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="flex">
+                <TableCell className="w-1/4 flex">
                   <Button variant="link" className="text-[#79E7BA]">
                     Deposit
                   </Button>
-                  <Button variant="link" className="text-[#79E7BA] ">
+                  <Button variant="link" className="text-[#79E7BA]">
                     Save
                   </Button>
                 </TableCell>
