@@ -6,6 +6,7 @@ import MemoVault from "@/icons/Vault";
 import MemoMagicPen from "@/icons/MagicPen";
 import MemoChrome from "@/icons/Chrome";
 import MemoAvax from "@/icons/Avax";
+import MemoChromeMagic from "@/icons/ChromeMagic";
 
 import MemoSolana from "@/icons/Solana";
 import MemoTxnUp from "@/icons/TxnUp";
@@ -21,6 +22,7 @@ import b7 from "@/icons/badges/b7.svg";
 import b8 from "@/icons/badges/b8.svg";
 import b9 from "@/icons/badges/b9.svg";
 import b10 from "@/icons/badges/b10.svg";
+
 export type Asset = {
   symbol: string;
   name: string;
@@ -520,5 +522,20 @@ export const ClaimAssetsData = [
     token: "AVAX",
     network: "Avalanche",
     status: "Claim",
+  },
+];
+
+export const extensionCardData = [
+  {
+    title: "Even more seamless",
+    desc: "Get our extension for more seamless saving while you spend",
+    btnTitle: "Download",
+    icon: MemoChrome,
+  },
+  {
+    title: "Saving just got smarter",
+    desc: "Our AI analyzes your past transactions to tailor the perfect savings plan just for you",
+    btnTitle: "Get started",
+    icon: MemoChromeMagic,
   },
 ];
