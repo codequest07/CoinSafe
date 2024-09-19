@@ -19,11 +19,11 @@ import MemoCalender from "@/icons/Calender";
 const getColorClass = (status: any) => {
   switch (status.toLowerCase()) {
     case "completed":
-      return "text-[#48FF91]";
+      return "text-[#48FF91] bg-[#48FF911A]";
     case "processing":
-      return "text-[#FFA448]";
+      return "text-[#FFA448] bg-[#FFA3481A]";
     case "failed":
-      return "text-[#FF484B]";
+      return "text-[#FF484B] bg-[#FF484B1A]";
     default:
       return "text-gray-500";
   }
@@ -54,7 +54,7 @@ const TransactionHistory = () => {
           <h2 className="text-lg font-semibold">Transaction History</h2>
           <div className="flex space-x-4 items-center">
             <DropdownMenu>
-              <DropdownMenuTrigger className="text-sm flex space-x-2 items-center outline-none">
+              <DropdownMenuTrigger className="text-sm bg-[#1E1E1E99] p-3 rounded-[2rem] flex space-x-2 items-center outline-none">
                 <div>All Networks</div>
                 <div>
                   <MemoDropdownIcon />
@@ -73,7 +73,7 @@ const TransactionHistory = () => {
             <div className="relative">
               <button
                 onClick={handleCalendarToggle}
-                className="text-sm px-4 py-2  flex items-center space-x-2 rounded-lg">
+                className="text-sm px-4 py-3 bg-[#1E1E1E99] flex items-center space-x-2 rounded-[2rem]">
                 <p>This month</p>
                 <MemoCalender />
               </button>
@@ -139,9 +139,9 @@ const TransactionHistory = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Badge className="rounded-[2rem]">
+                      <Badge className="bg-transparent text-center rounded-[2rem]">
                         <p
-                          className={`text-sm font-[400] ${getColorClass(
+                          className={`text-sm p-2 px-3 w-[6rem] rounded-[2rem] font-[400] ${getColorClass(
                             transaction.status
                           )}`}>
                           {transaction.status}
