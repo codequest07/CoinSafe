@@ -10,7 +10,6 @@ import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 import { useAccount } from "wagmi";
 
 const Home = () => {
-
   const { isConnected } = useAccount();
 
   return (
@@ -22,9 +21,9 @@ const Home = () => {
           <TrackingChart />
         </div>
 
-        {isConnected && 
+        {isConnected && (
           <>
-            <div className="flex gap-3 pt-3">
+            <div className="flex  gap-3 pt-3">
               <Card
                 title="Rewards"
                 value={5800000}
@@ -59,31 +58,31 @@ const Home = () => {
               />
             </div>
           </>
-        }
+        )}
 
-        {isConnected ? 
-        <>
-          <div className="flex py-3">
-            <div className="sm:w-2/3 overflow-hidden">
-              <AssetTable />
+        {isConnected ? (
+          <>
+            <div className="flex py-3">
+              <div className="sm:w-2/3 overflow-hidden">
+                <AssetTable />
+              </div>
+              <div className="sm:w-1/3 p-3">
+                <ScheduledSavings />
+              </div>
             </div>
-            <div className="sm:w-1/3 p-3">
-              <ScheduledSavings />
+          </>
+        ) : (
+          <>
+            <div className="flex  flex-col justify-center items-center py-6">
+              <div>
+                <MemoComingSoonIcon className="w-[600px] h-[250px]" />
+              </div>
+              <div className="text-[#F1F1F1] text-xl text-center font-medium py-6">
+                Connect your wallet to get the best of CoinSafe
+              </div>
             </div>
-          </div>
-        </> 
-      : 
-        <>
-          <div className="flex flex-col justify-center items-center py-6">
-            <div>
-              <MemoComingSoonIcon className="w-[600px] h-[250px]" />
-            </div>
-            <div className="text-[#F1F1F1] text-xl text-center font-medium py-6">
-              Connect your wallet to get the best of CoinSafe
-            </div>
-          </div>
-        </>
-      }
+          </>
+        )}
       </div>
     </main>
   );
