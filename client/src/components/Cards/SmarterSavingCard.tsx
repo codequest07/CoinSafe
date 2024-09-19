@@ -1,73 +1,92 @@
+import { useState } from "react";
+import { useAccount } from "wagmi";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SavingsOverviewData } from "@/lib/data";
-import { main } from "../../apps/index.ts";
-import { useAccount } from "wagmi";
+import Loading from "../Modals/loading-screen";
+import SaveSenseResp from "../Modals/SaveSenseResp";
 
 export default function SmarterSavingCard() {
+  const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
+  const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
+  const [saveSenseData, setSaveSenseData] = useState(null);
+
   const { address } = useAccount();
 
-  main(`0x${address}`)
-    .then((savingsPlan) => {
-      if (savingsPlan) {
-        console.log("Savings plan generated successfully:", savingsPlan);
-      } else {
-        console.log("No savings plan was generated.");
-      }
-    })
-    .catch((error) => console.error("Error generating savings plan:", error));
-
-  const handleButtonClick = async () => {
+  const handleGetStarted = async () => {
     if (!address) {
-      console.log("No wallet address available.");
+      console.error("No wallet connected");
       return;
     }
 
+    setIsLoadingModalOpen(true);
+
     try {
-      const savingsPlan = await main(`0x${address}`);
-      if (savingsPlan) {
-        console.log("Savings plan generated successfully:", savingsPlan);
-      } else {
-        console.log("No savings plan was generated.");
+      const response = await fetch(`http://localhost:1234/main/${address}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
       }
+      const data = await response.json();
+
+      setSaveSenseData(data);
+      setIsLoadingModalOpen(false);
+      setIsSaveSenseModalOpen(true);
     } catch (error) {
-      console.error(
-        "Error generating savings plan:",
-        error instanceof Error ? error.message : error
-      );
-    } finally {
-      // setLoading(false); // Optional: reset loading state
-      console.log("hello");
+      console.error("Error fetching data:", error);
+      setIsLoadingModalOpen(false);
     }
   };
+
+  const handleDownload = () => {
+    console.log("Download clicked");
+    // Perform specific action for "Download"
+  };
+
+  const handleButtonClick = (buttonText: string) => {
+    if (buttonText === "Get started") {
+      handleGetStarted();
+    } else if (buttonText === "Download") {
+      handleDownload();
+    }
+  };
+
+  const closeSaveSenseModal = () => setIsSaveSenseModalOpen(false);
 
   return (
     <div className="grid grid-cols-2 gap-3 pb-2">
       {SavingsOverviewData.map((items, index) => (
         <div
           key={index}
-          className="flex border-0 items-center justify-between bg-[#092324] rounded-[12px] p-4 text-[#F1F1F1]"
-        >
+          className="flex border-0 items-center space-x-4 justify-between bg-[#092324] rounded-[12px] p-4 text-[#F1F1F1]">
           <div>
             <items.icon className="w-12 h-12 text-[#20FFAF]" />
           </div>
           <div>
-            <CardTitle className="text-sm"> {items.title}</CardTitle>
-            {/* AI analyzes your spending to create a custom savings plan. */}
+            <CardTitle className="text-sm">{items.title}</CardTitle>
             <CardDescription className="text-xs">
               {items.description}
             </CardDescription>
           </div>
           <div>
             <Button
-              onClick={handleButtonClick}
-              className="px-4 py-2 text-white bg-[#FFFFFF2B] text-sm text-nowrap rounded-[100px]"
-            >
+              onClick={() => handleButtonClick(items.buttonText)}
+              className="px-4 py-2 text-white bg-[#FFFFFF2B] text-sm text-nowrap rounded-[100px]">
               {items.buttonText}
             </Button>
           </div>
         </div>
       ))}
+
+      <Loading
+        isOpen={isLoadingModalOpen}
+        onClose={() => setIsLoadingModalOpen(false)}
+      />
+
+      <SaveSenseResp
+        isOpen={isSaveSenseModalOpen}
+        onClose={closeSaveSenseModal}
+        data={saveSenseData}
+      />
     </div>
   );
 }
