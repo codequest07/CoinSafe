@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.hsection {
+  @apply px-5 py-2 max-w-[68rem] mx-auto;
+}
+
 body {
   background-color: #010104;
   font-family: "Archivo", sans-serif;

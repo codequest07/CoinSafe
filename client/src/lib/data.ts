@@ -22,6 +22,11 @@ import b7 from "@/icons/badges/b7.svg";
 import b8 from "@/icons/badges/b8.svg";
 import b9 from "@/icons/badges/b9.svg";
 import b10 from "@/icons/badges/b10.svg";
+import MemoPortfolioActive from "@/icons/PortfolioActive";
+import MemoDashboardActive from "@/icons/DashboardActive";
+import MemoVaultActive from "@/icons/VaultActive";
+import MemoStakingActive from "@/icons/StakingActive";
+import MemoRewardActive from "@/icons/RewardActive";
 
 export type Asset = {
   symbol: string;
@@ -43,27 +48,32 @@ export const NavLinks = [
   {
     to: "/dashboard",
     icon: MemoDashboard,
+    activeIcon: MemoDashboardActive,
     label: "Dashboard",
   },
   {
     to: "/dashboard/wallet",
     icon: MemoPortfolio,
+    activeIcon: MemoPortfolioActive,
     label: "Wallet",
   },
   {
     to: "/dashboard/vault",
     icon: MemoVault,
+    activeIcon: MemoVaultActive,
     label: "Vault",
   },
 
   {
     to: "/dashboard/staking",
     icon: MemoStaking,
+    activeIcon: MemoStakingActive,
     label: "Staking",
   },
   {
     to: "/dashboard/rewards",
     icon: MemoReward,
+    activeIcon: MemoRewardActive,
     label: "Rewards",
   },
 ];
@@ -288,7 +298,7 @@ export const SavingsOverviewData: SavingsCardData[] = [
   {
     title: "Saving just got smarter",
     description:
-      "Our AI analyzes your spending to create a custom savings plan.",
+      "Our AI analyzes your spending to create a custom savings plan",
     buttonText: "Get started",
     icon: MemoMagicPen,
   },

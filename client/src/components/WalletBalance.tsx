@@ -51,7 +51,7 @@ export default function WalletBalance() {
     <div className="bg-black text-white p-6 flex flex-col ">
       <div className="">
         {/* Network Selector */}
-
+{/* 
         <Select>
           <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-[2rem]">
             <div className="flex items-center">
@@ -67,7 +67,7 @@ export default function WalletBalance() {
             <SelectItem value="bitcoin">Bitcoin</SelectItem>
             <SelectItem value="ethereum">Ethereum</SelectItem>
           </SelectContent>
-        </Select>
+        </Select> */}
       </div>
 
       {/* Wallet Balance Information */}
