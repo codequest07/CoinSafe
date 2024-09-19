@@ -20,7 +20,7 @@ export default function AssetTable() {
   const savedAssets = allAssets.filter((asset) => asset.saved);
 
   return (
-    <div className="bg-[#010104] border border-[#13131373] p-4 rounded-[2rem] text-white w-full">
+    <div className="bg-[#010104] border border-[#13131373] overflow-hidden  p-4 rounded-[2rem] text-white w-full">
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">Assets</h1>
 
@@ -29,22 +29,26 @@ export default function AssetTable() {
           <TabsList className="sm:flex space-x-4 hidden bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="all-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               All assets
             </TabsTrigger>
             <TabsTrigger
               value="liquid-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               Liquid assets
             </TabsTrigger>
             <TabsTrigger
               value="staked-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               Staked assets
             </TabsTrigger>
             <TabsTrigger
               value="saved-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               Saved assets
             </TabsTrigger>
           </TabsList>

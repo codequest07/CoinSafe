@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Completion Screen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-black min-h-screen flex flex-col justify-center items-center text-white">
+    <div class="text-center w-[23rem]">
+      <div>
+        <img src="/img/Extension.svg" class="w-full" alt="" />
+      </div>
+      <!-- Icon Section -->
+      <div class="rounded-full p-4 inline-block mb-6">
+        <img src="/img/security-safe.svg" alt="" />
+      </div>
+
+      <!-- Main Text -->
+      <h1 class="text-2xl font-medium mb-4">You're all set!</h1>
+
+      <!-- Subtitle -->
+      <p class="text-gray-400 text-[14px] mb-12">
+        We’re super proud of you for committing to your goal! <br />
+        Some text, some text, some text
+      </p>
+
+      <!-- Button -->
+      <button
+        class="bg-white mt-40 text-black py-3 px-8 rounded-full text-lg w-full mb-6">
+        Start saving
+      </button>
+    </div>
+  </body>
+</html>

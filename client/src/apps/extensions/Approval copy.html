@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transaction Confirmation Screen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-black min-h-screen flex flex-col justify-center items-center text-white">
+    <div class="text-center w-[23rem]">
+      <!-- Logo Section -->
+      <div class="flex justify-center items-center mb-8">
+        <img src="/img/Extension.svg" alt="Coinsafe Logo" class="w-full mr-2" />
+      </div>
+
+      <!-- Address and Icon -->
+      <div
+        class="bg-gray-800 p-4 rounded-lg flex justify-between items-center mb-6">
+        <span>0xz1...xYZml</span>
+        <img src="/img/icon-metamask.svg" alt="MetaMask Icon" class="w-6 h-6" />
+      </div>
+
+      <!-- Transaction Info -->
+      <div class="bg-gray-800 p-4 rounded-lg text-left mb-12">
+        <p class="text-gray-300 text-sm">
+          You’re about to spend <span class="font-semibold">0.00234 AVAX</span>.
+          Since you’ve set up a <span class="font-semibold">20% save</span> on
+          each transaction with CoinSafe, our smart contract will automatically
+          lock an additional <span class="font-semibold">0.00234 AVAX</span> for
+          7 days.
+        </p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex justify-between">
+        <button class="bg-gray-700 text-white py-3 px-8 rounded-full">
+          Reject
+        </button>
+        <button class="bg-white text-black py-3 px-8 rounded-full">
+          Sign transaction
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

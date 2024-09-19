@@ -1,7 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import MemoLogo from "@/icons/Logo";
 import { NavLinks } from "@/lib/data";
-import ExtensionCard from "./ExtensionCard";
+import ExtensionCard from "./Cards/ExtensionCard";
 
 const Sidebar = () => {
   return (
@@ -20,13 +20,22 @@ const Sidebar = () => {
                   <NavLink
                     key={link.label}
                     to={link.to}
+                    end
                     className={({ isActive }) =>
                       isActive
-                        ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-3  text-[#F1F1F1]  bg-[#1E1E1E99]   transition-all "
-                        : "flex items-center gap-3 font-[400] rounded-lg  px-3 py-3  text-[#B5B5B5]   transition-all "
+                        ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-3 text-[#F1F1F1] bg-[#1E1E1E99] transition-all"
+                        : "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 text-[#B5B5B5] transition-all"
                     }>
-                    <link.icon className="w-5 h-5" />
-                    {link.label}
+                    {({ isActive }) => (
+                      <>
+                        {isActive ? (
+                          <link.activeIcon className="w-5 h-5" />
+                        ) : (
+                          <link.icon className="w-5 h-5" />
+                        )}
+                        {link.label}
+                      </>
+                    )}
                   </NavLink>
                 ))}
               </nav>
