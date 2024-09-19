@@ -5,8 +5,8 @@ import { Link } from "react-router-dom";
 
 const UserCard = () => {
   return (
-    <div className="bg-[#1E1E1E] max-w-sm p-4 shadow-lg rounded-lg">
-      <div className=" bg-[#1E1E1E] p-1 text-white  flex items-center justify-between space-x-4">
+    <div className="bg-[#13131340] max-w-sm p-4 shadow-lg rounded-lg">
+      <div className=" bg-[#13131340] p-1 text-white  flex items-center justify-between space-x-4">
         {/* User Info */}
         <div className="flex items-center space-x-2">
           <div>
@@ -19,8 +19,8 @@ const UserCard = () => {
         </div>
         <MemoDetailsIccon className="w-16 h-16" />
       </div>
-      <div className="h-[1px] w-full bg-[#FFFFFF17]" />
-      <div className="max-w-sm bg-[#1E1E1E] p-2  text-white">
+      <div className="h-[1px] w-full bg-[#13131340]" />
+      <div className="max-w-sm bg-[#13131340] p-2  text-white">
         <div className="flex items-center justify-between">
           <p className="text-gray-300 text-sm">Original sage</p>
           <p className="text-white font-[400] text-sm">

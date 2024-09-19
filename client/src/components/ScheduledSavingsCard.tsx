@@ -3,7 +3,7 @@ import { savings } from "@/lib/data";
 
 export default function ScheduledSavings() {
   return (
-    <div className="bg-[#131313] text-white p-4 rounded-lg max-w-lg mx-auto sm:max-w-full">
+    <div className="bg-[#13131340] text-white p-4 rounded-lg max-w-lg mx-auto sm:max-w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-base font-[500] sm:text-lg">Scheduled savings</h2>
         <a href="#" className="text-sm font-[400] text-green-400 sm:text-base">
