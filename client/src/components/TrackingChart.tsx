@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   Tooltip,
@@ -19,9 +19,11 @@ import {
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
-// import coinSafeAbi from '../abi/coinsafe.json';
+import coinSafeAbi from '../abi/coinsafe.json';
 // import { CoinSafeContract } from "@/lib/contract";
 import { useAccount, useReadContract } from "wagmi";
+import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+import { CoinSafeContract } from "@/lib/contract";
 // import { injected } from "wagmi/connectors";
 // import { liskSepolia } from "viem/chains";
 // import { erc20Abi } from "viem";
@@ -30,10 +32,48 @@ const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  // const [savingsBalance, setSavingsBalance] = useState();
+  // const [availableBalance, setAvailableBalance] = useState();
 
-  const {  } = useReadContract();
+  const TotalSavingsBalance = useReadContract({
+    abi: coinSafeAbi.abi,
+    address: CoinSafeContract.address as `0x${string}`,
+    functionName: 'getTotalSavingsBalance',
+    args: [address]
+  })
 
+  const AvailableBalance = useReadContract({
+    abi: coinSafeAbi.abi,
+    address: CoinSafeContract.address as `0x${string}`,
+    functionName: 'getAvailableBalance',
+    args: [address]
+  })
+
+  useEffect(() => {
+    if(AvailableBalance.data) {
+      console.log("Available Balance", AvailableBalance.data);
+      // setAvailableBalance(AvailableBalance);
+    }
+    if(AvailableBalance.error) {
+      console.log(AvailableBalance.error);
+      // setAvailableBalance(AvailableBalance);
+    }
+
+    if(TotalSavingsBalance.data) {
+      console.log("Total Savings Plan", TotalSavingsBalance.data);
+      // setSavingsBalance(TotalSavingsBalance)
+    }
+
+    if(TotalSavingsBalance.error) {
+      console.log(TotalSavingsBalance.error);
+      // setSavingsBalance(TotalSavingsBalance)
+    }
+
+    console.log(TotalSavingsBalance.status);
+    console.log(TotalSavingsBalance);
+    // console.log(AvailableBalance.status);
+  }, [AvailableBalance, TotalSavingsBalance])
   // const result = useReadContracts({
   //   contracts: [
   //     {

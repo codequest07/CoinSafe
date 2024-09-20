@@ -9,6 +9,7 @@ import MyRewards from "./Pages/MyRewards";
 import LandingPage from "./Pages/LandingPage";
 import Extension from "./Pages/Extension";
 import SaveSense from "./Pages/SaveSense";
+import { Toaster } from "./components/ui/toaster";
 
 const App = () => {
   return (
@@ -26,6 +27,7 @@ const App = () => {
           <Route path="/dashboard/SaveSense" element={<SaveSense />} />
         </Route>
       </Routes>
+      <Toaster />
     </div>
   );
 };
