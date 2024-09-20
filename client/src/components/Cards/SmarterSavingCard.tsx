@@ -21,7 +21,9 @@ export default function SmarterSavingCard() {
     setIsLoadingModalOpen(true);
 
     try {
-      const response = await fetch(`http://localhost:1234/main/${address}`);
+      const response = await fetch(
+        `https://coinsafe-1-1jw5.onrender.com/main/${address}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
