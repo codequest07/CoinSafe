@@ -12,7 +12,8 @@ app.use((0, cors_1.default)());
 app.get("/", (req, res) => {
     res.send("Welcome to CoinSafe!");
 });
-app.use("/api/v1", AiRouter_1.default);
+app.use(AiRouter_1.default);
 app.listen(port, () => {
     console.log(`My Server is running on port ${port}.... keep off!`);
 });
+//# sourceMappingURL=server.js.map
