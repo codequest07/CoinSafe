@@ -11,6 +11,7 @@ export default function CurrencyBreakdown() {
   return (
     <div className="bg-black text-white p-6">
       <p className="mb-2">Currency breakdown</p>
+
       {/* Progress Bar */}
       <div className="flex h-2 mb-4">
         <div
@@ -24,7 +25,7 @@ export default function CurrencyBreakdown() {
       </div>
 
       {/* Legend */}
-      <div className="flex space-x-4 items-center">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-center">
         <div className="flex items-center space-x-1">
           <div className="h-[0.8rem] w-1 rounded-xl bg-[#0B3009]"></div>
           <span>Bitcoin</span>
@@ -49,12 +50,12 @@ export default function CurrencyBreakdown() {
         <div className="flex items-center space-x-1">
           <div className="w-1 h-[0.8rem] bg-[#666667]"></div>
           <span>Others</span>
-          <span className="ml-2 flex">
-            <MemoInj className="relative -ml-0" />
-            <MemoUsdc className="relative -ml-1" />
-            <MemoCardano className="relative -ml-2" />
-            <MemoBnb className="relative -ml-2" />
-            <MemoQnt className="relative -ml-2" />
+          <span className="ml-2 flex space-x-2">
+            <MemoInj />
+            <MemoUsdc />
+            <MemoCardano />
+            <MemoBnb />
+            <MemoQnt />
           </span>
         </div>
       </div>
