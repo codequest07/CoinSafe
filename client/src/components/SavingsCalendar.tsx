@@ -7,7 +7,7 @@ const SavingsCalendar = () => {
   return (
     <div className="w-full overflow-x-hidden">
       <main className="p-4 flex justify-center items-center flex-col">
-        <div className="w-full bg-[#1E1E1E] p-6 rounded-lg text-white shadow-lg">
+        <div className="w-full bg-[#13131340] p-6 rounded-lg text-white shadow-lg">
           {" "}
           {/* Make sure it's full width */}
           {/* Top Bar: Savings Streak and Days */}
