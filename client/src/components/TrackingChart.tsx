@@ -22,7 +22,9 @@ import Deposit from "./Modals/Deposit";
 import coinSafeAbi from '../abi/coinsafe.json';
 // import { CoinSafeContract } from "@/lib/contract";
 import { useAccount, useReadContract } from "wagmi";
-import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+
+// import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+
 import { CoinSafeContract } from "@/lib/contract";
 // import { injected } from "wagmi/connectors";
 // import { liskSepolia } from "viem/chains";
