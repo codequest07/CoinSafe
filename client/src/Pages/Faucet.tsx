@@ -130,6 +130,7 @@ export default function Faucet() {
                   <p className="text-[10px] text-zinc-400 mb-2">{items.due}</p>
                   <Link
                     to={items.link}
+                    target="_blank"
                     className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline">
                     {items.btnTitle}
                   </Link>
