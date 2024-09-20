@@ -21,7 +21,9 @@ export default function SmarterSavingCard() {
     setIsLoadingModalOpen(true);
 
     try {
-      const response = await fetch(`http://localhost:1234/main/${address}`);
+      const response = await fetch(
+        `https://coinsafe-1-1jw5.onrender.com/main/${address}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -52,7 +54,7 @@ export default function SmarterSavingCard() {
   const closeSaveSenseModal = () => setIsSaveSenseModalOpen(false);
 
   return (
-    <div className=" hsection grid grid-cols-2 gap-3 pb-2">
+    <div className=" hsection grid grid-col-1 sm:grid-cols-2 gap-3 pb-2">
       {SavingsOverviewData.map((items, index) => (
         <div
           key={index}

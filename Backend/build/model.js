@@ -30,3 +30,4 @@ const UserSchema = new mongoose_1.Schema({
     password: { type: String, required: true },
 });
 exports.default = mongoose_1.default.model('User', UserSchema);
+//# sourceMappingURL=model.js.map

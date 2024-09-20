@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const UserCard = () => {
   return (
-    <div className="bg-[#13131340] max-w-sm p-4 shadow-lg rounded-lg">
+    <div className="bg-[#13131340] max-w-sm p-4 flex flex-col space-y-2 shadow-lg rounded-lg">
       <div className=" bg-[#13131340] p-1 text-white  flex items-center justify-between space-x-4">
         {/* User Info */}
         <div className="flex items-center space-x-2">
@@ -20,7 +20,7 @@ const UserCard = () => {
         <MemoDetailsIccon className="w-16 h-16" />
       </div>
       <div className="h-[1px] w-full bg-[#13131340]" />
-      <div className="max-w-sm bg-[#13131340] p-2  text-white">
+      <div className="max-w-sm flex  flex-col space-y-4 bg-[#13131340] p-2  text-white">
         <div className="flex items-center justify-between">
           <p className="text-gray-300 text-sm">Original sage</p>
           <p className="text-white font-[400] text-sm">

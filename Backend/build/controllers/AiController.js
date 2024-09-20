@@ -34,6 +34,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getClaudeSavingsPlan = getClaudeSavingsPlan;
 exports.main = main;
+require("dotenv").config();
 const alchemy_sdk_1 = require("alchemy-sdk");
 const axios_1 = __importStar(require("axios"));
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
@@ -45,9 +46,14 @@ const settings = {
 const alchemy = new alchemy_sdk_1.Alchemy(settings);
 function getClaudeSavingsPlan(transfersData) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
+        var _a, _b, _c;
         const API_KEY = anthropicApiKey;
-        const API_URL = "/api/anthropic/messages";
+        const API_URL = "https://api.anthropic.com/v1/messages";
+        console.log("API Key:", API_KEY ? "Set (not shown for security)" : "Not set");
+        if (!API_KEY) {
+            console.error("ANTHROPIC_API_KEY is not set");
+            return null;
+        }
         try {
             const response = yield axios_1.default.post(API_URL, {
                 model: "claude-3-5-sonnet-20240620",
@@ -55,13 +61,7 @@ function getClaudeSavingsPlan(transfersData) {
                 messages: [
                     {
                         role: "user",
-                        content: `${JSON.stringify(transfersData)}You are a financial savings platform, someone wants to save some money with you now advice your user on how to save properly. 
-                  You must sound convincing and homely explaining to them properly in soft diction. You will review their recent transactions and take into account how much they spend, 
-                  how often they spend and craft a proper savings plan based on their past transactions. 
-                  There are three categories of transaction A one off savings plan with fixed duration and fixed amount which is called the basic plan, 
-                  the second plan is a frequency plan whereby they automate to spend a specific amount at specific intervals say daily or weekly or monthly. 
-                  The third plan is the spend and save. per every transaction they make from their wallet account how much percentage of their transactions should they save for every transaction. 
-                  Give this In a concise readable way that a lay man will understand and be able to implement.`,
+                        content: `${JSON.stringify(transfersData)}You are a financial savings platform...`,
                     },
                 ],
             }, {
@@ -74,14 +74,26 @@ function getClaudeSavingsPlan(transfersData) {
             return response.data.content[0].text;
         }
         catch (error) {
-            console.error("Error calling Claude API:", error instanceof axios_1.AxiosError ? (_a = error.response) === null || _a === void 0 ? void 0 : _a.data : String(error));
+            if (error instanceof axios_1.AxiosError) {
+                console.error("Axios error calling Claude API:");
+                console.error("Status:", (_a = error.response) === null || _a === void 0 ? void 0 : _a.status);
+                console.error("Data:", (_b = error.response) === null || _b === void 0 ? void 0 : _b.data);
+                console.error("Headers:", (_c = error.response) === null || _c === void 0 ? void 0 : _c.headers);
+            }
+            else {
+                console.error("Unexpected error calling Claude API:", String(error));
+            }
             return null;
         }
     });
 }
 function main(address) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log("Received address:", address, "Type:", typeof address);
         try {
+            if (typeof address !== "string" || !address) {
+                throw new Error("Invalid address: must be a non-empty string");
+            }
             // Ensure the address is a valid Ethereum address
             if (!address.startsWith("0x") || address.length !== 42) {
                 throw new Error("Invalid Ethereum address format");
@@ -133,3 +145,4 @@ function main(address) {
         }
     });
 }
+//# sourceMappingURL=AiController.js.map
