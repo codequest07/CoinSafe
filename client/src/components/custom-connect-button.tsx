@@ -1,4 +1,3 @@
-import MemoMmIcon from "@/icons/MmIcon";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function CustomConnectButton() {
@@ -55,7 +54,6 @@ export default function CustomConnectButton() {
               cursor: "pointer",
             }}
             className="bg-[#131313B2] space-x-2 text-white py-2 px-5 rounded-[2rem]">
-            <MemoMmIcon className="w-5 h-5" />
             <p>
               {" "}
               {account.address.slice(0, 6)}...{account.address.slice(-4)}
