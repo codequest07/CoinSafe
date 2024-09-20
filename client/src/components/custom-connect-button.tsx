@@ -29,7 +29,7 @@ export default function CustomConnectButton() {
             <button
               onClick={openConnectModal}
               type="button"
-              className="bg-primary-green text-white py-2 px-5 rounded-lg">
+              className="bg-[#131313B2] text-white py-2 px-5 rounded-lg">
               Connect Wallet
             </button>
           );
@@ -54,7 +54,7 @@ export default function CustomConnectButton() {
               border: "none",
               cursor: "pointer",
             }}
-            className="bg-primary-green space-x-2 text-white py-2 px-5 rounded-[2rem]">
+            className="bg-[#131313B2] space-x-2 text-white py-2 px-5 rounded-[2rem]">
             <MemoMmIcon className="w-5 h-5" />
             <p>
               {" "}

@@ -21,7 +21,7 @@ import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
 // import coinSafeAbi from '../abi/coinsafe.json';
 // import { CoinSafeContract } from "@/lib/contract";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 // import { injected } from "wagmi/connectors";
 // import { liskSepolia } from "viem/chains";
 // import { erc20Abi } from "viem";
@@ -31,6 +31,8 @@ const TrackingChart = () => {
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const { isConnected } = useAccount();
+
+  const {  } = useReadContract();
 
   // const result = useReadContracts({
   //   contracts: [
