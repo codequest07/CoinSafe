@@ -43,17 +43,15 @@ const TrackingChart = () => {
   //       ]
   //     }
   //   ]
-    
+
   // })
 
   // const {data:balance, isError, isLoading } = useBalance({ address: result?.data[0].result[0]?.token as `0x${string}`})
 
   // console.log(balance);
 
-
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
-
 
   const data = [
     {
@@ -136,26 +134,33 @@ const TrackingChart = () => {
           </div>
         </div>
 
-        <div className="flex justify-between pb-6 border-b-[1px] border-[#FFFFFF17]">
-          <div className="">
+        <div className="sm:flex justify-between pb-6 border-b-[1px] border-[#FFFFFF17]">
+          {/* Total wallet balance */}
+          <div className="mb-6 sm:mb-0">
             <div className="text-[#CACACA] font-light text-sm pb-4">
               Total wallet balance
             </div>
             <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2">${isConnected ? "6,456.98" : "0.00"}</span>
+              <span className="text-[#F1F1F1] text-3xl pr-2">
+                ${isConnected ? "6,456.98" : "0.00"}
+              </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
             <div className="text-xs pt-2">
-              <span className="text-[#48FF91]">{"+18%"}</span>
-              <span className="text-[#7F7F7F]">24h</span>
+              <span className="text-[#48FF91]">+18%</span>
+              <span className="text-[#7F7F7F] ml-1">24h</span>
             </div>
           </div>
-          <div className="border-x-[1px] border-[#FFFFFF17] px-[150px]">
+
+          {/* Vault balance */}
+          <div className="border-x-[1px] border-[#FFFFFF17] px-4 sm:px-[150px] mb-6 sm:mb-0">
             <div className="text-[#CACACA] font-light text-sm pb-4">
               Vault balance
             </div>
             <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2">${isConnected ? "6,456.98" : "0.00"}</span>
+              <span className="text-[#F1F1F1] text-3xl pr-2">
+                ${isConnected ? "6,456.98" : "0.00"}
+              </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
             <div className="flex items-center gap-2 pt-2">
@@ -165,15 +170,19 @@ const TrackingChart = () => {
               </span>
             </div>
           </div>
+
+          {/* Available balance */}
           <div>
             <div className="text-[#CACACA] font-light text-sm pb-4">
               Available balance
             </div>
             <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2">${isConnected ? "6,456.98" : "0.00"}</span>
+              <span className="text-[#F1F1F1] text-3xl pr-2">
+                ${isConnected ? "6,456.98" : "0.00"}
+              </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
-            <div className="flex items-center gap-2 pt-2">
+            <div className="sm:flex items-center gap-2 pt-2">
               <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
               <span className="text-[#7F7F7F] text-xs">
                 15% of total wallet balance
@@ -184,8 +193,8 @@ const TrackingChart = () => {
       </div>
 
       <div className="w-full h-[160px]">
-        {isConnected && 
-          <>  
+        {isConnected && (
+          <>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={data}
@@ -222,7 +231,7 @@ const TrackingChart = () => {
               </AreaChart>
             </ResponsiveContainer>
           </>
-        }
+        )}
       </div>
 
       {/* SavingOption Modal */}

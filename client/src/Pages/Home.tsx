@@ -23,7 +23,7 @@ const Home = () => {
 
         {isConnected && (
           <>
-            <div className="flex  gap-3 pt-3">
+            <div className="sm:flex  gap-3 pt-3">
               <Card
                 title="Rewards"
                 value={5800000}
@@ -62,7 +62,7 @@ const Home = () => {
 
         {isConnected ? (
           <>
-            <div className="flex py-3">
+            <div className="sm:flex py-3">
               <div className="sm:w-2/3 overflow-hidden">
                 <AssetTable />
               </div>
