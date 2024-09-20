@@ -549,3 +549,30 @@ export const extensionCardData = [
     icon: MemoChromeMagic,
   },
 ];
+
+export const FaucetData = [
+  {
+    title: "LSK Faucet",
+    due: "Claim 1 LSK every 7 day(s)",
+    link: "https://sepolia-faucet.lisk.com/",
+    btnTitle: "Claim faucet",
+  },
+  {
+    title: "Sepolia Faucet",
+    due: "Claim 0.05 Sepolia every 1 day",
+    link: "https://cloud.google.com/application/web3/faucet/ethereum/sepolia",
+    btnTitle: "Claim faucet",
+  },
+  {
+    title: "ETH Lisk Sepolia Faucet",
+    due: "Claim 0.01 ETH/day.",
+    link: "https://thirdweb.com/lisk-sepolia-testnet",
+    btnTitle: "Claim faucet",
+  },
+  {
+    title: "Sepolia-lisk bridge",
+    due: "Sepolia - Lisk Sepolia",
+    link: "https://sepolia-bridge.lisk.com/bridge/lisk-sepolia-testnet",
+    btnTitle: "Bridge faucet",
+  },
+];
