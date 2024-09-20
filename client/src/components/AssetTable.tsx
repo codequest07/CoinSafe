@@ -20,12 +20,12 @@ export default function AssetTable() {
   const savedAssets = allAssets.filter((asset) => asset.saved);
 
   return (
-    <div className="bg-[#010104] border border-[#13131373] overflow-hidden  p-4 rounded-[2rem] text-white w-full">
+    <div className="bg-[#010104] border border-[#13131373] overflow-hidden p-4 rounded-[2rem] text-white w-full">
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">Assets</h1>
 
         {/* Tabs Component */}
-        <Tabs defaultValue="all-assets" className="w-full ">
+        <Tabs defaultValue="all-assets" className="w-full">
           <TabsList className="sm:flex space-x-4 hidden bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="all-assets"
@@ -79,40 +79,45 @@ function AssetTableContent({ assets }: { assets: Asset[] }) {
     <div className="bg-[#010104] w-full p-4 rounded-lg">
       <CardContent>
         <Table className="w-full">
-          {" "}
-          {/* Ensure table takes full width */}
           <TableHeader className="bg-[#1E1E1E99] text-[#CACACA]">
             <TableRow className="w-full">
-              <TableHead className="w-1/4">Ticker</TableHead>
-              <TableHead className="w-1/4">Amount</TableHead>
-              <TableHead className="hidden md:table-cell w-1/4">
+              <TableHead className="w-1/3">Ticker</TableHead>
+              <TableHead className="w-1/3">Amount</TableHead>
+              <TableHead className="hidden md:table-cell w-1/3">
                 Autosaved
               </TableHead>
-              <TableHead className="w-1/4">
+              <TableHead className="hidden sm:table-cell w-1/3">
                 <span className="sr-only">Actions</span>
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="text-[#F1F1F1] w-full">
             {assets.map((asset, index) => (
-              <TableRow key={index} className="w-full">
-                <TableCell className="w-1/4">
-                  <div className="flex items-center space-x-4 w-full">
+              <TableRow
+                key={index}
+                className="w-full flex flex-col sm:table-row">
+                {/* Ticker */}
+                <TableCell className="w-full sm:w-1/3">
+                  <div className="flex items-center space-x-4">
                     <MemoAvax className="w-6 h-6" />
-                    <div className="flex-grow">
+                    <div className="flex flex-col">
                       <p className="font-[400] text-base">{asset.symbol}</p>
                       <span className="font-[400] text-xs">{asset.name}</span>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="w-1/4">
-                  <div className="flex flex-col w-full">
+
+                {/* Amount */}
+                <TableCell className="w-full sm:w-1/3">
+                  <div className="flex flex-col">
                     <p>{asset.amount}</p>
                     <span className="text-xs">{asset.value}</span>
                   </div>
                 </TableCell>
-                <TableCell className="hidden md:table-cell w-1/4">
-                  <div className="flex items-center w-full">
+
+                {/* Autosaved column, hidden on smaller screens */}
+                <TableCell className="hidden md:table-cell w-1/3">
+                  <div className="flex items-center">
                     <span className="mr-2">
                       {asset.autosaved ? "Yes" : "No"}
                     </span>
@@ -123,7 +128,9 @@ function AssetTableContent({ assets }: { assets: Asset[] }) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="w-1/4 flex">
+
+                {/* Actions, hidden on very small screens */}
+                <TableCell className="flex justify-start space-x-6 sm:justify-end w-full sm:w-2/3">
                   <Button variant="link" className="text-[#79E7BA]">
                     Deposit
                   </Button>

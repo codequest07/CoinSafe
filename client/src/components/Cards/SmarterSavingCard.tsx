@@ -54,7 +54,7 @@ export default function SmarterSavingCard() {
   const closeSaveSenseModal = () => setIsSaveSenseModalOpen(false);
 
   return (
-    <div className=" hsection grid grid-cols-2 gap-3 pb-2">
+    <div className=" hsection grid grid-col-1 sm:grid-cols-2 gap-3 pb-2">
       {SavingsOverviewData.map((items, index) => (
         <div
           key={index}
