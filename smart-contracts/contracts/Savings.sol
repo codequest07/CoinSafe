@@ -25,7 +25,7 @@ contract Savings is ReentrancyGuard {
     error InvalidWithdrawal();
     error InsufficientAllowance();
 
-    enum TokenType { ETH, LSK, SAFU } // Define the token types
+    enum TokenType { USDT, LSK, SAFU } // Define the token types
 
     address public owner;
     address public trustedForwarder; // Gelato's trusted forwarder address
@@ -57,13 +57,13 @@ contract Savings is ReentrancyGuard {
         uint256 lastSavingTimestamp;
     }
 
-    struct Balances {
+    struct TokenBalance {
         address token;
         uint256 balance;
         // add bool to check if auosaved
     }
 
-    mapping(address => Balances[]) depositBalances;
+    mapping(address => TokenBalance[]) depositBalances;
     mapping(address => mapping(address => uint256)) depositBalancess;
     mapping(address => Safe) savings;
     mapping(address => bool) acceptedTokens;
@@ -84,7 +84,7 @@ contract Savings is ReentrancyGuard {
     constructor(address _erc20TokenAddress, address _liskTokenAddress, address _safuTokenAddress) {
         owner = msg.sender;
 
-        tokenAddresses[TokenType.ETH] = _erc20TokenAddress;
+        tokenAddresses[TokenType.USDT] = _erc20TokenAddress;
         tokenAddresses[TokenType.LSK] = _liskTokenAddress;
         tokenAddresses[TokenType.SAFU] = _safuTokenAddress;
 
@@ -199,7 +199,7 @@ contract Savings is ReentrancyGuard {
         IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
 
         bool tokenExists = false;
-        Balances[] storage userBalances = depositBalances[msg.sender];
+        TokenBalance[] storage userBalances = depositBalances[msg.sender];
         for (uint256 i = 0; i < userBalances.length; i++) {
             if (userBalances[i].token == _token) {
                 userBalances[i].balance += _amount;
@@ -209,7 +209,7 @@ contract Savings is ReentrancyGuard {
         }
 
         if (!tokenExists) {
-            depositBalances[msg.sender].push(Balances({
+            depositBalances[msg.sender].push(TokenBalance({
                 token: _token,
                 balance: _amount
             }));
@@ -230,7 +230,7 @@ contract Savings is ReentrancyGuard {
         if (_amount == 0) revert ZeroValueNotAllowed();
         if (!acceptedTokens[_token]) revert InvalidTokenAddress();
 
-        Balances[] storage userBalances = depositBalances[msg.sender];
+        TokenBalance[] storage userBalances = depositBalances[msg.sender];
         uint256 userBalance = 0;
 
         for (uint256 i = 0; i < userBalances.length; i++) {
@@ -270,7 +270,7 @@ contract Savings is ReentrancyGuard {
     function withdrawFromPool(address _token, uint256 _amount) external nonReentrant {
         if (_amount == 0) revert ZeroValueNotAllowed();
 
-        Balances[] storage userBalances = depositBalances[msg.sender];
+        TokenBalance[] storage userBalances = depositBalances[msg.sender];
         uint256 userBalance = 0;
         bool tokenExists = false;
 
@@ -317,14 +317,14 @@ contract Savings is ReentrancyGuard {
     /**
      * @dev Executes the automated saving plan (to be called by Gelato)
      * @param _user Address of the user whose plan is being executed
-     */
+    */
     function executeAutomatedSaving(address _user) external onlyTrustedForwarder {
         AutomatedSavingsPlan storage plan = automatedSavingsPlans[_user];
         
         if (plan.amount == 0 || plan.frequency == 0) return;
         if (block.timestamp < plan.lastSavingTimestamp + plan.frequency) return;
 
-        Balances[] storage userBalances = depositBalances[_user];
+        TokenBalance[] storage userBalances = depositBalances[_user];
         uint256 userBalance = 0;
 
         for (uint256 i = 0; i < userBalances.length; i++) {
@@ -381,7 +381,7 @@ contract Savings is ReentrancyGuard {
         uint256 amountAfterFee = _amount - fee;
         userSafe.amount -= _amount;
 
-        Balances[] storage userBalances = depositBalances[msg.sender];
+        TokenBalance[] storage userBalances = depositBalances[msg.sender];
         for (uint256 i = 0; i < userBalances.length; i++) {
             if (userBalances[i].token == _token) {
                 userBalances[i].balance += amountAfterFee;
@@ -420,9 +420,9 @@ contract Savings is ReentrancyGuard {
     /**
      * @dev Returns an array of the user's balances for all accepted tokens
      * @param _user Address of the user
-     * @return Balances[] Array of the user's balances
+     * @return TokenBalance[] Array of the user's balances
      */
-    function getUserBalances(address _user) external view returns (Balances[] memory) {
+    function getUserBalances(address _user) external view returns (TokenBalance[] memory) {
         return depositBalances[_user];
     }
 
@@ -449,11 +449,12 @@ contract Savings is ReentrancyGuard {
      * @param _user The address of the user
      * @return The available balance of the user
     */
-    function getAvailableBalance(address _user) external view returns (uint256) {
+    function getAvailableBalancei(address _user) external view returns (uint256) {
+
         uint256 availableBalance = 0;
 
         // Iterate through the user's deposits and sum up the balances
-        Balances[] memory userBalances = depositBalances[_user];
+        TokenBalance[] memory userBalances = depositBalances[_user];
         for (uint256 i = 0; i < userBalances.length; i++) {
             availableBalance += userBalances[i].balance;
         }
@@ -465,6 +466,48 @@ contract Savings is ReentrancyGuard {
         }
 
         return availableBalance;
+    }
+
+
+    /**
+     * @dev Gets the available balance for each token (funds in the deposit pool that are not locked in savings)
+     * @param _user The address of the user
+     * @return An array of TokenBalance structs containing token addresses and their available balances
+     */
+    function getAvailableBalances(address _user) external view returns (TokenBalance[] memory) {
+        TokenBalance[] memory userBalances = depositBalances[_user];
+        TokenBalance[] memory availableBalances = new TokenBalance[](userBalances.length);
+        uint256 count = 0;
+
+        for (uint256 i = 0; i < userBalances.length; i++) {
+            uint256 availableBalance = userBalances[i].balance;
+            
+            // Subtract the saved amount for this token if it exists
+            Safe storage userSafe = savings[_user];
+            if (userSafe.token == userBalances[i].token && userSafe.amount > 0) {
+                if (availableBalance >= userSafe.amount) {
+                    availableBalance -= userSafe.amount;
+                } else {
+                    availableBalance = 0;
+                }
+            }
+            
+            if (availableBalance > 0) {
+                availableBalances[count] = TokenBalance({
+                    token: userBalances[i].token,
+                    balance: availableBalance
+                });
+                count++;
+            }
+        }
+
+        // Create a new array with the correct size (excluding zero balances)
+        TokenBalance[] memory result = new TokenBalance[](count);
+        for (uint256 i = 0; i < count; i++) {
+            result[i] = availableBalances[i];
+        }
+
+        return result;
     }
     
 }
