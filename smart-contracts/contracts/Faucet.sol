@@ -1,26 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/**
- * @title IERC20
- * @dev Interface for the ERC20 standard as defined in the EIP.
- */
-interface IERC20 {
-    /**
-     * @dev Moves `amount` tokens from the caller's account to `recipient`.
-     * @param recipient The address to transfer to.
-     * @param amount The amount to transfer.
-     * @return A boolean value indicating whether the operation succeeded.
-     */
-    function transfer(address recipient, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Returns the amount of tokens owned by `account`.
-     * @param account The address to query the balance of.
-     * @return An uint256 representing the amount owned by the passed address.
-     */
-    function balanceOf(address account) external view returns (uint256);
-}
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title TokenFaucet
