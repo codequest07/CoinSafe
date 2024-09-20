@@ -106,4 +106,12 @@ contract TokenFaucet {
         uint256 balance = token.balanceOf(address(this));
         require(token.transfer(_to, balance), "Token transfer failed");
     }
+
+    function getContractBalance() external view returns (uint256) {
+        return token.balanceOf(address(this));
+    }
+
+    function getUserBalance() external view onlyOwner returns (uint256) {
+        return token.balanceOf(msg.sender);
+    }
 }
