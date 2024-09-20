@@ -14,13 +14,23 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
-import coinSafeAbi from '../../abi/coinsafe.json';
+import coinSafeAbi from "../../abi/coinsafe.json";
 import ApproveDeposit from "./ApproveDeposit";
 import { CoinSafeContract } from "@/lib/contract";
-import { useAccount, useConnect, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useTransactionReceipt,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { injected } from "wagmi/connectors";
 import { liskSepolia } from "viem/chains";
 import { erc20Abi } from "viem";
+import { waitForTransactionReceipt } from "@wagmi/core";
+import { config } from "@/lib/config";
+import { LoaderCircle } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -31,15 +41,18 @@ export default function Deposit({
   setIsDepositModalOpen: (open: boolean) => void;
   onBack: () => void;
 }) {
+  const {
+    writeContractAsync
+  } = useWriteContract();
 
-  const { writeContractAsync, isPending, isSuccess } = useWriteContract();
   const { connectAsync } = useConnect();
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const { address } = useAccount();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [amount, setAmount] = useState(0);
-  const [ token, setToken ] = useState("");
-  
+  const [token, setToken] = useState("");
+
   const openThirdModal = () => {
     console.log("details", token, amount);
 
@@ -47,48 +60,104 @@ export default function Deposit({
     setIsDepositModalOpen(false);
   };
 
-  const handleDepositAsset = async (e:any) => {
+  const handleDepositAsset = async (e: any) => {
     e.preventDefault();
 
     try {
-      if(!address) {
-        await connectAsync({ chainId: liskSepolia.id, connector: injected() })
+      setIsLoading(true);
+      if (!address) {
+        await connectAsync({ chainId: liskSepolia.id, connector: injected() });
       }
 
-      const response = await writeContractAsync({
+      if(!amount) {
+        toast({
+          title: 'Please input a value for amount to deposit',
+          variant: "destructive"
+        })
+        return;
+      }
+
+      if(!token) {
+        toast({
+          title: 'Please select token to deposit',
+          variant: "destructive"
+        })
+        return;
+      }
+
+      const approveResponse = await writeContractAsync({
         chainId: liskSepolia.id,
         address: token as `0x${string}`,
         functionName: "approve",
         abi: erc20Abi,
-        args: [
-          CoinSafeContract.address as `0x${string}`,
-          BigInt(amount+10)
-        ]
-      })
+        args: [CoinSafeContract.address as `0x${string}`, BigInt(amount + 10)],
+      });
 
-      console.log(response)
+      // Check if the approve transaction was successful
+      if (approveResponse) {
+        console.log(`Approve transaction successful: ${approveResponse}`);
 
-      const data = await writeContractAsync({
-        chainId: liskSepolia.id,
-        address: CoinSafeContract.address as `0x${string}`,
-        functionName: "depositToPool",
-        abi: coinSafeAbi.abi,
-        args: [
-          amount,
-          token
-        ]
-      })
+        // Step 2: Wait until the transaction is mined
+        const approveTransactionReceipt = await waitForTransactionReceipt(
+          config,
+          {
+            hash: approveResponse,
+          }
+        );
 
-      if(isSuccess) {
-        openThirdModal();
+        console.log(approveTransactionReceipt);
+
+        if (approveTransactionReceipt.transactionIndex === 1) {
+          console.log(
+            "Approve transaction confirmed, proceeding with deposit..."
+          );
+
+          // Step 3: Call depositToPool function after approval
+          const depositResponse = await writeContractAsync({
+            chainId: liskSepolia.id,
+            address: CoinSafeContract.address as `0x${string}`,
+            functionName: "depositToPool",
+            abi: coinSafeAbi.abi,
+            args: [amount, token],
+          });
+
+          console.log(depositResponse);
+
+          const depositTransactionReceipt = await waitForTransactionReceipt(
+            config,
+            {
+              hash: depositResponse,
+            }
+          );
+
+          if (depositTransactionReceipt.transactionIndex === 1) {
+            openThirdModal();
+          }
+
+          console.log("DATA", depositTransactionReceipt.status);
+          setIsLoading(false);
+        } else {
+          console.error("Deposit transaction failed or was reverted");
+          setIsLoading(false);
+        }
+      } else {
+        console.error("Approve transaction failed");
+        setIsLoading(false);
       }
 
-      console.log("DATA",data);
+      // const data = await writeContractAsync({
+      //   chainId: liskSepolia.id,
+      //   address: CoinSafeContract.address as `0x${string}`,
+      //   functionName: "depositToPool",
+      //   abi: coinSafeAbi.abi,
+      //   args: [amount, token],
+      // });
     } catch (error) {
-      console.log(error)
+      console.log(error);
+      setIsLoading(false);
     }
-    // const formData = new FormData(e.target as HTMLFormElement) 
-    // const tokenId = formData.get('tokenId') as string 
+    // const formData = new FormData(e.target as HTMLFormElement)
+    // const tokenId = formData.get('tokenId') as string
     // console.log("Loggin first")
     // writeContract({
     //   address: `0x${CoinSafeContract.address}`,
@@ -98,16 +167,11 @@ export default function Deposit({
     // });
 
     // console.log("Logging after")
-  }
-
-
-  
-
+  };
 
   const handleTokenSelect = (value: string) => {
     setToken(value);
-  }
-
+  };
 
   return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
@@ -128,8 +192,10 @@ export default function Deposit({
                   type="number"
                   id="amount"
                   value={amount}
-                  onChange={(e:any) => setAmount(e.target.value)}
-                  defaultValue={0}
+                  onChange={(e: any) => setAmount(e.target.value)}
+                  placeholder="100"
+                  required
+                  min={0.05}
                   className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
                 />
                 {/* <div className="text-xs text-gray-400 text-center">
@@ -138,7 +204,7 @@ export default function Deposit({
               </div>
             </div>
             <div className="ml-4">
-              <Select onValueChange={handleTokenSelect}>
+              <Select onValueChange={handleTokenSelect} required>
                 <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                   <div className="flex items-center">
                     {/* <MemoRipple className="mr-2" /> */}
@@ -151,8 +217,12 @@ export default function Deposit({
                       <p>USDT</p>
                     </div>
                   </SelectItem>
-                  <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">LSK</SelectItem>
-                  <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">SAFU</SelectItem>
+                  <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                    LSK
+                  </SelectItem>
+                  <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
+                    SAFU
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -170,7 +240,8 @@ export default function Deposit({
           <Button
             onClick={() => setIsDepositModalOpen(false)}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit">
+            type="submit"
+          >
             Cancel
           </Button>
           <div>
@@ -183,8 +254,10 @@ export default function Deposit({
                 // }
               }}
               className="text-black px-8 rounded-[2rem]"
-              variant="outline" disabled={isPending}>
-              Deposit assets
+              variant="outline"
+              disabled={isLoading}
+            >
+              {isLoading ? <LoaderCircle className="animate-spin"/> : "Deposit assets"}
             </Button>
           </div>
         </DialogFooter>

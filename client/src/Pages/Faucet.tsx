@@ -7,13 +7,48 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
+import { FaucetContract } from "@/lib/contract";
+import { useWriteContract } from "wagmi";
 
 export default function Faucet() {
   const [evmAddress, setEvmAddress] = useState("");
 
-  const handleClaim = () => {
-    // Implement claim logic here
-    console.log("Claiming tokens for address:", evmAddress);
+  // const [claimAmount, setClaimAmount] = useState("");
+
+  // Read contract data
+  // const faucetBalance = useReadContract({
+  //   abi: FaucetContract.abi.abi,
+  //   address: FaucetContract.address as `0x${string}`,
+  //   functionName: "getContractBalance",
+  // });
+  // console.log(faucetBalance);
+
+  // Write to contract
+  const {
+    data: hash,
+    error,
+    isError,
+    isPending,
+    isSuccess,
+    writeContractAsync,
+  } = useWriteContract();
+
+  async function handleClaim() {
+    if (evmAddress) {
+      const claimTnx = await writeContractAsync({
+        address: evmAddress as `0x${string}`,
+        abi: FaucetContract.abi.abi,
+        functionName: "claim",
+      });
+      console.log(claimTnx);
+    }
+  }
+
+  const getShortErrorMessage = (message: string) => {
+    const maxLength = 50;
+    return message.length > maxLength
+      ? `${message.substring(0, maxLength)}...`
+      : message;
   };
 
   return (
@@ -44,7 +79,7 @@ export default function Faucet() {
                     className="w-full py-5 bg-[#13131373] text-white border-zinc-700"
                   />
                   <Button
-                    className="absolute bg-transparent hover:bg-transparent  flex space-x-[2px] right-2 top-1/2 transform -translate-y-1/2 text-zinc-400"
+                    className="absolute bg-transparent hidden  hover:bg-transparent  sm:flex space-x-[2px] right-2 top-1/2 transform -translate-y-1/2 text-zinc-400"
                     onClick={() =>
                       navigator.clipboard.readText().then(setEvmAddress)
                     }>
@@ -55,10 +90,26 @@ export default function Faucet() {
               </div>
               <div className="sm:flex justify-end mt-4">
                 <Button
-                  className=" bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
-                  onClick={handleClaim}>
-                  Claim faucet
+                  className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
+                  onClick={() => handleClaim()}
+                  disabled={isPending}>
+                  {isPending ? "Pending" : "Claim faucet"}
                 </Button>
+              </div>
+              <div className="sm:max-w-xl">
+                {isError && (
+                  <p className="text-red-500">
+                    Error:{" "}
+                    {getShortErrorMessage(error?.message || "Unknown error")}
+                  </p>
+                )}
+                {isSuccess && (
+                  <div className=" text-green-800 p-3 rounded-lg">
+                    <p className="text-green-500 break-words">
+                      Success! Txn Hash: {hash}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
