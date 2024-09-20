@@ -11,7 +11,6 @@ import Extension from "./Pages/Extension";
 import SaveSense from "./Pages/SaveSense";
 import { Toaster } from "./components/ui/toaster";
 import Faucet from "./Pages/Faucet";
-import { Toaster } from "./components/ui/toaster";
 
 const App = () => {
   return (
