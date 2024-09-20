@@ -17,13 +17,7 @@ import MemoBackIcon from "@/icons/BackIcon";
 import coinSafeAbi from "../../abi/coinsafe.json";
 import ApproveDeposit from "./ApproveDeposit";
 import { CoinSafeContract } from "@/lib/contract";
-import {
-  useAccount,
-  useConnect,
-  useTransactionReceipt,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
+import { useAccount, useConnect, useWriteContract } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { liskSepolia } from "viem/chains";
 import { erc20Abi } from "viem";
