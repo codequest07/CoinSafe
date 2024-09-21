@@ -15,7 +15,7 @@ import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 
 export default function Faucet() {
   const [evmAddress, setEvmAddress] = useState("");
-  const [isFaucetAdded, setIsFaucetAdded] = useState(false); // State to track successful faucet claim
+  const [isFaucetAdded, setIsFaucetAdded] = useState(false); 
 
   //Read contract data
   const faucetBalance = useReadContract({
@@ -42,7 +42,7 @@ export default function Faucet() {
         abi: FaucetContract.abi.abi,
         functionName: "claim",
       });
-      console.log(claimTnx);
+      // console.log(claimTnx);
 
       if (claimTnx) {
         const transactionReceipt = await waitForTransactionReceipt(config, {
@@ -50,7 +50,7 @@ export default function Faucet() {
         });
 
         console.log(transactionReceipt);
-        setIsFaucetAdded(true); // Set the state to true when the claim is successful
+        setIsFaucetAdded(true); 
       }
     }
   }
