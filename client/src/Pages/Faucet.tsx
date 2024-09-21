@@ -11,11 +11,11 @@ import { FaucetContract } from "@/lib/contract";
 import { useReadContract, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/lib/config";
+import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 
 export default function Faucet() {
   const [evmAddress, setEvmAddress] = useState("");
-
-  // const [claimAmount, setClaimAmount] = useState("");
+  const [isFaucetAdded, setIsFaucetAdded] = useState(false); // State to track successful faucet claim
 
   //Read contract data
   const faucetBalance = useReadContract({
@@ -50,6 +50,7 @@ export default function Faucet() {
         });
 
         console.log(transactionReceipt);
+        setIsFaucetAdded(true); // Set the state to true when the claim is successful
       }
     }
   }
@@ -98,14 +99,23 @@ export default function Faucet() {
                   </Button>
                 </div>
               </div>
-              <div className="sm:flex justify-end mt-4">
-                <Button
-                  className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
-                  onClick={() => handleClaim()}
-                  disabled={isPending}>
-                  {isPending ? "Pending" : "Claim faucet"}
-                </Button>
+              <div className="sm:flex justify-between items-center mt-4">
+                {/* Conditionally render the AddTokenToMetaMask component */}
+                {isFaucetAdded && (
+                  <div className="">
+                    <AddTokenToMetaMask />
+                  </div>
+                )}
+                <div className="sm:flex sm:justify-end w-full">
+                  <Button
+                    className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
+                    onClick={() => handleClaim()}
+                    disabled={isPending}>
+                    {isPending ? "Pending" : "Claim faucet"}
+                  </Button>
+                </div>
               </div>
+
               <div className="sm:max-w-xl">
                 {isError && (
                   <p className="text-red-500">
