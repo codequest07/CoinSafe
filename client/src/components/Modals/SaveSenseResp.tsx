@@ -37,11 +37,11 @@ export default function SaveSenseResp({
                 className="text-white bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#1E1E1E99]">
                 Close
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 className="text-[#010104] bg-[#FFFFFFE5] rounded-[2rem] border-white hover:bg-[#FFFFFFE5]">
                 Regenerate
-              </Button>
+              </Button> */}
             </CardFooter>
           </div>
         </div>
