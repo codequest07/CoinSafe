@@ -8,20 +8,22 @@ import Footer from "@/components/Footer";
 import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
 import { FaucetContract } from "@/lib/contract";
-import { useWriteContract } from "wagmi";
+import { useReadContract, useWriteContract } from "wagmi";
+import { waitForTransactionReceipt } from "@wagmi/core";
+import { config } from "@/lib/config";
 
 export default function Faucet() {
   const [evmAddress, setEvmAddress] = useState("");
 
   // const [claimAmount, setClaimAmount] = useState("");
 
-  // Read contract data
-  // const faucetBalance = useReadContract({
-  //   abi: FaucetContract.abi.abi,
-  //   address: FaucetContract.address as `0x${string}`,
-  //   functionName: "getContractBalance",
-  // });
-  // console.log(faucetBalance);
+  //Read contract data
+  const faucetBalance = useReadContract({
+    abi: FaucetContract.abi.abi,
+    address: FaucetContract.address as `0x${string}`,
+    functionName: "getContractBalance",
+  });
+  console.log(faucetBalance);
 
   // Write to contract
   const {
@@ -36,11 +38,19 @@ export default function Faucet() {
   async function handleClaim() {
     if (evmAddress) {
       const claimTnx = await writeContractAsync({
-        address: evmAddress as `0x${string}`,
+        address: FaucetContract.address as `0x${string}`,
         abi: FaucetContract.abi.abi,
         functionName: "claim",
       });
       console.log(claimTnx);
+
+      if (claimTnx) {
+        const transactionReceipt = await waitForTransactionReceipt(config, {
+          hash: claimTnx,
+        });
+
+        console.log(transactionReceipt);
+      }
     }
   }
 
@@ -130,6 +140,7 @@ export default function Faucet() {
                   <p className="text-[10px] text-zinc-400 mb-2">{items.due}</p>
                   <Link
                     to={items.link}
+                    target="_blank"
                     className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline">
                     {items.btnTitle}
                   </Link>
