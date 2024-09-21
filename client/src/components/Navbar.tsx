@@ -42,7 +42,7 @@ export default function Navbar() {
             <Link
               to="/testnet"
               className="hover:text-[#79E7BA] transition-colors">
-              TESTNET
+              APP
             </Link>
             <Link
               to="/faucet"
