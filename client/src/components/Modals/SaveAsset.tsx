@@ -21,6 +21,16 @@ import MemoBackIcon from "@/icons/BackIcon";
 import MemoCalenderIcon from "@/icons/CalenderIcon";
 import ApproveTransaction from "./ApproveTransaction";
 
+import { useAccount, useConnect, useWriteContract } from 'wagmi';
+import { liskSepolia } from "viem/chains";
+import { injected } from "wagmi/connectors";
+import { erc20Abi } from "viem";
+import { CoinSafeContract } from "@/lib/contract";
+import coinSafeAbi from '../../abi/coinsafe.json';
+import { useRecoilState } from "recoil";
+import { saveAtom } from "@/store/atoms/save";
+// import { set } from "date-fns";
+
 export default function SaveAsset({
   isOpen,
   onClose,
@@ -33,15 +43,80 @@ export default function SaveAsset({
   const [selectedOption, setSelectedOption] = useState("manual");
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
 
-  const [amount, setAmount] = useState(0);
-  const [token, setToken] = useState("");
-  // const [savingsType, setSavingsType] = useState("")
 
-  const handleTokenSelect = (value: string) => {
-    setToken(value);
+  const [saveState, setSaveState] = useRecoilState(saveAtom);
+
+  // const handleChange = (event:any) => {
+  //   setSaveState((prevState) => ({...prevState, [event.target.name]: event.target.value}));
+  // };
+  const handleDurationChange = (event:any) => {
+    // convert number of days to seconds for smart contract
+    let _duration = (((Number(event.target.value) * 24)* 60) * 60);
+    setSaveState((prevState) => ({...prevState, [event.target.name]: _duration}));
+  };
+  const handleAmountChange = (event:any) => {
+    let _amount = Number(event.target.value);
+    setSaveState((prevState) => ({...prevState, [event.target.name]: _amount}));
   };
 
-  const handleTabChange = () => {};
+  console.log("SAVE::", saveState)
+
+  const { address } = useAccount();
+
+  const { writeContractAsync, isSuccess } = useWriteContract();
+  const { connectAsync } = useConnect();
+
+  const handleTokenSelect = (value: string) => {
+    setSaveState((prevState) => ({...prevState, token: value}));
+  }
+
+  const handleTabChange = () => {
+
+  }
+
+  const handleSaveAsset = async (e:any) => {
+    e.preventDefault();
+
+    try {
+      if(!address) {
+        await connectAsync({ chainId: liskSepolia.id, connector: injected() })
+      }
+
+      const response = await writeContractAsync({
+        chainId: liskSepolia.id,
+        address: saveState?.token as `0x${string}`,
+        functionName: "approve",
+        abi: erc20Abi,
+        args: [
+          CoinSafeContract.address as `0x${string}`,
+          BigInt(saveState?.amount+10 ** 18)
+        ]
+      })
+
+      console.log("Approve::::",response)
+
+      const data = await writeContractAsync({
+        chainId: liskSepolia.id,
+        address: CoinSafeContract.address as `0x${string}`,
+        functionName: "save",
+        abi: coinSafeAbi.abi,
+        args: [
+          saveState.token,
+          saveState.amount,
+          saveState.duration,
+          saveState.typeName
+        ]
+      })
+
+      if(isSuccess) {
+        openThirdModal();
+      }
+
+      console.log("DATA",data);
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -82,8 +157,9 @@ export default function SaveAsset({
                     <input
                       type="text"
                       id="amount"
-                      value={amount}
-                      onChange={(e: any) => setAmount(e.target.value)}
+                      name="amount"
+                      value={saveState.amount}
+                      onChange={handleAmountChange}
                       defaultValue={0}
                       className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
                     />
@@ -135,8 +211,10 @@ export default function SaveAsset({
                   <div className="relative">
                     <Input
                       id="duration"
-                      defaultValue="7days"
-                      type="text"
+                      // defaultValue="7days"
+                      type="number"
+                      name="duration"
+                      onChange={handleDurationChange}
                       placeholder="Days"
                       className="pl-3 pr-4"
                     />
@@ -306,10 +384,9 @@ export default function SaveAsset({
           </Button>
           <div>
             <Button
-              onClick={openThirdModal}
+              onClick={(e) => handleSaveAsset(e)}
               className="text-black px-8 rounded-[2rem]"
-              variant="outline"
-              disabled={token == ""}>
+              variant="outline" disabled={saveState.token==""}>
               Save assets
             </Button>
           </div>
