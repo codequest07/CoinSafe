@@ -7,13 +7,59 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
+import { FaucetContract } from "@/lib/contract";
+import { useReadContract, useWriteContract } from "wagmi";
+import { waitForTransactionReceipt } from "@wagmi/core";
+import { config } from "@/lib/config";
+import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 
 export default function Faucet() {
   const [evmAddress, setEvmAddress] = useState("");
+  const [isFaucetAdded, setIsFaucetAdded] = useState(false); // State to track successful faucet claim
 
-  const handleClaim = () => {
-    // Implement claim logic here
-    console.log("Claiming tokens for address:", evmAddress);
+  //Read contract data
+  const faucetBalance = useReadContract({
+    abi: FaucetContract.abi.abi,
+    address: FaucetContract.address as `0x${string}`,
+    functionName: "getContractBalance",
+  });
+  console.log(faucetBalance);
+
+  // Write to contract
+  const {
+    data: hash,
+    error,
+    isError,
+    isPending,
+    isSuccess,
+    writeContractAsync,
+  } = useWriteContract();
+
+  async function handleClaim() {
+    if (evmAddress) {
+      const claimTnx = await writeContractAsync({
+        address: FaucetContract.address as `0x${string}`,
+        abi: FaucetContract.abi.abi,
+        functionName: "claim",
+      });
+      console.log(claimTnx);
+
+      if (claimTnx) {
+        const transactionReceipt = await waitForTransactionReceipt(config, {
+          hash: claimTnx,
+        });
+
+        console.log(transactionReceipt);
+        setIsFaucetAdded(true); // Set the state to true when the claim is successful
+      }
+    }
+  }
+
+  const getShortErrorMessage = (message: string) => {
+    const maxLength = 50;
+    return message.length > maxLength
+      ? `${message.substring(0, maxLength)}...`
+      : message;
   };
 
   return (
@@ -44,7 +90,7 @@ export default function Faucet() {
                     className="w-full py-5 bg-[#13131373] text-white border-zinc-700"
                   />
                   <Button
-                    className="absolute bg-transparent hover:bg-transparent  flex space-x-[2px] right-2 top-1/2 transform -translate-y-1/2 text-zinc-400"
+                    className="absolute bg-transparent hidden  hover:bg-transparent  sm:flex space-x-[2px] right-2 top-1/2 transform -translate-y-1/2 text-zinc-400"
                     onClick={() =>
                       navigator.clipboard.readText().then(setEvmAddress)
                     }>
@@ -53,12 +99,37 @@ export default function Faucet() {
                   </Button>
                 </div>
               </div>
-              <div className="sm:flex justify-end mt-4">
-                <Button
-                  className=" bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
-                  onClick={handleClaim}>
-                  Claim faucet
-                </Button>
+              <div className="sm:flex justify-between items-center mt-4">
+                {/* Conditionally render the AddTokenToMetaMask component */}
+                {isFaucetAdded && (
+                  <div className="">
+                    <AddTokenToMetaMask />
+                  </div>
+                )}
+                <div className="sm:flex sm:justify-end w-full">
+                  <Button
+                    className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
+                    onClick={() => handleClaim()}
+                    disabled={isPending}>
+                    {isPending ? "Pending" : "Claim faucet"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="sm:max-w-xl">
+                {isError && (
+                  <p className="text-red-500">
+                    Error:{" "}
+                    {getShortErrorMessage(error?.message || "Unknown error")}
+                  </p>
+                )}
+                {isSuccess && (
+                  <div className=" text-green-800 p-3 rounded-lg">
+                    <p className="text-green-500 break-words">
+                      Success! Txn Hash: {hash}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -79,6 +150,7 @@ export default function Faucet() {
                   <p className="text-[10px] text-zinc-400 mb-2">{items.due}</p>
                   <Link
                     to={items.link}
+                    target="_blank"
                     className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline">
                     {items.btnTitle}
                   </Link>

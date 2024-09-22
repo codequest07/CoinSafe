@@ -17,13 +17,7 @@ import MemoBackIcon from "@/icons/BackIcon";
 import coinSafeAbi from "../../abi/coinsafe.json";
 import ApproveDeposit from "./ApproveDeposit";
 import { CoinSafeContract } from "@/lib/contract";
-import {
-  useAccount,
-  useConnect,
-  useTransactionReceipt,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
+import { useAccount, useConnect, useWriteContract } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { liskSepolia } from "viem/chains";
 import { erc20Abi } from "viem";
@@ -41,9 +35,7 @@ export default function Deposit({
   setIsDepositModalOpen: (open: boolean) => void;
   onBack: () => void;
 }) {
-  const {
-    writeContractAsync
-  } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
 
   const { connectAsync } = useConnect();
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
@@ -69,19 +61,19 @@ export default function Deposit({
         await connectAsync({ chainId: liskSepolia.id, connector: injected() });
       }
 
-      if(!amount) {
+      if (!amount) {
         toast({
-          title: 'Please input a value for amount to deposit',
-          variant: "destructive"
-        })
+          title: "Please input a value for amount to deposit",
+          variant: "destructive",
+        });
         return;
       }
 
-      if(!token) {
+      if (!token) {
         toast({
-          title: 'Please select token to deposit',
-          variant: "destructive"
-        })
+          title: "Please select token to deposit",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -240,8 +232,7 @@ export default function Deposit({
           <Button
             onClick={() => setIsDepositModalOpen(false)}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
+            type="submit">
             Cancel
           </Button>
           <div>
@@ -255,9 +246,12 @@ export default function Deposit({
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading}
-            >
-              {isLoading ? <LoaderCircle className="animate-spin"/> : "Deposit assets"}
+              disabled={isLoading}>
+              {isLoading ? (
+                <LoaderCircle className="animate-spin" />
+              ) : (
+                "Deposit assets"
+              )}
             </Button>
           </div>
         </DialogFooter>
