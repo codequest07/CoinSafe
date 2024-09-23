@@ -15,7 +15,7 @@ import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 
 export default function Faucet() {
   const [evmAddress, setEvmAddress] = useState("");
-  const [isFaucetAdded, setIsFaucetAdded] = useState(false); 
+  const [isFaucetAdded, setIsFaucetAdded] = useState(false);
 
   //Read contract data
   const faucetBalance = useReadContract({
@@ -50,7 +50,7 @@ export default function Faucet() {
         });
 
         console.log(transactionReceipt);
-        setIsFaucetAdded(true); 
+        setIsFaucetAdded(true);
       }
     }
   }
@@ -126,7 +126,7 @@ export default function Faucet() {
                 {isSuccess && (
                   <div className=" text-green-800 p-3 rounded-lg">
                     <p className="text-green-500 break-words">
-                      Success! Txn Hash: {hash}
+                      Txn Hash: {hash}
                     </p>
                   </div>
                 )}
