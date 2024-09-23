@@ -64,7 +64,7 @@ export default function SaveAsset({
     setSaveState((prevState) => ({...prevState, [event.target.name]: _amount}));
   };
 
-  console.log("SAVE::", saveState)
+  // console.log("SAVE::", saveState)
 
   const { address } = useAccount();
 

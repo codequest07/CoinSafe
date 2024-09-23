@@ -49,15 +49,8 @@ export default function SaveSenseResp({
           <CardFooter className="justify-end space-x-4 mt-4">
             <Button
               onClick={onClose}
-              className="text-white bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#1E1E1E99]"
-            >
+              className="text-white bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#1E1E1E99]">
               Close
-            </Button>
-            <Button
-              variant="outline"
-              className="text-[#010104] bg-[#FFFFFFE5] rounded-[2rem] border-white hover:bg-[#FFFFFFE5]"
-            >
-              Regenerate
             </Button>
           </CardFooter>
         </div>

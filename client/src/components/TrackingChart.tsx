@@ -7,15 +7,6 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuLabel,
-//   DropdownMenuSeparator,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
-// import { MdArrowDropDown } from "react-icons/md";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
@@ -56,22 +47,22 @@ const TrackingChart = () => {
   useEffect(() => {
     async function run() {
       if (AvailableBalance.data) {
-        console.log("Available Balance", AvailableBalance.data);
+        // console.log("Available Balance", AvailableBalance.data);
         let lskVal = 0, safuVal = 0, usdtVal = 0;
 
         for (let balance of AvailableBalance.data as any[]) {
           if (balance.token === tokens.usdt) {
-            console.log("USDT", balance, balance.balance);
+            // console.log("USDT", balance, balance.balance);
             usdtVal = await getUsdtToUsd(Number(formatUnits(balance.balance, 6))) as number;
           }
 
           if (balance.token === tokens.safu) {
-            console.log("SAFU", balance, balance.balance);
+            // console.log("SAFU", balance, balance.balance);
             safuVal = getSafuToUsd(Number(formatUnits(balance.balance, 18)));
           }
 
           if (balance.token === tokens.lsk) {
-            console.log("LSK", balance, balance.balance);
+            // console.log("LSK", balance, balance.balance);
             lskVal = await getLskToUsd(Number(formatUnits(balance.balance, 18))) as number;
           }
         }
@@ -79,22 +70,22 @@ const TrackingChart = () => {
         // setAvailableBalance(AvailableBalance);
       }
       if (AvailableBalance.error) {
-        console.log(AvailableBalance.error);
+        // console.log(AvailableBalance.error);
         // setAvailableBalance(AvailableBalance);
       }
 
       if (TotalSavingsBalance.data) {
-        console.log("Total Savings Plan", TotalSavingsBalance.data);
+        // console.log("Total Savings Plan", TotalSavingsBalance.data);
         setSavingsBalance(TotalSavingsBalance.data);
       }
 
       if (TotalSavingsBalance.error) {
-        console.log(TotalSavingsBalance.error);
+        // console.log(TotalSavingsBalance.error);
         // setSavingsBalance(TotalSavingsBalance)
       }
 
-      console.log(TotalSavingsBalance.status);
-      console.log(TotalSavingsBalance);
+      // console.log(TotalSavingsBalance.status);
+      // console.log(TotalSavingsBalance);
     }
     run();
   }, [AvailableBalance, TotalSavingsBalance]);
