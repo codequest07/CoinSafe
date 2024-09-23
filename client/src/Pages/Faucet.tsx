@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
 import { FaucetContract } from "@/lib/contract";
-import { useReadContract, useWriteContract } from "wagmi";
+import {  useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/lib/config";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
@@ -18,12 +18,11 @@ export default function Faucet() {
   const [isFaucetAdded, setIsFaucetAdded] = useState(false);
 
   //Read contract data
-  const faucetBalance = useReadContract({
-    abi: FaucetContract.abi.abi,
-    address: FaucetContract.address as `0x${string}`,
-    functionName: "getContractBalance",
-  });
-  console.log(faucetBalance);
+  // const faucetBalance = useReadContract({
+  //   abi: FaucetContract.abi.abi,
+  //   address: FaucetContract.address as `0x${string}`,
+  //   functionName: "getContractBalance",
+  // });
 
   // Write to contract
   const {
