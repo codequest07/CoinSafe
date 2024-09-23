@@ -22,7 +22,7 @@ export default function SmarterSavingCard() {
 
     try {
       const response = await fetch(
-        `https://coinsafe-1-1jw5.onrender.com/main/${address}`
+        `https://coinsafe-1-1jw5.onrender.com/${address}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch data");
