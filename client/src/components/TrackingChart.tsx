@@ -210,7 +210,7 @@ const TrackingChart = () => {
             </div>
             <div>
               <span className="text-[#F1F1F1] text-3xl pr-2">
-                ${isConnected ? availableBalance ?? "0.00" : "0.00"}
+                ${isConnected ? availableBalance?.toFixed(2) ?? "0.00" : "0.00"}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
@@ -248,7 +248,7 @@ const TrackingChart = () => {
               <span className="text-[#F1F1F1] text-3xl pr-2">
                 $
                 {isConnected
-                  ? availableBalance ?? 0 - savingsBalance ?? 0 ?? "0.00"
+                  ? (availableBalance || 0 - savingsBalance || 0)?.toFixed(2) ?? "0.00"
                   : "0.00"}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
