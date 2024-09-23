@@ -16,7 +16,7 @@ import { useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 import coinSafeAbi from "../../abi/coinsafe.json";
 import ApproveDeposit from "./ApproveDeposit";
-import { CoinSafeContract } from "@/lib/contract";
+import { CoinSafeContract, tokens } from "@/lib/contract";
 import { useAccount, useConnect, useWriteContract } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { liskSepolia } from "viem/chains";
@@ -66,6 +66,7 @@ export default function Deposit({
           title: "Please input a value for amount to deposit",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
@@ -74,6 +75,7 @@ export default function Deposit({
           title: "Please select token to deposit",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
@@ -82,7 +84,8 @@ export default function Deposit({
         address: token as `0x${string}`,
         functionName: "approve",
         abi: erc20Abi,
-        args: [CoinSafeContract.address as `0x${string}`, BigInt(amount + 10)],
+        // based on any update to more token to be added we'll update this amount being passed to this function
+        args: [CoinSafeContract.address as `0x${string}`, BigInt(token === tokens.usdt ? amount*10**6 : amount*10**18)],
       });
 
       // Check if the approve transaction was successful
@@ -110,7 +113,8 @@ export default function Deposit({
             address: CoinSafeContract.address as `0x${string}`,
             functionName: "depositToPool",
             abi: coinSafeAbi.abi,
-            args: [amount, token],
+            // based on any update to more token to be added we'll update this amount being passed to this function
+            args: [token === tokens.usdt ? amount*10**6 : amount*10**18, token],
           });
 
           console.log(depositResponse);
@@ -204,15 +208,15 @@ export default function Deposit({
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
+                  <SelectItem value={tokens.usdt}>
                     <div className="flex items-center space-x-2">
                       <p>USDT</p>
                     </div>
                   </SelectItem>
-                  <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                  <SelectItem value={tokens.lsk}>
                     LSK
                   </SelectItem>
-                  <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
+                  <SelectItem value={tokens.safu}>
                     SAFU
                   </SelectItem>
                 </SelectContent>

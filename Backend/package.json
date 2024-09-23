@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node build/server.js",
     "dev": "ts-node src/server.ts",
+    "test": "nodemon src/server.ts",
     "build": "tsc"
   },
   "keywords": [],
