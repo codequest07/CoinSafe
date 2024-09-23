@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getClaudeSavingsPlan = getClaudeSavingsPlan;
+exports.alchemyInstances = void 0;
 exports.main = main;
 require("dotenv").config();
 const alchemy_sdk_1 = require("alchemy-sdk");
@@ -41,9 +41,69 @@ const alchemyApiKey = process.env.ALCHEMY_API_KEY;
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 const settings = {
     apiKey: alchemyApiKey,
-    network: alchemy_sdk_1.Network.ETH_SEPOLIA,
+    networks: {
+        ethereum: {
+            mainnet: alchemy_sdk_1.Network.ETH_MAINNET,
+            sepolia: alchemy_sdk_1.Network.ETH_SEPOLIA,
+        },
+        polygon: {
+            mainnet: alchemy_sdk_1.Network.MATIC_MAINNET,
+            amoy: alchemy_sdk_1.Network.MATIC_AMOY,
+        },
+        optimism: {
+            mainnet: alchemy_sdk_1.Network.OPT_MAINNET,
+            sepolia: alchemy_sdk_1.Network.OPT_SEPOLIA,
+        },
+        arbitrum: {
+            mainnet: alchemy_sdk_1.Network.ARB_MAINNET,
+            sepolia: alchemy_sdk_1.Network.ARB_SEPOLIA,
+        },
+        base: {
+            mainnet: alchemy_sdk_1.Network.BASE_MAINNET,
+            sepolia: alchemy_sdk_1.Network.BASE_SEPOLIA,
+        },
+    },
 };
-const alchemy = new alchemy_sdk_1.Alchemy(settings);
+// Create Alchemy instances for all networks
+exports.alchemyInstances = Object.entries(settings.networks).reduce((acc, [network, chains]) => {
+    acc[network] = Object.entries(chains).reduce((chainAcc, [chain, networkType]) => {
+        chainAcc[chain] = new alchemy_sdk_1.Alchemy(Object.assign(Object.assign({}, settings), { network: networkType }));
+        return chainAcc;
+    }, {});
+    return acc;
+}, {});
+function getAssetTransfers(alchemy, address) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const getERC20Transfers = yield alchemy.core.getAssetTransfers({
+            fromBlock: "0x0",
+            toBlock: "latest",
+            toAddress: address,
+            excludeZeroValue: true,
+            category: [alchemy_sdk_1.AssetTransfersCategory.ERC20],
+        });
+        const getInternalTransfers = yield alchemy.core.getAssetTransfers({
+            fromBlock: "0x0",
+            toBlock: "latest",
+            toAddress: address,
+            excludeZeroValue: true,
+            category: [alchemy_sdk_1.AssetTransfersCategory.INTERNAL],
+        });
+        const selectFields = (transfer) => ({
+            value: Number(transfer.value),
+            erc721TokenId: transfer.erc721TokenId,
+            erc1155Metadata: transfer.erc1155Metadata,
+            tokenId: transfer.tokenId,
+            asset: transfer.asset || "",
+            category: transfer.category,
+        });
+        const filteredERC20Transfers = getERC20Transfers.transfers.map(selectFields);
+        const filteredInternalTransfers = getInternalTransfers.transfers.map(selectFields);
+        return {
+            erc20Transfers: filteredERC20Transfers,
+            internalTransfers: filteredInternalTransfers,
+        };
+    });
+}
 function getClaudeSavingsPlan(transfersData) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
@@ -61,13 +121,13 @@ function getClaudeSavingsPlan(transfersData) {
                 messages: [
                     {
                         role: "user",
-                        content: `${JSON.stringify(transfersData)}You are a financial  savings platform, someone wants to save some money with you now advice your user  on how to save properly. 
+                        content: `${JSON.stringify(transfersData)}You are a financial savings called SaveSense, someone wants to save some money with you now advice your user on how to save properly. 
                You must sound convincing and homely explaining to them properly in soft diction. You will review their recent transactions and take into account how much they spend, 
                how often they spend and craft a proper savings plan based on their past transactions. 
                There are three categories of transaction A one off savings plan with fixed duration and fixed amount which is called the basic plan, 
                the second plan is a frequency plan whereby they automate to spend a specific amount at specific intervals say daily or weekly or monthly. 
                The third plan is the spend and save. per every transaction they make from their wallet account how much percentage of their transactions should they save for every transaction. 
-               Give this In a concise readable way that a lay man will understand and be able to implement NOTE: If the json is empty say you have no recent transaction.`,
+               Give this In a concise readable way that a lay man will understand and be able to implement NOTE: If the json is empty say you have no recent transaction, don't you the word json and explain the savings plan for the user.`,
                     },
                 ],
             }, {
@@ -93,52 +153,27 @@ function getClaudeSavingsPlan(transfersData) {
         }
     });
 }
-function main(address) {
+function main(address, network, chain) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("Received address:", address, "Type:", typeof address);
+        var _a;
+        console.log(`Received address: ${address}, Network: ${network}, Chain: ${chain}`);
         try {
             if (typeof address !== "string" || !address) {
                 throw new Error("Invalid address: must be a non-empty string");
             }
-            // Ensure the address is a valid Ethereum address
             if (!address.startsWith("0x") || address.length !== 42) {
                 throw new Error("Invalid Ethereum address format");
             }
-            console.log("Fetching asset transfers for address:", address);
-            const getTransfers = yield alchemy.core.getAssetTransfers({
-                fromBlock: "0x0",
-                toBlock: "latest",
-                toAddress: address,
-                excludeZeroValue: true,
-                category: [alchemy_sdk_1.AssetTransfersCategory.ERC20],
-            });
-            console.log("Fetched ERC20 transfers:", getTransfers);
-            const getInternalTransfers = yield alchemy.core.getAssetTransfers({
-                fromBlock: "0x0",
-                toBlock: "latest",
-                toAddress: address,
-                excludeZeroValue: true,
-                category: [alchemy_sdk_1.AssetTransfersCategory.INTERNAL],
-            });
-            const selectFields = (transfer) => ({
-                value: Number(transfer.value),
-                erc721TokenId: transfer.erc721TokenId,
-                erc1155Metadata: transfer.erc1155Metadata,
-                tokenId: transfer.tokenId,
-                asset: transfer.asset || "",
-                category: transfer.category,
-            });
-            const filteredERC20Transfers = getTransfers.transfers.map(selectFields);
-            const filteredInternalTransfers = getInternalTransfers.transfers.map(selectFields);
-            const transfersData = {
-                erc20Transfers: filteredERC20Transfers,
-                internalTransfers: filteredInternalTransfers,
-            };
-            // fs.writeFileSync("transfers1.json", JSON.stringify(transfersData, null, 2));
-            // console.log("Transfers have been written to transfers.json");
+            const alchemy = (_a = exports.alchemyInstances[network]) === null || _a === void 0 ? void 0 : _a[chain];
+            if (!alchemy) {
+                throw new Error(`Invalid network or chain: ${network} ${chain}`);
+            }
+            console.log(`Fetching asset transfers for address: ${address} on ${network} ${chain}`);
+            const transfersData = yield getAssetTransfers(alchemy, address);
+            console.log("Fetched transfers:", transfersData);
             const savingsPlan = yield getClaudeSavingsPlan(transfersData);
             if (savingsPlan) {
-                console.log("Savings plan", savingsPlan);
+                console.log("Savings plan:", savingsPlan);
             }
             else {
                 console.log("Failed to generate savings plan");
@@ -151,4 +186,8 @@ function main(address) {
         }
     });
 }
+// Example usage
+// main("0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "ethereum", "mainnet")
+//   .then(result => console.log(result))
+//   .catch(error => console.error(error));
 //# sourceMappingURL=AiController.js.map

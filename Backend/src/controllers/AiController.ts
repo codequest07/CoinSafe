@@ -10,7 +10,7 @@ import axios, { AxiosError } from "axios";
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 
-type NetworkChain = "mainnet" | "sepolia" | "amoy";
+export type NetworkChain = "mainnet" | "sepolia" | "amoy";
 
 type NetworkConfig = {
   [key in NetworkChain]?: Network;
@@ -54,7 +54,7 @@ const settings: {
 };
 
 // Create Alchemy instances for all networks
-const alchemyInstances: AlchemyInstances = Object.entries(
+export const alchemyInstances: AlchemyInstances = Object.entries(
   settings.networks
 ).reduce((acc, [network, chains]) => {
   acc[network] = Object.entries(chains).reduce(
@@ -201,7 +201,7 @@ export async function main(
       throw new Error("Invalid Ethereum address format");
     }
 
-    const alchemy = alchemyInstances[network][chain];
+    const alchemy = alchemyInstances[network]?.[chain];
     if (!alchemy) {
       throw new Error(`Invalid network or chain: ${network} ${chain}`);
     }
