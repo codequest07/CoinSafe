@@ -13,11 +13,26 @@ import MemoCheckIcon from "@/icons/CheckIcon";
 import MemoXmarkIcon from "@/icons/XmarkIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { allAssets, Asset } from "@/lib/data";
+import { useAccount, useReadContract } from "wagmi";
+import { CoinSafeContract } from "@/lib/contract";
+import { useEffect } from "react";
 
 export default function AssetTable() {
   const liquidAssets = allAssets.filter((asset) => asset.liquid);
   const stakedAssets = allAssets.filter((asset) => asset.staked);
   const savedAssets = allAssets.filter((asset) => asset.saved);
+  const { address } = useAccount();
+
+  const TokenBalances = useReadContract({
+    abi: CoinSafeContract.abi.abi,
+    address: CoinSafeContract.address as `0x${string}`,
+    functionName: "getUserBalances",
+    args: [address],
+  });
+
+  useEffect(() => {
+    console.log(TokenBalances);
+  })
 
   return (
     <div className="bg-[#010104] border border-[#13131373] overflow-hidden p-4 rounded-[2rem] text-white w-full">

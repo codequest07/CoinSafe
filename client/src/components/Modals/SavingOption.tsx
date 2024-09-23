@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import SaveAsset from "./SaveAsset";
-import React from "react";
+import { useRecoilState } from "recoil";
+import { saveAtom } from "@/store/atoms/save";
 
 interface SavingOptionProps {
   isFirstModalOpen: boolean;
@@ -29,6 +31,13 @@ export default function SavingOption({
     setIsSecondModalOpen(true);
   };
 
+  const [_, setSaveState] = useRecoilState(saveAtom);
+
+  const handleChange = (event:any) => {
+    setSaveState((prevState) => ({...prevState, typeName: event.target.value}));
+  };
+
+
   return (
     <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-0 bg-[#09090B]">
@@ -47,6 +56,7 @@ export default function SavingOption({
                 id="manual"
                 name="savingOption"
                 value="manual"
+                onChange={handleChange}
                 className="peer appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
               />
               <div className="flex-1 ml-3">
@@ -64,6 +74,7 @@ export default function SavingOption({
                 id="personalized"
                 name="savingOption"
                 value="personalized"
+                onChange={handleChange}
                 className="peer appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
               />
               <div className="flex-1 ml-3">

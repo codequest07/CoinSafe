@@ -19,13 +19,14 @@ import {
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
-import coinSafeAbi from '../abi/coinsafe.json';
+import coinSafeAbi from "../abi/coinsafe.json";
 // import { CoinSafeContract } from "@/lib/contract";
 import { useAccount, useReadContract } from "wagmi";
 
-// import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 
-import { CoinSafeContract } from "@/lib/contract";
+import { CoinSafeContract, tokens } from "@/lib/contract";
+import { formatUnits } from "viem";
 // import { injected } from "wagmi/connectors";
 // import { liskSepolia } from "viem/chains";
 // import { erc20Abi } from "viem";
@@ -35,47 +36,68 @@ const TrackingChart = () => {
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const { isConnected, address } = useAccount();
-  // const [savingsBalance, setSavingsBalance] = useState();
-  // const [availableBalance, setAvailableBalance] = useState();
+  const [savingsBalance, setSavingsBalance] = useState<any>();
+  const [availableBalance, setAvailableBalance] = useState<number | null | undefined>(0);
 
   const TotalSavingsBalance = useReadContract({
     abi: coinSafeAbi.abi,
     address: CoinSafeContract.address as `0x${string}`,
-    functionName: 'getTotalSavingsBalance',
-    args: [address]
-  })
+    functionName: "getTotalSavingsBalance",
+    args: [address],
+  });
 
   const AvailableBalance = useReadContract({
     abi: coinSafeAbi.abi,
     address: CoinSafeContract.address as `0x${string}`,
-    functionName: 'getAvailableBalance',
-    args: [address]
-  })
+    functionName: "getAvailableBalances",
+    args: [address],
+  });
 
   useEffect(() => {
-    if(AvailableBalance.data) {
-      console.log("Available Balance", AvailableBalance.data);
-      // setAvailableBalance(AvailableBalance);
-    }
-    if(AvailableBalance.error) {
-      console.log(AvailableBalance.error);
-      // setAvailableBalance(AvailableBalance);
-    }
+    async function run() {
+      if (AvailableBalance.data) {
+        console.log("Available Balance", AvailableBalance.data);
+        let lskVal = 0, safuVal = 0, usdtVal = 0;
 
-    if(TotalSavingsBalance.data) {
-      console.log("Total Savings Plan", TotalSavingsBalance.data);
-      // setSavingsBalance(TotalSavingsBalance)
-    }
+        for (let balance of AvailableBalance.data as any[]) {
+          if (balance.token === tokens.usdt) {
+            console.log("USDT", balance, balance.balance);
+            usdtVal = await getUsdtToUsd(Number(formatUnits(balance.balance, 6))) as number;
+          }
 
-    if(TotalSavingsBalance.error) {
-      console.log(TotalSavingsBalance.error);
-      // setSavingsBalance(TotalSavingsBalance)
-    }
+          if (balance.token === tokens.safu) {
+            console.log("SAFU", balance, balance.balance);
+            safuVal = getSafuToUsd(Number(formatUnits(balance.balance, 18)));
+          }
 
-    console.log(TotalSavingsBalance.status);
-    console.log(TotalSavingsBalance);
-    // console.log(AvailableBalance.status);
-  }, [AvailableBalance, TotalSavingsBalance])
+          if (balance.token === tokens.lsk) {
+            console.log("LSK", balance, balance.balance);
+            lskVal = await getLskToUsd(Number(formatUnits(balance.balance, 18))) as number;
+          }
+        }
+        setAvailableBalance(lskVal + usdtVal + safuVal);
+        // setAvailableBalance(AvailableBalance);
+      }
+      if (AvailableBalance.error) {
+        console.log(AvailableBalance.error);
+        // setAvailableBalance(AvailableBalance);
+      }
+
+      if (TotalSavingsBalance.data) {
+        console.log("Total Savings Plan", TotalSavingsBalance.data);
+        setSavingsBalance(TotalSavingsBalance.data);
+      }
+
+      if (TotalSavingsBalance.error) {
+        console.log(TotalSavingsBalance.error);
+        // setSavingsBalance(TotalSavingsBalance)
+      }
+
+      console.log(TotalSavingsBalance.status);
+      console.log(TotalSavingsBalance);
+    }
+    run();
+  }, [AvailableBalance, TotalSavingsBalance]);
   // const result = useReadContracts({
   //   contracts: [
   //     {
@@ -167,12 +189,14 @@ const TrackingChart = () => {
           <div className="flex items-center gap-2">
             <Button
               onClick={openDepositModal}
-              className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer">
+              className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer"
+            >
               Deposit
             </Button>
             <Button
               onClick={openFirstModal}
-              className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm">
+              className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
+            >
               Save
             </Button>
           </div>
@@ -186,7 +210,7 @@ const TrackingChart = () => {
             </div>
             <div>
               <span className="text-[#F1F1F1] text-3xl pr-2">
-                ${isConnected ? "6,456.98" : "0.00"}
+                ${isConnected ? availableBalance?.toFixed(2) ?? "0.00" : "0.00"}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
@@ -203,7 +227,7 @@ const TrackingChart = () => {
             </div>
             <div>
               <span className="text-[#F1F1F1] text-3xl pr-2">
-                ${isConnected ? "6,456.98" : "0.00"}
+                ${isConnected ? savingsBalance ?? "0.00" : "0.00"}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
@@ -222,7 +246,10 @@ const TrackingChart = () => {
             </div>
             <div>
               <span className="text-[#F1F1F1] text-3xl pr-2">
-                ${isConnected ? "6,456.98" : "0.00"}
+                $
+                {isConnected
+                  ? (availableBalance || 0 - savingsBalance || 0)?.toFixed(2) ?? "0.00"
+                  : "0.00"}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
@@ -247,7 +274,8 @@ const TrackingChart = () => {
                   right: 0,
                   left: 0,
                   bottom: 0,
-                }}>
+                }}
+              >
                 <defs>
                   <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="100%" stopColor="#114124" stopOpacity={1} />
