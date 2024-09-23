@@ -2,6 +2,7 @@ import { config } from "@/lib/config";
 import { watchAsset } from "@wagmi/core";
 import { useState } from "react";
 import { Button } from "./ui/button";
+import MemoMmIcon from "@/icons/MmIcon";
 
 const AddTokenToMetaMask = () => {
   const [isAdding, setIsAdding] = useState(false);
@@ -32,10 +33,11 @@ const AddTokenToMetaMask = () => {
   return (
     <div>
       <Button
-        className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
+        className="bg-[#1E1E1E99] flex space-x-2 rounded-[2rem] text-[#F1F1F1] hover:bg-[#1E1E1E99]"
         onClick={handleAddToken}
         disabled={isAdding}>
-        {isAdding ? "Adding..." : "Add Token to MetaMask"}
+        <MemoMmIcon />
+        <span> {isAdding ? "Adding..." : "Add Token to MetaMask"}</span>
       </Button>
     </div>
   );
