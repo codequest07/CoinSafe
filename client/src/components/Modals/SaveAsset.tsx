@@ -22,6 +22,7 @@ import MemoCalenderIcon from "@/icons/CalenderIcon";
 import ApproveTransaction from "./ApproveTransaction";
 
 import { useAccount, useConnect, useWriteContract } from 'wagmi';
+import { waitForTransactionReceipt } from "@wagmi/core";
 import { liskSepolia } from "viem/chains";
 import { injected } from "wagmi/connectors";
 import { erc20Abi } from "viem";
@@ -29,6 +30,7 @@ import { CoinSafeContract } from "@/lib/contract";
 import coinSafeAbi from '../../abi/coinsafe.json';
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
+import { config } from "@/lib/config";
 // import { set } from "date-fns";
 
 export default function SaveAsset({
@@ -42,6 +44,9 @@ export default function SaveAsset({
 }) {
   const [selectedOption, setSelectedOption] = useState("manual");
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
+
+  // to multiply the amount based on selected token's decimals
+  const [decimals, setDecimals] = useState(1)
 
 
   const [saveState, setSaveState] = useRecoilState(saveAtom);
@@ -63,16 +68,25 @@ export default function SaveAsset({
 
   const { address } = useAccount();
 
-  const { writeContractAsync, isSuccess } = useWriteContract();
+  const { isPending, writeContractAsync } = useWriteContract();
   const { connectAsync } = useConnect();
 
   const handleTokenSelect = (value: string) => {
+    // SAFU & LSK check
+    if(
+      value == "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a" || 
+      value == "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D"
+    ) {
+      setDecimals(18);
+      // USDT check
+    } else if(value == "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909") {
+      setDecimals(6);
+    }
+
     setSaveState((prevState) => ({...prevState, token: value}));
   }
 
-  const handleTabChange = () => {
-
-  }
+  const handleTabChange = () => {};
 
   const handleSaveAsset = async (e:any) => {
     e.preventDefault();
@@ -81,6 +95,8 @@ export default function SaveAsset({
       if(!address) {
         await connectAsync({ chainId: liskSepolia.id, connector: injected() })
       }
+console.log("DECIMALS", decimals)
+console.log("AMOUNT", saveState.amount)
 
       const response = await writeContractAsync({
         chainId: liskSepolia.id,
@@ -89,32 +105,94 @@ export default function SaveAsset({
         abi: erc20Abi,
         args: [
           CoinSafeContract.address as `0x${string}`,
-          BigInt(saveState?.amount+10 ** 18)
+          BigInt(saveState?.amount + 10 ** decimals)
         ]
       })
 
-      console.log("Approve::::",response)
+      // Check if the approve transaction was successful
+      if (response) {
+        console.log(`Approve transaction successful: ${response}`);
 
-      const data = await writeContractAsync({
-        chainId: liskSepolia.id,
-        address: CoinSafeContract.address as `0x${string}`,
-        functionName: "save",
-        abi: coinSafeAbi.abi,
-        args: [
-          saveState.token,
-          saveState.amount,
-          saveState.duration,
-          saveState.typeName
-        ]
-      })
+        // Step 2: Wait until the transaction is mined
+        const approveTransactionReceipt = await waitForTransactionReceipt(
+          config,
+          {
+            hash: response,
+          }
+        );
 
-      if(isSuccess) {
-        openThirdModal();
+        console.log(approveTransactionReceipt);
+
+        if (approveTransactionReceipt.transactionIndex === 1) {
+          console.log(
+            "Approve transaction confirmed, proceeding with deposit..."
+          );
+
+          // Step 3: Call save function after approval
+          const data = await writeContractAsync({
+            chainId: liskSepolia.id,
+            address: CoinSafeContract.address as `0x${string}`,
+            functionName: "save",
+            abi: coinSafeAbi.abi,
+            args: [
+              saveState.token,
+              saveState.amount,
+              saveState.duration,
+              saveState.typeName
+            ]
+          })
+
+          console.log(data);
+
+          const saveTransactionReceipt = await waitForTransactionReceipt(
+            config,
+            {
+              hash: data,
+            }
+          );
+
+          if (saveTransactionReceipt.transactionIndex === 1) {
+            console.log("DATA",data);
+            openThirdModal();
+          }
+
+          // if(isSuccess) {
+          //   openThirdModal();
+          // }
+
+          console.log("DATA", saveTransactionReceipt.status);
+          // setIsLoading(false);
+        } else {
+          console.error("Save transaction failed or was reverted");
+          // setIsLoading(false);
+        }
+      } else {
+        console.error("Approve transaction failed");
+        // setIsLoading(false);
       }
 
-      console.log("DATA",data);
+      // console.log("Approve::::",response)
+
+      // const data = await writeContractAsync({
+      //   chainId: liskSepolia.id,
+      //   address: CoinSafeContract.address as `0x${string}`,
+      //   functionName: "save",
+      //   abi: coinSafeAbi.abi,
+      //   args: [
+      //     saveState.token,
+      //     saveState.amount,
+      //     saveState.duration,
+      //     saveState.typeName
+      //   ]
+      // })
+
+      // if(isSuccess) {
+      //   console.log("DATA",data);
+      //   openThirdModal();
+      // }
+
     } catch (error) {
-      console.log(error)
+      console.log("ERROR:::",error);
     }
   }
 
@@ -122,6 +200,7 @@ export default function SaveAsset({
     setIsThirdModalOpen(true);
     onClose();
   };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#09090B]">
@@ -386,8 +465,8 @@ export default function SaveAsset({
             <Button
               onClick={(e) => handleSaveAsset(e)}
               className="text-black px-8 rounded-[2rem]"
-              variant="outline" disabled={saveState.token==""}>
-              Save assets
+              variant="outline" disabled={saveState.token=="" || isPending}>
+              {isPending ? "Loading..." : "Save assets"}
             </Button>
           </div>
         </DialogFooter>

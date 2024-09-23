@@ -12,6 +12,7 @@ export const CoinSafeContract = {
   abi: coinSafeAbi,
 };
 
+
 export const FaucetContract = {
   address: "0x6245DF66b74b56D803730d48BF1bF16EEBBBD881",
   abi: faucetAbi,
