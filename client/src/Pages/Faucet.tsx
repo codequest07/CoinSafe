@@ -8,14 +8,13 @@ import Footer from "@/components/Footer";
 import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
 import { FaucetContract } from "@/lib/contract";
-import {  useWriteContract } from "wagmi";
+import { useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/lib/config";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 
 export default function Faucet() {
   const [evmAddress, setEvmAddress] = useState("");
-  const [isFaucetAdded, setIsFaucetAdded] = useState(false);
 
   //Read contract data
   // const faucetBalance = useReadContract({
@@ -49,7 +48,6 @@ export default function Faucet() {
         });
 
         console.log(transactionReceipt);
-        setIsFaucetAdded(true);
       }
     }
   }
@@ -80,6 +78,32 @@ export default function Faucet() {
                 <label htmlFor="evmAddress" className="text-sm font-medium">
                   EVM address
                 </label>
+
+                <div className="sm:max-w-xl my-4">
+                  {isError && (
+                    <div className="bg-[#FF484B24] p-3 rounded-[2rem]">
+                      <p className="text-[#FF484B] text-xs break-words">
+                        {getShortErrorMessage(
+                          error?.message || "Too many tries, try again later"
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {isSuccess && (
+                    <div className=" bg-[#48FF9124] p-3 rounded-[2rem]">
+                      <p className="text-[#48FF91] text-xs break-words">
+                        Faucet claim is successful! View on explorer{" "}
+                        <Link
+                          to={`https://sepolia-blockscout.lisk.com/tx/${hash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline">
+                          {hash}
+                        </Link>
+                      </p>
+                    </div>
+                  )}
+                </div>
                 <div className="mt-1 relative">
                   <Input
                     id="evmAddress"
@@ -98,37 +122,16 @@ export default function Faucet() {
                   </Button>
                 </div>
               </div>
-              <div className="sm:flex justify-between items-center mt-4">
-                {/* Conditionally render the AddTokenToMetaMask component */}
-                {isFaucetAdded && (
-                  <div className="">
-                    <AddTokenToMetaMask />
-                  </div>
-                )}
-                <div className="sm:flex sm:justify-end w-full">
-                  <Button
-                    className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
-                    onClick={() => handleClaim()}
-                    disabled={isPending}>
-                    {isPending ? "Pending" : "Claim faucet"}
-                  </Button>
+              <div className="sm:flex space-x-4 sm:justify-end w-full">
+                <div className="">
+                  <AddTokenToMetaMask />
                 </div>
-              </div>
-
-              <div className="sm:max-w-xl">
-                {isError && (
-                  <p className="text-red-500">
-                    Error:{" "}
-                    {getShortErrorMessage(error?.message || "Unknown error")}
-                  </p>
-                )}
-                {isSuccess && (
-                  <div className=" text-green-800 p-3 rounded-lg">
-                    <p className="text-green-500 break-words">
-                      Txn Hash: {hash}
-                    </p>
-                  </div>
-                )}
+                <Button
+                  className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
+                  onClick={() => handleClaim()}
+                  disabled={isPending}>
+                  {isPending ? "Pending" : "Claim faucet"}
+                </Button>
               </div>
             </div>
           </CardContent>
