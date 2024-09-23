@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const AiRouter_1 = __importDefault(require("./Routes/AiRouter"));
+const CoinGeckoApiRouter_1 = __importDefault(require("./Routes/CoinGeckoApiRouter"));
 const app = (0, express_1.default)();
 const port = process.env.PORT || 1234;
 app.use((0, cors_1.default)());
@@ -13,6 +14,7 @@ app.get("/", (req, res) => {
     res.send("Welcome to CoinSafe!");
 });
 app.use(AiRouter_1.default);
+app.use(CoinGeckoApiRouter_1.default);
 app.listen(port, () => {
     console.log(`My Server is running on port ${port}.... keep off!`);
 });
