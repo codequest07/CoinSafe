@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
+import { RecoilRoot } from 'recoil';
 
 import '@rainbow-me/rainbowkit/styles.css';
 import {
@@ -40,7 +41,9 @@ createRoot(document.getElementById("root")!).render(
             fontStack: "system",
             borderRadius: "large"
           })}>
-            <App />
+            <RecoilRoot>
+              <App />
+            </RecoilRoot>
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>
