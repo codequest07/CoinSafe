@@ -16,8 +16,12 @@ const express_1 = __importDefault(require("express"));
 const AiController_1 = require("../controllers/AiController");
 const AiRouter = express_1.default.Router();
 AiRouter.get("/main/:address", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const address = req.params.address;
-    const result = yield (0, AiController_1.main)(address);
+    const { address } = req.params;
+    const { network, chain } = req.query;
+    if (typeof network !== 'string' || typeof chain !== 'string') {
+        return res.status(400).json({ error: 'Invalid network or chain' });
+    }
+    const result = yield (0, AiController_1.main)(address, network, chain);
     res.json(result);
 }));
 exports.default = AiRouter;
