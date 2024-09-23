@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./Layout/Layout";
 import Home from "./Pages/Home";
 import Portfolio from "./Pages/Portfolio";
@@ -9,13 +9,18 @@ import MyRewards from "./Pages/MyRewards";
 import LandingPage from "./Pages/LandingPage";
 import Extension from "./Pages/Extension";
 import SaveSense from "./Pages/SaveSense";
+import { Toaster } from "./components/ui/toaster";
+import Faucet from "./Pages/Faucet";
 
 const App = () => {
   return (
     <div className="bg-[#010104]">
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/extension" element={<Extension />} /> extension
+        <Route path="/extension" element={<Extension />} />
+        <Route path="/testnet" element={<Navigate to={"/dashboard"} />} />
+        <Route path="/contact" element={<Navigate to={"/"} />} />
+        <Route path="/faucet" element={<Faucet />} />
         <Route path="/dashboard" element={<Layout />}>
           <Route path="/dashboard/" element={<Home />} />
           <Route path="/dashboard/wallet" element={<Portfolio />} />
@@ -26,6 +31,7 @@ const App = () => {
           <Route path="/dashboard/SaveSense" element={<SaveSense />} />
         </Route>
       </Routes>
+      <Toaster />
     </div>
   );
 };

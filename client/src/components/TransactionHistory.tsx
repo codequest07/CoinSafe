@@ -19,11 +19,11 @@ import MemoCalender from "@/icons/Calender";
 const getColorClass = (status: any) => {
   switch (status.toLowerCase()) {
     case "completed":
-      return "text-[#48FF91]";
+      return "text-[#48FF91] bg-[#48FF911A]";
     case "processing":
-      return "text-[#FFA448]";
+      return "text-[#FFA448] bg-[#FFA3481A]";
     case "failed":
-      return "text-[#FF484B]";
+      return "text-[#FF484B] bg-[#FF484B1A]";
     default:
       return "text-gray-500";
   }
@@ -50,11 +50,11 @@ const TransactionHistory = () => {
   return (
     <div>
       <Card className="bg-[#13131373] border-0 text-white p-5">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex sm:flex-row flex-col sm:space-y-0 space-y-3 justify-between sm:items-center mb-4">
           <h2 className="text-lg font-semibold">Transaction History</h2>
           <div className="flex space-x-4 items-center">
             <DropdownMenu>
-              <DropdownMenuTrigger className="text-sm flex space-x-2 items-center outline-none">
+              <DropdownMenuTrigger className="text-sm bg-[#1E1E1E99] p-3 rounded-[2rem] flex space-x-2 items-center outline-none">
                 <div>All Networks</div>
                 <div>
                   <MemoDropdownIcon />
@@ -73,7 +73,7 @@ const TransactionHistory = () => {
             <div className="relative">
               <button
                 onClick={handleCalendarToggle}
-                className="text-sm px-4 py-2  flex items-center space-x-2 rounded-lg">
+                className="text-sm px-4 py-3 bg-[#1E1E1E99] flex items-center space-x-2 rounded-[2rem]">
                 <p>This month</p>
                 <MemoCalender />
               </button>
@@ -85,7 +85,7 @@ const TransactionHistory = () => {
                     mode="single"
                     selected={date}
                     onSelect={setDate}
-                    className="rounded-md bg-black   mb-4"
+                    className="rounded-md bg-black mb-4"
                   />
                 )}
               </div>
@@ -103,12 +103,16 @@ const TransactionHistory = () => {
                   </TableCell>
                 </TableRow>
                 {transactions.map((transaction: Transaction, index) => (
-                  <TableRow key={`${date}-${index}`}>
+                  <TableRow
+                    key={`${date}-${index}`}
+                    className="block sm:table-row">
+                    {/* Transaction type is hidden on smaller screens */}
                     <TableCell className="hidden sm:table-cell">
                       {transaction.type}
                     </TableCell>
+                    {/* Amount and percentage */}
                     <TableCell>
-                      <div className="flex space-x-2 items-center">
+                      <div className="flex flex-col sm:flex-row sm:space-x-2 items-start sm:items-center">
                         <p>{transaction.amount}</p>
                         {transaction.icons && (
                           <transaction.icons className="w-5 h-5 text-[#20FFAF]" />
@@ -116,6 +120,7 @@ const TransactionHistory = () => {
                       </div>
                       <div className="text-xs">{transaction.percentage}</div>
                     </TableCell>
+                    {/* Hash, only visible on larger screens */}
                     <TableCell className="hidden sm:table-cell">
                       <div className="flex cursor-pointer items-center space-x-3">
                         {transaction.hash}
@@ -124,7 +129,8 @@ const TransactionHistory = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    {/* Token and network information */}
+                    <TableCell className="block sm:table-cell">
                       <div className="flex flex-col">
                         <p className="text-sm font-[500]">
                           {transaction.token}
@@ -132,16 +138,18 @@ const TransactionHistory = () => {
                         <p className="text-xs">{transaction.network}</p>
                       </div>
                     </TableCell>
+                    {/* Date and time */}
                     <TableCell className="text-right">
-                      <div className="flex items-center space-x-2">
-                        <p> {transaction.date}</p>
-                        <p> {transaction.time}</p>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-2">
+                        <p>{transaction.date}</p>
+                        <p>{transaction.time}</p>
                       </div>
                     </TableCell>
+                    {/* Transaction status */}
                     <TableCell className="text-right">
-                      <Badge className="rounded-[2rem]">
+                      <Badge className="bg-transparent text-center rounded-[2rem]">
                         <p
-                          className={`text-sm font-[400] ${getColorClass(
+                          className={`text-sm p-2 px-3 w-[6rem] rounded-[2rem] font-[400] ${getColorClass(
                             transaction.status
                           )}`}>
                           {transaction.status}

@@ -1,4 +1,5 @@
 {
+  "CoinsafeModule#Savings": "0x311F1D1e9668537F3be7e212813eF9eEb076817E",
   "SafuModule#Safu": "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a",
-  "CoinsafeModule#Savings": "0x6330605C037437270aab6526263595c2297E4B5E"
+  "TokenFaucetModule#TokenFaucet": "0x6245DF66b74b56D803730d48BF1bF16EEBBBD881"
 }

@@ -11,7 +11,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to CoinSafe!");
 });
 
-app.use( AiRouter);
+app.use(AiRouter);
 
 app.listen(port, () => {
   console.log(`My Server is running on port ${port}.... keep off!`);

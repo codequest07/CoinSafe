@@ -22,6 +22,11 @@ import b7 from "@/icons/badges/b7.svg";
 import b8 from "@/icons/badges/b8.svg";
 import b9 from "@/icons/badges/b9.svg";
 import b10 from "@/icons/badges/b10.svg";
+import MemoPortfolioActive from "@/icons/PortfolioActive";
+import MemoDashboardActive from "@/icons/DashboardActive";
+import MemoVaultActive from "@/icons/VaultActive";
+import MemoStakingActive from "@/icons/StakingActive";
+import MemoRewardActive from "@/icons/RewardActive";
 
 export type Asset = {
   symbol: string;
@@ -43,27 +48,32 @@ export const NavLinks = [
   {
     to: "/dashboard",
     icon: MemoDashboard,
+    activeIcon: MemoDashboardActive,
     label: "Dashboard",
   },
   {
     to: "/dashboard/wallet",
     icon: MemoPortfolio,
+    activeIcon: MemoPortfolioActive,
     label: "Wallet",
   },
   {
     to: "/dashboard/vault",
     icon: MemoVault,
+    activeIcon: MemoVaultActive,
     label: "Vault",
   },
 
   {
     to: "/dashboard/staking",
     icon: MemoStaking,
+    activeIcon: MemoStakingActive,
     label: "Staking",
   },
   {
     to: "/dashboard/rewards",
     icon: MemoReward,
+    activeIcon: MemoRewardActive,
     label: "Rewards",
   },
 ];
@@ -288,7 +298,7 @@ export const SavingsOverviewData: SavingsCardData[] = [
   {
     title: "Saving just got smarter",
     description:
-      "Our AI analyzes your spending to create a custom savings plan.",
+      "Our AI analyzes your spending to create a custom savings plan",
     buttonText: "Get started",
     icon: MemoMagicPen,
   },
@@ -537,5 +547,32 @@ export const extensionCardData = [
     desc: "Our AI analyzes your past transactions to tailor the perfect savings plan just for you",
     btnTitle: "Get started",
     icon: MemoChromeMagic,
+  },
+];
+
+export const FaucetData = [
+  {
+    title: "LSK Faucet",
+    due: "Claim 1 LSK every 7 day(s)",
+    link: "https://sepolia-faucet.lisk.com/",
+    btnTitle: "Claim faucet",
+  },
+  {
+    title: "Sepolia Faucet",
+    due: "Claim 0.05 Sepolia every 1 day",
+    link: "https://cloud.google.com/application/web3/faucet/ethereum/sepolia",
+    btnTitle: "Claim faucet",
+  },
+  {
+    title: "ETH Lisk Sepolia Faucet",
+    due: "Claim 0.01 ETH/day.",
+    link: "https://thirdweb.com/lisk-sepolia-testnet",
+    btnTitle: "Claim faucet",
+  },
+  {
+    title: "Sepolia-lisk bridge",
+    due: "Sepolia - Lisk Sepolia",
+    link: "https://sepolia-bridge.lisk.com/bridge/lisk-sepolia-testnet",
+    btnTitle: "Bridge faucet",
   },
 ];

@@ -15,7 +15,7 @@ const ReferralCard = () => {
 
   return (
     <main className="px-4">
-      <div className="max-w-sm bg-[#1E1E1E] p-4 rounded-lg text-white shadow-lg">
+      <div className="max-w-sm bg-[#13131340] p-4 rounded-lg text-white shadow-lg">
         {/* Label */}
         <p className="text-gray-400 text-sm mb-2">Your referral link</p>
 
@@ -27,7 +27,7 @@ const ReferralCard = () => {
           {/* Copy Button */}
           <button
             onClick={handleCopy}
-            className="ml-4 px-4 p-1 text-sm rounded-[2rem] bg-[#79E7BA29] hover:bg-[#79E7BA29] text-black flex items-center">
+            className="ml-4 px-4 p-1 text-sm rounded-[2rem] bg-[#79E7BA29] hover:bg-[#79E7BA29] text-white flex items-center">
             <MemoCopyIcon className="w-4 h-4 mr-2" />
             {isCopied ? "Copied" : "Copy"}
           </button>
