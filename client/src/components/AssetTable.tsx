@@ -14,8 +14,7 @@ import MemoXmarkIcon from "@/icons/XmarkIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { allAssets, Asset } from "@/lib/data";
 import { useAccount, useReadContract } from "wagmi";
-import { CoinSafeContract } from "@/lib/contract";
-import { useEffect } from "react";
+import { CoinSafeContract } from "@/lib/contract";import { useEffect } from "react";
 
 export default function AssetTable() {
   const liquidAssets = allAssets.filter((asset) => asset.liquid);
