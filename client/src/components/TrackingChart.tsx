@@ -48,7 +48,7 @@ const TrackingChart = () => {
   const AvailableBalance = useReadContract({
     abi: coinSafeAbi.abi,
     address: CoinSafeContract.address as `0x${string}`,
-    functionName: 'getAvailableBalance',
+    functionName: 'getAvailableBalances',
     args: [address]
   })
 
