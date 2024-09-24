@@ -18,6 +18,7 @@ import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import { formatUnits } from "viem";
+import { getValidNumberValue } from "@/lib/utils";
 // import { injected } from "wagmi/connectors";
 // import { liskSepolia } from "viem/chains";
 // import { erc20Abi } from "viem";
@@ -28,7 +29,9 @@ const TrackingChart = () => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const { isConnected, address } = useAccount();
   const [savingsBalance, setSavingsBalance] = useState<any>();
-  const [availableBalance, setAvailableBalance] = useState<number | null | undefined>(0);
+  const [availableBalance, setAvailableBalance] = useState<
+    number | null | undefined
+  >(0);
 
   const TotalSavingsBalance = useReadContract({
     abi: coinSafeAbi.abi,
@@ -48,12 +51,16 @@ const TrackingChart = () => {
     async function run() {
       if (AvailableBalance.data) {
         // console.log("Available Balance", AvailableBalance.data);
-        let lskVal = 0, safuVal = 0, usdtVal = 0;
+        let lskVal = 0,
+          safuVal = 0,
+          usdtVal = 0;
 
         for (let balance of AvailableBalance.data as any[]) {
           if (balance.token === tokens.usdt) {
             // console.log("USDT", balance, balance.balance);
-            usdtVal = await getUsdtToUsd(Number(formatUnits(balance.balance, 6))) as number;
+            usdtVal = (await getUsdtToUsd(
+              Number(formatUnits(balance.balance, 6))
+            )) as number;
           }
 
           if (balance.token === tokens.safu) {
@@ -63,10 +70,17 @@ const TrackingChart = () => {
 
           if (balance.token === tokens.lsk) {
             // console.log("LSK", balance, balance.balance);
-            lskVal = await getLskToUsd(Number(formatUnits(balance.balance, 18))) as number;
+            lskVal = (await getLskToUsd(
+              Number(formatUnits(balance.balance, 18))
+            )) as number;
           }
         }
-        setAvailableBalance(lskVal + usdtVal + safuVal);
+        setAvailableBalance(
+          getValidNumberValue(lskVal) +
+            getValidNumberValue(usdtVal) +
+            getValidNumberValue(safuVal)
+        );
+        // console.log("Available balance: ", lskVal + usdtVal + safuVal);
         // setAvailableBalance(AvailableBalance);
       }
       if (AvailableBalance.error) {
@@ -201,7 +215,12 @@ const TrackingChart = () => {
             </div>
             <div>
               <span className="text-[#F1F1F1] text-3xl pr-2">
-                ${isConnected ? availableBalance?.toFixed(2) ?? "0.00" : "0.00"}
+                $
+                {isConnected
+                  ? availableBalance
+                    ? availableBalance?.toFixed(2)
+                    : "0.00"
+                  : "0.00"}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
@@ -239,7 +258,8 @@ const TrackingChart = () => {
               <span className="text-[#F1F1F1] text-3xl pr-2">
                 $
                 {isConnected
-                  ? (availableBalance || 0 - savingsBalance || 0)?.toFixed(2) ?? "0.00"
+                  ? (availableBalance || 0 - savingsBalance || 0)?.toFixed(2) ??
+                    "0.00"
                   : "0.00"}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>

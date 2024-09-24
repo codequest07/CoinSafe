@@ -1,4 +1,5 @@
-export const base_uri = import.meta.env.PROD ? 'https://coinsafe-1-1jw5.onrender.com' : 'http://localhost:1234';
+// export const base_uri_test = import.meta.env.DEV ? 'http://localhost:1234' : 'https://coinsafe-1-1jw5.onrender.com';
+export const base_uri = 'https://coinsafe-1-1jw5.onrender.com';
 
 export const getLskToUsd = async (lsk: number) => {
   try {
@@ -6,10 +7,10 @@ export const getLskToUsd = async (lsk: number) => {
     console.log(res);
     const data = await res.json();
 
-    console.log(data?.lisk?.usd);
+    // console.log(data?.lisk?.usd);
 
     if (data?.lisk?.usd) {
-        console.log("return val: ", data.lisk.usd * lsk)
+        // console.log("return val: ", data.lisk.usd * lsk)
       return data.lisk.usd * lsk;
     } else {
       throw new Error("LSK data or USD price not available");
@@ -21,7 +22,7 @@ export const getLskToUsd = async (lsk: number) => {
 };
 
 export const getSafuToUsd = (safu: number) => {
-  return 2 * safu;
+  return 0.339 * safu;
 };
 
 export const getUsdtToUsd = async (usdt: number) => {
@@ -29,10 +30,10 @@ export const getUsdtToUsd = async (usdt: number) => {
     const res = await fetch(`${base_uri}/api-cg/tether`);
     const data = await res.json();
 
-    console.log(data?.tether?.usd);
+    // console.log(data?.tether?.usd);
 
     if (data?.tether?.usd) {
-        console.log("return val: ", data.tether.usd * usdt)
+        // console.log("return val: ", data.tether.usd * usdt)
 
       return data.tether.usd * usdt;
     } else {
