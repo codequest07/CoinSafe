@@ -93,13 +93,13 @@ export default function Faucet() {
                     <div className=" bg-[#48FF9124] p-3 rounded-[2rem]">
                       <p className="text-[#48FF91] text-xs break-words">
                         Faucet claim is successful! View on explorer{" "}
-                        <Link
-                          to={`https://sepolia-blockscout.lisk.com/tx/${hash}`}
+                        <a
+                          href={`https://sepolia-blockscout.lisk.com/tx/${hash}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="underline">
-                          {hash}
-                        </Link>
+                          {`${hash.slice(0, 6)}...${hash.slice(-4)}`}
+                        </a>
                       </p>
                     </div>
                   )}
