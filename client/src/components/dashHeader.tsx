@@ -6,6 +6,7 @@ import { NavLinks } from "@/lib/data";
 import MemoLogo from "@/icons/Logo";
 import SmileFace from "./Smile";
 import ExtensionCard from "./Cards/ExtensionCard";
+import ClaimBtn from "./ClaimBtn";
 
 const DashHeader = () => {
   return (
@@ -61,6 +62,7 @@ const DashHeader = () => {
                 </div>
               </div>
               <div className="flex items-center sm:space-x-3">
+                <ClaimBtn />
                 {/* Icons for connected wallets */}
                 <SmileFace />
               </div>
