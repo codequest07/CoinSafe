@@ -67,16 +67,17 @@ module.exports = {
 					to: { height: "0" },
 				},
 				spinEarth: {
-					'0%': { transform: 'rotate(0deg)' },
+					'0%': { transform: 'rotate(90deg)' },
 					'100%': { transform: 'rotate(360deg)' },
 				},
 			},
 			animation: {
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
-				spinEarth: 'spinEarth 30s linear infinite',
+				spinEarth: 'spinEarth 60s linear infinite',
 			},
 		},
 	},
 	plugins: [require("tailwindcss-animate")],
-}
+};
+
