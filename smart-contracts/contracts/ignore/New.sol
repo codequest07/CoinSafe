@@ -80,7 +80,7 @@ contract Savings is ReentrancyGuard {
     uint8 public acceptedTokenCount;
     uint256 txCount;
 
-    mapping(address => Transaction[]) private userTransactions;
+    mapping(address => Transaction[]) public userTransactions;
 
     mapping(address => mapping(address => uint256)) private userTokenBalances;
     mapping(address => mapping(uint256 => Safe)) private userSavings;
@@ -201,8 +201,6 @@ contract Savings is ReentrancyGuard {
 
 
 // =================================== CREATE SPEND&SAVE SAVE PLAN =======================================
-
-
 
     /**
      * @notice Creates a Spend and Save plan for the user
@@ -485,18 +483,8 @@ contract Savings is ReentrancyGuard {
         return userSavingsArray;
     }
 
-    // Get all users savings across types
-    // TODO: FIX ERROR HERE. DEBUGGER - PINPOINT ON LINE 390
-    function getAllSafes() external view returns (Safe[] memory) {
-        uint256 savingsCount = userSavingsCount[msg.sender];
-        Safe[] memory userSavingsArray = new Safe[](savingsCount);
-        
-        for (uint256 i = savingsCount - 1; i >= 0 ; i--) {
-            userSavingsArray[i] = userSavings[msg.sender][i];
-        }
+    // TODO: // Get all users savings across types
 
-        return userSavingsArray;
-    }
 
     // Get scheduled savings and next savings action
     function getScheduledSavings() external view returns (ScheduledSaving[] memory) {
@@ -536,48 +524,44 @@ contract Savings is ReentrancyGuard {
 
 // =================================== GET TRAMNSACTIONS =====================================
 
-    function getTotalTransactions() external view returns (uint256) {
-        return userTransactions[msg.sender].length;
-    }
-
     /**
      * @notice Gets the transaction history for the user
      * @param offset The offset for pagination
      * @param limit The limit for pagination
      * @return Transaction[] The array of transactions
     */
-    function getTransactionHistory(uint256 offset, uint256 limit) external view 
-    returns (Transaction[] memory) {
-        Transaction[] memory history = userTransactions[msg.sender];
-        uint256 length = history.length;
+    // function getTransactionHistory(uint256 offset, uint256 limit) external view 
+    // returns (Transaction[] memory) {
+    //     Transaction[] memory history = userTransactions[msg.sender];
+    //     uint256 length = history.length;
         
-        // If there are no transactions, return empty array
-        if (length == 0) {
-            return new Transaction[](0);
-        }
+    //     // If there are no transactions, return empty array
+    //     if (length == 0) {
+    //         return new Transaction[](0);
+    //     }
         
-        // Adjust offset if it's beyond array bounds
-        if (offset >= length) {
-            offset = length - (length % limit);
-            if (offset == length) {
-                offset = length > limit ? length - limit : 0;
-            }
-        }
+    //     // Adjust offset if it's beyond array bounds
+    //     if (offset >= length) {
+    //         offset = length - (length % limit);
+    //         if (offset == length) {
+    //             offset = length > limit ? length - limit : 0;
+    //         }
+    //     }
         
-        // Calculate actual size of returned array
-        uint256 size = length - offset;
-        if (size > limit) {
-            size = limit;
-        }
+    //     // Calculate actual size of returned array
+    //     uint256 size = length - offset;
+    //     if (size > limit) {
+    //         size = limit;
+    //     }
         
-        // Create return array and populate it
-        Transaction[] memory page = new Transaction[](size);
-        for (uint256 i = 0; i < size; i++) {
-            page[i] = history[length - 1 - (offset + i)];
-        }
+    //     // Create return array and populate it
+    //     Transaction[] memory page = new Transaction[](size);
+    //     for (uint256 i = 0; i < size; i++) {
+    //         page[i] = history[length - 1 - (offset + i)];
+    //     }
         
-        return page;
-    }
+    //     return page;
+    // }
 
 
 // =================================== ADD TRANSACTION =====================================
@@ -619,6 +603,7 @@ contract Savings is ReentrancyGuard {
 
 
 // ================================== GET SAVINGS HISTORY ===================================
+
     function getSavingsActionHistory() external view returns (Transaction[] memory) {
         Transaction[] memory history = userTransactions[msg.sender];
         

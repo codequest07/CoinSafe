@@ -80,7 +80,7 @@ contract Savings is ReentrancyGuard {
     uint8 public acceptedTokenCount;
     uint256 txCount;
 
-    mapping(address => Transaction[]) private userTransactions;
+    mapping(address => Transaction[]) public userTransactions;
 
     mapping(address => mapping(address => uint256)) private userTokenBalances;
     mapping(address => mapping(uint256 => Safe)) private userSavings;
@@ -483,18 +483,8 @@ contract Savings is ReentrancyGuard {
         return userSavingsArray;
     }
 
-    // Get all users savings across types
-    // TODO: FIX ERROR HERE. DEBUGGER - PINPOINT ON LINE 390
-    function getAllSafes() external view returns (Safe[] memory) {
-        uint256 savingsCount = userSavingsCount[msg.sender];
-        Safe[] memory userSavingsArray = new Safe[](savingsCount);
-        
-        for (uint256 i = savingsCount - 1; i >= 0 ; i--) {
-            userSavingsArray[i] = userSavings[msg.sender][i];
-        }
+    // TODO: // Get all users savings across types
 
-        return userSavingsArray;
-    }
 
     // Get scheduled savings and next savings action
     function getScheduledSavings() external view returns (ScheduledSaving[] memory) {
@@ -533,10 +523,6 @@ contract Savings is ReentrancyGuard {
     }
 
 // =================================== GET TRAMNSACTIONS =====================================
-
-    function getTotalTransactions() external view returns (uint256) {
-        return userTransactions[msg.sender].length;
-    }
 
     /**
      * @notice Gets the transaction history for the user
@@ -602,21 +588,9 @@ contract Savings is ReentrancyGuard {
         emit TransactionHistoryUpdated(msg.sender, txCount, newTransaction.id, _token, _type, _amount, block.timestamp, TxStatus.Completed);
     }
 
-    /**
-     * @notice Gets the recommended offset for pagination
-     * @param limit The limit for pagination
-     * @return uint256 The recommended offset
-    */
-    function getRecommendedOffset(uint256 limit) external view returns (uint256) {
-        uint256 length = userTransactions[msg.sender].length;
-        if (length == 0) return 0;
-        
-        uint256 lastPage = length / limit;
-        return lastPage * limit;
-    }
-
 
 // ================================== GET SAVINGS HISTORY ===================================
+
     function getSavingsActionHistory() external view returns (Transaction[] memory) {
         Transaction[] memory history = userTransactions[msg.sender];
         
@@ -654,40 +628,7 @@ contract Savings is ReentrancyGuard {
     }
 
 
-// ================================== ADMIN ACTIONS ===================================
-
-    /**
-     * @notice Adds a new token to the list of accepted tokens
-     * @param _token The address of the token
-     * @param _tokenType The type of token
-    */
-    function addAcceptedToken(address _token, TokenType _tokenType) external onlyOwner {
-        if (_token == address(0)) revert InvalidTokenAddress();
-        if (acceptedTokens[_token]) revert("Token already accepted");
-
-        acceptedTokens[_token] = true;
-        acceptedTokensAddresses[_tokenType] = _token;
-
-        acceptedTokenCount++;
-
-        emit TokenAdded(_token, _tokenType);
-    }
-
-    /**
-     * @notice Removes a token from the list of accepted tokens
-     * @param _tokenType The type of token to remove
-    */
-    function removeAcceptedToken(TokenType _tokenType) external onlyOwner {
-        address tokenAddress = acceptedTokensAddresses[_tokenType];
-        if (!acceptedTokens[tokenAddress]) revert("Token is not accepted");
-
-        acceptedTokens[tokenAddress] = false;
-        delete acceptedTokensAddresses[_tokenType];
-
-        acceptedTokenCount--;
-
-        emit TokenRemoved(tokenAddress, _tokenType);
-    }
+// ================================== ADMIN ACTIONS =======================================
 
 
     function getContractBalance(address _token) external view onlyOwner returns (uint256) {
