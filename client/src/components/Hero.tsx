@@ -13,7 +13,8 @@ const Hero = () => {
           bg-bottom mt-6 bg-blend-overlay px-4 sm:px-6"
       style={{
         backgroundBlendMode: "overlay",
-      }}>
+      }}
+    >
       <div className="absolute bottom-0">
         <img
           src="/assets/hero-image.svg"
@@ -24,24 +25,26 @@ const Hero = () => {
       <div className="pt-[50px] sm:pt-[100px] flex flex-col items-center">
         <div>
           <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-[#F1F1F1] text-center">
-            Spend and save <Cover>like a total chad</Cover> 
+            Spend and save <Cover>like a total chad</Cover>
           </h1>
         </div>
         <div className="sm:max-w-[500px] pt-6">
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-center text-[#CACACA]">
             Experience seamless savings, AI-powered insights, and a sprinkle of
-            blockchain magic—built on Lisk
+            blockchain magic—built on Base
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 pt-10">
           <button
             onClick={() => navigate("/extension")}
-            className="bg-[#1E1E1E99] text-[#F1F1F1] px-5 py-2 sm:px-8 sm:py-3 rounded-[2rem]">
+            className="bg-[#1E1E1E99] text-[#F1F1F1] px-5 py-2 sm:px-8 sm:py-3 rounded-[2rem]"
+          >
             Download extension
           </button>
           <button
             onClick={() => navigate("/dashboard")}
-            className="bg-[#FFFFFFE5] text-[#010104] px-5 py-2 sm:px-8 sm:py-3 rounded-[2rem]">
+            className="bg-[#FFFFFFE5] text-[#010104] px-5 py-2 sm:px-8 sm:py-3 rounded-[2rem]"
+          >
             Launch app
           </button>
         </div>
