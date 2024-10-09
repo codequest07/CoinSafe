@@ -78,8 +78,6 @@ contract Savings is ReentrancyGuard {
     uint8 public acceptedTokenCount;
     uint256 txCount;
 
-    mapping (address => mapping (address => uint256)) public totalAmountSaved; // user => token => amountSaved
-
     mapping(address => Transaction[]) public userTransactions;
 
     mapping(address => mapping(address => uint256)) private userTokenBalances;
@@ -194,8 +192,6 @@ contract Savings is ReentrancyGuard {
         });
         userSavingsCount[msg.sender]++;
 
-        totalAmountSaved[msg.sender][_token] += _amount;
-
         addTransaction("save", _token, _amount);
 
         emit SavedSuccessfully(msg.sender, _token, _amount, _duration);
@@ -296,8 +292,6 @@ contract Savings is ReentrancyGuard {
             });
             userSavingsCount[msg.sender]++;
 
-            totalAmountSaved[msg.sender][_token] += amountToSave;
-
             addTransaction("spend and save", _token, _amount);
 
             emit SpendAndSave(msg.sender, _token, amountToSave);
@@ -330,8 +324,6 @@ contract Savings is ReentrancyGuard {
         userSavingsCount[_user]++;
 
         plan.lastSavingTimestamp = block.timestamp;
-
-        totalAmountSaved[_user][plan.token] += plan.amount;
 
         addTransaction("auto save", plan.token, plan.amount);
 
@@ -584,6 +576,45 @@ contract Savings is ReentrancyGuard {
         userTransactions[msg.sender].push(newTransaction);
 
         emit TransactionHistoryUpdated(msg.sender, txCount, newTransaction.id, _token, _type, _amount, block.timestamp, TxStatus.Completed);
+    }
+
+
+// ================================== GET SAVINGS HISTORY ===================================
+
+    function getSavingsActionHistory() external view returns (Transaction[] memory) {
+        Transaction[] memory history = userTransactions[msg.sender];
+        
+        // First, count how many savings-related transactions we have
+        uint256 savingsCount = 0;
+        for (uint256 i = 0; i < history.length; i++) {
+            if (isSavingsTransaction(history[i].typeOfTransaction)) {
+                savingsCount++;
+            }
+        }
+        
+        // Create an array of the correct size
+        Transaction[] memory savingsHistory = new Transaction[](savingsCount);
+        
+        // Fill the array
+        uint256 currentIndex = 0;
+        for (uint256 i = 0; i < history.length; i++) {
+            if (isSavingsTransaction(history[i].typeOfTransaction)) {
+                savingsHistory[currentIndex] = history[i];
+                currentIndex++;
+            }
+        }
+        
+        return savingsHistory;
+    }
+
+    // Helper function to check if a transaction is savings-related
+    function isSavingsTransaction(string memory txType) internal pure returns (bool) {
+        return (
+            keccak256(abi.encodePacked(txType)) == keccak256(abi.encodePacked("save")) ||
+            keccak256(abi.encodePacked(txType)) == keccak256(abi.encodePacked("spendAndSave")) ||
+            keccak256(abi.encodePacked(txType)) == keccak256(abi.encodePacked("automatedSave")) ||
+            keccak256(abi.encodePacked(txType)) == keccak256(abi.encodePacked("unlock"))
+        );
     }
 
 
