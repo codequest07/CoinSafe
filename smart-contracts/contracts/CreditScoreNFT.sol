@@ -60,8 +60,6 @@ contract CreditScoreNFT is ERC721 {
 
 
 
-
-
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         address owner = _ownerOf(tokenId);
         require(owner != address(0), "ERC721Metadata: URI query for nonexistent token");
