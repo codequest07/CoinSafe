@@ -8,12 +8,13 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
-import MemoAvax from "@/icons/Avax";
+// import MemoAvax from "@/icons/Avax";
 import MemoCheckIcon from "@/icons/CheckIcon";
 import MemoXmarkIcon from "@/icons/XmarkIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { allAssets, Asset } from "@/lib/data";
+import { allAssets } from "@/lib/data";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
+// import { parseUnits } from "viem";
 import { CoinSafeContract } from "@/lib/contract";import { useEffect, useState } from "react";
 
 export default function AssetTable() {
@@ -29,66 +30,35 @@ export default function AssetTable() {
   // const safuAddress = tokens.safu;
   // const lskAddress = tokens.lsk;
   
-  const {data:TokenBalances} = useReadContracts({
-    contracts: [
-      {
-        abi: CoinSafeContract.abi.abi,
-        address: CoinSafeContract.address as `0x${string}`,
-        functionName: "getUserBalances",
-        args: [address],
-      }
-    ]
-  });
-
-  // console.log(TokenBalances)
-
-  // const isAutoSaved = useReadContracts({
+  // const {data:TokenBalances} = useReadContracts({
   //   contracts: [
   //     {
   //       abi: CoinSafeContract.abi.abi,
   //       address: CoinSafeContract.address as `0x${string}`,
-  //       functionName: "isTokenAutoSaved",
-  //       args: [address, "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a"],
+  //       functionName: "getUserBalances",
+  //       args: [address],
   //     }
   //   ]
   // });
 
+  const {data:TokenBalances} = useReadContract({
+      abi: CoinSafeContract.abi.abi,
+      address: CoinSafeContract.address as `0x${string}`,
+      functionName: "getUserBalances",
+      args: [address],
+  });
 
-
-  // function handleAssets() {
-  //   // const tokenBals = TokenBalances.data![0]
-  //   let tokens:any = TokenBalances?.data![0]?.result;
-  //   let balances:any = TokenBalances?.data![1]?.result;
-
-  //   const assetsObj = {
-  //     ticker: '',
-  //     amount: ''
-  //   }
-
-  //   for(let i=0; i<tokens.length; i++) {
-  //     for(let x = 0; x<balances.length; x++) {
-
-  //     }
-
-  //   }
-
-  // }
-  // let tokens:any = TokenBalances?.data![0]?.result;
-  // let balances:any = TokenBalances?.data![0]?.result;
-
-  // useEffect(() => {
-  //   getIsAutoSaved(tokens[0], balances[0])
-  // }, [])
-
-  
-
+  console.log("TOKEN BALANCES", TokenBalances)
   // const assets:any = TokenBalances?.data![0]?.result;
-  const assets:any = TokenBalances![0].result
+  // const assets:any = TokenBalances![0]?.result || [];
+  const assets:any = TokenBalances || []
   console.log("ASSETS",assets)
-
+  
   useEffect(() => {
+
+    if (assets.length === 0) return;
     // Map through the 2D array to create objects
-    const result = assets[0].map((key: any, index: string | number) => {
+    const result = assets[0]?.map((key: any, index: string | number) => {
       return {
         token: key,
         balance: Number(assets[1][index]),
@@ -100,7 +70,7 @@ export default function AssetTable() {
     // Set the state with the generated objects
     setAssetData(result);
     console.log("Assets", assetData)
-  }, []);  // Empty dependency array to run only on mount
+  }, [assets]);  // Empty dependency array to run only on mount
 
   // console.log(TokenBalances?.data![0]?.result)
 
@@ -163,7 +133,8 @@ function AssetTableContent({ assets }: { assets: any[] }) {
   const tokenData = {
     "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": "SAFU",
     "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": "LSK",
-    "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909": "USDT"
+    "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909": "USDT",
+    "0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909": "USDT"
   } as any;
 
 
