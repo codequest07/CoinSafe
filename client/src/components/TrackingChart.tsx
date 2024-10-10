@@ -205,8 +205,36 @@ const TrackingChart = () => {
         // Process Savings Plan
         if (SavingsBalances.data) {
           console.log("Savings Plan", SavingsBalances.data);
-        }
+    
+          const savingsData: any[] = SavingsBalances.data as any[];
+          let totalUsdBalance = 0;
 
+    
+          // Loop through each savings plan and calculate the total balance in USD
+          for (const plan of savingsData) {
+            const token = plan.token;
+            const amount = plan.amount;
+    
+            let usdValue = 0;
+    
+            // Assuming you have conversion functions for each token to USD
+            if (token === tokens.usdt) {
+              usdValue = await getUsdtToUsd(Number(formatUnits(amount, 6))) as number; // Convert USDT to USD
+            } else if (token === tokens.safu) {
+              usdValue = getSafuToUsd(Number(formatUnits(amount, 18))) as number; // Convert SAFU to USD
+            } else if (token === tokens.lsk) {
+              usdValue = await getLskToUsd(Number(formatUnits(amount, 18))) as number; // Convert LSK to USD
+            }
+    
+            // Accumulate the USD value of each token
+            totalUsdBalance += usdValue;
+          }
+    
+          // Update the savingsBalance state with the total balance in USD
+          setSavingsBalance(totalUsdBalance);
+    
+          console.log("Total Savings Balance in USD:", totalUsdBalance);
+        }
         // Error handling for Savings Plan
         if (SavingsBalances.error) {
           console.error("SavingsBalances Error:", SavingsBalances.error);

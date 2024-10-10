@@ -59,7 +59,14 @@ export default function Deposit({
     try {
       setIsLoading(true);
       if (!address) {
-        await connectAsync({ chainId: liskSepolia.id, connector: injected() });
+        try {
+          await connectAsync({
+            chainId: liskSepolia.id,
+            connector: injected(),
+          });
+        } catch (error) {
+          alert(error);
+        }
       }
 
       if (!amount) {
@@ -86,7 +93,10 @@ export default function Deposit({
         functionName: "approve",
         abi: erc20Abi,
         // based on any update to more token to be added we'll update this amount being passed to this function
-        args: [CoinSafeContract.address as `0x${string}`, BigInt(token === tokens.usdt ? amount*10**6 : amount*10**18)],
+        args: [
+          CoinSafeContract.address as `0x${string}`,
+          BigInt(token === tokens.usdt ? amount * 10 ** 6 : amount * 10 ** 18),
+        ],
       });
 
       // Check if the approve transaction was successful
@@ -115,7 +125,10 @@ export default function Deposit({
             functionName: "depositToPool",
             abi: coinSafeAbi.abi,
             // based on any update to more token to be added we'll update this amount being passed to this function
-            args: [token === tokens.usdt ? amount*10**6 : amount*10**18, token],
+            args: [
+              token === tokens.usdt ? amount * 10 ** 6 : amount * 10 ** 18,
+              token,
+            ],
           });
 
           console.log(depositResponse);
@@ -214,12 +227,8 @@ export default function Deposit({
                       <p>USDT</p>
                     </div>
                   </SelectItem>
-                  <SelectItem value={tokens.lsk}>
-                    LSK
-                  </SelectItem>
-                  <SelectItem value={tokens.safu}>
-                    SAFU
-                  </SelectItem>
+                  <SelectItem value={tokens.lsk}>LSK</SelectItem>
+                  <SelectItem value={tokens.safu}>SAFU</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -237,7 +246,8 @@ export default function Deposit({
           <Button
             onClick={() => setIsDepositModalOpen(false)}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit">
+            type="submit"
+          >
             Cancel
           </Button>
           <div>
@@ -251,7 +261,8 @@ export default function Deposit({
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading}>
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (
@@ -263,7 +274,9 @@ export default function Deposit({
       </DialogContent>
       <Deposited
         amount={amount}
-        token={token == tokens.safu ? "SAFU" : token ===tokens.lsk ? "LSK" : "USDT"}
+        token={
+          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+        }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
       />
