@@ -28,7 +28,7 @@ const TrackingChart = () => {
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const { isConnected, address } = useAccount();
-  const [savingsBalance, setSavingsBalance] = useState<any>();
+  const [savingsBalance, setSavingsBalance] = useState<number>(0);
   const [availableBalance, setAvailableBalance] = useState<number>(0);
   const [totalBalance, setTotalBalance] = useState<number>(0);
 
@@ -63,11 +63,11 @@ const TrackingChart = () => {
 
         // Extract relevant details from the logs
         const log: any = logs[0]; // Assuming a single log for simplicity
-        const { token, amount, user } = log.args;
+        const { token, amount } = log.args;
 
-        console.log(
-          `Token: ${token}, Amount: ${amount.toString()}, User: ${user}`
-        );
+        // console.log(
+        //   `Token: ${token}, Amount: ${amount.toString()}, User: ${user}`
+        // );
 
         // Define your token addresses (assumed to be predefined)
         const usdtAddress = tokens.usdt;
@@ -96,7 +96,7 @@ const TrackingChart = () => {
         setAvailableBalance((prev) => prev + amountInUsd);
         setTotalBalance((prev) => prev + amountInUsd);
 
-        alert(`Deposit of ${amountInUsd} USD in token ${token} successful!`);
+        // alert(`Deposit of ${amountInUsd} USD in token ${token} successful!`);
       } catch (error) {
         console.error("Error processing logs:", error);
       }
@@ -107,9 +107,48 @@ const TrackingChart = () => {
     abi: coinSafeAbi.abi,
     address: CoinSafeContract.address as `0x${string}`,
     eventName: "SavedSuccessfully",
-    onLogs(logs) {
+    onLogs(logs: any) {
       console.log("New logs!", logs);
-      alert(`New Logs!, ${logs}`);
+
+      // Extract token and amount saved from the event logs
+      const newSave = logs[0]?.args;
+      const tokenAddress = newSave?.token;
+      const savedAmount = newSave?.amount;
+
+      // alert(
+      //   `New Savings Event: Token: ${tokenAddress}, Amount: ${savedAmount}`
+      // );
+
+      // Convert saved amount to USD and update balances
+      async function updateBalances() {
+        let usdValue = 0;
+
+        // Check for the token and convert amount to USD using your conversion function
+        if (tokenAddress === tokens.usdt) {
+          usdValue = (await getUsdtToUsd(
+            Number(formatUnits(savedAmount, 6))
+          )) as number; // USDT has 6 decimals
+        } else if (tokenAddress === tokens.safu) {
+          usdValue = (await getSafuToUsd(
+            Number(formatUnits(savedAmount, 18))
+          )) as number; // Convert SAFU to USD
+        } else if (tokenAddress === tokens.lsk) {
+          usdValue = (await getLskToUsd(
+            Number(formatUnits(savedAmount, 18))
+          )) as number; // Convert LSK to USD
+        }
+
+        // Update the savings balance by adding the new saved amount
+        setSavingsBalance((prevSavings) => prevSavings + usdValue);
+
+        // Assuming availableBalance is reduced by the saved amount
+        setAvailableBalance((prevAvailable) => prevAvailable - usdValue);
+
+        // console.log("Updated Savings Balance:", savingsBalance);
+        // console.log("Updated Available Balance:", availableBalance);
+      }
+
+      updateBalances();
     },
   });
 
@@ -205,8 +244,41 @@ const TrackingChart = () => {
         // Process Savings Plan
         if (SavingsBalances.data) {
           console.log("Savings Plan", SavingsBalances.data);
-        }
 
+          const savingsData: any[] = SavingsBalances.data as any[];
+          let totalUsdBalance = 0;
+
+          // Loop through each savings plan and calculate the total balance in USD
+          for (const plan of savingsData) {
+            const token = plan.token;
+            const amount = plan.amount;
+
+            let usdValue = 0;
+
+            // Assuming you have conversion functions for each token to USD
+            if (token === tokens.usdt) {
+              usdValue = (await getUsdtToUsd(
+                Number(formatUnits(amount, 6))
+              )) as number; // Convert USDT to USD
+            } else if (token === tokens.safu) {
+              usdValue = getSafuToUsd(
+                Number(formatUnits(amount, 18))
+              ) as number; // Convert SAFU to USD
+            } else if (token === tokens.lsk) {
+              usdValue = (await getLskToUsd(
+                Number(formatUnits(amount, 18))
+              )) as number; // Convert LSK to USD
+            }
+
+            // Accumulate the USD value of each token
+            totalUsdBalance += usdValue;
+          }
+
+          // Update the savingsBalance state with the total balance in USD
+          setSavingsBalance(totalUsdBalance);
+
+          console.log("Total Savings Balance in USD:", totalUsdBalance);
+        }
         // Error handling for Savings Plan
         if (SavingsBalances.error) {
           console.error("SavingsBalances Error:", SavingsBalances.error);
@@ -217,7 +289,7 @@ const TrackingChart = () => {
       }
     }
     run();
-  }, [AvailableBalance, TotalBalance, SavingsBalances]);
+  }, [AvailableBalance.data, TotalBalance.data, SavingsBalances.data]);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
@@ -335,7 +407,7 @@ const TrackingChart = () => {
             </div>
             <div>
               <span className="text-[#F1F1F1] text-3xl pr-2">
-                ${isConnected ? savingsBalance ?? "0.00" : "0.00"}
+                ${isConnected ? savingsBalance.toFixed(2) ?? "0.00" : "0.00"}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>

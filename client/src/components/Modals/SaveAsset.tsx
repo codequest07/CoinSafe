@@ -19,18 +19,17 @@ import { useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 // import MemoRipple from "@/icons/Ripple";
 import MemoCalenderIcon from "@/icons/CalenderIcon";
-import ApproveTransaction from "./ApproveTransaction";
 
-import { useAccount, useConnect, useWriteContract } from 'wagmi';
+import { useAccount, useConnect, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { liskSepolia } from "viem/chains";
 import { injected } from "wagmi/connectors";
-import { erc20Abi } from "viem";
-import { CoinSafeContract } from "@/lib/contract";
-import coinSafeAbi from '../../abi/coinsafe.json';
+import { CoinSafeContract, tokens } from "@/lib/contract";
+import coinSafeAbi from "../../abi/coinsafe.json";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { config } from "@/lib/config";
+import SaveSuccessful from "./SaveSuccessful";
 // import { set } from "date-fns";
 
 export default function SaveAsset({
@@ -46,155 +45,99 @@ export default function SaveAsset({
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
 
   // to multiply the amount based on selected token's decimals
-  const [decimals, setDecimals] = useState(1)
-
+  const [decimals, setDecimals] = useState(1);
 
   const [saveState, setSaveState] = useRecoilState(saveAtom);
+  const [isLoading, setIsLoading] = useState(false);
 
   // const handleChange = (event:any) => {
   //   setSaveState((prevState) => ({...prevState, [event.target.name]: event.target.value}));
   // };
-  const handleDurationChange = (event:any) => {
+  const handleDurationChange = (event: any) => {
     // convert number of days to seconds for smart contract
-    let _duration = (((Number(event.target.value) * 24)* 60) * 60);
-    setSaveState((prevState) => ({...prevState, [event.target.name]: _duration}));
+    let _duration = Number(event.target.value) * 24 * 60 * 60;
+    setSaveState((prevState) => ({
+      ...prevState,
+      [event.target.name]: _duration,
+    }));
   };
-  const handleAmountChange = (event:any) => {
+  const handleAmountChange = (event: any) => {
     let _amount = Number(event.target.value);
-    setSaveState((prevState) => ({...prevState, [event.target.name]: _amount}));
+    setSaveState((prevState) => ({
+      ...prevState,
+      [event.target.name]: _amount,
+    }));
   };
 
   // console.log("SAVE::", saveState)
 
   const { address } = useAccount();
 
-  const { isPending, writeContractAsync } = useWriteContract();
+  const { writeContractAsync } = useWriteContract();
   const { connectAsync } = useConnect();
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
-    if(
-      value == "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a" || 
-      value == "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D"
-    ) {
+    if (value == tokens.safu || value == tokens.lsk) {
       setDecimals(18);
       // USDT check
-    } else if(value == "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909") {
+    } else if (value == tokens.usdt) {
       setDecimals(6);
     }
 
-    setSaveState((prevState) => ({...prevState, token: value}));
-  }
+    setSaveState((prevState) => ({ ...prevState, token: value }));
+  };
 
   const handleTabChange = () => {};
 
-  const handleSaveAsset = async (e:any) => {
+  const handleSaveAsset = async (e: any) => {
     e.preventDefault();
 
     try {
-      if(!address) {
-        await connectAsync({ chainId: liskSepolia.id, connector: injected() })
-      }
-console.log("DECIMALS", decimals)
-console.log("AMOUNT", saveState.amount)
-
-      const response = await writeContractAsync({
-        chainId: liskSepolia.id,
-        address: saveState?.token as `0x${string}`,
-        functionName: "approve",
-        abi: erc20Abi,
-        args: [
-          CoinSafeContract.address as `0x${string}`,
-          BigInt(saveState?.amount + 10 ** decimals)
-        ]
-      })
-
-      // Check if the approve transaction was successful
-      if (response) {
-        console.log(`Approve transaction successful: ${response}`);
-
-        // Step 2: Wait until the transaction is mined
-        const approveTransactionReceipt = await waitForTransactionReceipt(
-          config,
-          {
-            hash: response,
-          }
-        );
-
-        console.log(approveTransactionReceipt);
-
-        if (approveTransactionReceipt.transactionIndex === 1) {
-          console.log(
-            "Approve transaction confirmed, proceeding with deposit..."
-          );
-
-          // Step 3: Call save function after approval
-          const data = await writeContractAsync({
+      if (!address) {
+        try {
+          await connectAsync({
             chainId: liskSepolia.id,
-            address: CoinSafeContract.address as `0x${string}`,
-            functionName: "save",
-            abi: coinSafeAbi.abi,
-            args: [
-              saveState.token,
-              saveState.amount,
-              saveState.duration,
-              saveState.typeName
-            ]
-          })
-
-          console.log(data);
-
-          const saveTransactionReceipt = await waitForTransactionReceipt(
-            config,
-            {
-              hash: data,
-            }
-          );
-
-          if (saveTransactionReceipt.transactionIndex === 1) {
-            console.log("DATA",data);
-            openThirdModal();
-          }
-
-          // if(isSuccess) {
-          //   openThirdModal();
-          // }
-
-          console.log("DATA", saveTransactionReceipt.status);
-          // setIsLoading(false);
-        } else {
-          console.error("Save transaction failed or was reverted");
-          // setIsLoading(false);
+            connector: injected(),
+          });
+        } catch (error) {
+          alert(error);
         }
-      } else {
-        console.error("Approve transaction failed");
-        // setIsLoading(false);
+      }
+      setIsLoading(true);
+      console.log("DECIMALS", decimals);
+      console.log("AMOUNT", saveState.amount);
+
+      // Step 3: Call save function
+      const data = await writeContractAsync({
+        chainId: liskSepolia.id,
+        address: CoinSafeContract.address as `0x${string}`,
+        functionName: "save",
+        abi: coinSafeAbi.abi,
+        args: [saveState.token, BigInt(saveState.token === tokens.usdt ? saveState.amount * 10 ** 6 : saveState.amount * 10 ** 18), saveState.duration],
+      });
+
+      console.log(data);
+
+      const saveTransactionReceipt = await waitForTransactionReceipt(config, {
+        hash: data,
+      });
+
+      if (saveTransactionReceipt.transactionIndex === 1) {
+        console.log("DATA", data);
+        openThirdModal();
       }
 
-      // console.log("Approve::::",response)
-
-      // const data = await writeContractAsync({
-      //   chainId: liskSepolia.id,
-      //   address: CoinSafeContract.address as `0x${string}`,
-      //   functionName: "save",
-      //   abi: coinSafeAbi.abi,
-      //   args: [
-      //     saveState.token,
-      //     saveState.amount,
-      //     saveState.duration,
-      //     saveState.typeName
-      //   ]
-      // })
-
-      // if(isSuccess) {
-      //   console.log("DATA",data);
-      //   openThirdModal();
-      // }
-
+      console.log("DATA", saveTransactionReceipt.status);
+      setIsLoading(false);
     } catch (error) {
-      console.log("ERROR:::",error);
+      console.log("ERROR:::", error);
+      if((error as any).toString().includes("InsufficientFunds()")) {
+        alert("Insufficient Funds, Please deposit enough to be able to save.");
+      }
+      setIsLoading(false);
     }
-  }
+  };
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -211,16 +154,19 @@ console.log("AMOUNT", saveState.amount)
         <Tabs
           defaultValue="one-time"
           onValueChange={() => handleTabChange()}
-          className="w-full">
+          className="w-full"
+        >
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
-              className="flex justify-center rounded-2xl items-center flex-1">
+              className="flex justify-center rounded-2xl items-center flex-1"
+            >
               One-time Save
             </TabsTrigger>
             <TabsTrigger
               value="autosave"
-              className="flex justify-center rounded-2xl items-center flex-1">
+              className="flex justify-center rounded-2xl items-center flex-1"
+            >
               Autosave
             </TabsTrigger>
           </TabsList>
@@ -314,7 +260,8 @@ console.log("AMOUNT", saveState.amount)
               <div className="flex gap-2">
                 <Label
                   htmlFor="manual"
-                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400">
+                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
+                >
                   <input
                     type="radio"
                     id="manual"
@@ -333,7 +280,8 @@ console.log("AMOUNT", saveState.amount)
                 </Label>
                 <Label
                   htmlFor="personalized"
-                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400">
+                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
+                >
                   <input
                     type="radio"
                     id="personalized"
@@ -458,20 +406,32 @@ console.log("AMOUNT", saveState.amount)
           <Button
             onClick={onClose}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit">
+            type="submit"
+          >
             Cancel
           </Button>
           <div>
             <Button
               onClick={(e) => handleSaveAsset(e)}
               className="text-black px-8 rounded-[2rem]"
-              variant="outline" disabled={saveState.token=="" || isPending}>
-              {isPending ? "Loading..." : "Save assets"}
+              variant="outline"
+              disabled={saveState.token == "" || isLoading}
+            >
+              {isLoading ? "Loading..." : "Save assets"}
             </Button>
           </div>
         </DialogFooter>
       </DialogContent>
-      <ApproveTransaction
+      <SaveSuccessful
+        amount={saveState.amount}
+        token={
+          saveState.token == tokens.safu
+            ? "SAFU"
+            : saveState.token === tokens.lsk
+            ? "LSK"
+            : "USDT"
+        }
+        duration={saveState.duration}
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
       />
