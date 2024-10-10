@@ -15,7 +15,7 @@ import {
 import { useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 import coinSafeAbi from "../../abi/coinsafe.json";
-import ApproveDeposit from "./ApproveDeposit";
+// import ApproveDeposit from "./ApproveDeposit";
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import { useAccount, useConnect, useWriteContract } from "wagmi";
 import { injected } from "wagmi/connectors";
@@ -25,6 +25,7 @@ import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/lib/config";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import Deposited from "./Deposited";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -260,7 +261,9 @@ export default function Deposit({
           </div>
         </DialogFooter>
       </DialogContent>
-      <ApproveDeposit
+      <Deposited
+        amount={amount}
+        token={token == tokens.safu ? "SAFU" : token ===tokens.lsk ? "LSK" : "USDT"}
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
       />

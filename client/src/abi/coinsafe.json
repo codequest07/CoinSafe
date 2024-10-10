@@ -53,6 +53,11 @@
     },
     {
       "inputs": [],
+      "name": "ContractPaused",
+      "type": "error"
+    },
+    {
+      "inputs": [],
       "name": "FailedInnerCall",
       "type": "error"
     },
@@ -64,6 +69,11 @@
     {
       "inputs": [],
       "name": "InsufficientFunds",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidInput",
       "type": "error"
     },
     {
@@ -83,7 +93,7 @@
     },
     {
       "inputs": [],
-      "name": "NotOwner",
+      "name": "PlanAlreadyExists",
       "type": "error"
     },
     {
@@ -104,6 +114,11 @@
     },
     {
       "inputs": [],
+      "name": "SpendAndSavePlanNotFound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
       "name": "UnauthorizedCaller",
       "type": "error"
     },
@@ -111,6 +126,47 @@
       "inputs": [],
       "name": "ZeroValueNotAllowed",
       "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "userAutomatedPlanExistsAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "userSpendAndSavePlanAlreadyExists",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "frequency",
+          "type": "uint256"
+        }
+      ],
+      "name": "AutomatedPlanCreated",
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -178,13 +234,19 @@
           "type": "address"
         },
         {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
           "indexed": false,
           "internalType": "uint256",
           "name": "amount",
           "type": "uint256"
         }
       ],
-      "name": "BalanceWithdrawnToUserAccount",
+      "name": "DepositSuccessful",
       "type": "event"
     },
     {
@@ -204,12 +266,18 @@
         },
         {
           "indexed": false,
+          "internalType": "uint8",
+          "name": "percentage",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
           "internalType": "uint256",
-          "name": "amount",
+          "name": "duration",
           "type": "uint256"
         }
       ],
-      "name": "DepositSuccessful",
+      "name": "PlanCreated",
       "type": "event"
     },
     {
@@ -305,6 +373,99 @@
         {
           "indexed": true,
           "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum Savings.TokenType",
+          "name": "tokenType",
+          "type": "uint8"
+        }
+      ],
+      "name": "TokenAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum Savings.TokenType",
+          "name": "tokenType",
+          "type": "uint8"
+        }
+      ],
+      "name": "TokenRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "txCount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "txId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "typeOfTransaction",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum Savings.TxStatus",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "name": "TransactionHistoryUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
           "name": "user",
           "type": "address"
         },
@@ -325,6 +486,103 @@
       "type": "event"
     },
     {
+      "inputs": [],
+      "name": "acceptedTokenCount",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "acceptedTokens",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum Savings.TokenType",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "name": "acceptedTokensAddresses",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "automatedSavingsPlans",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "frequency",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "lastSavingTimestamp",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "claimAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -332,12 +590,22 @@
           "type": "address"
         },
         {
-          "internalType": "enum Savings.TokenType",
-          "name": "_tokenType",
-          "type": "uint8"
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_frequency",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_duration",
+          "type": "uint256"
         }
       ],
-      "name": "addAcceptedToken",
+      "name": "createAutomatedSavingsPlan",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -404,43 +672,17 @@
           "type": "address"
         }
       ],
-      "name": "getAvailableBalancei",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_user",
-          "type": "address"
-        }
-      ],
       "name": "getAvailableBalances",
       "outputs": [
         {
-          "components": [
-            {
-              "internalType": "address",
-              "name": "token",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "balance",
-              "type": "uint256"
-            }
-          ],
-          "internalType": "struct Savings.TokenBalance[]",
+          "internalType": "address[]",
           "name": "",
-          "type": "tuple[]"
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
         }
       ],
       "stateMutability": "view",
@@ -466,19 +708,30 @@
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "enum Savings.TokenType",
-          "name": "_tokenType",
-          "type": "uint8"
-        }
-      ],
-      "name": "getTokenAddress",
+      "inputs": [],
+      "name": "getScheduledSavings",
       "outputs": [
         {
-          "internalType": "address",
+          "components": [
+            {
+              "internalType": "address",
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scheduledDate",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Savings.ScheduledSaving[]",
           "name": "",
-          "type": "address"
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -487,17 +740,59 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "_user",
-          "type": "address"
-        }
-      ],
-      "name": "getTotalSavingsBalance",
-      "outputs": [
+          "internalType": "uint256",
+          "name": "offset",
+          "type": "uint256"
+        },
         {
           "internalType": "uint256",
-          "name": "",
+          "name": "limit",
           "type": "uint256"
+        }
+      ],
+      "name": "getTransactionHistory",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "user",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "typeOfTransaction",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum Savings.TxStatus",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct Savings.Transaction[]",
+          "name": "",
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -514,7 +809,41 @@
       "name": "getUserBalances",
       "outputs": [
         {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        }
+      ],
+      "name": "getUserSavings",
+      "outputs": [
+        {
           "components": [
+            {
+              "internalType": "string",
+              "name": "typeOfSafe",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
             {
               "internalType": "address",
               "name": "token",
@@ -522,13 +851,52 @@
             },
             {
               "internalType": "uint256",
-              "name": "balance",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "duration",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "startTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "unlockTime",
               "type": "uint256"
             }
           ],
-          "internalType": "struct Savings.TokenBalance[]",
+          "internalType": "struct Savings.Safe[]",
           "name": "",
           "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "isTokenAutoSaved",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -550,19 +918,6 @@
     {
       "inputs": [
         {
-          "internalType": "enum Savings.TokenType",
-          "name": "_tokenType",
-          "type": "uint8"
-        }
-      ],
-      "name": "removeAcceptedToken",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
           "name": "_token",
           "type": "address"
@@ -576,37 +931,9 @@
           "internalType": "uint256",
           "name": "_duration",
           "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "_typeName",
-          "type": "string"
         }
       ],
       "name": "save",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_token",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_amount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_frequency",
-          "type": "uint256"
-        }
-      ],
-      "name": "setAutomatedSavingsPlan",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -630,13 +957,150 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "trustedForwarder",
-      "outputs": [
+      "inputs": [
         {
           "internalType": "address",
           "name": "",
           "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "totalAmountSaved",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userAutomatedPlanExists",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userSpendAndSavePlan",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "percentage",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userSpendAndSavePlanExists",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "userTransactions",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "typeOfTransaction",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "enum Savings.TxStatus",
+          "name": "status",
+          "type": "uint8"
         }
       ],
       "stateMutability": "view",
@@ -663,24 +1127,14 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "_token",
-          "type": "address"
-        },
-        {
           "internalType": "uint256",
-          "name": "_amount",
+          "name": "_savingsIndex",
           "type": "uint256"
         },
         {
           "internalType": "bool",
           "name": "_acceptEarlyWithdrawalFee",
           "type": "bool"
-        },
-        {
-          "internalType": "string",
-          "name": "_type",
-          "type": "string"
         }
       ],
       "name": "withdrawSavings",

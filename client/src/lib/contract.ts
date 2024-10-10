@@ -8,7 +8,7 @@ export const tokens = {
 };
 
 export const CoinSafeContract = {
-  address: "0x311F1D1e9668537F3be7e212813eF9eEb076817E",
+  address: "0x727b742EAd5540703b62C7f33312335dcFd83f5A",
   abi: coinSafeAbi,
 };
 
