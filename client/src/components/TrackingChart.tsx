@@ -63,11 +63,11 @@ const TrackingChart = () => {
 
         // Extract relevant details from the logs
         const log: any = logs[0]; // Assuming a single log for simplicity
-        const { token, amount, user } = log.args;
+        const { token, amount } = log.args;
 
-        console.log(
-          `Token: ${token}, Amount: ${amount.toString()}, User: ${user}`
-        );
+        // console.log(
+        //   `Token: ${token}, Amount: ${amount.toString()}, User: ${user}`
+        // );
 
         // Define your token addresses (assumed to be predefined)
         const usdtAddress = tokens.usdt;
@@ -96,7 +96,7 @@ const TrackingChart = () => {
         setAvailableBalance((prev) => prev + amountInUsd);
         setTotalBalance((prev) => prev + amountInUsd);
 
-        alert(`Deposit of ${amountInUsd} USD in token ${token} successful!`);
+        // alert(`Deposit of ${amountInUsd} USD in token ${token} successful!`);
       } catch (error) {
         console.error("Error processing logs:", error);
       }
@@ -115,9 +115,9 @@ const TrackingChart = () => {
       const tokenAddress = newSave?.token;
       const savedAmount = newSave?.amount;
 
-      alert(
-        `New Savings Event: Token: ${tokenAddress}, Amount: ${savedAmount}`
-      );
+      // alert(
+      //   `New Savings Event: Token: ${tokenAddress}, Amount: ${savedAmount}`
+      // );
 
       // Convert saved amount to USD and update balances
       async function updateBalances() {
@@ -144,8 +144,8 @@ const TrackingChart = () => {
         // Assuming availableBalance is reduced by the saved amount
         setAvailableBalance((prevAvailable) => prevAvailable - usdValue);
 
-        console.log("Updated Savings Balance:", savingsBalance);
-        console.log("Updated Available Balance:", availableBalance);
+        // console.log("Updated Savings Balance:", savingsBalance);
+        // console.log("Updated Available Balance:", availableBalance);
       }
 
       updateBalances();
