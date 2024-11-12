@@ -13,7 +13,7 @@ import MemoCheckIcon from "@/icons/CheckIcon";
 import MemoXmarkIcon from "@/icons/XmarkIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { allAssets } from "@/lib/data";
-import { useAccount, useReadContract, useReadContracts } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 // import { parseUnits } from "viem";
 import { CoinSafeContract } from "@/lib/contract";import { useEffect, useState } from "react";
 
