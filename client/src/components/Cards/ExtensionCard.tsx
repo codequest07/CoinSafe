@@ -7,12 +7,18 @@ import {
 } from "@/components/ui/carousel";
 import MemoChrome from "@/icons/Chrome";
 import MemoChromeMagic from "@/icons/ChromeMagic";
+import SaveSenseResp from "../Modals/SaveSenseResp";
+import Loading from "../Modals/loading-screen";
+import { useAccount } from "wagmi";
+import KitchenLoading from "../Modals/kitchen-loading";
 
 interface ExtensionCardProps {
   title: string;
   desc: string;
   btnTitle: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  onButtonClick?: () => void;
+  setShowKitchenLoading: (show: boolean) => void;
 }
 
 const ExtensionCard: React.FC<ExtensionCardProps> = ({
@@ -20,7 +26,17 @@ const ExtensionCard: React.FC<ExtensionCardProps> = ({
   desc,
   btnTitle,
   icon: Icon,
+  onButtonClick,
+  setShowKitchenLoading,
 }) => {
+  const handleClick = () => {
+    if (btnTitle === "Get started") {
+      onButtonClick?.();
+    } else {
+      setShowKitchenLoading(true);
+    }
+  };
+
   return (
     <Card className="flex flex-col items-center border-0 justify-between bg-[#092324] text-white p-2 rounded-lg shadow-lg">
       <CardHeader className="flex items-center justify-center">
@@ -31,7 +47,8 @@ const ExtensionCard: React.FC<ExtensionCardProps> = ({
         <p className="text-[#F1F1F1] text-xs">{desc}</p>
         <button
           className="bg-white text-[#010104] font-[500] py-2 px-6 rounded-full"
-          aria-label={btnTitle}>
+          aria-label={btnTitle}
+          onClick={handleClick}>
           {btnTitle}
         </button>
       </CardContent>
@@ -58,7 +75,12 @@ export default function ExtensionCardCarousel() {
   const [api, setApi] = useState<any>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
+  const [showKitchenLoading, setShowKitchenLoading] = useState(false);
+  const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
+  const [saveSenseData, setSaveSenseData] = useState(null);
 
+  const { address } = useAccount();
   const scrollNext = useCallback(() => {
     if (api) {
       api.scrollNext();
@@ -75,9 +97,37 @@ export default function ExtensionCardCarousel() {
   }, [api]);
 
   useEffect(() => {
-    const timer = setInterval(scrollNext, 3000); // Change slide every 3 seconds
+    const timer = setInterval(scrollNext, 4000); // Change slide every 4 seconds
     return () => clearInterval(timer);
   }, [scrollNext]);
+
+  const handleGetStarted = async () => {
+    if (!address) {
+      console.error("No wallet connected");
+      return;
+    }
+
+    setIsLoadingModalOpen(true);
+
+    try {
+      const response = await fetch(
+        `https://coinsafe-0q0m.onrender.com/main/${address}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+
+      setSaveSenseData(data);
+      setIsLoadingModalOpen(false);
+      setIsSaveSenseModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoadingModalOpen(false);
+    }
+  };
+
+  const closeSaveSenseModal = () => setIsSaveSenseModalOpen(false);
 
   return (
     <div className="flex flex-col items-center">
@@ -90,7 +140,13 @@ export default function ExtensionCardCarousel() {
         <CarouselContent>
           {extensionCardData.map((card, index) => (
             <CarouselItem key={index}>
-              <ExtensionCard {...card} />
+              <ExtensionCard
+                {...card}
+                onButtonClick={
+                  card.btnTitle === "Get started" ? handleGetStarted : undefined
+                }
+                setShowKitchenLoading={setShowKitchenLoading}
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -105,6 +161,19 @@ export default function ExtensionCardCarousel() {
           />
         ))}
       </div>
+      <Loading
+        isOpen={isLoadingModalOpen}
+        onClose={() => setIsLoadingModalOpen(false)}
+      />
+      <SaveSenseResp
+        isOpen={isSaveSenseModalOpen}
+        onClose={closeSaveSenseModal}
+        data={saveSenseData}
+      />
+      <KitchenLoading
+        isOpen={showKitchenLoading}
+        onClose={() => setShowKitchenLoading(false)}
+      />
     </div>
   );
 }

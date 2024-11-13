@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { SavingsOverviewData } from "@/lib/data";
 import Loading from "../Modals/loading-screen";
 import SaveSenseResp from "../Modals/SaveSenseResp";
+import KitchenLoading from "../Modals/kitchen-loading";
 
 export default function SmarterSavingCard() {
   const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
   const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
   const [saveSenseData, setSaveSenseData] = useState(null);
+  const [showKitchenLoading, setShowKitchenLoading] = useState(false);
 
   const { address } = useAccount();
 
@@ -39,8 +41,7 @@ export default function SmarterSavingCard() {
   };
 
   const handleDownload = () => {
-    console.log("Download clicked");
-    // Perform specific action for "Download"
+    setShowKitchenLoading(true);
   };
 
   const handleButtonClick = (buttonText: string) => {
@@ -85,6 +86,11 @@ export default function SmarterSavingCard() {
         isOpen={isSaveSenseModalOpen}
         onClose={closeSaveSenseModal}
         data={saveSenseData}
+      />
+
+      <KitchenLoading
+        isOpen={showKitchenLoading}
+        onClose={() => setShowKitchenLoading(false)}
       />
     </div>
   );

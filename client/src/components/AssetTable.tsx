@@ -15,10 +15,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { allAssets } from "@/lib/data";
 import { useAccount, useReadContract } from "wagmi";
 import { formatEther } from "viem";
-import { CoinSafeContract } from "@/lib/contract";import { useEffect, useState } from "react";
+import { CoinSafeContract } from "@/lib/contract";
+import { useEffect, useState } from "react";
 
 export default function AssetTable() {
-
   const [assetData, setAssetData] = useState([]);
 
   const liquidAssets = allAssets.filter((asset) => asset.liquid);
@@ -29,7 +29,7 @@ export default function AssetTable() {
   // const usdtAddress = tokens.usdt;
   // const safuAddress = tokens.safu;
   // const lskAddress = tokens.lsk;
-  
+
   // const {data:TokenBalances} = useReadContracts({
   //   contracts: [
   //     {
@@ -41,21 +41,18 @@ export default function AssetTable() {
   //   ]
   // });
 
-  const {data:TokenBalances} = useReadContract({
-      abi: CoinSafeContract.abi.abi,
-      address: CoinSafeContract.address as `0x${string}`,
-      functionName: "getUserBalances",
-      args: [address],
+  const { data: TokenBalances } = useReadContract({
+    abi: CoinSafeContract.abi.abi,
+    address: CoinSafeContract.address as `0x${string}`,
+    functionName: "getUserBalances",
+    args: [address],
   });
 
-  console.log("TOKEN BALANCES", TokenBalances)
   // const assets:any = TokenBalances?.data![0]?.result;
   // const assets:any = TokenBalances![0]?.result || [];
-  const assets:any = TokenBalances || []
-  console.log("ASSETS",assets)
-  
-  useEffect(() => {
+  const assets: any = TokenBalances || [];
 
+  useEffect(() => {
     if (assets.length === 0) return;
     // Map through the 2D array to create objects
     const result = assets[0]?.map((key: any, index: string | number) => {
@@ -65,15 +62,9 @@ export default function AssetTable() {
       };
     });
 
-    console.log("RESULT", result)
-
     // Set the state with the generated objects
     setAssetData(result);
-    console.log("Assets", assetData)
-  }, [assets]);  // Empty dependency array to run only on mount
-
-  // console.log(TokenBalances?.data![0]?.result)
-
+  }, [assets]); // Empty dependency array to run only on mount
 
   return (
     <div className="bg-[#010104] border border-[#13131373] overflow-hidden p-4 rounded-[2rem] text-white w-full">
@@ -134,9 +125,8 @@ function AssetTableContent({ assets }: { assets: any[] }) {
     "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": "SAFU",
     "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": "LSK",
     "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909": "USDT",
-    "0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909": "USDT"
+    "0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909": "USDT",
   } as any;
-
 
   return (
     <div className="bg-[#010104] w-full p-4 rounded-lg">
@@ -165,7 +155,9 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                     {/* <MemoAvax className="w-6 h-6" /> */}
                     {/* <div className="w-6 h-6 rounded-full text-white text-sm bg-yellow-100">{tokenData[asset.token][1]}</div> */}
                     <div className="flex flex-col">
-                      <p className="font-[400] text-base">{tokenData[asset.token]}</p>
+                      <p className="font-[400] text-base">
+                        {tokenData[asset.token]}
+                      </p>
                       <span className="font-[400] text-xs">{asset.name}</span>
                     </div>
                   </div>
