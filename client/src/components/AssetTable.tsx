@@ -14,7 +14,7 @@ import MemoXmarkIcon from "@/icons/XmarkIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { allAssets } from "@/lib/data";
 import { useAccount, useReadContract } from "wagmi";
-// import { parseUnits } from "viem";
+import { formatEther } from "viem";
 import { CoinSafeContract } from "@/lib/contract";import { useEffect, useState } from "react";
 
 export default function AssetTable() {
@@ -61,7 +61,7 @@ export default function AssetTable() {
     const result = assets[0]?.map((key: any, index: string | number) => {
       return {
         token: key,
-        balance: Number(assets[1][index]),
+        balance: formatEther(assets[1][index]),
       };
     });
 
