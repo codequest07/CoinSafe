@@ -15,11 +15,15 @@ const Home = () => {
   return (
     <main>
       <div className="flex flex-col w-full sm:flex ">
-        <SmarterSavingCard />
-        {/* sm:space-x-4 */}
-        <div className="">
-          <TrackingChart />
-        </div>
+      {isConnected && (
+        <>
+          <SmarterSavingCard />
+          {/* sm:space-x-4 */}
+          <div className="">
+            <TrackingChart />
+          </div>
+        </>
+      )}
 
         {isConnected && (
           <>
