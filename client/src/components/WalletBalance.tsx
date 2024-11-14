@@ -303,8 +303,8 @@ export default function WalletBalance() {
 
         {/* Action Buttons */}
         <div className="flex flex-row  space-x-4">
-          <Button className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
-            Withdraws
+          <Button className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full" onClick={() => {}}>
+            Withdraw {/*s*/}
           </Button>
           <Button
             onClick={openDepositModal}

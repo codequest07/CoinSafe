@@ -10,7 +10,7 @@ const Sidebar = () => {
         <div className="hidden rounded-2xl border-r p-2 border-[#13131373]  bg-[#13131373]  md:block">
           <div className="flex h-full max-h-screen shadow-lg  rounded-xl  flex-col gap-2">
             <div className="flex items-center py-12 px-4 lg:h-[60px] lg:px-6">
-              <Link to="/" className="flex items-center gap-2 font-semibold">
+              <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
                 <MemoLogo className="w-40 h-40" />
               </Link>
             </div>
