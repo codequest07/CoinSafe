@@ -361,20 +361,22 @@ const TrackingChart = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div> */}
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={openDepositModal}
-              className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer"
-            >
-              Deposit
-            </Button>
-            <Button
-              onClick={openFirstModal}
-              className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
-            >
-              Save
-            </Button>
-          </div>
+          {isConnected && (
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={openDepositModal}
+                className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer"
+              >
+                Deposit
+              </Button>
+              <Button
+                onClick={openFirstModal}
+                className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
+              >
+                Save
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="sm:flex justify-between pb-6 border-b-[1px] border-[#FFFFFF17]">

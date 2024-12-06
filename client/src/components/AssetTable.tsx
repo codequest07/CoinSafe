@@ -12,18 +12,20 @@ import { CardContent } from "./ui/card";
 import MemoCheckIcon from "@/icons/CheckIcon";
 import MemoXmarkIcon from "@/icons/XmarkIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { allAssets } from "@/lib/data";
+// import { allAssets } from "@/lib/data";
 import { useAccount, useReadContract } from "wagmi";
 import { formatEther } from "viem";
 import { CoinSafeContract } from "@/lib/contract";
 import { useEffect, useState } from "react";
+import Deposit from "./Modals/Deposit";
+import SavingOption from "./Modals/SavingOption";
 
 export default function AssetTable() {
   const [assetData, setAssetData] = useState([]);
 
-  const liquidAssets = allAssets.filter((asset) => asset.liquid);
-  const stakedAssets = allAssets.filter((asset) => asset.staked);
-  const savedAssets = allAssets.filter((asset) => asset.saved);
+  // const liquidAssets = allAssets.filter((asset) => asset.liquid);
+  // const stakedAssets = allAssets.filter((asset) => asset.staked);
+  // const savedAssets = allAssets.filter((asset) => asset.saved);
   const { address } = useAccount();
 
   // const usdtAddress = tokens.usdt;
@@ -75,22 +77,26 @@ export default function AssetTable() {
           <TabsList className="sm:flex space-x-4 hidden bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="all-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               All assets
             </TabsTrigger>
             <TabsTrigger
               value="liquid-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               Liquid assets
             </TabsTrigger>
             <TabsTrigger
               value="staked-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               Staked assets
             </TabsTrigger>
             <TabsTrigger
               value="saved-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               Saved assets
             </TabsTrigger>
           </TabsList>
@@ -102,17 +108,17 @@ export default function AssetTable() {
 
           {/* Tab Content for Liquid Assets */}
           <TabsContent value="liquid-assets">
-            <AssetTableContent assets={liquidAssets} />
+            <AssetTableContent assets={[]} />
           </TabsContent>
 
           {/* Tab Content for Staked Assets */}
           <TabsContent value="staked-assets">
-            <AssetTableContent assets={stakedAssets} />
+            <AssetTableContent assets={[]} />
           </TabsContent>
 
           {/* Tab Content for Saved Assets */}
           <TabsContent value="saved-assets">
-            <AssetTableContent assets={savedAssets} />
+            <AssetTableContent assets={[]} />
           </TabsContent>
         </Tabs>
       </div>
@@ -121,6 +127,10 @@ export default function AssetTable() {
 }
 
 function AssetTableContent({ assets }: { assets: any[] }) {
+  const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
+  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+
   const tokenData = {
     "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": "SAFU",
     "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": "LSK",
@@ -148,7 +158,8 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             {assets.map((asset, index) => (
               <TableRow
                 key={index}
-                className="w-full flex flex-col sm:table-row">
+                className="w-full flex flex-col sm:table-row"
+              >
                 {/* Ticker */}
                 <TableCell className="w-full sm:w-1/3">
                   <div className="flex items-center space-x-4">
@@ -187,10 +198,18 @@ function AssetTableContent({ assets }: { assets: any[] }) {
 
                 {/* Actions, hidden on very small screens */}
                 <TableCell className="flex justify-start space-x-6 sm:justify-end w-full sm:w-2/3">
-                  <Button variant="link" className="text-[#79E7BA]">
+                  <Button
+                    variant="link"
+                    className="text-[#79E7BA]"
+                    onClick={() => setIsDepositModalOpen(true)}
+                  >
                     Deposit
                   </Button>
-                  <Button variant="link" className="text-[#79E7BA]">
+                  <Button
+                    variant="link"
+                    className="text-[#79E7BA]"
+                    onClick={() => setIsFirstModalOpen(true)}
+                  >
                     Save
                   </Button>
                 </TableCell>
@@ -199,6 +218,18 @@ function AssetTableContent({ assets }: { assets: any[] }) {
           </TableBody>
         </Table>
       </CardContent>
+      {/* SavingOption Modal */}
+      <SavingOption
+        isFirstModalOpen={isFirstModalOpen}
+        setIsFirstModalOpen={setIsFirstModalOpen}
+        isSecondModalOpen={isSecondModalOpen}
+        setIsSecondModalOpen={setIsSecondModalOpen}
+      />
+      <Deposit
+        isDepositModalOpen={isDepositModalOpen}
+        setIsDepositModalOpen={setIsDepositModalOpen}
+        onBack={() => {}}
+      />
     </div>
   );
 }
