@@ -5,8 +5,9 @@ import { SavingsOverviewData } from "@/lib/data";
 import Loading from "../Modals/loading-screen";
 import SaveSenseResp from "../Modals/SaveSenseResp";
 import KitchenLoading from "../Modals/kitchen-loading";
+import { toast } from "@/hooks/use-toast";
 
-export default function SmarterSavingCard() {
+export default function SmarterSavingCard({setIsConnectModalOpen}:{setIsConnectModalOpen: (open: boolean) => void;}) {
   const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
   const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
   const [saveSenseData, setSaveSenseData] = useState(null);
@@ -16,7 +17,12 @@ export default function SmarterSavingCard() {
 
   const handleGetStarted = async () => {
     if (!address) {
+      toast({
+        title: "No wallet connected",
+        variant: "destructive",
+      });
       console.error("No wallet connected");
+      setIsConnectModalOpen(true);
       return;
     }
 

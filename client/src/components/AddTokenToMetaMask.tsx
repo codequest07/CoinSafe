@@ -3,6 +3,7 @@ import { watchAsset } from "@wagmi/core";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import MemoMmIcon from "@/icons/MmIcon";
+import { tokens } from "@/lib/contract";
 
 const AddTokenToMetaMask = () => {
   const [isAdding, setIsAdding] = useState(false);
@@ -13,8 +14,8 @@ const AddTokenToMetaMask = () => {
       const wasAdded = await watchAsset(config, {
         type: "ERC20",
         options: {
-          address: "0x6245DF66b74b56D803730d48BF1bF16EEBBBD881",
-          symbol: "Safu",
+          address: tokens.safu,
+          symbol: "SAFU",
           decimals: 18,
         },
       });
