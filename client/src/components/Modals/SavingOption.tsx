@@ -111,6 +111,7 @@ export default function SavingOption({
           setIsSecondModalOpen(false);
           setIsFirstModalOpen(true);
         }}
+        tab=""
       />
     </Dialog>
   );
