@@ -7,7 +7,7 @@ import SaveSenseResp from "../Modals/SaveSenseResp";
 import KitchenLoading from "../Modals/kitchen-loading";
 import { toast } from "@/hooks/use-toast";
 
-export default function SmarterSavingCard({setIsConnectModalOpen}:{setIsConnectModalOpen: (open: boolean) => void;}) {
+export default function SmarterSavingCard({setIsConnectModalOpen}:{setIsConnectModalOpen?: (open: boolean) => void;}) {
   const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
   const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
   const [saveSenseData, setSaveSenseData] = useState(null);
@@ -22,7 +22,7 @@ export default function SmarterSavingCard({setIsConnectModalOpen}:{setIsConnectM
         variant: "destructive",
       });
       console.error("No wallet connected");
-      setIsConnectModalOpen(true);
+      setIsConnectModalOpen && setIsConnectModalOpen(true);
       return;
     }
 

@@ -1,5 +1,3 @@
-import Wallet from "@/icons/Wallet";
-import React from "react";
 import CustomConnectButton from "../custom-connect-button";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
