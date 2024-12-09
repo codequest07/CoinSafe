@@ -126,27 +126,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
               Thank you for joining the waitlist!
             </h2>
             <div className="w-16 h-16 mb-6">
-              <svg
-                width="64"
-                height="64"
-                viewBox="0 0 64 64"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-[#4ADE80]">
-                <rect width="64" height="64" rx="32" fill="currentColor" />
-                <path
-                  d="M41.5 27.5C41.5 35.5 35.5 42.5 27.5 42.5C19.5 42.5 13.5 35.5 13.5 27.5C13.5 19.5 19.5 13.5 27.5 13.5"
-                  stroke="black"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M27.5 21.5C27.5 21.5 27.5 27.5 27.5 27.5C27.5 27.5 47.5 27.5 47.5 27.5"
-                  stroke="black"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <img src="/assets/sms-star.svg" alt="sms-star" />
             </div>
             <p className="text-gray-400 max-w-[80%]">
               We'll notify you as soon as Coinsafe is ready for you to start
