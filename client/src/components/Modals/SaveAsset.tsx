@@ -38,10 +38,12 @@ export default function SaveAsset({
   isOpen,
   onClose,
   onBack,
+  tab,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onBack: () => void;
+  tab: string;
 }) {
   const [selectedOption, setSelectedOption] = useState("manual");
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
@@ -171,7 +173,7 @@ export default function SaveAsset({
           <p>Save your assets</p>
         </DialogTitle>
         <Tabs
-          defaultValue="one-time"
+          defaultValue={tab || "one-time"}
           onValueChange={() => handleTabChange()}
           className="w-full"
         >

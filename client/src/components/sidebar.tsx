@@ -2,8 +2,20 @@ import { Link, NavLink } from "react-router-dom";
 import MemoLogo from "@/icons/Logo";
 import { NavLinks } from "@/lib/data";
 import ExtensionCard from "./Cards/ExtensionCard";
+import { useAccount } from "wagmi";
+import { useState } from "react";
+import ConnectModal from "./Modals/ConnectModal";
 
 const Sidebar = () => {
+  const [openConnectModal, setOpenConnectModal] = useState(false);
+  const { isConnected } = useAccount();
+
+  const handleNavigate = (e: any) => {
+    if(!isConnected) {
+      e.preventDefault();
+      setOpenConnectModal(true);
+    }
+  }
   return (
     <main>
       <div className="grid min-h-screen w-full md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr]">
@@ -21,6 +33,7 @@ const Sidebar = () => {
                     key={link.label}
                     to={link.to}
                     end
+                    onClick={handleNavigate}
                     className={({ isActive }) =>
                       isActive
                         ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-3 text-[#F1F1F1] bg-[#1E1E1E99] transition-all"
@@ -47,6 +60,12 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
+      {openConnectModal && (
+        <ConnectModal
+          isConnectModalOpen={openConnectModal}
+          setIsConnectModalOpen={setOpenConnectModal}
+        />
+      )}
     </main>
   );
 };

@@ -1,44 +1,42 @@
-import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useEffect } from "react";
 
+import { Card, CardContent } from "../ui/card";
+import { Button } from "../ui/button";
+
 const WhisperDownloadCard = () => {
-  const navigate = useNavigate();
   useEffect(() => {
     AOS.init({
       duration: 2000,
     });
   }, []);
   return (
-    <div
-      data-aos="fade-up"
-      className="w-full sm:w-[65%]  mx-auto rounded-[12px] border border-[#FFFFFF17] p-6 sm:p-12 lg:p-20">
-      <div className="flex flex-col justify-center items-center text-center">
-        <div className="mb-6">
-          <img
-            src="/assets/whisper.svg"
-            alt="Whisper"
-            className="w-40 h-40 sm:w-full sm:h-full"
-          />
-        </div>
-        <div className="mb-6">
-          <div className="text-xl font-semibold sm:text-2xl lg:text-3xl">
-            Spend and save with Whisper
+    <div data-aos="fade-up">
+      <Card className="bg-[#13131340] sm:w-[25rem] border-[#FFFFFF21] rounded-xl overflow-hidden">
+        <CardContent className="p-8 flex flex-col items-center text-center h-full">
+          <div className="mb-8 w-40 h-40  ">
+            <img
+              src="/assets/savesense.svg"
+              alt="Whisper"
+              className="w-40 h-40 sm:w-60 sm:h-60"
+            />
           </div>
-          <div className="text-[#CACACA] sm:w-[400px]  text-sm sm:text-base lg:text-lg mt-2">
-            Spend and save like a total chad. Whisper automatically locks in
-            savings every time you make a move.
-          </div>
-        </div>
-        <div>
-          <button
-            onClick={() => navigate("/extension")}
-            className="bg-[#1E1E1E99] text-[#F1F1F1] px-4 py-2 sm:px-6 sm:py-3 lg:px-8 lg:py-4 rounded-full">
-            Download extension
-          </button>
-        </div>
-      </div>
+          <h3 className="text-2xl text-[#F1F1F1] font-medium my-7">
+            Save time and money
+          </h3>
+          <p className="text-gray-400 mb-8 flex-grow">
+            Coinsafe connects to your spending and sets aside small amounts
+            automatically, helping you build wealth without even thinking about
+            it.
+          </p>
+          <Button
+            variant="outline"
+            className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
+            Start saving
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
