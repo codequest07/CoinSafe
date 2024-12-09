@@ -49,7 +49,7 @@ export default function SaveAsset({
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
 
   // to multiply the amount based on selected token's decimals
-  const [decimals, setDecimals] = useState(1);
+  const [, setDecimals] = useState(1);
 
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   // const [isLoading, setIsLoading] = useState(false);
