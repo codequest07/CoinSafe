@@ -7,6 +7,6 @@ WaitlistRouter.post('/api/waitlist', addToWaitlist);
 
 WaitlistRouter.get('/api/waitlist', getAllWaitlistEntries);
 
-WaitlistRouter.get('/waitlist/:email', getOne);
+WaitlistRouter.get('/api/waitlist/:email', getOne);
 
 export default WaitlistRouter;
