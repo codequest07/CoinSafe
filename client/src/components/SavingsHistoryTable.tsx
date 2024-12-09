@@ -1,84 +1,64 @@
-import {
-  Table,
-  TableRow,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
+import { Table, TableRow, TableBody, TableCell } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
 import MemoAvax from "@/icons/Avax";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-  } from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { savingsHistoryAssets } from "@/lib/data";
-import { MdArrowDropDown } from "react-icons/md";
 
 const SavingsHistoryTable = () => {
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-4 text-white w-full">
-        <div className="sm:mx-auto">
+      <div className="sm:mx-auto">
         <div className="flex justify-between items-center">
-            <div>
-                <h1 className="text-xl font-normal mb-4">Savings History</h1>
+          <div>
+            <h1 className="text-xl font-normal mb-4">Savings History</h1>
+          </div>
+          <div className="flex gap-2">
+            <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99]">
+              <Select>
+                <SelectTrigger className="text-sm border-none bg-transparent focus:ring-0 focus:ring-offset-0">
+                  <SelectValue placeholder="All Transactions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Transactions</SelectItem>
+                  <SelectItem value="deposit">Deposit</SelectItem>
+                  <SelectItem value="withdraw">Withdraw</SelectItem>
+                  <SelectItem value="transfer">Transfer</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex gap-2">
-                <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99]">
-                    <DropdownMenu>
-                    <DropdownMenuTrigger className="text-sm flex items-center outline-none">
-                        <div>All Transactions</div>
-                        <div>
-                        <MdArrowDropDown />
-                        </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Profile</DropdownMenuItem>
-                        <DropdownMenuItem>Billing</DropdownMenuItem>
-                        <DropdownMenuItem>Team</DropdownMenuItem>
-                        <DropdownMenuItem>Subscription</DropdownMenuItem>
-                    </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
 
-                <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99]">
-                    <DropdownMenu>
-                    <DropdownMenuTrigger className="text-sm flex items-center outline-none">
-                        <div>This Month</div>
-                        <div>
-                        <MdArrowDropDown />
-                        </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Profile</DropdownMenuItem>
-                        <DropdownMenuItem>Billing</DropdownMenuItem>
-                        <DropdownMenuItem>Team</DropdownMenuItem>
-                        <DropdownMenuItem>Subscription</DropdownMenuItem>
-                    </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+            <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99]">
+              <Select>
+                <SelectTrigger className="text-sm border-none bg-transparent focus:ring-0 focus:ring-offset-0">
+                  <SelectValue placeholder="This Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="this-month">This Month</SelectItem>
+                  <SelectItem value="last-month">Last Month</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
         </div>
 
         {/* Tabs Component */}
         <Tabs defaultValue="all-assets" className="w-full ">
-
           <TabsContent value="all-assets">
             <AssetTableContent assets={savingsHistoryAssets} />
           </TabsContent>
-
         </Tabs>
       </div>
     </div>
   );
-}
+};
 
 function AssetTableContent({ assets }: { assets: any[] }) {
   return (
@@ -86,9 +66,9 @@ function AssetTableContent({ assets }: { assets: any[] }) {
       <CardContent>
         <Table>
           {/* <TableHeader className="bg-[#1E1E1E99]  text-[#CACACA]"> */}
-            <TableRow>
-                <div className="py-2 pt-2">23rd Sept, 2024</div>
-              {/* <TableHead>Ticker</TableHead>
+          <TableRow>
+            <div className="py-2 pt-2">23rd Sept, 2024</div>
+            {/* <TableHead>Ticker</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Maturity Date</TableHead>
               <TableHead className="hidden md:table-cell">Autosaved</TableHead>
@@ -96,7 +76,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
               <TableHead>
                 <span className="sr-only">Actions</span>
               </TableHead> */}
-            </TableRow>
+          </TableRow>
           {/* </TableHeader> */}
           <TableBody className="text-[#F1F1F1]">
             {assets.map((asset, index) => (
@@ -110,13 +90,13 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                   </div>
                 </TableCell>
                 <TableCell>
-                    <div className="flex">
-                        <div className="flex flex-col">
-                            <p>{asset.amount}</p>
-                            <span className="text-xs">{asset.value}</span>
-                        </div>
-                        <MemoAvax className="w-3 h-5" />
+                  <div className="flex">
+                    <div className="flex flex-col">
+                      <p>{asset.amount}</p>
+                      <span className="text-xs">{asset.value}</span>
                     </div>
+                    <MemoAvax className="w-3 h-5" />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
@@ -137,31 +117,44 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                   </div>
                 </TableCell> */}
                 <TableCell>
-                    <div className="flex flex-col">
-                    <div className={`
+                  <div className="flex flex-col">
+                    <div
+                      className={`
                         px-2 py-1 rounded-[10px] text-xs w-fit 
-                        ${asset.status == "upcoming" && 'text-[#00F2FE] bg-[#00F2FE1A]'}
-                        ${asset.status == "processing" && 'text-[#FFA448] bg-[#FFA3481A]'}
-                        ${asset.status == "completed" && 'text-[#48FF91] bg-[#48FF911A]'}
-                        ${asset.status == "cancelled" && 'text-[#FFFFFF] bg-[#FFFFFF1A]'}
-                        ${asset.status == "failed" && 'text-[#FF484B] bg-[#FF484B1A]'}
+                        ${
+                          asset.status == "upcoming" &&
+                          "text-[#00F2FE] bg-[#00F2FE1A]"
+                        }
+                        ${
+                          asset.status == "processing" &&
+                          "text-[#FFA448] bg-[#FFA3481A]"
+                        }
+                        ${
+                          asset.status == "completed" &&
+                          "text-[#48FF91] bg-[#48FF911A]"
+                        }
+                        ${
+                          asset.status == "cancelled" &&
+                          "text-[#FFFFFF] bg-[#FFFFFF1A]"
+                        }
+                        ${
+                          asset.status == "failed" &&
+                          "text-[#FF484B] bg-[#FF484B1A]"
+                        }
                     `}>
-                        {asset.status}
+                      {asset.status}
                     </div>
-                    
                   </div>
                 </TableCell>
-                
               </TableRow>
             ))}
           </TableBody>
 
           <TableRow>
             <div className="py-2 pt-2">23rd Sept, 2024</div>
-            
-            </TableRow>
+          </TableRow>
 
-            <TableBody className="text-[#F1F1F1]">
+          <TableBody className="text-[#F1F1F1]">
             {assets.map((asset, index) => (
               <TableRow key={index}>
                 <TableCell className="font-medium">
@@ -173,13 +166,13 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                   </div>
                 </TableCell>
                 <TableCell>
-                    <div className="flex">
-                        <div className="flex flex-col">
-                            <p>{asset.amount}</p>
-                            <span className="text-xs">{asset.value}</span>
-                        </div>
-                        <MemoAvax className="w-3 h-5" />
+                  <div className="flex">
+                    <div className="flex flex-col">
+                      <p>{asset.amount}</p>
+                      <span className="text-xs">{asset.value}</span>
                     </div>
+                    <MemoAvax className="w-3 h-5" />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
@@ -201,15 +194,31 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                 </TableCell> */}
                 <TableCell>
                   <div className="flex flex-col">
-                    <div className={`
+                    <div
+                      className={`
                         px-2 py-1 rounded-[10px] text-xs w-fit 
-                        ${asset.status == "upcoming" && 'text-[#00F2FE] bg-[#00F2FE1A]'}
-                        ${asset.status == "processing" && 'text-[#FFA448] bg-[#FFA3481A]'}
-                        ${asset.status == "completed" && 'text-[#48FF91] bg-[#48FF911A]'}
-                        ${asset.status == "cancelled" && 'text-[#FFFFFF] bg-[#FFFFFF1A]'}
-                        ${asset.status == "failed" && 'text-[#FF484B] bg-[#FF484B1A]'}
+                        ${
+                          asset.status == "upcoming" &&
+                          "text-[#00F2FE] bg-[#00F2FE1A]"
+                        }
+                        ${
+                          asset.status == "processing" &&
+                          "text-[#FFA448] bg-[#FFA3481A]"
+                        }
+                        ${
+                          asset.status == "completed" &&
+                          "text-[#48FF91] bg-[#48FF911A]"
+                        }
+                        ${
+                          asset.status == "cancelled" &&
+                          "text-[#FFFFFF] bg-[#FFFFFF1A]"
+                        }
+                        ${
+                          asset.status == "failed" &&
+                          "text-[#FF484B] bg-[#FF484B1A]"
+                        }
                     `}>
-                        {asset.status}
+                      {asset.status}
                     </div>
                     {/* <p></p> */}
                     {/* <span className="text-xs">{asset.value}</span> */}
@@ -229,7 +238,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
         </Table>
       </CardContent>
     </div>
-  )
+  );
 }
 
-export default SavingsHistoryTable
+export default SavingsHistoryTable;

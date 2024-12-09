@@ -3,25 +3,35 @@ import Card from "@/components/Card";
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
 import CumulativeCard from "@/components/CumulativeCard";
 import GasCoverageCard from "@/components/GasCoverageCard";
+import ConnectModal from "@/components/Modals/ConnectModal";
 import SavingStreakCard from "@/components/SavingStreakCard";
 import ScheduledSavings from "@/components/ScheduledSavingsCard";
 import TrackingChart from "@/components/TrackingChart";
-import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 const Home = () => {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const [openConnectModal, setOpenConnectModal] = useState(false);
+
+  useEffect(() => {
+    if(!isConnected || !address) {
+      setOpenConnectModal(true);
+    }
+  }, [isConnected, address])
 
   return (
     <main>
       <div className="flex flex-col w-full sm:flex ">
-        <SmarterSavingCard />
-        {/* sm:space-x-4 */}
-        <div className="">
-          <TrackingChart />
-        </div>
+        <>
+          <SmarterSavingCard setIsConnectModalOpen={setOpenConnectModal}/>
+          {/* sm:space-x-4 */}
+          <div className="">
+            <TrackingChart />
+          </div>
+        </>
 
-        {isConnected && (
+        {isConnected ? (
           <>
             <div className="sm:flex  gap-3 pt-3">
               <Card
@@ -58,9 +68,46 @@ const Home = () => {
               />
             </div>
           </>
+        ) : (
+          <>
+            <div className="sm:flex  gap-3 pt-3">
+              <Card
+                title="Rewards"
+                value={0}
+                unit="points"
+                badge="0.0x"
+                emphasize="find out"
+                text="how points will be used"
+              />
+
+              <SavingStreakCard
+                title="Savings streak"
+                value={0}
+                unit="days"
+                emphasize="maintain"
+                text="streaks for points multipliers"
+              />
+
+              <GasCoverageCard
+                title="Gas coverage"
+                value={0}
+                per={0}
+                unit="--"
+                emphasize="find out"
+                text="how points will be used"
+              />
+
+              <CumulativeCard
+                title="Cumulative APY"
+                value={0}
+                unit="per annum"
+                text="sum of staking and saving returns"
+              />
+            </div>
+          </>
         )}
 
-        {isConnected ? (
+        {isConnected && (
           <>
             <div className="sm:flex py-3">
               <div className="sm:w-2/3 overflow-hidden">
@@ -71,19 +118,15 @@ const Home = () => {
               </div>
             </div>
           </>
-        ) : (
-          <>
-            <div className="flex  flex-col justify-center items-center py-6">
-              <div>
-                <MemoComingSoonIcon className="w-[600px] h-[250px]" />
-              </div>
-              <div className="text-[#F1F1F1] text-xl text-center font-medium py-6">
-                Connect your wallet to get the best of CoinSafe
-              </div>
-            </div>
-          </>
         )}
       </div>
+
+      {openConnectModal && (
+        <ConnectModal
+          isConnectModalOpen={openConnectModal}
+          setIsConnectModalOpen={setOpenConnectModal}
+        />
+      )}
     </main>
   );
 };

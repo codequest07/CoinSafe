@@ -28,7 +28,7 @@ export default function CustomConnectButton() {
             <button
               onClick={openConnectModal}
               type="button"
-              className="bg-[#131313B2] text-white py-2 px-5 rounded-lg">
+              className="text-[#131313B2] bg-white py-2 px-5 rounded-full text-sm">
               Connect Wallet
             </button>
           );

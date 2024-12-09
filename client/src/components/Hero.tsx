@@ -31,7 +31,7 @@ const Hero = () => {
         <div className="sm:max-w-[500px] pt-6">
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-center text-[#CACACA]">
             Experience seamless savings, AI-powered insights, and a sprinkle of
-            blockchain magic—built on Base
+            blockchain magic—built on Lisk
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 pt-10">

@@ -4,17 +4,25 @@ import { Button } from "@/components/ui/button";
 import { SavingsOverviewData } from "@/lib/data";
 import Loading from "../Modals/loading-screen";
 import SaveSenseResp from "../Modals/SaveSenseResp";
+import KitchenLoading from "../Modals/kitchen-loading";
+import { toast } from "@/hooks/use-toast";
 
-export default function SmarterSavingCard() {
+export default function SmarterSavingCard({setIsConnectModalOpen}:{setIsConnectModalOpen?: (open: boolean) => void;}) {
   const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
   const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
   const [saveSenseData, setSaveSenseData] = useState(null);
+  const [showKitchenLoading, setShowKitchenLoading] = useState(false);
 
   const { address } = useAccount();
 
   const handleGetStarted = async () => {
     if (!address) {
+      toast({
+        title: "No wallet connected",
+        variant: "destructive",
+      });
       console.error("No wallet connected");
+      setIsConnectModalOpen && setIsConnectModalOpen(true);
       return;
     }
 
@@ -22,7 +30,7 @@ export default function SmarterSavingCard() {
 
     try {
       const response = await fetch(
-        `https://coinsafe-1-1jw5.onrender.com/main/${address}`
+        `https://coinsafe-0q0m.onrender.com/main/${address}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch data");
@@ -39,8 +47,7 @@ export default function SmarterSavingCard() {
   };
 
   const handleDownload = () => {
-    console.log("Download clicked");
-    // Perform specific action for "Download"
+    setShowKitchenLoading(true);
   };
 
   const handleButtonClick = (buttonText: string) => {
@@ -54,7 +61,7 @@ export default function SmarterSavingCard() {
   const closeSaveSenseModal = () => setIsSaveSenseModalOpen(false);
 
   return (
-    <div className=" hsection grid grid-col-1 sm:grid-cols-2 gap-3 pb-2">
+    <div className="grid grid-col-1 sm:grid-cols-2 gap-3 pb-2">
       {SavingsOverviewData.map((items, index) => (
         <div
           key={index}
@@ -85,6 +92,11 @@ export default function SmarterSavingCard() {
         isOpen={isSaveSenseModalOpen}
         onClose={closeSaveSenseModal}
         data={saveSenseData}
+      />
+
+      <KitchenLoading
+        isOpen={showKitchenLoading}
+        onClose={() => setShowKitchenLoading(false)}
       />
     </div>
   );

@@ -12,14 +12,15 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-black w-full py-4 px-6 flex justify-between items-center">
+      <nav className="bg-black fixed z-10 top-0 w-full py-4 sm:px-16 px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center space-x-2">
           <AppLogo className="" />
           {/* MemoNavX */}
         </Link>
         <Button
           className="bg-transparent hover:bg-transparent"
-          onClick={toggleMenu}>
+          // onClick={toggleMenu}
+        >
           <MemoHandburggerIcon className="w-9 h-9" />
           <span className="sr-only">Menu</span>
         </Button>
