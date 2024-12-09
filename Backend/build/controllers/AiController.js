@@ -56,7 +56,7 @@ function getClaudeSavingsPlan(transfersData) {
         }
         try {
             const response = yield axios_1.default.post(API_URL, {
-                model: "claude-3-opus-20240229",
+                model: "claude-3-5-haiku-20241022",
                 max_tokens: 1000,
                 messages: [
                     {
