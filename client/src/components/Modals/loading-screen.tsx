@@ -1,7 +1,6 @@
 "use client";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import MemoLogo2 from "@/icons/Logo2";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 

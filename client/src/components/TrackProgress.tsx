@@ -1,10 +1,9 @@
-import { useNavigate } from "react-router-dom";
+
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useEffect } from "react";
 
 const TrackProgress = () => {
-  const navigate = useNavigate();
 
   useEffect(() => {
     AOS.init({
