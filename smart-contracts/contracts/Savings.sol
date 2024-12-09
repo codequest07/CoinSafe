@@ -308,6 +308,7 @@ contract Savings is ReentrancyGuard {
 // ===================================== EXECUTE AUTOMATED SAVINGS =====================================
 
     function executeAutomatedSaving(address _user) external {
+        
         AutomatedSavingsPlan storage plan = automatedSavingsPlans[_user];
         
         if (plan.amount == 0 || plan.frequency == 0) return;
