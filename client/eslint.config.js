@@ -23,9 +23,15 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-      "no-unused-vars": ["error", { "varsIgnorePattern": "React" }],
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": "off"
+      'no-unused-vars': 'off', // Disable default no-unused-vars
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { varsIgnorePattern: 'React', argsIgnorePattern: '^_' },
+      ],
+      '@typescript-eslint/no-explicit-any': 'off',
+      // "no-unused-vars": ["error", { "varsIgnorePattern": "React" }],
+      // "@typescript-eslint/no-explicit-any": "off",
+      // "@typescript-eslint/no-unused-vars": "off"
     },
   },
 )
