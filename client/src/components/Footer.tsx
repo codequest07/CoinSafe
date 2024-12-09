@@ -12,7 +12,10 @@ const Footer = () => {
         </div>
         <div className="flex gap-4">
           <div className="border-x border-[#FFFFFF17] py-3 px-4 md:py-4 md:px-6">
-            <Link to={"#"}>
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              to={"https://x.com/Coinsafe_safe"}>
               <img
                 src="/assets/discord.svg"
                 alt="Discord"
@@ -21,7 +24,10 @@ const Footer = () => {
             </Link>
           </div>
           <div className="border-x border-[#FFFFFF17] py-3 px-4 md:py-4 md:px-6">
-            <Link to={"#"}>
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              to={"https://x.com/Coinsafe_safe"}>
               <img
                 src="/assets/x.svg"
                 alt="X"
@@ -30,7 +36,10 @@ const Footer = () => {
             </Link>
           </div>
           <div className="border-x border-[#FFFFFF17] py-3 px-4 md:py-4 md:px-6">
-            <Link to={"#"}>
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              to={"https://x.com/Coinsafe_safe"}>
               <img
                 src="/assets/telegram.svg"
                 alt="Telegram"
