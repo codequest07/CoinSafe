@@ -31,7 +31,7 @@ export default function LandingFeatures() {
 
         {/* Features Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <div className="relative overflow-hidden border border-[#FFFFFF21] rounded-3xl bg-[#1D1D1D73] p-6 md:p-8">
+          <div className="relative overflow-hidden border border-[#FFFFFF21] sm:rounded-3xl rounded-md bg-[#1D1D1D73] p-6 md:p-8">
             <div className="mb-4 h-16 w-16">
               <img src="/assets/Mask.svg" alt="Mask" className="w-16 h-16" />
             </div>
@@ -40,7 +40,7 @@ export default function LandingFeatures() {
             </p>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl border border-[#FFFFFF21]  bg-[#1D1D1D73] p-6 md:p-8">
+          <div className="relative overflow-hidden sm:rounded-3xl rounded-md border border-[#FFFFFF21]  bg-[#1D1D1D73] p-6 md:p-8">
             <div className="mb-4 h-16 w-16">
               <img
                 src="/assets/Cylinder.svg"
@@ -54,7 +54,7 @@ export default function LandingFeatures() {
             </p>
           </div>
 
-          <div className="relative overflow-hidden border border-[#FFFFFF21] rounded-3xl bg-[#1D1D1D73] p-6 md:p-8">
+          <div className="relative overflow-hidden border border-[#FFFFFF21] sm:rounded-3xl rounded-md  bg-[#1D1D1D73] p-6 md:p-8">
             <div className="mb-4 h-16 w-16">
               <img
                 src="/assets/FlatCylinder.svg"
@@ -67,7 +67,7 @@ export default function LandingFeatures() {
             </p>
           </div>
 
-          <div className="relative overflow-hidden border border-[#FFFFFF21] rounded-3xl bg-[#1D1D1D73] p-6 md:p-8">
+          <div className="relative overflow-hidden border border-[#FFFFFF21] sm:rounded-3xl rounded-md  bg-[#1D1D1D73] p-6 md:p-8">
             <div className="mb-4 h-16 w-16">
               <img src="assets/Pill.svg" alt="Pill" className="w-16 h-16" />
             </div>
