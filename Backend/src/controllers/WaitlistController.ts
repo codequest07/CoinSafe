@@ -48,6 +48,7 @@ export const addToWaitlist = async (req: Request, res: Response): Promise<Respon
             </footer>
           </div>
         `,
+        
       });
       
 
