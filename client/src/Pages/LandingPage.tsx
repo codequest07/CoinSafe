@@ -5,6 +5,7 @@ import LandingFeatures from "@/components/LandingFeatures";
 import LatestHero from "@/components/LatestHero";
 import Navbar from "@/components/Navbar";
 import PoweredBy from "@/components/PoweredBy";
+import ToolsSection from "@/components/Tools-section";
 import TrackProgress from "@/components/TrackProgress";
 
 const LandingPage = () => {
@@ -12,15 +13,15 @@ const LandingPage = () => {
     <div>
       <main>
         <Navbar />
-        <LatestHero />
-
-        <FeatureCards />
-        <LandingFeatures />
-        <TrackProgress />
-
-        <PoweredBy />
-
-        <Footer />
+        <div className="mt-12">
+          <LatestHero />
+          <FeatureCards />
+          <ToolsSection />
+          <LandingFeatures />
+          <TrackProgress />
+          <PoweredBy />
+          <Footer />
+        </div>
       </main>
     </div>
   );

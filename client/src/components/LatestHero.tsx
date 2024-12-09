@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { WaitlistModal } from "./Waitlist-modal";
+import { WaitlistModal } from "./Modals/Waitlist-modal";
 
 export default function Hero() {
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
