@@ -14,7 +14,13 @@ export default function Hero() {
           {/* Left column - Text content */}
           <div className="space-y-6 md:space-y-8">
             <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight">
+              <h1
+                style={{
+                  background: "linear-gradient(to right, #F1F1F1, #8B8B8B)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight">
                 Save smarter
                 <br />
                 Earn effortlessly
