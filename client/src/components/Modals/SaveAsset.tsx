@@ -27,17 +27,20 @@ import {
 } from "@/components/ui/popover"; // Line 24: Added Popover for calendar
 import { format, differenceInDays, addDays } from "date-fns";
 
-import { useAccount, useConnect, useWriteContract } from "wagmi";
-import { waitForTransactionReceipt } from "@wagmi/core";
+import { useAccount } from "wagmi";
+// import { waitForTransactionReceipt } from "@wagmi/core";
 import { liskSepolia } from "viem/chains";
-import { injected } from "wagmi/connectors";
+// import { injected } from "wagmi/connectors";
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import coinSafeAbi from "../../abi/coinsafe.json";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { config } from "@/lib/config";
+// import { config } from "@/lib/config";
 import SaveSuccessful from "./SaveSuccessful";
 import { LoaderCircle } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { useSaveAsset } from "@/hooks/useSaveAsset";
+
 
 export default function SaveAsset({
   isOpen,
@@ -103,6 +106,8 @@ export default function SaveAsset({
     setUnlockDate(calculatedUnlockDate);
     setSelectedDate(calculatedUnlockDate);
   };
+    
+    
 
   const [selectedOption, setSelectedOption] = useState("manual");
   const [validationErrors, setValidationErrors] = useState<{
@@ -153,9 +158,10 @@ export default function SaveAsset({
   };
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   // to multiply the amount based on selected token's decimals
-  const [decimals, setDecimals] = useState(1);
+  const [,setDecimals] = useState(1);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
-  const [isLoading, setIsLoading] = useState(false);
+  //   const [isLoading, setIsLoading] = useState(false);
+  // to multiply the amount based on selected token's decimals
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let _amount = Number(event.target.value);
@@ -166,8 +172,9 @@ export default function SaveAsset({
   };
 
   const { address } = useAccount();
-  const { writeContractAsync } = useWriteContract();
-  const { connectAsync } = useConnect();
+
+  // const { writeContractAsync } = useWriteContract();
+  // const { connectAsync } = useConnect();
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
@@ -182,62 +189,74 @@ export default function SaveAsset({
   };
 
   const handleTabChange = () => {};
+  //if (!validateForm()) {
+  //     return; // Stop if validation fails
+  //}
 
-  const handleSaveAsset = async (e: any) => {
-    e.preventDefault();
+  // const handleSaveAsset = async (e: any) => {
+  //   e.preventDefault();
+  //   try {
+  //     if (!address) {
+  //       try {
+  //         await connectAsync({
+  //           chainId: liskSepolia.id,
+  //           connector: injected(),
+  //         });
+  //       } catch (error) {
+  //         alert(error);
+  //       }
+  //     }
+  //     setIsLoading(true);
+  //     console.log("DECIMALS", decimals);
+  //     console.log("AMOUNT", saveState.amount);
 
-    // Perform validation first
-    if (!validateForm()) {
-      return; // Stop if validation fails
-    }
+  //     // Step 3: Call save function
+  //     const data = await writeContractAsync({
+  //       chainId: liskSepolia.id,
+  //       address: CoinSafeContract.address as `0x${string}`,
+  //       functionName: "save",
+  //       abi: coinSafeAbi.abi,
+  //       args: [saveState.token, BigInt(saveState.token === tokens.usdt ? saveState.amount * 10 ** 6 : saveState.amount * 10 ** 18), saveState.duration],
+  //     });
 
-    try {
-      if (!address) {
-        try {
-          await connectAsync({
-            chainId: liskSepolia.id,
-            connector: injected(),
-          });
-        } catch (error) {
-          alert(error);
-        }
-      }
-      setIsLoading(true);
-      console.log("DECIMALS", decimals);
-      console.log("AMOUNT", saveState.amount);
+  //     console.log(data);
 
-      // Step 3: Call save function
-      const data = await writeContractAsync({
-        chainId: liskSepolia.id,
-        address: CoinSafeContract.address as `0x${string}`,
-        functionName: "save",
-        abi: coinSafeAbi.abi,
-        args: [
-          saveState.token,
-          BigInt(
-            saveState.token === tokens.usdt
-              ? saveState.amount * 10 ** 6
-              : saveState.amount * 10 ** 18
-          ),
-          saveState.duration,
-        ],
+  //     const saveTransactionReceipt = await waitForTransactionReceipt(config, {
+  //       hash: data,
+  //     });
+
+  //     if (saveTransactionReceipt.transactionIndex === 1) {
+  //       console.log("DATA", data);
+  //       openThirdModal();
+  //     }
+
+  //     console.log("DATA", saveTransactionReceipt.status);
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.log("ERROR:::", error);
+  //     if((error as any).toString().includes("InsufficientFunds()")) {
+  //       alert("Insufficient Funds, Please deposit enough to be able to save.");
+  //     }
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  const { saveAsset, isLoading } = useSaveAsset({
+    address,
+    saveState,
+    coinSafeAddress: CoinSafeContract.address as `0x${string}`,
+    coinSafeAbi: coinSafeAbi.abi,
+    chainId: liskSepolia.id,
+    onSuccess: () => {
+      openThirdModal();
+    },
+    onError: (error: { message: any; }) => {
+      toast({
+        title: error.message,
+        variant: "destructive"
       });
-
-      const saveTransactionReceipt = await waitForTransactionReceipt(config, {
-        hash: data,
-      });
-
-      if (saveTransactionReceipt.status === "success") {
-        openThirdModal();
-      }
-      setIsLoading(false);
-    } catch (error) {
-      if ((error as any).toString().includes("InsufficientFunds()")) {
-        alert("Insufficient Funds, Please deposit enough to be able to save.");
-      }
-      setIsLoading(false);
     }
-  };
+  });
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -578,7 +597,7 @@ export default function SaveAsset({
           </Button>
           <div>
             <Button
-              onClick={(e) => handleSaveAsset(e)}
+              onClick={(e) => saveAsset(e)}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
               disabled={isLoading}

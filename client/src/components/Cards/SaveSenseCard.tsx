@@ -1,42 +1,40 @@
-import { useNavigate } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useEffect } from "react";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
 
 const SaveSenseCard = () => {
-  const navigate = useNavigate();
   useEffect(() => {
     AOS.init({
       duration: 2000,
     });
   }, []);
   return (
-    <div data-aos="fade-right" className="w-full sm:w-1/2 ">
-      <div className="flex flex-col justify-between h-full rounded-[12px] border-[1px] border-[#FFFFFF17] p-6 sm:p-12 lg:p-20">
-        <div className="flex flex-col items-center mb-6">
-          <img
-            src="/assets/savesense.svg"
-            alt="SaveSense"
-            className="w-24 h-24 sm:w-60 sm:h-60"
-          />
-          <div className="text-center mt-4">
-            <div className="text-xl font-semibold">
-              Smart savings with SaveSense
-            </div>
-            <div className="text-[#CACACA] mt-2 text-sm sm:text-base lg:text-lg">
-              Our AI isn’t just smart—it’s a wealth wizard. It analyzes your
-              spending and crafts a savings plan that’s borderline genius.
-            </div>
+    <div data-aos="fade-up">
+      <Card className="bg-[#13131340] sm:w-[25rem] border-[#FFFFFF21]  rounded-xl overflow-hidden">
+        <CardContent className="p-8 flex flex-col items-center text-center h-full">
+          <div className="mb-8 w-40 h-40 relative">
+            <img
+              src="/assets/whisper.svg"
+              alt="Whisper Device"
+              className="w-40 h-40 sm:w-60 sm:h-60"
+            />
           </div>
-        </div>
-        <div className="flex justify-center">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="bg-[#1E1E1E99] text-[#F1F1F1] px-6 py-3 rounded-full">
+          <h3 className="text-2xl text-[#F1F1F1] font-medium my-7">
+            Get rewarded for saving
+          </h3>
+          <p className="text-gray-400 mb-8 flex-grow">
+            Saving doesn’t have to feel boring. Earn rewards like Gas Badges and
+            bonuses when you stay consistent with your financial goals.
+          </p>
+          <Button
+            variant="outline"
+            className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
             Start saving
-          </button>
-        </div>
-      </div>
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
