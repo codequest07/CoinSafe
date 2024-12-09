@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Country } from "country-state-city";
 import {
   Dialog,
@@ -18,6 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 interface WaitlistModalProps {
   open: boolean;
@@ -35,6 +37,17 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
   const [emailError, setEmailError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast({
+        title: "Success!",
+        description: "You've been added to the waitlist.",
+        duration: 5000,
+      });
+    }
+  }, [isSuccess, toast]);
 
   const validateEmail = (email: string) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -86,10 +99,16 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
           setIsSuccess(true);
           resetForm();
         } else {
-          console.error("Form submission failed");
+          throw new Error("Form submission failed");
         }
       } catch (error) {
         console.error("Error submitting form:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to join the waitlist. Please try again.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        });
       } finally {
         setIsSubmitting(false);
       }
@@ -106,22 +125,38 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
             <h2 className="text-xl font-semibold text-white mb-6">
               Thank you for joining the waitlist!
             </h2>
-            <div className="w-24 h-24 mb-6">
-              <img
-                src="/assets/sms-star.svg"
-                className="w-24 h-24 "
-                alt="sms-star"
-              />
+            <div className="w-16 h-16 mb-6">
+              <svg
+                width="64"
+                height="64"
+                viewBox="0 0 64 64"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-[#4ADE80]">
+                <rect width="64" height="64" rx="32" fill="currentColor" />
+                <path
+                  d="M41.5 27.5C41.5 35.5 35.5 42.5 27.5 42.5C19.5 42.5 13.5 35.5 13.5 27.5C13.5 19.5 19.5 13.5 27.5 13.5"
+                  stroke="black"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M27.5 21.5C27.5 21.5 27.5 27.5 27.5 27.5C27.5 27.5 47.5 27.5 47.5 27.5"
+                  stroke="black"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
-            <p className="text-gray-400 max-w-[95%]">
-              We’ll notify you as soon as Coinsafe is ready for you to start
+            <p className="text-gray-400 max-w-[80%]">
+              We'll notify you as soon as Coinsafe is ready for you to start
               saving and earning with ease. In the meantime, feel free to share
-              the waitlist with friends and family—let’s build a smarter way to
+              the waitlist with friends and family—let's build a smarter way to
               save together!
             </p>
             <Button
               onClick={handleClose}
-              className="mt-6 bg-[#3F3F3F99] hover:bg-[#3F3F3F99] text-white rounded-[2rem]">
+              className="mt-6 bg-white hover:bg-white text-black rounded-[2rem]">
               Close
             </Button>
           </div>
