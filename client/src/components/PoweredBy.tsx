@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { WaitlistModal } from "./Waitlist-modal";
+import { WaitlistModal } from "./Modals/Waitlist-modal";
 const PoweredBy = () => {
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   return (
-    <div className="flex flex-col items-center px-4 sm:px-6 md:px-8 lg:px-16">
+    <div className="flex flex-col items-center px-4 pb-28 sm:px-6 md:px-8 lg:px-16">
       <div className="flex flex-col items-center pt-12 md:pt-[100px] text-center">
         <h1 className="text-3xl md:text-4xl lg:text-5xl text-[#F1F1F1]">
           Built on trust, powered by security

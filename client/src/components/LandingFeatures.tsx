@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { WaitlistModal } from "./Waitlist-modal";
+import { WaitlistModal } from "./Modals/Waitlist-modal";
 import { useState } from "react";
 
 export default function LandingFeatures() {
@@ -8,22 +8,23 @@ export default function LandingFeatures() {
     <div className="  px-4 py-12 md:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
-        <div className="flex flex-col items-center justify-between gap-8 pb-16 md:flex-row md:pb-24">
+        <div className="sm:flex flex-col items-center justify-between gap-8 pb-16 md:flex-row md:pb-24">
           <h1
-            className="max-w-4xl text-center text-4xl font-medium tracking-tight md:text-left "
+            className="max-w-4xl sm:text-center text-4xl font-medium tracking-tight md:text-left "
             style={{
               background: "linear-gradient(to right, #F1F1F1, #8B8B8B)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}>
-            Coinsafe makes saving and investing with <br /> crypto simple,
-            secure, and rewarding.
+            Coinsafe makes saving and investing with
+            <br className="hidden sm:block" /> crypto simple, secure, and
+            rewarding.
           </h1>
 
           <Button
             onClick={() => setShowWaitlistModal(true)}
             variant="secondary"
-            className="whitespace-nowrap rounded-full px-6 py-2">
+            className="whitespace-nowrap rounded-full mt-8 sm:mt-0 px-6 py-2">
             Join waitlist
           </Button>
         </div>
