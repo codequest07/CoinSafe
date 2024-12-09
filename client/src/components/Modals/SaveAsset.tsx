@@ -37,6 +37,7 @@ import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { config } from "@/lib/config";
 import SaveSuccessful from "./SaveSuccessful";
+import { LoaderCircle } from "lucide-react";
 
 export default function SaveAsset({
   isOpen,
@@ -104,6 +105,52 @@ export default function SaveAsset({
   };
 
   const [selectedOption, setSelectedOption] = useState("manual");
+  const [validationErrors, setValidationErrors] = useState<{
+    amount?: string;
+    token?: string;
+    duration?: string;
+    transactionPercentage?: string;
+    frequency?: string;
+  }>({});
+
+  // LINE 37-60: Comprehensive validation function
+  const validateForm = () => {
+    const errors: typeof validationErrors = {};
+
+    // Common validations for both one-time and autosave
+    if (!saveState.amount || saveState.amount <= 0) {
+      errors.amount = "Please enter a valid amount";
+    }
+
+    if (!saveState.token) {
+      errors.token = "Please select a token";
+    }
+
+    if (!saveState.duration || saveState.duration <= 0) {
+      errors.duration = "Please enter a valid duration";
+    }
+
+    // Specific validations based on autosave option
+    if (tab === "autosave") {
+      if (selectedOption === "manual") {
+        // Validation for per transaction saving
+        if (
+          !saveState.transactionPercentage ||
+          saveState.transactionPercentage <= 0
+        ) {
+          errors.transactionPercentage = "Please enter a valid percentage";
+        }
+      } else if (selectedOption === "personalized") {
+        // Validation for personalized frequency saving
+        if (!saveState.frequency) {
+          errors.frequency = "Please select a saving frequency";
+        }
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   // to multiply the amount based on selected token's decimals
   const [decimals, setDecimals] = useState(1);
@@ -138,6 +185,11 @@ export default function SaveAsset({
 
   const handleSaveAsset = async (e: any) => {
     e.preventDefault();
+
+    // Perform validation first
+    if (!validateForm()) {
+      return; // Stop if validation fails
+    }
 
     try {
       if (!address) {
@@ -236,6 +288,11 @@ export default function SaveAsset({
                       onChange={handleAmountChange}
                       className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
                     />
+                    {validationErrors.amount && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {validationErrors.amount}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="ml-4">
@@ -260,18 +317,23 @@ export default function SaveAsset({
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                  {validationErrors.token && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.token}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Wallet Balance Section */}
               <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-[300] text-gray-300">
+                {/* <div className="text-sm font-[300] text-gray-300">
                   Wallet balance:{" "}
                   <span className="text-gray-400">3000 XRP</span>
                 </div>
                 <div className="text-sm text-green-400 cursor-pointer">
                   Save all
-                </div>
+                </div> */}
               </div>
 
               {/* Duration Section */}
@@ -376,7 +438,19 @@ export default function SaveAsset({
                     type="number"
                     placeholder="20 %"
                     className="pl-3 pr-4"
+                    value={saveState.transactionPercentage || ""}
+                    onChange={(e) => {
+                      setSaveState((prev) => ({
+                        ...prev,
+                        transactionPercentage: Number(e.target.value),
+                      }));
+                    }}
                   />
+                  {validationErrors.transactionPercentage && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.transactionPercentage}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -421,6 +495,11 @@ export default function SaveAsset({
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                      {validationErrors.token && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {validationErrors.token}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -438,6 +517,11 @@ export default function SaveAsset({
                         ))}
                       </SelectContent>
                     </Select>
+                    {validationErrors.frequency && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {validationErrors.frequency}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -497,9 +581,13 @@ export default function SaveAsset({
               onClick={(e) => handleSaveAsset(e)}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={saveState.token == "" || isLoading}
+              disabled={isLoading}
             >
-              {isLoading ? "Loading..." : "Save assets"}
+              {isLoading ? (
+                <LoaderCircle className="animate-spin" />
+              ) : (
+                "Save assets"
+              )}
             </Button>
           </div>
         </DialogFooter>
