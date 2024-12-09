@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import SaveAsset from "./SaveAsset";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { SaveSenseModalManager } from "../Cards/SaveSenseModalManager";
 
 interface SavingOptionProps {
   isFirstModalOpen: boolean;
@@ -27,27 +26,12 @@ export default function SavingOption({
   isSecondModalOpen,
   setIsSecondModalOpen,
 }: SavingOptionProps) {
-  const [saveState, setSaveState] = useRecoilState(saveAtom);
-
-  const modalManagerRef = useRef<{ 
-    fetchData: () => void; 
-    download: () => void; 
-  }>(null);
-
-  const handleButtonClick = () => {  
-      // Trigger fetch data method on modal manager
-      modalManagerRef.current?.fetchData();
-  };
-
   const openSecondModal = () => {
-    if(saveState.typeName === "personalized") {
-      setIsFirstModalOpen(false);
-      handleButtonClick();
-      return 
-    }
+    setIsFirstModalOpen(false);
     setIsSecondModalOpen(true);
   };
 
+  const [_, setSaveState] = useRecoilState(saveAtom);
 
   const handleChange = (event:any) => {
     setSaveState((prevState) => ({...prevState, typeName: event.target.value}));
@@ -128,13 +112,6 @@ export default function SavingOption({
           setIsFirstModalOpen(true);
         }}
         tab=""
-      />
-       {/* Modal Manager Component */}
-       <SaveSenseModalManager 
-        trigger={modalManagerRef}
-        onClose={() => {
-          // Optional: Add any cleanup or additional logic when modals close
-        }} 
       />
     </Dialog>
   );
