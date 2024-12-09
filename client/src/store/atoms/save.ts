@@ -6,6 +6,8 @@ export const saveAtom = atom({
     token: '',
     amount: 0,
     duration: 0,
-    typeName: ''
+    typeName: '',
+    transactionPercentage: 0,
+    frequency: '',
   },
 });

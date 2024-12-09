@@ -255,12 +255,12 @@ export default function Deposit({
           </div>
 
           {/* Wallet Balance Section */}
-          <div className="flex items-center justify-between mb-3">
+          {/* <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-[300] text-gray-300">
               Deposit assets: <span className="text-gray-400">3000 XRP</span>
             </div>
             <div className="text-sm text-green-400 cursor-pointer">Max</div>
-          </div>
+          </div> */}
         </div>
         <DialogFooter>
           <Button

@@ -19,6 +19,13 @@ import { useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 // import MemoRipple from "@/icons/Ripple";
 import MemoCalenderIcon from "@/icons/CalenderIcon";
+import { Calendar } from "@/components/ui/calendar"; // Line 20: Added Shadcn Calendar
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"; // Line 24: Added Popover for calendar
+import { format, differenceInDays, addDays } from "date-fns";
 
 import { useAccount } from "wagmi";
 // import { waitForTransactionReceipt } from "@wagmi/core";
@@ -30,9 +37,10 @@ import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 // import { config } from "@/lib/config";
 import SaveSuccessful from "./SaveSuccessful";
+import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
-// import { set } from "date-fns";
+
 
 export default function SaveAsset({
   isOpen,
@@ -45,35 +53,123 @@ export default function SaveAsset({
   onBack: () => void;
   tab: string;
 }) {
-  const [selectedOption, setSelectedOption] = useState("manual");
-  const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
+  const [frequencies] = useState([
+    { value: "1day", label: "Every day" },
+    { value: "2days", label: "Every 2 days" },
+    { value: "5days", label: "Every 5 days" },
+    { value: "weekly", label: "Weekly" },
+    { value: "monthly", label: "Monthly" },
+  ]);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [daysInput, setDaysInput] = useState<number | string>("");
+  const [unlockDate, setUnlockDate] = useState<Date | null>(null);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  // to multiply the amount based on selected token's decimals
-  const [, setDecimals] = useState(1);
+  // Line 50-64: New handler for calendar date selection
+  const handleDateSelect = (selectedDay: Date | undefined) => {
+    if (selectedDay) {
+      setSelectedDate(selectedDay);
 
-  const [saveState, setSaveState] = useRecoilState(saveAtom);
-  // const [isLoading, setIsLoading] = useState(false);
+      // Calculate days difference from today
+      const days = differenceInDays(selectedDay, new Date());
 
-  // const handleChange = (event:any) => {
-  //   setSaveState((prevState) => ({...prevState, [event.target.name]: event.target.value}));
-  // };
-  const handleDurationChange = (event: any) => {
-    // convert number of days to seconds for smart contract
-    let _duration = Number(event.target.value) * 24 * 60 * 60;
+      // Update days input and set unlock date
+      setDaysInput(days);
+
+      // Calculate duration in seconds for smart contract
+      const durationInSeconds = days * 24 * 60 * 60;
+
+      setSaveState((prevState) => ({
+        ...prevState,
+        duration: durationInSeconds,
+      }));
+
+      setUnlockDate(selectedDay);
+
+      // Close calendar popover
+      setIsCalendarOpen(false);
+    }
+  };
+
+  const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const days = Number(event.target.value);
+    setDaysInput(days);
+
+    const calculatedUnlockDate = addDays(new Date(), days);
+    const durationInSeconds = days * 24 * 60 * 60;
+
     setSaveState((prevState) => ({
       ...prevState,
-      [event.target.name]: _duration,
+      duration: durationInSeconds,
     }));
+
+    setUnlockDate(calculatedUnlockDate);
+    setSelectedDate(calculatedUnlockDate);
   };
-  const handleAmountChange = (event: any) => {
+    
+    
+
+  const [selectedOption, setSelectedOption] = useState("manual");
+  const [validationErrors, setValidationErrors] = useState<{
+    amount?: string;
+    token?: string;
+    duration?: string;
+    transactionPercentage?: string;
+    frequency?: string;
+  }>({});
+
+  // LINE 37-60: Comprehensive validation function
+  const validateForm = () => {
+    const errors: typeof validationErrors = {};
+
+    // Common validations for both one-time and autosave
+    if (!saveState.amount || saveState.amount <= 0) {
+      errors.amount = "Please enter a valid amount";
+    }
+
+    if (!saveState.token) {
+      errors.token = "Please select a token";
+    }
+
+    if (!saveState.duration || saveState.duration <= 0) {
+      errors.duration = "Please enter a valid duration";
+    }
+
+    // Specific validations based on autosave option
+    if (tab === "autosave") {
+      if (selectedOption === "manual") {
+        // Validation for per transaction saving
+        if (
+          !saveState.transactionPercentage ||
+          saveState.transactionPercentage <= 0
+        ) {
+          errors.transactionPercentage = "Please enter a valid percentage";
+        }
+      } else if (selectedOption === "personalized") {
+        // Validation for personalized frequency saving
+        if (!saveState.frequency) {
+          errors.frequency = "Please select a saving frequency";
+        }
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
+  // to multiply the amount based on selected token's decimals
+  const [,setDecimals] = useState(1);
+  const [saveState, setSaveState] = useRecoilState(saveAtom);
+  //   const [isLoading, setIsLoading] = useState(false);
+  // to multiply the amount based on selected token's decimals
+
+  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let _amount = Number(event.target.value);
     setSaveState((prevState) => ({
       ...prevState,
-      [event.target.name]: _amount,
+      amount: _amount,
     }));
   };
-
-  // console.log("SAVE::", saveState)
 
   const { address } = useAccount();
 
@@ -93,10 +189,12 @@ export default function SaveAsset({
   };
 
   const handleTabChange = () => {};
+  //if (!validateForm()) {
+  //     return; // Stop if validation fails
+  //}
 
   // const handleSaveAsset = async (e: any) => {
   //   e.preventDefault();
-
   //   try {
   //     if (!address) {
   //       try {
@@ -201,17 +299,19 @@ export default function SaveAsset({
                   </label>
                   <div className="flex flex-col items-center justify-center">
                     <input
-                      type="text"
+                      type="number" // Line 179: Changed to number input
                       id="amount"
                       name="amount"
-                      value={saveState.amount}
+                      placeholder="Enter amount" // Line 182: Added placeholder
+                      value={saveState.amount || ""} // Line 183: Added fallback
                       onChange={handleAmountChange}
-                      defaultValue={0}
                       className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
                     />
-                    {/* <div className="text-xs text-gray-400 text-center">
-                      ≈ $400.56
-                    </div> */}
+                    {validationErrors.amount && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {validationErrors.amount}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="ml-4">
@@ -236,42 +336,67 @@ export default function SaveAsset({
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                  {validationErrors.token && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.token}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Wallet Balance Section */}
               <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-[300] text-gray-300">
+                {/* <div className="text-sm font-[300] text-gray-300">
                   Wallet balance:{" "}
                   <span className="text-gray-400">3000 XRP</span>
                 </div>
                 <div className="text-sm text-green-400 cursor-pointer">
                   Save all
-                </div>
+                </div> */}
               </div>
 
               {/* Duration Section */}
               <div className="space-y-4 py-6 text-white">
                 <div className="space-y-2 relative">
                   <Label htmlFor="duration">Duration</Label>
-                  <div className="relative">
+                  <div className="relative flex items-center">
                     <Input
                       id="duration"
-                      // defaultValue="7days"
                       type="number"
                       name="duration"
+                      placeholder="Enter days"
+                      value={daysInput}
                       onChange={handleDurationChange}
-                      placeholder="Days"
-                      className="pl-3 pr-4"
+                      className="pl-3 pr-10 flex-grow"
                     />
-                    <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
+                    <Popover
+                      open={isCalendarOpen}
+                      onOpenChange={setIsCalendarOpen}
+                    >
+                      <PopoverTrigger asChild>
+                        <span onClick={() => setIsCalendarOpen(true)}>
+                          <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
+                        </span>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={handleDateSelect}
+                          initialFocus
+                          disabled={(date) => date < new Date()}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
               </div>
 
               {/* Unlock Date Section */}
               <div className="text-sm text-gray-300">
-                Unlocks on 24 Sept, 2024
+                {unlockDate
+                  ? `Unlocks on ${format(unlockDate, "dd MMM, yyyy")}`
+                  : "Enter duration to see unlock date"}
               </div>
             </div>
           </TabsContent>
@@ -329,11 +454,22 @@ export default function SaveAsset({
                   </Label>
                   <Input
                     id="transactionPercentage"
-                    defaultValue="% 20"
-                    type="text"
-                    placeholder="Percentage"
+                    type="number"
+                    placeholder="20 %"
                     className="pl-3 pr-4"
+                    value={saveState.transactionPercentage || ""}
+                    onChange={(e) => {
+                      setSaveState((prev) => ({
+                        ...prev,
+                        transactionPercentage: Number(e.target.value),
+                      }));
+                    }}
                   />
+                  {validationErrors.transactionPercentage && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.transactionPercentage}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -348,7 +484,7 @@ export default function SaveAsset({
                         <input
                           type="text"
                           id="amount"
-                          defaultValue="345,000.67 XRP"
+                          placeholder="345,000.67 XRP"
                           className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
                         />
                         <div className="text-xs text-gray-400 text-center">
@@ -378,27 +514,33 @@ export default function SaveAsset({
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                      {validationErrors.token && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {validationErrors.token}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="space-y-4 py-2 text-white">
                     <Label htmlFor="frequencyAmount">Frequency</Label>
                     <Select>
-                      <SelectTrigger className="w-full bg-gray-700 border bg-transparent  text-white rounded-lg">
-                        <div className="flex items-center">
-                          <SelectValue placeholder="Monthly" />
-                        </div>
+                      <SelectTrigger className="w-full bg-gray-700 border bg-transparent text-white rounded-lg">
+                        <SelectValue placeholder="Select Frequency" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="jan">
-                          <div className="flex items-center space-x-2">
-                            <p>Jan</p>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="feb">Feb</SelectItem>
-                        <SelectItem value="mar">Mar</SelectItem>
+                        {frequencies.map((freq) => (
+                          <SelectItem key={freq.value} value={freq.value}>
+                            {freq.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
+                    {validationErrors.frequency && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {validationErrors.frequency}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -406,18 +548,40 @@ export default function SaveAsset({
               {/* Common Duration Section */}
               <div className="space-y-2 relative">
                 <Label htmlFor="duration">Duration</Label>
-                <div className="relative">
+                <div className="relative flex items-center">
                   <Input
                     id="duration"
-                    defaultValue="7 days"
-                    type="text"
-                    placeholder="Days"
-                    className="pl-3 pr-4"
+                    type="number"
+                    name="duration"
+                    placeholder="Enter days"
+                    value={daysInput}
+                    onChange={handleDurationChange}
+                    className="pl-3 pr-10 flex-grow"
                   />
-                  <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
+                  <Popover
+                    open={isCalendarOpen}
+                    onOpenChange={setIsCalendarOpen}
+                  >
+                    <PopoverTrigger asChild>
+                      <span onClick={() => setIsCalendarOpen(true)}>
+                        <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
+                      </span>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={handleDateSelect}
+                        initialFocus
+                        disabled={(date) => date < new Date()}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="text-sm text-gray-300">
-                  Unlocks on 24 Sept, 2024
+                  {unlockDate
+                    ? `Unlocks on ${format(unlockDate, "dd MMM, yyyy")}`
+                    : "Enter duration to see unlock date"}
                 </div>
               </div>
             </div>
@@ -436,9 +600,13 @@ export default function SaveAsset({
               onClick={(e) => saveAsset(e)}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={saveState.token == "" || isLoading}
+              disabled={isLoading}
             >
-              {isLoading ? "Loading..." : "Save assets"}
+              {isLoading ? (
+                <LoaderCircle className="animate-spin" />
+              ) : (
+                "Save assets"
+              )}
             </Button>
           </div>
         </DialogFooter>
