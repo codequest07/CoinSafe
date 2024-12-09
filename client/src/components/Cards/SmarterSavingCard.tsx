@@ -1,39 +1,64 @@
-import { useRef } from "react";
+import { useState } from "react";
+import { useAccount } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { SavingsOverviewData } from "@/lib/data";
-import { SaveSenseModalManager } from "./SaveSenseModalManager";
-import { useAccount } from "wagmi";
+import Loading from "../Modals/loading-screen";
+import SaveSenseResp from "../Modals/SaveSenseResp";
+import KitchenLoading from "../Modals/kitchen-loading";
 import { toast } from "@/hooks/use-toast";
 
-export default function SmarterSavingCard({
-  setIsConnectModalOpen
-}: {
-  setIsConnectModalOpen?: (open: boolean) => void;
-}) {
+export default function SmarterSavingCard({setIsConnectModalOpen}:{setIsConnectModalOpen?: (open: boolean) => void;}) {
+  const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
+  const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
+  const [saveSenseData, setSaveSenseData] = useState(null);
+  const [showKitchenLoading, setShowKitchenLoading] = useState(false);
+
   const { address } = useAccount();
-  const modalManagerRef = useRef<{ 
-    fetchData: () => void; 
-    download: () => void; 
-  }>(null);
+
+  const handleGetStarted = async () => {
+    if (!address) {
+      toast({
+        title: "No wallet connected",
+        variant: "destructive",
+      });
+      console.error("No wallet connected");
+      setIsConnectModalOpen && setIsConnectModalOpen(true);
+      return;
+    }
+
+    setIsLoadingModalOpen(true);
+
+    try {
+      const response = await fetch(
+        `https://coinsafe-0q0m.onrender.com/main/${address}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+
+      setSaveSenseData(data);
+      setIsLoadingModalOpen(false);
+      setIsSaveSenseModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoadingModalOpen(false);
+    }
+  };
+
+  const handleDownload = () => {
+    setShowKitchenLoading(true);
+  };
 
   const handleButtonClick = (buttonText: string) => {
     if (buttonText === "Get started") {
-      if (!address) {
-        toast({
-          title: "No wallet connected",
-          variant: "destructive",
-        });
-        setIsConnectModalOpen && setIsConnectModalOpen(true);
-        return;
-      }
-      
-      // Trigger fetch data method on modal manager
-      modalManagerRef.current?.fetchData();
+      handleGetStarted();
     } else if (buttonText === "Download") {
-      // Trigger download method on modal manager
-      modalManagerRef.current?.download();
+      handleDownload();
     }
   };
+
+  const closeSaveSenseModal = () => setIsSaveSenseModalOpen(false);
 
   return (
     <div className="grid grid-col-1 sm:grid-cols-2 gap-3 pb-2">
@@ -57,13 +82,21 @@ export default function SmarterSavingCard({
           </div>
         </div>
       ))}
-      
-      {/* Modal Manager Component */}
-      <SaveSenseModalManager 
-        trigger={modalManagerRef}
-        onClose={() => {
-          // Optional: Add any cleanup or additional logic when modals close
-        }} 
+
+      <Loading
+        isOpen={isLoadingModalOpen}
+        onClose={() => setIsLoadingModalOpen(false)}
+      />
+
+      <SaveSenseResp
+        isOpen={isSaveSenseModalOpen}
+        onClose={closeSaveSenseModal}
+        data={saveSenseData}
+      />
+
+      <KitchenLoading
+        isOpen={showKitchenLoading}
+        onClose={() => setShowKitchenLoading(false)}
       />
     </div>
   );
