@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Country } from "country-state-city";
 import {
   Dialog,
   DialogContent,
@@ -10,18 +11,30 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface WaitlistModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+const initialFormData = {
+  name: "",
+  email: "",
+  country: "",
+};
+
 export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-  });
+  const [formData, setFormData] = useState(initialFormData);
   const [emailError, setEmailError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const validateEmail = (email: string) => {
     const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -38,79 +51,170 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setEmailError("");
+    setIsSubmitting(false);
+  };
+
+  const handleClose = () => {
+    onOpenChange(false);
+    // Reset form after a short delay to allow the closing animation
+    setTimeout(() => {
+      resetForm();
+      setIsSuccess(false);
+    }, 300);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateEmail(formData.email)) {
-      // Handle form submission here
-      console.log("Form submitted:", formData);
-      onOpenChange(false);
+      setIsSubmitting(true);
+      try {
+        const response = await fetch(
+          "https://coinsafe-0q0m.onrender.com/api/waitlist",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
+
+        if (response.ok) {
+          setIsSuccess(true);
+          resetForm();
+        } else {
+          console.error("Form submission failed");
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       setEmailError("Please enter a valid email address");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="bg-[#17171C] border-0 text-white max-w-[370px] sm:max-w-[480px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-white">
-            Join our waitlist
-          </DialogTitle>
-          <DialogDescription className="text-gray-400">
-            Be the first to experience Coinsafe! Sign up now to secure your spot
-            and get early access to tools that make saving simple, secure, and
-            rewarding.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm text-gray-400">
-              Name
-            </label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, name: e.target.value }))
-              }
-              className="bg-[#262628] border-0 text-white placeholder:text-gray-500"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm text-gray-400">
-              Email address
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={handleEmailChange}
-              className={`bg-[#262628] border-0 text-white placeholder:text-gray-500 ${
-                emailError ? "border-red-500" : ""
-              }`}
-              required
-            />
-            {emailError && (
-              <p className="text-red-500 text-sm mt-1">{emailError}</p>
-            )}
-          </div>
-          <div className="flex justify-between gap-3 mt-6">
+        {isSuccess ? (
+          <div className="flex flex-col items-center text-center py-8">
+            <h2 className="text-xl font-semibold text-white mb-6">
+              Thank you for joining the waitlist!
+            </h2>
+            <div className="w-24 h-24 mb-6">
+              <img
+                src="/assets/sms-star.svg"
+                className="w-24 h-24 "
+                alt="sms-star"
+              />
+            </div>
+            <p className="text-gray-400 max-w-[95%]">
+              We’ll notify you as soon as Coinsafe is ready for you to start
+              saving and earning with ease. In the meantime, feel free to share
+              the waitlist with friends and family—let’s build a smarter way to
+              save together!
+            </p>
             <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="bg-[#262628] hover:bg-[#262628] text-white hover:text-white border-0 rounded-[2rem]">
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-white hover:bg-white text-black rounded-[2rem]"
-              disabled={!formData.name || !formData.email || !!emailError}>
-              Join waitlist
+              onClick={handleClose}
+              className="mt-6 bg-[#3F3F3F99] hover:bg-[#3F3F3F99] text-white rounded-[2rem]">
+              Close
             </Button>
           </div>
-        </form>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-white">
+                Join our waitlist
+              </DialogTitle>
+              <DialogDescription className="text-gray-400">
+                Be the first to experience Coinsafe! Sign up now to secure your
+                spot and get early access to tools that make saving simple,
+                secure, and rewarding.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm text-gray-400">
+                  Name
+                </label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  className="bg-[#262628] border-0 text-white placeholder:text-gray-500"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm text-gray-400">
+                  Email address
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleEmailChange}
+                  className={`bg-[#262628] border-0 text-white placeholder:text-gray-500 ${
+                    emailError ? "border-red-500" : ""
+                  }`}
+                  required
+                />
+                {emailError && (
+                  <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="country" className="text-sm text-gray-400">
+                  Country
+                </label>
+                <Select
+                  value={formData.country}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, country: value }))
+                  }>
+                  <SelectTrigger className="bg-[#262628] border-0 text-white">
+                    <SelectValue placeholder="Select a country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Country.getAllCountries().map((country) => (
+                      <SelectItem key={country.isoCode} value={country.isoCode}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-between gap-3 mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  className="bg-[#262628] hover:bg-[#262628] text-white hover:text-white border-0 rounded-[2rem]">
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-white hover:bg-white text-black rounded-[2rem]"
+                  disabled={
+                    !formData.name ||
+                    !formData.email ||
+                    !formData.country ||
+                    !!emailError ||
+                    isSubmitting
+                  }>
+                  {isSubmitting ? "Submitting..." : "Join waitlist"}
+                </Button>
+              </div>
+            </form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
