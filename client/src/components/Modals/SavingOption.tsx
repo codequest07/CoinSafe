@@ -27,7 +27,11 @@ export default function SavingOption({
   setIsSecondModalOpen,
 }: SavingOptionProps) {
   const openSecondModal = () => {
-    setIsFirstModalOpen(false);
+  if(saveState.typeName === "personalized") {
+      setIsFirstModalOpen(false);
+      handleButtonClick();
+      return 
+    }
     setIsSecondModalOpen(true);
   };
 
@@ -71,9 +75,9 @@ export default function SavingOption({
               className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-primary-foreground">
               <input
                 type="radio"
-                id="personalized"
+                id="personalized-ai"
                 name="savingOption"
-                value="personalized"
+                value="personalized-ai"
                 onChange={handleChange}
                 className="peer appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
               />
