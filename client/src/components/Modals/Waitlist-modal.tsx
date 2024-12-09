@@ -125,7 +125,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
             <h2 className="text-xl font-semibold text-white mb-6">
               Thank you for joining the waitlist!
             </h2>
-            <div className="w-16 h-16 mb-6">
+            <div className="w-24 h-24 mb-6">
               <img src="/assets/sms-star.svg" alt="sms-star" />
             </div>
             <p className="text-gray-400 max-w-[80%]">
