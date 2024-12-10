@@ -23,16 +23,20 @@ import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import { formatUnits } from "viem";
 import { getValidNumberValue } from "@/lib/utils";
+import Withdraw from "./Modals/Withdraw";
 
 export default function WalletBalance() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const { isConnected, address } = useAccount();
 
   const openDepositModal = () => setIsDepositModalOpen(true);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
+
+  const openWithdrawModal = () => setIsWithdrawModalOpen(true);
 
   const [availableBalance, setAvailableBalance] = useState<number>(0);
   const [totalBalance, setTotalBalance] = useState<number>(0);
@@ -303,8 +307,11 @@ export default function WalletBalance() {
 
         {/* Action Buttons */}
         <div className="flex flex-row  space-x-4">
-          <Button className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full" onClick={() => {}}>
-            Withdraw {/*s*/}
+          <Button
+            onClick={openWithdrawModal}
+            className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full"
+          >
+            Withdraw
           </Button>
           <Button
             onClick={openDepositModal}
@@ -333,6 +340,13 @@ export default function WalletBalance() {
       <Deposit
         isDepositModalOpen={isDepositModalOpen}
         setIsDepositModalOpen={setIsDepositModalOpen}
+        onBack={() => {}}
+      />
+
+      {/* withdraw Modal */}
+      <Withdraw
+        isWithdrawModalOpen={isWithdrawModalOpen}
+        setIsWithdrawModalOpen={setIsWithdrawModalOpen}
         onBack={() => {}}
       />
     </div>
