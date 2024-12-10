@@ -2,7 +2,7 @@ import faucetAbi from "../abi/faucet.json";
 import coinSafeAbi from "../abi/coinsafe.json";
 
 export const tokens = {
-  usdt: "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909",
+  usdt: "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda",
   safu: "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a",
   lsk: "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D",
 };

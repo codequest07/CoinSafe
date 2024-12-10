@@ -53,6 +53,8 @@ const TrackingChart = () => {
     args: [address],
   });
 
+  // console.log("values from reading th contract: ", TotalBalance, SavingsBalances, AvailableBalance);
+
   useWatchContractEvent({
     abi: coinSafeAbi.abi,
     address: CoinSafeContract.address as `0x${string}`,
