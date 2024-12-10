@@ -53,7 +53,7 @@ export default function Faucet() {
   }
 
   const getShortErrorMessage = (message: string) => {
-    const maxLength = 50;
+    const maxLength = 60;
     return message.length > maxLength
       ? `${message.substring(0, maxLength)}...`
       : message;
@@ -62,7 +62,7 @@ export default function Faucet() {
   return (
     <main>
       <Navbar />
-      <div className="min-h-fit  bg-[#13131373] text-white p-8">
+      <div className="min-h-fit  bg-[#13131373] text-white p-8 mt-20">
         <Card className="w-full sm:max-w-xl border-[#FFFFFF17] sm:mx-auto bg-[#13131373] text-white">
           <CardHeader>
             <CardTitle className="text-2xl font-[400] text-center">
@@ -84,7 +84,10 @@ export default function Faucet() {
                     <div className="bg-[#FF484B24] p-3 rounded-[2rem]">
                       <p className="text-[#FF484B] text-xs break-words">
                         {getShortErrorMessage(
-                          error?.message || "Too many tries, try again later"
+                          (error?.message?.includes("ClaimTooSoon")
+                            ? "You can only claim once every 24 hours! Try again tomorrow"
+                            : error?.message) ||
+                            "Too many tries, try again later"
                         )}
                       </p>
                     </div>
@@ -97,7 +100,8 @@ export default function Faucet() {
                           href={`https://sepolia-blockscout.lisk.com/tx/${hash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="underline">
+                          className="underline"
+                        >
                           {`${hash.slice(0, 6)}...${hash.slice(-4)}`}
                         </a>
                       </p>
@@ -116,7 +120,8 @@ export default function Faucet() {
                     className="absolute bg-transparent hidden  hover:bg-transparent  sm:flex space-x-[2px] right-2 top-1/2 transform -translate-y-1/2 text-zinc-400"
                     onClick={() =>
                       navigator.clipboard.readText().then(setEvmAddress)
-                    }>
+                    }
+                  >
                     <MemoClipboard className="w-5 h-5" />
                     <p>Paste</p>
                   </Button>
@@ -129,7 +134,8 @@ export default function Faucet() {
                 <Button
                   className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
                   onClick={() => handleClaim()}
-                  disabled={isPending}>
+                  disabled={isPending}
+                >
                   {isPending ? "Pending" : "Claim faucet"}
                 </Button>
               </div>
@@ -144,7 +150,8 @@ export default function Faucet() {
             {FaucetData.map((items, index) => (
               <Card
                 key={index}
-                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full">
+                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full"
+              >
                 <CardHeader className="p-3 pb-0">
                   <CardTitle className="text-sm mt-3">{items.title}</CardTitle>
                 </CardHeader>
@@ -153,7 +160,8 @@ export default function Faucet() {
                   <Link
                     to={items.link}
                     target="_blank"
-                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline">
+                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline"
+                  >
                     {items.btnTitle}
                   </Link>
                 </CardContent>

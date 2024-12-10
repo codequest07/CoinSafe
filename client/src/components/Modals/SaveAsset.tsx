@@ -41,7 +41,6 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 
-
 export default function SaveAsset({
   isOpen,
   onClose,
@@ -106,8 +105,6 @@ export default function SaveAsset({
     setUnlockDate(calculatedUnlockDate);
     setSelectedDate(calculatedUnlockDate);
   };
-    
-    
 
   const [selectedOption, setSelectedOption] = useState("manual");
   const [validationErrors, setValidationErrors] = useState<{
@@ -158,7 +155,7 @@ export default function SaveAsset({
   };
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   // to multiply the amount based on selected token's decimals
-  const [,setDecimals] = useState(1);
+  const [, setDecimals] = useState(1);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   //   const [isLoading, setIsLoading] = useState(false);
   // to multiply the amount based on selected token's decimals
@@ -250,12 +247,12 @@ export default function SaveAsset({
     onSuccess: () => {
       openThirdModal();
     },
-    onError: (error: { message: any; }) => {
+    onError: (error: { message: any }) => {
       toast({
         title: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const openThirdModal = () => {
