@@ -15,14 +15,8 @@ import {
 import { useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 import coinSafeAbi from "../../abi/coinsafe.json";
-// import ApproveDeposit from "./ApproveDeposit";
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import { useAccount } from "wagmi";
-// import { injected } from "wagmi/connectors";
-// import { liskSepolia } from "viem/chains";
-// import { erc20Abi } from "viem";
-// import { waitForTransactionReceipt } from "@wagmi/core";
-// import { config } from "@/lib/config";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Deposited from "./Deposited";
@@ -37,12 +31,8 @@ export default function Deposit({
   setIsDepositModalOpen: (open: boolean) => void;
   onBack: () => void;
 }) {
-  // const { writeContractAsync } = useWriteContract();
-
-  // const { connectAsync } = useConnect();
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const { address } = useAccount();
-  // const [isLoading, setIsLoading] = useState(false);
 
   const [amount, setAmount] = useState(0);
   const [token, setToken] = useState("");
@@ -53,133 +43,6 @@ export default function Deposit({
     setIsThirdModalOpen(true);
     setIsDepositModalOpen(false);
   };
-
-  // const handleDepositAsset = async (e: any) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     setIsLoading(true);
-
-  //     if (!address) {
-  //       try {
-  //         await connectAsync({
-  //           chainId: liskSepolia.id,
-  //           connector: injected(),
-  //         });
-  //       } catch (error) {
-  //         alert(error);
-  //       }
-  //     }
-
-  //     if (!amount) {
-  //       toast({
-  //         title: "Please input a value for amount to deposit",
-  //         variant: "destructive",
-  //       });
-  //       setIsLoading(false);
-  //       return;
-  //     }
-
-  //     if (!token) {
-  //       toast({
-  //         title: "Please select token to deposit",
-  //         variant: "destructive",
-  //       });
-  //       setIsLoading(false);
-  //       return;
-  //     }
-
-  //     const approveResponse = await writeContractAsync({
-  //       chainId: liskSepolia.id,
-  //       address: token as `0x${string}`,
-  //       functionName: "approve",
-  //       abi: erc20Abi,
-  //       // based on any update to more token to be added we'll update this amount being passed to this function
-  //       args: [
-  //         CoinSafeContract.address as `0x${string}`,
-  //         BigInt(token === tokens.usdt ? amount * 10 ** 6 : amount * 10 ** 18),
-  //       ],
-  //     });
-
-  //     // Check if the approve transaction was successful
-  //     if (approveResponse) {
-  //       console.log(`Approve transaction successful: ${approveResponse}`);
-
-  //       // Step 2: Wait until the transaction is mined
-  //       const approveTransactionReceipt = await waitForTransactionReceipt(
-  //         config,
-  //         {
-  //           hash: approveResponse,
-  //         }
-  //       );
-
-  //       console.log(approveTransactionReceipt);
-
-  //       if (approveTransactionReceipt.transactionIndex === 1) {
-  //         console.log(
-  //           "Approve transaction confirmed, proceeding with deposit..."
-  //         );
-
-  //         // Step 3: Call depositToPool function after approval
-  //         const depositResponse = await writeContractAsync({
-  //           chainId: liskSepolia.id,
-  //           address: CoinSafeContract.address as `0x${string}`,
-  //           functionName: "depositToPool",
-  //           abi: coinSafeAbi.abi,
-  //           // based on any update to more token to be added we'll update this amount being passed to this function
-  //           args: [
-  //             token === tokens.usdt ? amount * 10 ** 6 : amount * 10 ** 18,
-  //             token,
-  //           ],
-  //         });
-
-  //         console.log(depositResponse);
-
-  //         const depositTransactionReceipt = await waitForTransactionReceipt(
-  //           config,
-  //           {
-  //             hash: depositResponse,
-  //           }
-  //         );
-
-  //         if (depositTransactionReceipt.transactionIndex === 1) {
-  //           openThirdModal();
-  //         }
-
-  //         console.log("DATA", depositTransactionReceipt.status);
-  //         setIsLoading(false);
-  //       } else {
-  //         console.error("Deposit transaction failed or was reverted");
-  //         setIsLoading(false);
-  //       }
-  //     } else {
-  //       console.error("Approve transaction failed");
-  //       setIsLoading(false);
-  //     }
-
-  //     // const data = await writeContractAsync({
-  //     //   chainId: liskSepolia.id,
-  //     //   address: CoinSafeContract.address as `0x${string}`,
-  //     //   functionName: "depositToPool",
-  //     //   abi: coinSafeAbi.abi,
-  //     //   args: [amount, token],
-  //     // });
-  //   } catch (error) {
-  //     console.log(error);
-  //     setIsLoading(false);
-  //   }
-  //   // const formData = new FormData(e.target as HTMLFormElement)
-  //   // const tokenId = formData.get('tokenId') as string
-  //   // console.log("Loggin first")
-  //   // writeContract({
-  //   //   address: `0x${CoinSafeContract.address}`,
-  //   //   abi:coinSafeAbi.abi,
-  //   //   functionName: 'depositToPool',
-  //   //   args: [amount, BigInt(token)],
-  //   // });
-
-  //   // console.log("Logging after")
-  // };
 
   const handleTokenSelect = (value: string) => {
     setToken(value);

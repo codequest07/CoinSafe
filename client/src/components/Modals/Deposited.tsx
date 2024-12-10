@@ -17,7 +17,7 @@ export default function Deposited({
       <DialogContent className="max-w-[500px] p-6 bg-black text-white rounded-lg shadow-lg">
         <div className="flex justify-between items-center mb-4">
           <DialogTitle className="text-lg font-semibold">
-            Deposit transaction Succesful
+            Deposit transaction Successful
           </DialogTitle>
         </div>
 
