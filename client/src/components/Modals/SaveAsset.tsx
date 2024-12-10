@@ -63,6 +63,7 @@ export default function SaveAsset({
   const [daysInput, setDaysInput] = useState<number | string>("");
   const [unlockDate, setUnlockDate] = useState<Date | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [ currentTab, setCurrentTab ] = useState(tab || 'one-time');
 
   // Line 50-64: New handler for calendar date selection
   const handleDateSelect = (selectedDay: Date | undefined) => {
@@ -106,7 +107,7 @@ export default function SaveAsset({
     setSelectedDate(calculatedUnlockDate);
   };
 
-  const [selectedOption, setSelectedOption] = useState("manual");
+  const [selectedOption, setSelectedOption] = useState("per-transaction");
   const [validationErrors, setValidationErrors] = useState<{
     amount?: string;
     token?: string;
@@ -133,8 +134,8 @@ export default function SaveAsset({
     }
 
     // Specific validations based on autosave option
-    if (tab === "autosave") {
-      if (selectedOption === "manual") {
+    if (currentTab === "autosave") {
+      if (selectedOption === "per-tranaction") {
         // Validation for per transaction saving
         if (
           !saveState.transactionPercentage ||
@@ -142,7 +143,7 @@ export default function SaveAsset({
         ) {
           errors.transactionPercentage = "Please enter a valid percentage";
         }
-      } else if (selectedOption === "personalized") {
+      } else if (selectedOption === "by-frequency") {
         // Validation for personalized frequency saving
         if (!saveState.frequency) {
           errors.frequency = "Please select a saving frequency";
@@ -153,12 +154,12 @@ export default function SaveAsset({
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
+
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   // to multiply the amount based on selected token's decimals
   const [, setDecimals] = useState(1);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
-  //   const [isLoading, setIsLoading] = useState(false);
-  // to multiply the amount based on selected token's decimals
+  const { address } = useAccount();
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let _amount = Number(event.target.value);
@@ -167,11 +168,6 @@ export default function SaveAsset({
       amount: _amount,
     }));
   };
-
-  const { address } = useAccount();
-
-  // const { writeContractAsync } = useWriteContract();
-  // const { connectAsync } = useConnect();
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
@@ -185,58 +181,10 @@ export default function SaveAsset({
     setSaveState((prevState) => ({ ...prevState, token: value }));
   };
 
-  const handleTabChange = () => {};
-  //if (!validateForm()) {
-  //     return; // Stop if validation fails
-  //}
-
-  // const handleSaveAsset = async (e: any) => {
-  //   e.preventDefault();
-  //   try {
-  //     if (!address) {
-  //       try {
-  //         await connectAsync({
-  //           chainId: liskSepolia.id,
-  //           connector: injected(),
-  //         });
-  //       } catch (error) {
-  //         alert(error);
-  //       }
-  //     }
-  //     setIsLoading(true);
-  //     console.log("DECIMALS", decimals);
-  //     console.log("AMOUNT", saveState.amount);
-
-  //     // Step 3: Call save function
-  //     const data = await writeContractAsync({
-  //       chainId: liskSepolia.id,
-  //       address: CoinSafeContract.address as `0x${string}`,
-  //       functionName: "save",
-  //       abi: coinSafeAbi.abi,
-  //       args: [saveState.token, BigInt(saveState.token === tokens.usdt ? saveState.amount * 10 ** 6 : saveState.amount * 10 ** 18), saveState.duration],
-  //     });
-
-  //     console.log(data);
-
-  //     const saveTransactionReceipt = await waitForTransactionReceipt(config, {
-  //       hash: data,
-  //     });
-
-  //     if (saveTransactionReceipt.transactionIndex === 1) {
-  //       console.log("DATA", data);
-  //       openThirdModal();
-  //     }
-
-  //     console.log("DATA", saveTransactionReceipt.status);
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.log("ERROR:::", error);
-  //     if((error as any).toString().includes("InsufficientFunds()")) {
-  //       alert("Insufficient Funds, Please deposit enough to be able to save.");
-  //     }
-  //     setIsLoading(false);
-  //   }
-  // };
+  const handleTabChange = (value: string) => {
+    console.log("Tab switched to: ", value);
+    setCurrentTab(value);
+  };
 
   const { saveAsset, isLoading } = useSaveAsset({
     address,
@@ -269,7 +217,7 @@ export default function SaveAsset({
         </DialogTitle>
         <Tabs
           defaultValue={tab || "one-time"}
-          onValueChange={() => handleTabChange()}
+          onValueChange={handleTabChange}
           className="w-full"
         >
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
@@ -402,16 +350,16 @@ export default function SaveAsset({
               <p className="font-[200] text-base">Choose savings method</p>
               <div className="flex gap-2">
                 <Label
-                  htmlFor="manual"
+                  htmlFor="per-transaction"
                   className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
                 >
                   <input
                     type="radio"
-                    id="manual"
+                    id="per-transaction"
                     name="savingOption"
-                    value="manual"
-                    checked={selectedOption === "manual"}
-                    onChange={() => setSelectedOption("manual")}
+                    value="per-transaction"
+                    checked={selectedOption === "per-transaction"}
+                    onChange={() => setSelectedOption("per-transaction")}
                     className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
                   />
                   <div className="flex-1 ml-3">
@@ -422,16 +370,16 @@ export default function SaveAsset({
                   </div>
                 </Label>
                 <Label
-                  htmlFor="personalized"
+                  htmlFor="by-frequency"
                   className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
                 >
                   <input
                     type="radio"
-                    id="personalized"
+                    id="by-frequency"
                     name="savingOption"
-                    value="personalized"
-                    checked={selectedOption === "personalized"}
-                    onChange={() => setSelectedOption("personalized")}
+                    value="by-frequency"
+                    checked={selectedOption === "by-frequency"}
+                    onChange={() => setSelectedOption("by-frequency")}
                     className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
                   />
                   <div className="flex-1 ml-3">
@@ -444,7 +392,7 @@ export default function SaveAsset({
               </div>
 
               {/* Conditionally Rendered Content */}
-              {selectedOption === "manual" && (
+              {selectedOption === "per-transaction" && (
                 <div className="space-y-4 py-2 text-white">
                   <Label htmlFor="transactionPercentage">
                     Transaction Percentage
@@ -470,7 +418,7 @@ export default function SaveAsset({
                 </div>
               )}
 
-              {selectedOption === "personalized" && (
+              {selectedOption === "by-frequency" && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex-1">
@@ -594,7 +542,12 @@ export default function SaveAsset({
           </Button>
           <div>
             <Button
-              onClick={(e) => saveAsset(e)}
+              onClick={(e) => {
+                if (!validateForm()) {
+                  return; // Stop if validation fails
+                }
+                saveAsset(e);
+              }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
               disabled={isLoading}
