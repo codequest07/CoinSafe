@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import SaveAsset from "./SaveAsset";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
+import { SaveSenseModalManager } from "../Cards/SaveSenseModalManager";
 
 interface SavingOptionProps {
   isFirstModalOpen: boolean;
@@ -26,12 +27,23 @@ export default function SavingOption({
   isSecondModalOpen,
   setIsSecondModalOpen,
 }: SavingOptionProps) {
+  const [saveState, setSaveState] = useRecoilState(saveAtom);
+
+  const modalManagerRef = useRef<{
+    fetchData: () => void;
+    download: () => void;
+  }>(null);
+
+  const handleButtonClick = () => {
+    // Trigger fetch data method on modal manager
+    modalManagerRef.current?.fetchData();
+  };
+
   const openSecondModal = () => {
-<<<<<<< HEAD
-  if(saveState.typeName === "personalized") {
+    if (saveState.typeName === "personalized-ai") {
       setIsFirstModalOpen(false);
       handleButtonClick();
-      return 
+      return;
     }
 =======
     setIsFirstModalOpen(false);
@@ -39,12 +51,12 @@ export default function SavingOption({
     setIsSecondModalOpen(true);
   };
 
-  const [_, setSaveState] = useRecoilState(saveAtom);
-
-  const handleChange = (event:any) => {
-    setSaveState((prevState) => ({...prevState, typeName: event.target.value}));
+  const handleChange = (event: any) => {
+    setSaveState((prevState) => ({
+      ...prevState,
+      typeName: event.target.value,
+    }));
   };
-
 
   return (
     <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
@@ -58,7 +70,8 @@ export default function SavingOption({
           <RadioGroup defaultValue="manual" className="flex flex-col gap-2">
             <Label
               htmlFor="manual"
-              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-white">
+              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-white"
+            >
               <input
                 type="radio"
                 id="manual"
@@ -76,7 +89,8 @@ export default function SavingOption({
             </Label>
             <Label
               htmlFor="personalized"
-              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-primary-foreground">
+              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-primary-foreground"
+            >
               <input
                 type="radio"
                 id="personalized-ai"
@@ -100,13 +114,15 @@ export default function SavingOption({
             <Button
               className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] px-8 rounded-[2rem]"
               type="button"
-              onClick={() => setIsFirstModalOpen(false)}>
+              onClick={() => setIsFirstModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button
               className="bg-white hover:bg-white px-8 text-black rounded-[2rem]"
               type="button"
-              onClick={openSecondModal}>
+              onClick={openSecondModal}
+            >
               Proceed
             </Button>
           </div>
@@ -120,6 +136,13 @@ export default function SavingOption({
           setIsFirstModalOpen(true);
         }}
         tab=""
+      />
+      {/* Modal Manager Component */}
+      <SaveSenseModalManager
+        trigger={modalManagerRef}
+        onClose={() => {
+          // Optional: Add any cleanup or additional logic when modals close
+        }}
       />
     </Dialog>
   );
