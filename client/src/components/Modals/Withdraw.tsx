@@ -14,21 +14,14 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
-// import coinSafeAbi from "../../abi/coinsafe.json";
-// import ApproveWithdraw from "./ApproveWithdraw";
-import { tokens } from "@/lib/contract";
+import { CoinSafeContract, tokens } from "@/lib/contract";
 import { 
   useAccount, 
-  useConnect, 
-  // useWriteContract 
 } from "wagmi";
-import { injected } from "wagmi/connectors";
-import { liskSepolia } from "viem/chains";
-// import { erc20Abi } from "viem";
-// import { waitForTransactionReceipt } from "@wagmi/core";
-// import { config } from "@/lib/config";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useWithdrawAsset } from "@/hooks/useWithdrawAsset";
+import SuccessfulTxModal from "./SuccessfulTxModal";
 
 export default function Withdraw({
   isWithdrawModalOpen,
@@ -39,74 +32,36 @@ export default function Withdraw({
   setIsWithdrawModalOpen: (open: boolean) => void;
   onBack: () => void;
 }) {
-  // const { writeContractAsync } = useWriteContract();
-
-  const { connectAsync } = useConnect();
-  // const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
+  const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const { address } = useAccount();
-  const [isLoading, setIsLoading] = useState(false);
 
   const [amount, setAmount] = useState(0);
   const [token, setToken] = useState("");
 
-  // const openThirdModal = () => {
-  //   console.log("details", token, amount);
+  const openThirdModal = () => {
+    console.log("details", token, amount);
 
-  //   setIsThirdModalOpen(true);
-  //   setIsWithdrawModalOpen(false);
-  // };
-
-  const handleWithdrawAsset = async (e: any) => {
-    e.preventDefault();
-
-    try {
-      setIsLoading(true);
-      if (!address) {
-        try {
-          await connectAsync({
-            chainId: liskSepolia.id,
-            connector: injected(),
-          });
-        } catch (error) {
-          alert(error);
-        }
-      }
-
-      if (!amount) {
-        toast({
-          title: "Please input a value for amount to Withdraw",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      if (!token) {
-        toast({
-          title: "Please select token to Withdraw",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-    } catch (error) {
-      console.log(error);
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
-    }
-    // const formData = new FormData(e.target as HTMLFormElement)
-    // const tokenId = formData.get('tokenId') as string
-    // console.log("Loggin first")
-    // writeContract({
-    //   address: `0x${CoinSafeContract.address}`,
-    //   abi:coinSafeAbi.abi,
-    //   functionName: 'WithdrawToPool',
-    //   args: [amount, BigInt(token)],
-    // });
-
-    // console.log("Logging after")
+    setIsThirdModalOpen(true);
+    setIsWithdrawModalOpen(false);
   };
+
+  const { withdrawAsset, isLoading } = useWithdrawAsset({
+    address,
+    token: token as `0x${string}`,
+    amount,
+    coinSafeAddress: CoinSafeContract.address as `0x${string}`,
+    coinSafeAbi: CoinSafeContract.abi.abi,
+    onSuccess: () => {
+      openThirdModal();
+    },
+    onError: (error) => {
+      toast({
+        title: error.message,
+        variant: "destructive"
+      });
+    },
+    toast
+  });
 
   const handleTokenSelect = (value: string) => {
     setToken(value);
@@ -182,7 +137,7 @@ export default function Withdraw({
           <div>
             <Button
               onClick={(e) => {
-                handleWithdrawAsset(e);
+                withdrawAsset(e)
 
                 // if(isSuccess) {
                 //   openThirdModal();
@@ -201,14 +156,15 @@ export default function Withdraw({
           </div>
         </DialogFooter>
       </DialogContent>
-      {/* <Withdrawed
+      <SuccessfulTxModal
+        transactionType="withdraw"
         amount={amount}
         token={
           token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
         }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
-      /> */}
+      />
     </Dialog>
   );
 }
