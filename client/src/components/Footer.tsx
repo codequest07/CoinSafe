@@ -15,7 +15,7 @@ const Footer = () => {
             <Link
               target="_blank"
               rel="noopener noreferrer"
-              to={"https://x.com/Coinsafe_safe"}>
+              to={"https://discord.gg/AprSgxhh"}>
               <img
                 src="/assets/discord.svg"
                 alt="Discord"
@@ -39,7 +39,7 @@ const Footer = () => {
             <Link
               target="_blank"
               rel="noopener noreferrer"
-              to={"https://x.com/Coinsafe_safe"}>
+              to={"https://t.me/coinsafe_safe"}>
               <img
                 src="/assets/telegram.svg"
                 alt="Telegram"
