@@ -27,11 +27,15 @@ export default function SavingOption({
   setIsSecondModalOpen,
 }: SavingOptionProps) {
   const openSecondModal = () => {
+<<<<<<< HEAD
   if(saveState.typeName === "personalized") {
       setIsFirstModalOpen(false);
       handleButtonClick();
       return 
     }
+=======
+    setIsFirstModalOpen(false);
+>>>>>>> 5ca8974 (Revert "Merge pull request #5 from codequest07/amd-updates")
     setIsSecondModalOpen(true);
   };
 
