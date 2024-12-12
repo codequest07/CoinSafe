@@ -31,7 +31,6 @@ import { useAccount } from "wagmi";
 // import { waitForTransactionReceipt } from "@wagmi/core";
 import { liskSepolia } from "viem/chains";
 // import { injected } from "wagmi/connectors";
-// import { injected } from "wagmi/connectors";
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import coinSafeAbi from "../../abi/coinsafe.json";
 import { useRecoilState } from "recoil";
@@ -41,7 +40,6 @@ import SaveSuccessful from "./SaveSuccessful";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
-
 
 export default function SaveAsset({
   isOpen,
@@ -65,7 +63,7 @@ export default function SaveAsset({
   const [daysInput, setDaysInput] = useState<number | string>("");
   const [unlockDate, setUnlockDate] = useState<Date | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [ currentTab, setCurrentTab ] = useState(tab || 'one-time');
+  const [currentTab, setCurrentTab] = useState(tab || "one-time");
 
   // Line 50-64: New handler for calendar date selection
   const handleDateSelect = (selectedDay: Date | undefined) => {
@@ -159,7 +157,7 @@ export default function SaveAsset({
 
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   // to multiply the amount based on selected token's decimals
-const [,setDecimals] = useState(1);
+  const [, setDecimals] = useState(1);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const { address } = useAccount();
 
@@ -170,10 +168,6 @@ const [,setDecimals] = useState(1);
       amount: _amount,
     }));
   };
-  const { address } = useAccount();
-
-  // const { writeContractAsync } = useWriteContract();
-  // const { connectAsync } = useConnect();
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
@@ -187,58 +181,10 @@ const [,setDecimals] = useState(1);
     setSaveState((prevState) => ({ ...prevState, token: value }));
   };
 
-const handleTabChange = () => {};
-  //if (!validateForm()) {
-  //     return; // Stop if validation fails
-  //}
-
-  // const handleSaveAsset = async (e: any) => {
-  //   e.preventDefault();
-  //   try {
-  //     if (!address) {
-  //       try {
-  //         await connectAsync({
-  //           chainId: liskSepolia.id,
-  //           connector: injected(),
-  //         });
-  //       } catch (error) {
-  //         alert(error);
-  //       }
-  //     }
-  //     setIsLoading(true);
-  //     console.log("DECIMALS", decimals);
-  //     console.log("AMOUNT", saveState.amount);
-
-  //     // Step 3: Call save function
-  //     const data = await writeContractAsync({
-  //       chainId: liskSepolia.id,
-  //       address: CoinSafeContract.address as `0x${string}`,
-  //       functionName: "save",
-  //       abi: coinSafeAbi.abi,
-  //       args: [saveState.token, BigInt(saveState.token === tokens.usdt ? saveState.amount * 10 ** 6 : saveState.amount * 10 ** 18), saveState.duration],
-  //     });
-
-  //     console.log(data);
-
-  //     const saveTransactionReceipt = await waitForTransactionReceipt(config, {
-  //       hash: data,
-  //     });
-
-  //     if (saveTransactionReceipt.transactionIndex === 1) {
-  //       console.log("DATA", data);
-  //       openThirdModal();
-  //     }
-
-  //     console.log("DATA", saveTransactionReceipt.status);
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.log("ERROR:::", error);
-  //     if((error as any).toString().includes("InsufficientFunds()")) {
-  //       alert("Insufficient Funds, Please deposit enough to be able to save.");
-  //     }
-  //     setIsLoading(false);
-  //   }
-  // };
+  const handleTabChange = (value: string) => {
+    console.log("Tab switched to: ", value);
+    setCurrentTab(value);
+  };
 
   const { saveAsset, isLoading } = useSaveAsset({
     address,
@@ -249,12 +195,12 @@ const handleTabChange = () => {};
     onSuccess: () => {
       openThirdModal();
     },
-    onError: (error: { message: any; }) => {
+    onError: (error: { message: any }) => {
       toast({
         title: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const openThirdModal = () => {
@@ -272,19 +218,16 @@ const handleTabChange = () => {};
         <Tabs
           defaultValue={tab || "one-time"}
           onValueChange={handleTabChange}
-          className="w-full"
-        >
+          className="w-full">
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               One-time Save
             </TabsTrigger>
             <TabsTrigger
               value="autosave"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               Autosave
             </TabsTrigger>
           </TabsList>
@@ -370,8 +313,7 @@ const handleTabChange = () => {};
                     />
                     <Popover
                       open={isCalendarOpen}
-                      onOpenChange={setIsCalendarOpen}
-                    >
+                      onOpenChange={setIsCalendarOpen}>
                       <PopoverTrigger asChild>
                         <span onClick={() => setIsCalendarOpen(true)}>
                           <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -405,8 +347,7 @@ const handleTabChange = () => {};
               <div className="flex gap-2">
                 <Label
                   htmlFor="per-transaction"
-                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
-                >
+                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400">
                   <input
                     type="radio"
                     id="per-transaction"
@@ -425,8 +366,7 @@ const handleTabChange = () => {};
                 </Label>
                 <Label
                   htmlFor="by-frequency"
-                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
-                >
+                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400">
                   <input
                     type="radio"
                     id="by-frequency"
@@ -559,8 +499,7 @@ const handleTabChange = () => {};
                   />
                   <Popover
                     open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
+                    onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <span onClick={() => setIsCalendarOpen(true)}>
                         <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -590,8 +529,7 @@ const handleTabChange = () => {};
           <Button
             onClick={onClose}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
+            type="submit">
             Cancel
           </Button>
           <div>
@@ -604,8 +542,7 @@ const handleTabChange = () => {};
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (
