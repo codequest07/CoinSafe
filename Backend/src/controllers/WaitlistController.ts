@@ -1,14 +1,19 @@
-import { Request, Response } from 'express';
-import Waitlist from '../Models/WaitlistModel';
-import { waitlistValidationSchema } from '../Validation';
-import { sendEmail } from '../email';
+import { Request, Response } from "express";
+import Waitlist from "../Models/WaitlistModel";
+import { waitlistValidationSchema } from "../Validation";
+import { sendEmail } from "../email";
 
-
-export const addToWaitlist = async (req: Request, res: Response): Promise<Response | undefined> => {
+export const addToWaitlist = async (
+  req: Request,
+  res: Response
+): Promise<Response | undefined> => {
   const { name, country, email } = req.body;
 
   if (!name || !country || !email) {
-    return res.status(400).json({ message: 'Request body is missing required fields: name, country, or email' });
+    return res.status(400).json({
+      message:
+        "Request body is missing required fields: name, country, or email",
+    });
   }
 
   const { error } = waitlistValidationSchema.validate({ name, country, email });
@@ -20,16 +25,18 @@ export const addToWaitlist = async (req: Request, res: Response): Promise<Respon
   try {
     const existingUser = await Waitlist.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email is already registered in the waitlist' });
+      return res
+        .status(400)
+        .json({ message: "Email is already registered in the waitlist" });
     }
 
     const newEntry = new Waitlist({ name, country, email });
     await newEntry.save();
 
     await sendEmail({
-        email,
-        subject: 'Welcome to CoinSafe Waitlist',
-        html: `
+      email,
+      subject: "Welcome to CoinSafe Waitlist",
+      html: `
           <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #2c3e50;">Hi ${name},</h2>
             <p style="font-size: 16px; line-height: 1.6; color: #555;">
@@ -48,49 +55,53 @@ export const addToWaitlist = async (req: Request, res: Response): Promise<Respon
             </footer>
           </div>
         `,
-        
-      });
-      
+    });
 
     res.status(201).json({
       message: "Successfully added to the waitlist",
       user: { email: newEntry.email, name: newEntry.name },
     });
   } catch (error) {
-    console.error('Error adding to waitlist:', error);
-    res.status(500).json({ message: 'Server error. Please try again later' });
+    console.error("Error adding to waitlist:", error);
+    res.status(500).json({ message: "Server error. Please try again later" });
   }
 };
 
-
-
-export const getAllWaitlistEntries = async (req: Request, res: Response): Promise<void> => {
+export const getAllWaitlistEntries = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const waitlist = await Waitlist.find();
     res.status(200).json(waitlist);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-export const getOne = async (req: Request, res: Response): Promise<Response | undefined> => {
-    const { email } = req.params; 
-  
-    if (!email) {
-      return res.status(400).json({ message: 'Email parameter is required' });
+export const getOne = async (
+  req: Request,
+  res: Response
+): Promise<Response | undefined> => {
+  const { email } = req.params;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email parameter is required" });
+  }
+
+  try {
+    const user = await Waitlist.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "No waitlist entry found for this email" });
     }
-  
-    try {
-      const user = await Waitlist.findOne({ email }); 
-  
-      if (!user) {
-        return res.status(404).json({ message: 'No waitlist entry found for this email' });
-      }
-  
-      res.status(200).json(user); 
-    } catch (error) {
-      console.error('Error fetching user from waitlist:', error);
-      res.status(500).json({ message: 'Server error. Please try again later' });
-    }
-  };
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user from waitlist:", error);
+    res.status(500).json({ message: "Server error. Please try again later" });
+  }
+};

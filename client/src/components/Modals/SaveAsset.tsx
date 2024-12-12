@@ -63,7 +63,7 @@ export default function SaveAsset({
   const [daysInput, setDaysInput] = useState<number | string>("");
   const [unlockDate, setUnlockDate] = useState<Date | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [ currentTab, setCurrentTab ] = useState(tab || 'one-time');
+  const [currentTab, setCurrentTab] = useState(tab || "one-time");
 
   // Line 50-64: New handler for calendar date selection
   const handleDateSelect = (selectedDay: Date | undefined) => {
@@ -218,19 +218,16 @@ export default function SaveAsset({
         <Tabs
           defaultValue={tab || "one-time"}
           onValueChange={handleTabChange}
-          className="w-full"
-        >
+          className="w-full">
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               One-time Save
             </TabsTrigger>
             <TabsTrigger
               value="autosave"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               Autosave
             </TabsTrigger>
           </TabsList>
@@ -316,8 +313,7 @@ export default function SaveAsset({
                     />
                     <Popover
                       open={isCalendarOpen}
-                      onOpenChange={setIsCalendarOpen}
-                    >
+                      onOpenChange={setIsCalendarOpen}>
                       <PopoverTrigger asChild>
                         <span onClick={() => setIsCalendarOpen(true)}>
                           <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -351,8 +347,7 @@ export default function SaveAsset({
               <div className="flex gap-2">
                 <Label
                   htmlFor="per-transaction"
-                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
-                >
+                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400">
                   <input
                     type="radio"
                     id="per-transaction"
@@ -371,8 +366,7 @@ export default function SaveAsset({
                 </Label>
                 <Label
                   htmlFor="by-frequency"
-                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
-                >
+                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400">
                   <input
                     type="radio"
                     id="by-frequency"
@@ -505,8 +499,7 @@ export default function SaveAsset({
                   />
                   <Popover
                     open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
+                    onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <span onClick={() => setIsCalendarOpen(true)}>
                         <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -536,8 +529,7 @@ export default function SaveAsset({
           <Button
             onClick={onClose}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
+            type="submit">
             Cancel
           </Button>
           <div>
@@ -550,8 +542,7 @@ export default function SaveAsset({
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (

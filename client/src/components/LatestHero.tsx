@@ -50,24 +50,24 @@ export default function Hero() {
           </div>
 
           {/* Right column - Cards */}
-          <div className="relative mt-12 md:mt-0">
+          <div className="relative">
             {/* Top floating card */}
-            <div className="relative md:absolute md:top-10 md:right-0 w-full md:w-[35rem]  transform rotate-0  md:-rotate-0  ">
+            <div className="">
               <img
-                src="/assets/ClaimableCard.svg"
+                src="/assets/heroIma.png"
                 alt="Claimable Card"
                 className="w-full h-auto"
               />
             </div>
 
-            {/* Bottom floating card */}
+            {/* Bottom floating card
             <div className="relative md:absolute md:-bottom-[4.6rem] md:-left-2 w-full md:w-[35rem]  transform -rotate-0  md:-rotate-10  ">
               <img
                 src="/assets/VaultCard.svg"
                 alt="Vault Card"
                 className="w-full h-auto"
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
