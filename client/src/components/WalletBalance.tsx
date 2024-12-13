@@ -298,34 +298,38 @@ export default function WalletBalance() {
               ${isConnected ? availableBalance?.toFixed(2) ?? "0.00" : "0.00"}{" "}
               <span className="text-xs font-[300]">USD</span>
             </p>
-            <p className="text-[#7F7F7F] text-xs flex items-center justify-center sm:justify-start space-x-1">
-              <div className="bg-[#79E7BA] h-[0.6rem] w-1 rounded-xl"></div>
-              <span>{getPercentage(availableBalance, totalBalance)}%</span> of total wallet balance
-            </p>
+            {isConnected && (
+              <p className="text-[#7F7F7F] text-xs flex items-center justify-center sm:justify-start space-x-1">
+                <div className="bg-[#79E7BA] h-[0.6rem] w-1 rounded-xl"></div>
+                <span>{getPercentage(availableBalance, totalBalance)}%</span> of total wallet balance
+              </p>
+            )}
           </div>
         </main>
 
         {/* Action Buttons */}
-        <div className="flex flex-row  space-x-4">
-          <Button
-            onClick={openWithdrawModal}
-            className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full"
-          >
-            Withdraw
-          </Button>
-          <Button
-            onClick={openDepositModal}
-            className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full"
-          >
-            Deposit
-          </Button>
-          <Button
-            onClick={openFirstModal}
-            className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-black px-6 py-2 rounded-full"
-          >
-            Save
-          </Button>
-        </div>
+        {isConnected && (
+          <div className="flex flex-row  space-x-4">
+            <Button
+              onClick={openWithdrawModal}
+              className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full"
+            >
+              Withdraw
+            </Button>
+            <Button
+              onClick={openDepositModal}
+              className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full"
+            >
+              Deposit
+            </Button>
+            <Button
+              onClick={openFirstModal}
+              className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-black px-6 py-2 rounded-full"
+            >
+              Save
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* SavingOption Modal */}

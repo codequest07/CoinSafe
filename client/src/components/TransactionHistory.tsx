@@ -29,6 +29,8 @@ import { Button } from "./ui/button";
 import MemoStory from "@/icons/Story";
 import SavingOption from "./Modals/SavingOption";
 import Deposit from "./Modals/Deposit";
+import CustomConnectButton from "./custom-connect-button";
+import { useAccount } from "wagmi";
 enum TxStatus {
   Completed = 0,
   Pending = 1,
@@ -77,6 +79,7 @@ const TransactionHistory = () => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const { isConnected } = useAccount();
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => {
@@ -154,23 +157,31 @@ const TransactionHistory = () => {
             <MemoStory className="w-16 h-16" />
           </div>
           <p className=" text-base max-w-[24rem] my-8">
-            This space is yours to litter with transaction histories, however
+            {isConnected
+              ? `This space is yours to litter with transaction histories, however
             you wish. Deposits, savings, withdrawals, we strongly advise you
-            start with saving
+            start with saving`
+              : "No wallet connected, connect your wallet to get the best of coinsafe"}
           </p>
-          <div className="flex gap-4">
-            <Button
-              onClick={openDepositModal}
-              className="bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#2a2a2a]">
-              Deposit
-            </Button>
-            <Button
-              onClick={openFirstModal}
-              variant="outline"
-              className="bg-white text-black rounded-[2rem]  hover:bg-gray-100">
-              Save
-            </Button>
-          </div>
+          {isConnected ? (
+            <div className="flex gap-4">
+              <Button
+                onClick={openDepositModal}
+                className="bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#2a2a2a]"
+              >
+                Deposit
+              </Button>
+              <Button
+                onClick={openFirstModal}
+                variant="outline"
+                className="bg-white text-black rounded-[2rem]  hover:bg-gray-100"
+              >
+                Save
+              </Button>
+            </div>
+          ) : (
+            <CustomConnectButton />
+          )}
         </div>
         <Deposit
           isDepositModalOpen={isDepositModalOpen}
@@ -242,62 +253,68 @@ const TransactionHistory = () => {
                     {formatTimestamp(parseInt(date))}
                   </TableCell>
                 </TableRow> */}
-                {transactions.map((transaction: Transaction, index) => (
-                  <TableRow
-                    key={`${date}-${index}`}
-                    className="block sm:table-row">
-                    {/* Transaction type is hidden on smaller screens */}
-                    <TableCell className="hidden sm:table-cell">
-                      {capitalize(transaction.typeOfTransaction)}
-                    </TableCell>
-                    {/* Amount and percentage */}
-                    <TableCell>
-                      <div className="flex flex-col sm:flex-row sm:space-x-2 items-start sm:items-center">
-                        <p>{formatEther(transaction.amount)}</p>
-                        {/* {transaction.icons && (
+                {transactions
+                  // .sort((a, b) => Number(a.timestamp) - Number(b.timestamp))
+                  .map((transaction: Transaction, index) => (
+                    <TableRow
+                      key={`${date}-${index}`}
+                      className="block sm:table-row"
+                    >
+                      {/* Transaction type is hidden on smaller screens */}
+                      <TableCell className="hidden sm:table-cell">
+                        {capitalize(transaction.typeOfTransaction)}
+                      </TableCell>
+                      {/* Amount and percentage */}
+                      <TableCell>
+                        <div className="flex flex-col sm:flex-row sm:space-x-2 items-start sm:items-center">
+                          <p>{formatEther(transaction.amount)}</p>
+                          {/* {transaction.icons && (
                           <transaction.icons className="w-5 h-5 text-[#20FFAF]" />
                         )} */}
-                      </div>
-                      {/* <div className="text-xs">{transaction.percentage}</div> */}
-                    </TableCell>
-                    {/* Hash, only visible on larger screens */}
-                    <TableCell className="hidden sm:table-cell">
-                      {/* <div className="flex cursor-pointer items-center space-x-3">
+                        </div>
+                        {/* <div className="text-xs">{transaction.percentage}</div> */}
+                      </TableCell>
+                      {/* Hash, only visible on larger screens */}
+                      <TableCell className="hidden sm:table-cell">
+                        {/* <div className="flex cursor-pointer items-center space-x-3">
                         {transaction.hash}
                         {transaction.txnIcon && (
                           <transaction.txnIcon className="w-4 h-4 ml-1" />
                         )}
                       </div> */}
-                    </TableCell>
-                    {/* Token and network information */}
-                    <TableCell className="block sm:table-cell">
-                      <div className="flex flex-col">
-                        <p className="text-sm font-[500]">
-                          {tokenSymbol[transaction.token]}
-                        </p>
-                        {/* <p className="text-xs">{transaction.network}</p> */}
-                      </div>
-                    </TableCell>
-                    {/* Date and time */}
-                    <TableCell className="text-right ">
-                      <div className="flex flex-col justify-center text-center sm:flex-row items-start sm:items-center sm:space-x-2">
-                        <p>{formatTimestamp(Number(transaction.timestamp))}</p>
-                        {/* <p>{transaction.time}</p> */}
-                      </div>
-                    </TableCell>
-                    {/* Transaction status */}
-                    <TableCell className="text-right flex justify-center">
-                      <Badge className="bg-transparent text-center rounded-[2rem]">
-                        <p
-                          className={`text-sm p-2 px-3 w-[6rem] rounded-[2rem] font-[400] ${getColorClass(
-                            transaction.status
-                          )}`}>
-                          {getStatusText(transaction.status)}
-                        </p>
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      {/* Token and network information */}
+                      <TableCell className="block sm:table-cell">
+                        <div className="flex flex-col">
+                          <p className="text-sm font-[500]">
+                            {tokenSymbol[transaction.token]}
+                          </p>
+                          {/* <p className="text-xs">{transaction.network}</p> */}
+                        </div>
+                      </TableCell>
+                      {/* Date and time */}
+                      <TableCell className="text-right ">
+                        <div className="flex flex-col justify-center text-center sm:flex-row items-start sm:items-center sm:space-x-2">
+                          <p>
+                            {formatTimestamp(Number(transaction.timestamp))}
+                          </p>
+                          {/* <p>{transaction.time}</p> */}
+                        </div>
+                      </TableCell>
+                      {/* Transaction status */}
+                      <TableCell className="text-right flex justify-center">
+                        <Badge className="bg-transparent text-center rounded-[2rem]">
+                          <p
+                            className={`text-sm p-2 px-3 w-[6rem] rounded-[2rem] font-[400] ${getColorClass(
+                              transaction.status
+                            )}`}
+                          >
+                            {getStatusText(transaction.status)}
+                          </p>
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </React.Fragment>
             ))}
           </TableBody>
