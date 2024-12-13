@@ -1,20 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import MemoDropdownIcon from "@/icons/DropdownIcon";
+// import { Calendar } from "@/components/ui/calendar";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuLabel,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu";
+// import MemoDropdownIcon from "@/icons/DropdownIcon";
 import { TransactionHistoryData } from "@/lib/data";
-import { Transaction } from "@/types";
+// import { Transaction } from "@/types";
 import { Badge } from "./ui/badge";
-import MemoCalender from "@/icons/Calender";
+// import MemoCalender from "@/icons/Calender";
+import { Transaction, useTransactionHistory } from "@/hooks/useTransactionHistory";
+import { CoinSafeContract } from "@/lib/contract";
+import coinSafeAbi from "../abi/coinsafe.json";
 
 const getColorClass = (status: any) => {
   switch (status.toLowerCase()) {
@@ -37,15 +40,57 @@ const TransactionHistory = () => {
     setShowCalendar(!showCalendar);
   };
 
-  const groupedTransactions = TransactionHistoryData.reduce<
+  // const groupedTransactions = TransactionHistoryData.reduce<
+  //   Record<string, Transaction[]>
+  // >((acc, transaction) => {
+  //   if (!acc[transaction.date]) {
+  //     acc[transaction.date] = [];
+  //   }
+  //   acc[transaction.date].push(transaction);
+  //   return acc;
+  // }, {});
+
+  const { 
+    transactions,
+    isLoading,
+    isError,
+    error,
+    fetchNextPage,
+    fetchPreviousPage,
+    hasMore,
+    hasPrevious
+  } = useTransactionHistory({
+    contractAddress: CoinSafeContract.address,
+    abi: coinSafeAbi.abi,
+    // limit: 10
+  })
+
+  useEffect(() => {
+    console.log("loading", isLoading)
+    console.log("error?", isError)
+    console.log("error text", error)
+    console.log("transactions", transactions)
+  }, [transactions])
+
+  const groupedTransactions = transactions?.reduce<
     Record<string, Transaction[]>
   >((acc, transaction) => {
-    if (!acc[transaction.date]) {
-      acc[transaction.date] = [];
+    if (!acc[Number(transaction.timestamp)]) {
+      acc[Number(transaction.timestamp)] = [];
     }
-    acc[transaction.date].push(transaction);
+    acc[Number(transaction.timestamp)].push(transaction);
     return acc;
   }, {});
+
+//   struct Transaction {
+//     uint256 id;
+//     address user;
+//     address token;
+//     string typeOfTransaction;
+//     uint256 amount;
+//     uint256 timestamp;
+//     TxStatus status; 
+// }
 
   return (
     <div>
@@ -53,7 +98,7 @@ const TransactionHistory = () => {
         <div className="flex sm:flex-row flex-col sm:space-y-0 space-y-3 justify-between sm:items-center mb-4">
           <h2 className="text-lg font-semibold">Transaction History</h2>
           <div className="flex space-x-4 items-center">
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger className="text-sm bg-[#1E1E1E99] p-3 rounded-[2rem] flex space-x-2 items-center outline-none">
                 <div>All Networks</div>
                 <div>
@@ -68,18 +113,18 @@ const TransactionHistory = () => {
                 <DropdownMenuItem>Team</DropdownMenuItem>
                 <DropdownMenuItem>Subscription</DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
             {/* Button to toggle the calendar */}
             <div className="relative">
-              <button
+              {/* <button
                 onClick={handleCalendarToggle}
                 className="text-sm px-4 py-3 bg-[#1E1E1E99] flex items-center space-x-2 rounded-[2rem]">
                 <p>This month</p>
                 <MemoCalender />
-              </button>
+              </button> */}
 
               {/* Conditional rendering of the calendar */}
-              <div className="absolute z-10 right-4">
+              {/* <div className="absolute z-10 right-4">
                 {showCalendar && (
                   <Calendar
                     mode="single"
@@ -88,7 +133,7 @@ const TransactionHistory = () => {
                     className="rounded-md bg-black mb-4"
                   />
                 )}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -108,26 +153,26 @@ const TransactionHistory = () => {
                     className="block sm:table-row">
                     {/* Transaction type is hidden on smaller screens */}
                     <TableCell className="hidden sm:table-cell">
-                      {transaction.type}
+                      {transaction.typeOfTransaction}
                     </TableCell>
                     {/* Amount and percentage */}
                     <TableCell>
                       <div className="flex flex-col sm:flex-row sm:space-x-2 items-start sm:items-center">
-                        <p>{transaction.amount}</p>
-                        {transaction.icons && (
+                        <p>{Number(transaction.amount)}</p>
+                        {/* {transaction.icons && (
                           <transaction.icons className="w-5 h-5 text-[#20FFAF]" />
-                        )}
+                        )} */}
                       </div>
-                      <div className="text-xs">{transaction.percentage}</div>
+                      {/* <div className="text-xs">{transaction.percentage}</div> */}
                     </TableCell>
                     {/* Hash, only visible on larger screens */}
                     <TableCell className="hidden sm:table-cell">
-                      <div className="flex cursor-pointer items-center space-x-3">
+                      {/* <div className="flex cursor-pointer items-center space-x-3">
                         {transaction.hash}
                         {transaction.txnIcon && (
                           <transaction.txnIcon className="w-4 h-4 ml-1" />
                         )}
-                      </div>
+                      </div> */}
                     </TableCell>
                     {/* Token and network information */}
                     <TableCell className="block sm:table-cell">
@@ -135,25 +180,25 @@ const TransactionHistory = () => {
                         <p className="text-sm font-[500]">
                           {transaction.token}
                         </p>
-                        <p className="text-xs">{transaction.network}</p>
+                        {/* <p className="text-xs">{transaction.network}</p> */}
                       </div>
                     </TableCell>
                     {/* Date and time */}
                     <TableCell className="text-right">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-2">
-                        <p>{transaction.date}</p>
-                        <p>{transaction.time}</p>
+                        {/* <p>{transaction.date}</p>
+                        <p>{transaction.time}</p> */}
                       </div>
                     </TableCell>
                     {/* Transaction status */}
                     <TableCell className="text-right">
                       <Badge className="bg-transparent text-center rounded-[2rem]">
-                        <p
+                        {/* <p
                           className={`text-sm p-2 px-3 w-[6rem] rounded-[2rem] font-[400] ${getColorClass(
                             transaction.status
                           )}`}>
                           {transaction.status}
-                        </p>
+                        </p> */}
                       </Badge>
                     </TableCell>
                   </TableRow>
