@@ -7,7 +7,7 @@ import ComingSoon from "@/components/Coming-Soon";
 
 const Rewards = () => {
   return (
-    <div className="flex w-full overflow-x-hidden ">
+    <div className="flex w-full items-center justify-center overflow-x-hidden ">
       <ComingSoon />
       {/* // First Column - Larger
       <div className="w-full md:w-2/3 space-y-4">
