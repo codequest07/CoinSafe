@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 // import { Calendar } from "@/components/ui/calendar";
@@ -15,18 +15,24 @@ import { Card } from "@/components/ui/card";
 // import { Transaction } from "@/types";
 import { Badge } from "./ui/badge";
 // import MemoCalender from "@/icons/Calender";
-import { Transaction, useTransactionHistory } from "@/hooks/useTransactionHistory";
+import {
+  Transaction,
+  useTransactionHistory,
+} from "@/hooks/useTransactionHistory";
 import { CoinSafeContract } from "@/lib/contract";
 import coinSafeAbi from "../abi/coinsafe.json";
 import { formatTimestamp } from "@/utils/formatTimestamp";
 import { formatEther } from "viem";
 import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { capitalize } from "@/utils/capitalize";
-
+import { Button } from "./ui/button";
+import MemoStory from "@/icons/Story";
+import SavingOption from "./Modals/SavingOption";
+import Deposit from "./Modals/Deposit";
 enum TxStatus {
   Completed = 0,
   Pending = 1,
-  Failed = 2
+  Failed = 2,
 }
 
 // const TxStatusMap = {
@@ -35,7 +41,7 @@ enum TxStatus {
 //   2: 'Failed'
 // } as const;
 
-const TxStatusArray = ['Completed', 'Pending', 'Failed'];
+const TxStatusArray = ["Completed", "Pending", "Failed"];
 
 // function getStatusStyle(status: number): { color: string } {
 //   switch (status) {
@@ -68,6 +74,14 @@ function getStatusText(status: number) {
 }
 
 const TransactionHistory = () => {
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
+  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+
+  const openFirstModal = () => setIsFirstModalOpen(true);
+  const openDepositModal = () => {
+    setIsDepositModalOpen(true);
+  };
   // const [date, setDate] = React.useState<Date | undefined>(new Date());
   // const [showCalendar, setShowCalendar] = React.useState(false); // State to toggle calendar visibility
 
@@ -85,7 +99,7 @@ const TransactionHistory = () => {
   //   return acc;
   // }, {});
 
-  const { 
+  const {
     transactions,
     isLoading,
     isError,
@@ -99,15 +113,15 @@ const TransactionHistory = () => {
     contractAddress: CoinSafeContract.address,
     abi: coinSafeAbi.abi,
     // limit: 10
-  })
+  });
 
   useEffect(() => {
-    console.log("loading", isLoading)
-    console.log("error?", isError)
-    console.log("error text", error)
-    console.log("transactions", transactions)
+    console.log("loading", isLoading);
+    console.log("error?", isError);
+    console.log("error text", error);
+    console.log("transactions", transactions);
     refetch();
-  }, [transactions])
+  }, [transactions]);
 
   const groupedTransactions = transactions?.reduce<
     Record<string, Transaction[]>
@@ -119,15 +133,59 @@ const TransactionHistory = () => {
     return acc;
   }, {});
 
-//   struct Transaction {
-//     uint256 id;
-//     address user;
-//     address token;
-//     string typeOfTransaction;
-//     uint256 amount;
-//     uint256 timestamp;
-//     TxStatus status; 
-// }
+  //   struct Transaction {
+  //     uint256 id;
+  //     address user;
+  //     address token;
+  //     string typeOfTransaction;
+  //     uint256 amount;
+  //     uint256 timestamp;
+  //     TxStatus status;
+  // }
+
+  if (!transactions || transactions.length === 0) {
+    return (
+      <Card className="bg-[#13131373] border-0 text-white p-5">
+        <div className="flex sm:flex-row flex-col sm:space-y-0 space-y-3 justify-between sm:items-center mb-4">
+          <h2 className="text-lg font-semibold">Transaction History</h2>
+        </div>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="mb-6 rounded-full  p-6">
+            <MemoStory className="w-16 h-16" />
+          </div>
+          <p className=" text-base max-w-[24rem] my-8">
+            This space is yours to litter with transaction histories, however
+            you wish. Deposits, savings, withdrawals, we strongly advise you
+            start with saving
+          </p>
+          <div className="flex gap-4">
+            <Button
+              onClick={openDepositModal}
+              className="bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#2a2a2a]">
+              Deposit
+            </Button>
+            <Button
+              onClick={openFirstModal}
+              variant="outline"
+              className="bg-white text-black rounded-[2rem]  hover:bg-gray-100">
+              Save
+            </Button>
+          </div>
+        </div>
+        <Deposit
+          isDepositModalOpen={isDepositModalOpen}
+          setIsDepositModalOpen={setIsDepositModalOpen}
+          onBack={() => {}}
+        />
+        <SavingOption
+          isFirstModalOpen={isFirstModalOpen}
+          setIsFirstModalOpen={setIsFirstModalOpen}
+          isSecondModalOpen={isSecondModalOpen}
+          setIsSecondModalOpen={setIsSecondModalOpen}
+        />
+      </Card>
+    );
+  }
 
   return (
     <div>
@@ -250,8 +308,8 @@ const TransactionHistory = () => {
 };
 
 export default TransactionHistory;
-
-{/* <div>
+{
+  /* <div>
       <Card className="bg-[#13131373] border-0 text-white p-5">
         <div className="flex sm:flex-row flex-col sm:space-y-0 space-y-3 justify-between sm:items-center mb-4">
           <h2 className="text-lg font-semibold">Transaction History</h2>
@@ -319,4 +377,5 @@ export default TransactionHistory;
           </TableBody>
         </Table>
       </Card>
-    </div> */}
+    </div> */
+}

@@ -13,50 +13,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmail = void 0;
+const dotenv_1 = __importDefault(require("dotenv"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
-require("dotenv").config();
+dotenv_1.default.config();
 const sendEmail = (options) => __awaiter(void 0, void 0, void 0, function* () {
-    // Configure the transporter
+    if (!process.env.service || !process.env.user || !process.env.mailPassword) {
+        console.error("Missing environment variables for email service.");
+        throw new Error("Missing environment variables for email service.");
+    }
     const transporter = nodemailer_1.default.createTransport({
-        host: "smtp.gmail.com",
-        port: 587, // Gmail's SMTP port with STARTTLS
-        secure: false, // Use STARTTLS
+        service: 'gmail',
         auth: {
-            user: process.env.user, // Gmail email address
-            pass: process.env.mailPassword, // App password from Gmail
+            user: process.env.user,
+            pass: process.env.mailPassword,
         },
-        tls: {
-            rejectUnauthorized: false, // Ignore certificate issues
-        },
-    });
-    // Verify SMTP Connection
-    transporter.verify((error, success) => {
-        if (error) {
-            console.error("❌ SMTP Connection Error:", error);
-        }
-        else {
-            console.log("✅ SMTP Server is Ready:", success);
-        }
     });
     const mailOptions = {
-        from: process.env.user, // Sender email
-        to: options.email, // Receiver email
-        subject: options.subject, // Email subject
-        html: options.html, // Email content
+        from: process.env.user,
+        to: options.email,
+        subject: options.subject,
+        html: options.html,
     };
     try {
-        // Send email
-        const info = yield transporter.sendMail(mailOptions);
-        console.log(`✅ Email sent successfully to ${options.email}`);
-        console.log("Message ID:", info.messageId);
-        return {
-            messageId: info.messageId,
-            accepted: info.accepted,
-            rejected: info.rejected,
-        };
+        yield transporter.sendMail(mailOptions);
+        console.log("Email sent successfully.");
     }
     catch (error) {
-        console.error("❌ Error sending email:", error);
+        console.error(" Error sending email:", error);
         throw error;
     }
 });
