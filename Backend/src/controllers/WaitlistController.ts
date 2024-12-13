@@ -33,8 +33,6 @@ export const addToWaitlist = async (
     const newEntry = new Waitlist({ name, country, email });
     await newEntry.save();
 
-    const logoUrl = 'https://asset.cloudinary.com/dfp2rztmd/15e628561c99c4d17db6c55b86a56cda';
-
     await sendEmail({
       email,
       subject: "Welcome to CoinSafe Waitlist",
@@ -46,42 +44,6 @@ export const addToWaitlist = async (
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome to the CoinSafe Waitlist!</title>
     <style>
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #121212;
-          color: #f1f1f1;
-        }
-        .footer {
-          border-top-color: #333;
-        }
-        .footer p {
-          color: #999;
-        }
-        .logo-light {
-          display: none;
-        }
-        .logo-dark {
-          display: block;
-        }
-      }
-      @media (prefers-color-scheme: light) {
-        body {
-          background-color: #ffffff;
-          color: #333333;
-        }
-        .footer {
-          border-top-color: #eee;
-        }
-        .footer p {
-          color: #666;
-        }
-        .logo-light {
-          display: block;
-        }
-        .logo-dark {
-          display: none;
-        }
-      }
     </style>
   </head>
   <body
@@ -93,11 +55,7 @@ export const addToWaitlist = async (
       padding: 20px;
     ">
     <div style="margin-bottom: 20px">
-      <img
-        class="logo-dark"
-        src="${logoUrl}"
-        alt="CoinSafe Logo Light"
-        style="max-width: 150px; height: auto" />
+      <div style="font-family: Arial, sans-serif; font-size: 36px; font-weight: bold; color: #79E7BA; letter-spacing: 2px;">COINSAFE</div>
     </div>
 
     <h1 style="font-size: 28px; margin-bottom: 20px">Hi ${name},</h1>
@@ -153,16 +111,7 @@ export const addToWaitlist = async (
 
     <div class="footer" style="margin-top: 10px; padding-top: 10px">
       <div style="margin-bottom: 20px">
-        <img
-          class="logo-dark"
-          src="https://res.cloudinary.com/dfp2rztmd/image/upload/v1733760492/coinsafe/tbamrq8mdmnrs1vj0wwj.svg"
-          alt="CoinSafe Logo Light"
-          style="max-width: 120px; height: auto" />
-        <img
-          class="logo-light"
-          src="https://res.cloudinary.com/dfp2rztmd/image/upload/v1733823776/coinsafe/feckuhyhvnfgard1tm9p.svg"
-          alt="CoinSafe Logo Dark"
-          style="max-width: 120px; height: auto" />
+        <div style="font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; color: #79E7BA; letter-spacing: 1px;">COINSAFE</div>
       </div>
 
       <p style="font-size: 14px">
