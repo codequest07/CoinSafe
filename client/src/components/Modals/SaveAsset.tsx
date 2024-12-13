@@ -52,7 +52,7 @@ export default function SaveAsset({
   isOpen: boolean;
   onClose: () => void;
   onBack: () => void;
-  tab: string;
+  tab?: string;
 }) {
   const [frequencies] = useState([
     { value: "86400", label: "Every day" }, // 1 day = 86400 seconds
