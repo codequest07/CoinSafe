@@ -26,9 +26,9 @@ import { formatEther } from "viem";
 import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { capitalize } from "@/utils/capitalize";
 import { Button } from "./ui/button";
-import Deposit from "./Modals/Deposit";
+import MemoStory from "@/icons/Story";
 import SavingOption from "./Modals/SavingOption";
-
+import Deposit from "./Modals/Deposit";
 enum TxStatus {
   Completed = 0,
   Pending = 1,
@@ -116,12 +116,12 @@ const TransactionHistory = () => {
   });
 
   useEffect(() => {
-    console.log("loading", isLoading);
-    console.log("error?", isError);
-    console.log("error text", error);
-    console.log("transactions", transactions);
+  console.log("loading", isLoading)
+    console.log("error?", isError)
+    console.log("error text", error)
+    console.log("transactions", transactions)
     refetch();
-  }, [transactions]);
+  }, [transactions])
 
   const groupedTransactions = transactions?.reduce<
     Record<string, Transaction[]>
