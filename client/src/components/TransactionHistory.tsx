@@ -18,19 +18,54 @@ import { Badge } from "./ui/badge";
 import { Transaction, useTransactionHistory } from "@/hooks/useTransactionHistory";
 import { CoinSafeContract } from "@/lib/contract";
 import coinSafeAbi from "../abi/coinsafe.json";
+import { formatTimestamp } from "@/utils/formatTimestamp";
+import { formatEther } from "viem";
+import { tokenSymbol } from "@/utils/displayTokenSymbol";
+import { capitalize } from "@/utils/capitalize";
 
-// const getColorClass = (status: any) => {
-//   switch (status.toLowerCase()) {
-//     case "completed":
-//       return "text-[#48FF91] bg-[#48FF911A]";
-//     case "processing":
-//       return "text-[#FFA448] bg-[#FFA3481A]";
-//     case "failed":
-//       return "text-[#FF484B] bg-[#FF484B1A]";
+enum TxStatus {
+  Completed = 0,
+  Pending = 1,
+  Failed = 2
+}
+
+// const TxStatusMap = {
+//   0: 'Completed',
+//   1: 'Pending',
+//   2: 'Failed'
+// } as const;
+
+const TxStatusArray = ['Completed', 'Pending', 'Failed'];
+
+// function getStatusStyle(status: number): { color: string } {
+//   switch (status) {
+//     case TxStatus.Completed:
+//       return { color: "text-[#48FF91] bg-[#48FF911A]" };
+//     case TxStatus.Pending:
+//       return { color: "text-[#FFA448] bg-[#FFA3481A]" };
+//     case TxStatus.Failed:
+//       return { color: "text-[#FF484B] bg-[#FF484B1A]" };
 //     default:
-//       return "text-gray-500";
+//       return { color: "text-gray-500" };
 //   }
-// };
+// }
+
+const getColorClass = (status: any) => {
+  switch (status) {
+    case TxStatus.Completed:
+      return "text-[#48FF91] bg-[#48FF911A]";
+    case TxStatus.Pending:
+      return "text-[#FFA448] bg-[#FFA3481A]";
+    case TxStatus.Failed:
+      return "text-[#FF484B] bg-[#FF484B1A]";
+    default:
+      return "text-gray-500";
+  }
+};
+
+function getStatusText(status: number) {
+  return TxStatusArray[status]; // or TxStatusMap[status]
+}
 
 const TransactionHistory = () => {
   // const [date, setDate] = React.useState<Date | undefined>(new Date());
@@ -55,6 +90,7 @@ const TransactionHistory = () => {
     isLoading,
     isError,
     error,
+    refetch,
     // fetchNextPage,
     // fetchPreviousPage,
     // hasMore,
@@ -70,6 +106,7 @@ const TransactionHistory = () => {
     console.log("error?", isError)
     console.log("error text", error)
     console.log("transactions", transactions)
+    refetch();
   }, [transactions])
 
   const groupedTransactions = transactions?.reduce<
@@ -142,23 +179,23 @@ const TransactionHistory = () => {
           <TableBody>
             {Object.entries(groupedTransactions).map(([date, transactions]) => (
               <React.Fragment key={date}>
-                <TableRow>
+                {/* <TableRow>
                   <TableCell colSpan={6} className="text-sm font-[300] py-2">
-                    {date}
+                    {formatTimestamp(parseInt(date))}
                   </TableCell>
-                </TableRow>
+                </TableRow> */}
                 {transactions.map((transaction: Transaction, index) => (
                   <TableRow
                     key={`${date}-${index}`}
                     className="block sm:table-row">
                     {/* Transaction type is hidden on smaller screens */}
                     <TableCell className="hidden sm:table-cell">
-                      {transaction.typeOfTransaction}
+                      {capitalize(transaction.typeOfTransaction)}
                     </TableCell>
                     {/* Amount and percentage */}
                     <TableCell>
                       <div className="flex flex-col sm:flex-row sm:space-x-2 items-start sm:items-center">
-                        <p>{Number(transaction.amount)}</p>
+                        <p>{formatEther(transaction.amount)}</p>
                         {/* {transaction.icons && (
                           <transaction.icons className="w-5 h-5 text-[#20FFAF]" />
                         )} */}
@@ -178,27 +215,27 @@ const TransactionHistory = () => {
                     <TableCell className="block sm:table-cell">
                       <div className="flex flex-col">
                         <p className="text-sm font-[500]">
-                          {transaction.token}
+                          {tokenSymbol[transaction.token]}
                         </p>
                         {/* <p className="text-xs">{transaction.network}</p> */}
                       </div>
                     </TableCell>
                     {/* Date and time */}
-                    <TableCell className="text-right">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-2">
-                        {/* <p>{transaction.date}</p>
-                        <p>{transaction.time}</p> */}
+                    <TableCell className="text-right ">
+                      <div className="flex flex-col justify-center text-center sm:flex-row items-start sm:items-center sm:space-x-2">
+                        <p>{formatTimestamp(Number(transaction.timestamp))}</p>
+                        {/* <p>{transaction.time}</p> */}
                       </div>
                     </TableCell>
                     {/* Transaction status */}
-                    <TableCell className="text-right">
+                    <TableCell className="text-right flex justify-center">
                       <Badge className="bg-transparent text-center rounded-[2rem]">
-                        {/* <p
+                        <p
                           className={`text-sm p-2 px-3 w-[6rem] rounded-[2rem] font-[400] ${getColorClass(
                             transaction.status
                           )}`}>
-                          {transaction.status}
-                        </p> */}
+                          {getStatusText(transaction.status)}
+                        </p>
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -213,3 +250,73 @@ const TransactionHistory = () => {
 };
 
 export default TransactionHistory;
+
+{/* <div>
+      <Card className="bg-[#13131373] border-0 text-white p-5">
+        <div className="flex sm:flex-row flex-col sm:space-y-0 space-y-3 justify-between sm:items-center mb-4">
+          <h2 className="text-lg font-semibold">Transaction History</h2>
+          <div className="flex space-x-4 items-center">
+            
+            <div className="relative">
+              
+            </div>
+          </div>
+        </div>
+
+        <Table>
+          <TableBody>
+            {Object.entries(groupedTransactions).map(([date, transactions]) => (
+              <React.Fragment key={date}>
+                <TableRow>
+                  <TableCell colSpan={6} className="text-sm font-[300] py-2">
+                    {formatTimestamp(parseInt(date))}
+                  </TableCell>
+                </TableRow>
+                {transactions.map((transaction: Transaction, index) => (
+                  <TableRow
+                    key={`${date}-${index}`}
+                    className="block sm:table-row">
+                    
+                    <TableCell className="hidden sm:table-cell">
+                      {transaction.typeOfTransaction}
+                    </TableCell>
+                    
+                    <TableCell>
+                      <div className="flex flex-col sm:flex-row sm:space-x-2 items-start sm:items-center">
+                        <p>{Number(transaction.amount)}</p>
+                        
+                      </div>
+                      
+                    </TableCell>
+                    
+                    <TableCell className="hidden sm:table-cell">
+                      
+                    </TableCell>
+                    
+                    <TableCell className="block sm:table-cell">
+                      <div className="flex flex-col">
+                        <p className="text-sm font-[500]">
+                          {transaction.token}
+                        </p>
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="text-right">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-2">
+                        
+                      </div>
+                    </TableCell>
+                    
+                    <TableCell className="text-right">
+                      <Badge className="bg-transparent text-center rounded-[2rem]">
+                        
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </React.Fragment>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div> */}
