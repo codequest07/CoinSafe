@@ -31,7 +31,7 @@ const Home = () => {
           </div>
         </>
 
-        {isConnected ? (
+        {/* {isConnected ? (
           <>
             <div className="sm:flex gap-3 pt-3 relative">
               <div className="backdrop-blur-sm absolute w-full h-full flex items-center justify-center">
@@ -110,7 +110,7 @@ const Home = () => {
               />
             </div>
           </>
-        )}
+        )} */}
 
         {isConnected && (
           <>
