@@ -19,7 +19,7 @@ export default function Navbar() {
         </Link>
         <Button
           className="bg-transparent hover:bg-transparent"
-          // onClick={toggleMenu}
+          onClick={toggleMenu}
         >
           <MemoHandburggerIcon className="w-9 h-9" />
           <span className="sr-only">Menu</span>
