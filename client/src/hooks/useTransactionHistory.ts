@@ -66,6 +66,7 @@ export function useTransactionHistory({
     //   staleTime: 30_000, // Consider data stale after 30 seconds
     //   cacheTime: 5 * 60_000, // Keep data in cache for 5 minutes
     },
+    account: address,
   }) as {
     data: Transaction[]
     isError: boolean
