@@ -47,13 +47,40 @@ export default function AssetTable() {
   const assets: any = TokenBalances || [];
 
   useEffect(() => {
-    if (assets.length === 0) return;
-    const result = assets[0]?.map((key: any, index: string | number) => ({
-      token: key,
-      balance: formatEther(assets[1][index]),
-    }));
-    setAssetData(result);
-  }, [assets]);
+  if (allAssets.length === 0) return;
+    // Map through the 2D array to create objects
+    const allAssetsRes = allAssets[0]?.map(
+      (key: any, index: string | number) => {
+        return {
+          token: key,
+          balance: formatEther(allAssets[1][index]),
+        };
+      }
+    );
+    setAllAssetData(allAssetsRes);
+
+    if (liquidAssets.length === 0) return;
+    // Map through the 2D array to create objects
+    const liquidAssetsRes = liquidAssets[0]?.map(
+      (key: any, index: string | number) => {
+        return {
+          token: key,
+          balance: formatEther(liquidAssets[1][index]),
+        };
+      }
+    );
+    setLiquidAssetData(liquidAssetsRes);
+
+    if (savedAssets.length === 0) return;
+    // Map through the 2D array to create objects
+    const savedAssetsRes = transformAndAccumulateTokenBalances(savedAssets);
+
+    setSavedAssetData(savedAssetsRes);
+
+    console.log("All Token Balances", AllTokenBalances);
+    console.log("Liquid Token Balances", LiquidTokenBalances);
+    console.log("Saved Token Balances", SavedTokenBalances);
+  }, [allAssets, liquidAssets, savedAssets]);
 
   return (
     <div className="bg-[#010104] border border-[#13131373] overflow-hidden p-4 rounded-[2rem] text-white w-full">
@@ -63,22 +90,25 @@ export default function AssetTable() {
           <TabsList className="sm:flex space-x-4 hidden bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="all-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               All assets
             </TabsTrigger>
             <TabsTrigger
               value="liquid-assets"
-              className="text-white px-4 py-2 rounded-full">
+              className="text-white px-4 py-2 rounded-full"
+            >
               Liquid assets
             </TabsTrigger>
-            <TabsTrigger
+          <TabsTrigger
               value="staked-assets"
               className="text-white px-4 py-2 rounded-full">
               Staked assets
             </TabsTrigger>
             <TabsTrigger
               value="saved-assets"
-              className="text-white px-4 py-2 rounded-full">
+            className="text-white px-4 py-2 rounded-full"
+            >
               Saved assets
             </TabsTrigger>
           </TabsList>
@@ -132,7 +162,8 @@ function AssetTableContent({ assets }: { assets: any[] }) {
           </h3>
           <Button
             onClick={openDepositModal}
-            className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]">
+            className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+          >
             Deposit
           </Button>
         </div>
@@ -165,7 +196,8 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             {assets.map((asset, index) => (
               <TableRow
                 key={index}
-                className="w-full flex flex-col sm:table-row">
+                className="w-full flex flex-col sm:table-row"
+              >
                 <TableCell className="w-full sm:w-1/3">
                   <div className="flex items-center space-x-4">
                     <div className="flex flex-col">
@@ -198,13 +230,15 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                   <Button
                     variant="link"
                     className="text-[#79E7BA]"
-                    onClick={() => setIsDepositModalOpen(true)}>
+                    onClick={() => setIsDepositModalOpen(true)}
+                  >
                     Deposit
                   </Button>
                   <Button
                     variant="link"
                     className="text-[#79E7BA]"
-                    onClick={() => setIsFirstModalOpen(true)}>
+                    onClick={() => setIsFirstModalOpen(true)}
+                  >
                     Save
                   </Button>
                 </TableCell>
@@ -218,6 +252,11 @@ function AssetTableContent({ assets }: { assets: any[] }) {
         setIsFirstModalOpen={setIsFirstModalOpen}
         isSecondModalOpen={isSecondModalOpen}
         setIsSecondModalOpen={setIsSecondModalOpen}
+      />
+      <Deposit
+        isDepositModalOpen={isDepositModalOpen}
+        setIsDepositModalOpen={setIsDepositModalOpen}
+        onBack={() => {}}
       />
     </div>
   );
