@@ -130,7 +130,7 @@ export const useDepositAsset = ({
             new Promise((resolve) => setTimeout(resolve, ms));
 
           // Wait for a delay before proceeding
-          await delay(1500);
+          await delay(3000);
 
           const depositResponse = await writeContractAsync({
             chainId: liskSepolia.id,
