@@ -127,7 +127,10 @@ export default function SavingOption({
       </DialogContent>
       <SaveAsset
         isOpen={isSecondModalOpen}
-        onClose={() => setIsSecondModalOpen(false)}
+        onClose={() => {
+          setIsSecondModalOpen(false);
+          setIsFirstModalOpen(false);
+        }}
         onBack={() => {
           setIsSecondModalOpen(false);
           setIsFirstModalOpen(true);

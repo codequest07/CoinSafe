@@ -15,16 +15,16 @@ const Home = () => {
   const [openConnectModal, setOpenConnectModal] = useState(false);
 
   useEffect(() => {
-    if(!isConnected || !address) {
+    if (!isConnected || !address) {
       setOpenConnectModal(true);
     }
-  }, [isConnected, address])
+  }, [isConnected, address]);
 
   return (
     <main>
       <div className="flex flex-col w-full sm:flex ">
         <>
-          <SmarterSavingCard setIsConnectModalOpen={setOpenConnectModal}/>
+          <SmarterSavingCard setIsConnectModalOpen={setOpenConnectModal} />
           {/* sm:space-x-4 */}
           <div className="">
             <TrackingChart />
@@ -33,7 +33,12 @@ const Home = () => {
 
         {isConnected ? (
           <>
-            <div className="sm:flex  gap-3 pt-3">
+            <div className="sm:flex gap-3 pt-3 relative">
+              <div className="backdrop-blur-sm absolute w-full h-full flex items-center justify-center">
+                <p className="text-white text-lg max-w-[400px] text-center">
+                  Cards (Rewards, Streaks, Gas badges, Points) <span className="text-[#20FFAF] font-semibold">Coming soon</span>, we're in the kitchen
+                </p>
+              </div>
               <Card
                 title="Rewards"
                 value={5800000}

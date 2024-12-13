@@ -8,6 +8,6 @@ export const saveAtom = atom({
     duration: 0,
     typeName: '',
     transactionPercentage: 0,
-    frequency: '',
+    frequency: 0,
   },
 });
