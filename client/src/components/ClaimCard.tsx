@@ -55,11 +55,11 @@ const ClaimCard = ({
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <button
+          {/* <button
             onClick={openclaimModal}
             className="rounded-[100px] px-8 py-[8px] bg-[#1E1E1E99] h-[40px] text-sm text-[#F1F1F1]">
             Claim all
-          </button>
+          </button> */}
           {/* <button className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">Save</button> */}
         </div>
       </div>
