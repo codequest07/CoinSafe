@@ -40,6 +40,8 @@ import SaveSuccessful from "./SaveSuccessful";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
+import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
+import SuccessfulTxModal from "./SuccessfulTxModal";
 
 export default function SaveAsset({
   isOpen,
@@ -53,17 +55,23 @@ export default function SaveAsset({
   tab: string;
 }) {
   const [frequencies] = useState([
-    { value: "1day", label: "Every day" },
-    { value: "2days", label: "Every 2 days" },
-    { value: "5days", label: "Every 5 days" },
-    { value: "weekly", label: "Weekly" },
-    { value: "monthly", label: "Monthly" },
+    { value: "86400", label: "Every day" }, // 1 day = 86400 seconds
+    { value: "172800", label: "Every 2 days" }, // 2 days = 172800 seconds
+    { value: "432000", label: "Every 5 days" }, // 5 days = 432000 seconds
+    { value: "604800", label: "Weekly" }, // 1 week = 604800 seconds
+    { value: "2592000", label: "Monthly" }, // 1 month = 2592000 seconds (approx. 30 days)
   ]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [daysInput, setDaysInput] = useState<number | string>("");
   const [unlockDate, setUnlockDate] = useState<Date | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState(tab || "one-time");
+
+
+  function getFrequencyLabel(value: string) {
+    const frequency = frequencies.find(frequency => frequency.value === value);
+    return frequency ? frequency.label : undefined; // Return the label or null if not found
+  }
 
   // Line 50-64: New handler for calendar date selection
   const handleDateSelect = (selectedDay: Date | undefined) => {
@@ -107,7 +115,7 @@ export default function SaveAsset({
     setSelectedDate(calculatedUnlockDate);
   };
 
-  const [selectedOption, setSelectedOption] = useState("per-transaction");
+  const [selectedOption, setSelectedOption] = useState("by-frequency");
   const [validationErrors, setValidationErrors] = useState<{
     amount?: string;
     token?: string;
@@ -169,6 +177,14 @@ export default function SaveAsset({
     }));
   };
 
+  const handleFrequencyChange = (value: string) => {
+    let _frequency = Number(value);
+    setSaveState((prevState) => ({
+      ...prevState,
+      frequency: _frequency,
+    }));
+  };
+
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
     if (value == tokens.safu || value == tokens.lsk) {
@@ -203,6 +219,39 @@ export default function SaveAsset({
     },
   });
 
+  const { createAutoSavings, isLoading: autoSavingsLoading } =
+    usecreateAutoSavings({
+      address,
+      saveState,
+      coinSafeAddress: CoinSafeContract.address as `0x${string}`,
+      coinSafeAbi: coinSafeAbi.abi,
+      chainId: liskSepolia.id,
+      onSuccess: () => {
+        openThirdModal();
+      },
+      onError: (error: { message: any }) => {
+        toast({
+          title: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+
+  const handleSaveAsset = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    if (!validateForm()) {
+      return;
+    }
+
+    if (currentTab === "autosave" && selectedOption === "by-frequency") {
+      createAutoSavings(event);
+      return;
+    }
+
+    saveAsset(event);
+  };
+
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
     onClose();
@@ -218,16 +267,19 @@ export default function SaveAsset({
         <Tabs
           defaultValue={tab || "one-time"}
           onValueChange={handleTabChange}
-          className="w-full">
+          className="w-full"
+        >
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
-              className="flex justify-center rounded-2xl items-center flex-1">
+              className="flex justify-center rounded-2xl items-center flex-1"
+            >
               One-time Save
             </TabsTrigger>
             <TabsTrigger
               value="autosave"
-              className="flex justify-center rounded-2xl items-center flex-1">
+              className="flex justify-center rounded-2xl items-center flex-1"
+            >
               Autosave
             </TabsTrigger>
           </TabsList>
@@ -313,7 +365,8 @@ export default function SaveAsset({
                     />
                     <Popover
                       open={isCalendarOpen}
-                      onOpenChange={setIsCalendarOpen}>
+                      onOpenChange={setIsCalendarOpen}
+                    >
                       <PopoverTrigger asChild>
                         <span onClick={() => setIsCalendarOpen(true)}>
                           <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -345,7 +398,7 @@ export default function SaveAsset({
             <div className="space-y-4 py-4">
               <p className="font-[200] text-base">Choose savings method</p>
               <div className="flex gap-2">
-                <Label
+                {/* <Label
                   htmlFor="per-transaction"
                   className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400">
                   <input
@@ -363,10 +416,11 @@ export default function SaveAsset({
                       Save a percentage of every transaction
                     </p>
                   </div>
-                </Label>
+                </Label> */}
                 <Label
                   htmlFor="by-frequency"
-                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400">
+                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
+                >
                   <input
                     type="radio"
                     id="by-frequency"
@@ -424,12 +478,19 @@ export default function SaveAsset({
                           type="text"
                           id="amount"
                           placeholder="345,000.67 XRP"
+                          value={saveState.amount || ""} // Line 183: Added fallback
+                          onChange={handleAmountChange}
                           className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
                         />
-                        <div className="text-xs text-gray-400 text-center">
+                        {/* <div className="text-xs text-gray-400 text-center">
                           ≈ $400.56
-                        </div>
+                        </div> */}
                       </div>
+                      {validationErrors.amount && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {validationErrors.amount}
+                        </p>
+                      )}
                     </div>
                     <div className="ml-4">
                       <Select onValueChange={handleTokenSelect}>
@@ -463,7 +524,7 @@ export default function SaveAsset({
 
                   <div className="space-y-4 py-2 text-white">
                     <Label htmlFor="frequencyAmount">Frequency</Label>
-                    <Select>
+                    <Select onValueChange={handleFrequencyChange}>
                       <SelectTrigger className="w-full bg-gray-700 border bg-transparent text-white rounded-lg">
                         <SelectValue placeholder="Select Frequency" />
                       </SelectTrigger>
@@ -499,7 +560,8 @@ export default function SaveAsset({
                   />
                   <Popover
                     open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}>
+                    onOpenChange={setIsCalendarOpen}
+                  >
                     <PopoverTrigger asChild>
                       <span onClick={() => setIsCalendarOpen(true)}>
                         <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -529,21 +591,18 @@ export default function SaveAsset({
           <Button
             onClick={onClose}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit">
+            type="submit"
+          >
             Cancel
           </Button>
           <div>
             <Button
-              onClick={(e) => {
-                if (!validateForm()) {
-                  return; // Stop if validation fails
-                }
-                saveAsset(e);
-              }}
+              onClick={handleSaveAsset}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading}>
-              {isLoading ? (
+              disabled={isLoading || autoSavingsLoading}
+            >
+              {isLoading || autoSavingsLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (
                 "Save assets"
@@ -562,8 +621,20 @@ export default function SaveAsset({
             : "USDT"
         }
         duration={saveState.duration}
-        isOpen={isThirdModalOpen}
+        isOpen={isThirdModalOpen && currentTab === 'one-time'}
         onClose={() => setIsThirdModalOpen(false)}
+      />
+      <SuccessfulTxModal
+        transactionType="setup-recurring-save"
+        amount={saveState.amount}
+        token={
+          saveState.token == tokens.safu ? "SAFU" : saveState.token === tokens.lsk ? "LSK" : "USDT"
+        }
+        isOpen={isThirdModalOpen && currentTab === "autosave" && selectedOption === 'by-frequency'}
+        onClose={() => setIsThirdModalOpen(false)}
+        additionalDetails={{
+          frequency: getFrequencyLabel(saveState.frequency.toString())
+        }}
       />
     </Dialog>
   );

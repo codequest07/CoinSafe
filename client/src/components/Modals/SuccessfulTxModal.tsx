@@ -64,9 +64,15 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
           </>
         );
       case "setup-recurring-save":
-        return `You set up a ${
-          additionalDetails?.frequency || "recurring"
-        } save of ${amount} ${token}`;
+        return (
+          <>
+            You set up an <span className="text-[#20FFAF] font-semibold">automated savings</span> plan to save{" "}
+            <span className="text-[#20FFAF] font-semibold">
+              {amount} {token}
+            </span>{" "}
+            <span className="font-semibold lowercase">{additionalDetails?.frequency || "every day"}</span>
+          </>
+        );
       default:
         return (
           <>
@@ -92,7 +98,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
       case "save":
         return "Saving Successful";
       case "setup-recurring-save":
-        return "Recurring Save Setup";
+        return "Create Automated Savings Successful";
       default:
         return "Transaction Successful";
     }

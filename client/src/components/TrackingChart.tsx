@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import {
-  ResponsiveContainer,
-  Tooltip,
-  YAxis,
-  XAxis,
-  AreaChart,
-  Area,
-} from "recharts";
+// import {
+//   ResponsiveContainer,
+//   Tooltip,
+//   YAxis,
+//   XAxis,
+//   AreaChart,
+//   Area,
+// } from "recharts";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
@@ -296,50 +296,50 @@ const TrackingChart = () => {
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
 
-  const data = [
-    {
-      date: "10/12/2024",
-      uv: 0,
-      pv: 2400,
-      amt: 2400,
-    },
-    {
-      date: "10/12/2024",
-      uv: 3000,
-      pv: 1398,
-      amt: 2210,
-    },
-    {
-      date: "10/12/2024",
-      uv: 2000,
-      pv: 9800,
-      amt: 2290,
-    },
-    {
-      date: "10/12/2024",
-      uv: 2780,
-      pv: 3908,
-      amt: 2000,
-    },
-    {
-      date: "10/12/2024",
-      uv: 1890,
-      pv: 4800,
-      amt: 2181,
-    },
-    {
-      date: "10/12/2024",
-      uv: 2390,
-      pv: 3800,
-      amt: 2500,
-    },
-    {
-      date: "10/12/2024",
-      uv: 3490,
-      pv: 4300,
-      amt: 2100,
-    },
-  ];
+  // const data = [ 
+  //   {
+  //     date: "10/12/2024",
+  //     uv: 0,
+  //     pv: 2400,
+  //     amt: 2400,
+  //   },
+  //   {
+  //     date: "10/12/2024",
+  //     uv: 3000,
+  //     pv: 1398,
+  //     amt: 2210,
+  //   },
+  //   {
+  //     date: "10/12/2024",
+  //     uv: 2000,
+  //     pv: 9800,
+  //     amt: 2290,
+  //   },
+  //   {
+  //     date: "10/12/2024",
+  //     uv: 2780,
+  //     pv: 3908,
+  //     amt: 2000,
+  //   },
+  //   {
+  //     date: "10/12/2024",
+  //     uv: 1890,
+  //     pv: 4800,
+  //     amt: 2181,
+  //   },
+  //   {
+  //     date: "10/12/2024",
+  //     uv: 2390,
+  //     pv: 3800,
+  //     amt: 2500,
+  //   },
+  //   {
+  //     date: "10/12/2024",
+  //     uv: 3490,
+  //     pv: 4300,
+  //     amt: 2100,
+  //   },
+  // ];
 
   return (
     <div className="w-full border-[1px] border-[#FFFFFF17] p-6 rounded-[12px]">
@@ -381,7 +381,8 @@ const TrackingChart = () => {
           )}
         </div>
 
-        <div className="sm:flex justify-between pb-6 border-b-[1px] border-[#FFFFFF17]">
+          {/* removeed classnames 'border-b-[1px] border-[#FFFFFF17]' for border bottom styles */}
+        <div className="sm:flex justify-between pb-6">
           {/* Total wallet balance */}
           <div className="mb-6 sm:mb-0">
             <div className="text-[#CACACA] font-light text-sm pb-4">
@@ -444,7 +445,7 @@ const TrackingChart = () => {
         </div>
       </div>
 
-      <div className="w-full h-[160px]">
+      {/* <div className="w-full h-[160px]">
         {isConnected && (
           <>
             <ResponsiveContainer width="100%" height="100%">
@@ -485,7 +486,7 @@ const TrackingChart = () => {
             </ResponsiveContainer>
           </>
         )}
-      </div>
+      </div> */}
 
       {/* SavingOption Modal */}
       <SavingOption
