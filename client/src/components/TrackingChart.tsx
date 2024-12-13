@@ -18,7 +18,7 @@ import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import { formatUnits } from "viem";
-import { getValidNumberValue } from "@/lib/utils";
+import { getPercentage, getValidNumberValue } from "@/lib/utils";
 // import { injected } from "wagmi/connectors";
 // import { liskSepolia } from "viem/chains";
 // import { erc20Abi } from "viem";
@@ -399,10 +399,10 @@ const TrackingChart = () => {
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
-            <div className="text-xs pt-2">
+            {/* <div className="text-xs pt-2">
               <span className="text-[#48FF91]">+18%</span>
               <span className="text-[#7F7F7F] ml-1">24h</span>
-            </div>
+            </div> */}
           </div>
 
           {/* Vault balance */}
@@ -419,7 +419,7 @@ const TrackingChart = () => {
             <div className="flex items-center gap-2 pt-2">
               <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
               <span className="text-[#7F7F7F] text-xs">
-                67% of total wallet balance
+                {getPercentage(savingsBalance, totalBalance)}% of total wallet balance
               </span>
             </div>
           </div>
@@ -438,7 +438,7 @@ const TrackingChart = () => {
             <div className="sm:flex items-center gap-2 pt-2">
               <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
               <span className="text-[#7F7F7F] text-xs">
-                15% of total wallet balance
+                {getPercentage(availableBalance, totalBalance)}% of total wallet balance
               </span>
             </div>
           </div>

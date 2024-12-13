@@ -4,6 +4,7 @@
 
 .hsection {
   @apply px-5 py-2 max-w-[68rem] mx-auto;
+  scroll-behavior: smooth;
 }
 
 body {

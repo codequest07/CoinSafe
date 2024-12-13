@@ -1,20 +1,23 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import MemoClipboard from "@/icons/Clipboard";
+// import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
 import { FaucetContract } from "@/lib/contract";
-import { useWriteContract } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/lib/config";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
+import CustomConnectButton from "@/components/custom-connect-button";
 
 export default function Faucet() {
-  const [evmAddress, setEvmAddress] = useState("");
+  const [evmAddress] = useState("");
+  const { isConnected } = useAccount();
+
 
   //Read contract data
   // const faucetBalance = useReadContract({
@@ -71,13 +74,13 @@ export default function Faucet() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-center mb-5">
-              Enter your EVM wallet address to claim SAFU testnet tokens
+              Connect your EVM wallet to claim SAFU testnet tokens
             </p>
             <div className="space-y-6">
               <div>
-                <label htmlFor="evmAddress" className="text-sm font-medium">
+                {/* <label htmlFor="evmAddress" className="text-sm font-medium">
                   EVM address
-                </label>
+                </label> */}
 
                 <div className="sm:max-w-xl my-4">
                   {isError && (
@@ -108,7 +111,7 @@ export default function Faucet() {
                     </div>
                   )}
                 </div>
-                <div className="mt-1 relative">
+                {/* <div className="mt-1 relative">
                   <Input
                     id="evmAddress"
                     type="text"
@@ -125,19 +128,23 @@ export default function Faucet() {
                     <MemoClipboard className="w-5 h-5" />
                     <p>Paste</p>
                   </Button>
-                </div>
+                </div> */}
               </div>
-              <div className="sm:flex space-x-4 sm:justify-end w-full">
+              <div className="sm:flex space-x-4 sm:justify-center w-full">
                 <div className="">
                   <AddTokenToMetaMask />
                 </div>
-                <Button
-                  className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
-                  onClick={() => handleClaim()}
-                  disabled={isPending}
-                >
-                  {isPending ? "Pending" : "Claim faucet"}
-                </Button>
+                {!isConnected ? (
+                  <CustomConnectButton />
+                ) : (
+                  <Button
+                    className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
+                    onClick={() => handleClaim()}
+                    disabled={isPending}
+                  >
+                    {isPending ? "Pending" : "Claim faucet"}
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>

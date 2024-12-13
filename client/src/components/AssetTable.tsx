@@ -66,6 +66,7 @@ export default function AssetTable() {
 
     // Set the state with the generated objects
     setAssetData(result);
+    console.log(TokenBalances);
   }, [assets]); // Empty dependency array to run only on mount
 
   return (
@@ -88,12 +89,6 @@ export default function AssetTable() {
               Liquid assets
             </TabsTrigger>
             <TabsTrigger
-              value="staked-assets"
-              className="text-white px-4 py-2 rounded-full"
-            >
-              Staked assets
-            </TabsTrigger>
-            <TabsTrigger
               value="saved-assets"
               className="text-white px-4 py-2 rounded-full"
             >
@@ -108,11 +103,6 @@ export default function AssetTable() {
 
           {/* Tab Content for Liquid Assets */}
           <TabsContent value="liquid-assets">
-            <AssetTableContent assets={[]} />
-          </TabsContent>
-
-          {/* Tab Content for Staked Assets */}
-          <TabsContent value="staked-assets">
             <AssetTableContent assets={[]} />
           </TabsContent>
 

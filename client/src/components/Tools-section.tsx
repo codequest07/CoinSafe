@@ -14,7 +14,8 @@ const SavingsTools = () => {
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
-          className=" sm:text-3xl text-[35px] font-bold">
+          className=" sm:text-3xl text-[35px] font-bold"
+        >
           All the tools you need to save and earn in{" "}
           <span className="text-green-500">one place</span>
         </h2>
@@ -32,9 +33,11 @@ const SavingsTools = () => {
             Our easy-to-use browser extension, Whisper automatically locks in
             savings every time you make a transaction.
           </p>
-          <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
-            Start saving
-          </Button>
+          <a href="#hero">
+            <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
+              Start saving
+            </Button>
+          </a>
         </div>
 
         {/* Whisper Permissions */}
@@ -58,9 +61,11 @@ const SavingsTools = () => {
             Our easy to use browser extension, Whisper automatically locks in
             savings every time you make a transaction.
           </p>
-          <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
-            Start saving
-          </Button>
+          <a href="#hero">
+            <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
+              Start saving
+            </Button>
+          </a>
         </div>
 
         {/* Investment Options */}
@@ -73,9 +78,11 @@ const SavingsTools = () => {
             Choose from high-yield savings vaults and staking opportunities
             tailored to your risk level and goals.
           </p>
-          <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
-            Start saving
-          </Button>
+          <a href="#hero">
+            <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
+              Start saving
+            </Button>
+          </a>
         </div>
       </div>
     </section>
