@@ -58,7 +58,6 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
       functionName: "getScheduledSavings",
       account: address,
     })) as Array<{ token: string; amount: bigint; scheduledDate: bigint }>;
-    console.log("Scheduled Savings fetched: ", result);
     return result;
   }
 
@@ -68,10 +67,8 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
         try {
           setIsLoading(true);
           const result = await fetchResult();
-          console.log("Before", result, scheduledSavings);
           const scheduledSavingsRes = await transformArrayData(result);
           setScheduledSavings(scheduledSavingsRes);
-          console.log("After", result, scheduledSavingsRes);
           setIsLoading(false);
         } catch (err: any) {
           setError(err);
@@ -80,8 +77,7 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
         }
       }
     }
-    run();
-    console.log("Scheduled Savings", scheduledSavings);
+    run();    
   }, [isConnected]);
 
   return {

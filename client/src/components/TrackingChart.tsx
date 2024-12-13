@@ -245,7 +245,7 @@ const TrackingChart = () => {
 
         // Process Savings Plan
         if (SavingsBalances.data) {
-          console.log("Savings Plan", SavingsBalances.data);
+          // console.log("Savings Plan", SavingsBalances.data);
 
           const savingsData: any[] = SavingsBalances.data as any[];
           let totalUsdBalance = 0;
@@ -279,7 +279,7 @@ const TrackingChart = () => {
           // Update the savingsBalance state with the total balance in USD
           setSavingsBalance(totalUsdBalance);
 
-          console.log("Total Savings Balance in USD:", totalUsdBalance);
+          // console.log("Total Savings Balance in USD:", totalUsdBalance);
         }
         // Error handling for Savings Plan
         if (SavingsBalances.error) {

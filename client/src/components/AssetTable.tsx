@@ -30,6 +30,20 @@ export default function AssetTable() {
     args: [address],
   });
 
+  const { data: LiquidTokenBalances } = useReadContract({
+    abi: CoinSafeContract.abi.abi,
+    address: CoinSafeContract.address as `0x${string}`,
+    functionName: "getAvailableBalances",
+    args: [address],
+  });
+
+  const { data: SavedTokenBalances } = useReadContract({
+    abi: CoinSafeContract.abi.abi,
+    address: CoinSafeContract.address as `0x${string}`,
+    functionName: "getUserSavings",
+    args: [address],
+  });
+
   const assets: any = TokenBalances || [];
 
   useEffect(() => {
@@ -69,16 +83,16 @@ export default function AssetTable() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="all-assets">
-            <AssetTableContent assets={assetData} />
+            <AssetTableContent assets={allAssetData} />
           </TabsContent>
           <TabsContent value="liquid-assets">
-            <AssetTableContent assets={[]} />
+          <AssetTableContent assets={liquidAssetData} />
           </TabsContent>
           <TabsContent value="staked-assets">
             <AssetTableContent assets={[]} />
           </TabsContent>
           <TabsContent value="saved-assets">
-            <AssetTableContent assets={[]} />
+            <AssetTableContent assets={savedAssetData} />
           </TabsContent>
         </Tabs>
       </div>

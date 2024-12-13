@@ -1,10 +1,11 @@
 import { useGetScheduledSavings } from "@/hooks/useGetScheduledSavings";
 // import { savings } from "@/lib/data";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import { format } from "date-fns";
 import AllScheduledSavings from "./Modals/AllScheduledSavings";
+import { Loader2 } from "lucide-react";
 
 export default function ScheduledSavings() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -15,15 +16,14 @@ export default function ScheduledSavings() {
   const openFirstModal = () => setIsFirstModalOpen(true);
   const triggerOpenAllScheduledSavings = () => setOpenAllScheduledSavings(true);
 
-  useEffect(() => {
-    console.log(scheduledSavings, isLoading, error);
-  }, [isLoading]);
-
   return (
     <div className="bg-[#13131340] text-white p-4 rounded-lg max-w-lg mx-auto sm:max-w-full">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-base font-[500] sm:text-lg">Scheduled savings</h2>
-        <span onClick={triggerOpenAllScheduledSavings} className="text-sm font-[400] text-green-400 sm:text-base cursor-pointer">
+        <span
+          onClick={triggerOpenAllScheduledSavings}
+          className="text-sm font-[400] text-green-400 sm:text-base cursor-pointer"
+        >
           View all
         </span>
       </div>
@@ -47,10 +47,10 @@ export default function ScheduledSavings() {
               </div>
               <div className="text-right">
                 <div className="font-[400] text-sm sm:text-base">
-                  {saving.amount} {" "}
+                  {saving.amount}{" "}
                   <span className="text-sm opacity-70">{saving.token}</span>
                 </div>
-                {saving.token === 'safu' && (
+                {saving.token === "safu" && (
                   <div className="text-sm text-gray-400 sm:text-base">
                     ≈ ${saving.value}
                   </div>
@@ -61,28 +61,38 @@ export default function ScheduledSavings() {
         ))
       ) : (
         <div className="flex flex-col items-center mt-3 justify-center gap-3">
-          <p>You haven't created an automated savings plan yet! Create one?</p>
-          <Button
-            onClick={openFirstModal}
-            className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
-          >
-            Save
-          </Button>
-          {/* SavingOption Modal */}
-          <SavingOption
-            isFirstModalOpen={isFirstModalOpen}
-            setIsFirstModalOpen={setIsFirstModalOpen}
-            isSecondModalOpen={isSecondModalOpen}
-            setIsSecondModalOpen={setIsSecondModalOpen}
-            tab="autosave"
-          />
+          {isLoading ? (
+            <Loader2 className="w-12 h-12 animate-spin" />
+          ) : error ? (
+            <>An error occured: {error}</>
+          ) : (
+            <>
+              <p>
+                You haven't created an automated savings plan yet! Create one?
+              </p>
+              <Button
+                onClick={openFirstModal}
+                className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
+              >
+                Save
+              </Button>
+              {/* SavingOption Modal */}
+              <SavingOption
+                isFirstModalOpen={isFirstModalOpen}
+                setIsFirstModalOpen={setIsFirstModalOpen}
+                isSecondModalOpen={isSecondModalOpen}
+                setIsSecondModalOpen={setIsSecondModalOpen}
+                tab="autosave"
+              />
+            </>
+          )}
         </div>
       )}
       <AllScheduledSavings
         scheduledSavings={scheduledSavings}
         isModalOpen={openAllScheduledSavings}
         setisModalOpen={setOpenAllScheduledSavings}
-        onBack={()=> setOpenAllScheduledSavings(false)}
+        onBack={() => setOpenAllScheduledSavings(false)}
       />
     </div>
   );
