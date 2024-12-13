@@ -2,13 +2,13 @@ import { Table, TableRow, TableBody, TableCell } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
 import MemoAvax from "@/icons/Avax";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { savingsHistoryAssets } from "@/lib/data";
 
 const SavingsHistoryTable = () => {
@@ -19,7 +19,7 @@ const SavingsHistoryTable = () => {
           <div>
             <h1 className="text-xl font-normal mb-4">Savings History</h1>
           </div>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99]">
               <Select>
                 <SelectTrigger className="text-sm border-none bg-transparent focus:ring-0 focus:ring-offset-0">
@@ -46,7 +46,7 @@ const SavingsHistoryTable = () => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Tabs Component */}

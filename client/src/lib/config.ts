@@ -1,4 +1,4 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+// import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import {
     // mainnet,
     // polygon,
@@ -8,12 +8,25 @@ import {
     // sepolia,
     liskSepolia,
   } from 'wagmi/chains';
-  import { http } from 'wagmi';
+  import { createConfig, http } from 'wagmi';
+  import { connectorsForWallets } from '@rainbow-me/rainbowkit';
+import {
+  metaMaskWallet,
+  phantomWallet,
+  rabbyWallet
+} from '@rainbow-me/rainbowkit/wallets';
+
+const connectors = connectorsForWallets(
+  [{
+    groupName: 'Recommended',
+    wallets: [metaMaskWallet, phantomWallet, rabbyWallet]
+  }],
+  { appName: 'RainbowKit App', projectId: 'YOUR_PROJECT_ID' },
+);
   
-  export const config = getDefaultConfig({
-    appName: 'CoinSafe',
-    projectId: 'YOUR_PROJECT_ID',
+  export const config = createConfig({
     chains: [liskSepolia],
+    connectors,
     transports: {
         [liskSepolia.id]: http()
     },

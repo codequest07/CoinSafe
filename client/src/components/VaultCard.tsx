@@ -1,5 +1,6 @@
 import { useState } from "react";
 import SavingOption from "./Modals/SavingOption";
+import { useAccount } from "wagmi";
 
 const VaultCard = ({
   title,
@@ -20,6 +21,7 @@ const VaultCard = ({
 }) => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const { isConnected } = useAccount();
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   return (
@@ -56,14 +58,19 @@ const VaultCard = ({
             </div>
           </div>
         </div>
-        <div className="flex justify-end gap-2">
-          {/* <button className="rounded-[100px] px-8 py-[8px] bg-[#1E1E1E99] h-[40px] text-sm text-[#F1F1F1]">Unlock</button> */}
-          <button
-            onClick={openFirstModal}
-            className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
-            Save
-          </button>
-        </div>
+        {isConnected && (
+          <div className="flex justify-end gap-2">
+            {/* <button className="rounded-[100px] px-8 py-[8px] bg-[#1E1E1E99] h-[40px] text-sm text-[#F1F1F1]">
+              Unlock
+            </button> */}
+            <button
+              onClick={openFirstModal}
+              className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+            >
+              Save
+            </button>
+          </div>
+        )}
       </div>
       <SavingOption
         isFirstModalOpen={isFirstModalOpen}

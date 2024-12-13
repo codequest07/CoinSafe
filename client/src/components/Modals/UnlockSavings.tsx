@@ -48,7 +48,7 @@ export default function UnlockSavings({
                 <input
                   type="text"
                   id="amount"
-                  defaultValue="345,000.67 XRP"
+                  defaultValue="345 SAFU"
                   className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
                 />
                 <div className="text-xs text-gray-400 text-center">
@@ -80,7 +80,7 @@ export default function UnlockSavings({
           {/* Wallet Balance Section */}
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-[300] text-gray-300">
-              Saved balance: <span className="text-gray-400">3000 XRP</span>
+              Saved balance: <span className="text-gray-400">3000 SAFU</span>
             </div>
             <div className="text-sm text-green-400 cursor-pointer">
               Unlock all

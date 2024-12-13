@@ -22,7 +22,7 @@ const ConnectModal = ({
         <p className="my-3 text-[16px] text-center text-[#F1F1F1]">Connect your wallet to get the best of coinsafe</p>
         <div className="flex gap-2 items-center justify-center w-full">
           <Button className='rounded-full border-none outline-none font-light py-2 px-10 text-sm bg-[#FFFFFF2B]/20' onClick={() => setIsConnectModalOpen(false)}>Close</Button>
-          <CustomConnectButton/>
+          <span onClick={() => setIsConnectModalOpen(false)}><CustomConnectButton/></span>
         </div>
       </DialogContent>
     </Dialog>
