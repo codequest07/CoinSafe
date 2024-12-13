@@ -12,12 +12,14 @@ import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/lib/config";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import CustomConnectButton from "@/components/custom-connect-button";
 
 export default function Faucet() {
   const [evmAddress] = useState("");
   const { isConnected } = useAccount();
-
+  const navigate = useNavigate();
 
   //Read contract data
   // const faucetBalance = useReadContract({
@@ -62,15 +64,22 @@ export default function Faucet() {
       : message;
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
   return (
     <main>
       <Navbar />
       <div className="min-h-fit  bg-[#13131373] text-white p-8 mt-20">
         <Card className="w-full sm:max-w-xl border-[#FFFFFF17] sm:mx-auto bg-[#13131373] text-white">
           <CardHeader>
-            <CardTitle className="text-2xl font-[400] text-center">
-              Claim faucet
-            </CardTitle>
+            <button
+              onClick={handleGoBack}
+              className="inline-flex items-center text-sm text-white hover:text-white mb-3">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to app
+            </button>
+            <CardTitle className="text-2xl font-[400]">Claim faucet</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-center mb-5">
@@ -103,8 +112,7 @@ export default function Faucet() {
                           href={`https://sepolia-blockscout.lisk.com/tx/${hash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="underline"
-                        >
+                          className="underline">
                           {`${hash.slice(0, 6)}...${hash.slice(-4)}`}
                         </a>
                       </p>
@@ -123,8 +131,7 @@ export default function Faucet() {
                     className="absolute bg-transparent hidden  hover:bg-transparent  sm:flex space-x-[2px] right-2 top-1/2 transform -translate-y-1/2 text-zinc-400"
                     onClick={() =>
                       navigator.clipboard.readText().then(setEvmAddress)
-                    }
-                  >
+                    }>
                     <MemoClipboard className="w-5 h-5" />
                     <p>Paste</p>
                   </Button>
@@ -157,8 +164,7 @@ export default function Faucet() {
             {FaucetData.map((items, index) => (
               <Card
                 key={index}
-                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full"
-              >
+                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full">
                 <CardHeader className="p-3 pb-0">
                   <CardTitle className="text-sm mt-3">{items.title}</CardTitle>
                 </CardHeader>
@@ -167,8 +173,7 @@ export default function Faucet() {
                   <Link
                     to={items.link}
                     target="_blank"
-                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline"
-                  >
+                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline">
                     {items.btnTitle}
                   </Link>
                 </CardContent>
