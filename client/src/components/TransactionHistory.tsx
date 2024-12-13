@@ -116,12 +116,12 @@ const TransactionHistory = () => {
   });
 
   useEffect(() => {
-  console.log("loading", isLoading)
-    console.log("error?", isError)
-    console.log("error text", error)
-    console.log("transactions", transactions)
+    console.log("loading", isLoading);
+    console.log("error?", isError);
+    console.log("error text", error);
+    console.log("transactions", transactions);
     refetch();
-  }, [transactions])
+  }, [transactions]);
 
   const groupedTransactions = transactions?.reduce<
     Record<string, Transaction[]>
@@ -153,7 +153,7 @@ const TransactionHistory = () => {
           <div className="mb-6 rounded-full  p-6">
             <MemoStory className="w-16 h-16" />
           </div>
-          <p className="mb-2 text-base max-w-[24rem] font-[400]">
+          <p className=" text-base max-w-[24rem] my-8">
             This space is yours to litter with transaction histories, however
             you wish. Deposits, savings, withdrawals, we strongly advise you
             start with saving

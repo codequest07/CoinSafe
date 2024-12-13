@@ -118,7 +118,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
           </h3>
           <Button
             onClick={openDepositModal}
-            className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#79E7BA] hover:bg-[#2a2a2a]">
+            className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]">
             Deposit
           </Button>
         </div>
