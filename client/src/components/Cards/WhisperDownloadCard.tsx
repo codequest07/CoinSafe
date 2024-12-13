@@ -30,11 +30,14 @@ const WhisperDownloadCard = () => {
             automatically, helping you build wealth without even thinking about
             it.
           </p>
-          <Button
-            variant="outline"
-            className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
-            Start saving
-          </Button>
+          <a href="#hero">
+            <Button
+              variant="outline"
+              className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]"
+            >
+              Start saving
+            </Button>
+          </a>
         </CardContent>
       </Card>
     </div>

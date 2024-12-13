@@ -135,7 +135,8 @@ const Vault = () => {
           title="Vault balance"
           value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.00 : 0.00}
           unit="USD"
-          text="+18% (compared to your previous savings)"
+          text=""
+          // text="+18% (compared to your previous savings)"
         />
         <ClaimCard
           title="Claimable balance"

@@ -5,7 +5,7 @@ import { WaitlistModal } from "./Modals/Waitlist-modal";
 export default function Hero() {
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden" id="hero">
       {/* Grid overlay background image */}
       <div className="absolute inset-0 bg-[url('/assets/herobg.svg')] bg-repeat bg-opacity-40" />
 
@@ -33,12 +33,12 @@ export default function Hero() {
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
-              <Button
+              {/* <Button
                 size="lg"
                 variant="default"
                 className="bg-[#262628] text-[#F1F1F1] rounded-[2rem]  sm:w-auto">
                 Download extension
-              </Button>
+              </Button> */}
               <Button
                 onClick={() => setShowWaitlistModal(true)}
                 size="lg"
