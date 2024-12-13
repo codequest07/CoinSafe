@@ -2,10 +2,12 @@ import { useGetScheduledSavings } from "@/hooks/useGetScheduledSavings";
 import MemoUsdc from "@/icons/Usdc";
 import { tokens } from "@/lib/contract";
 // import { savings } from "@/lib/data";
-import { useEffect } from "react";
-import SaveAsset from "./Modals/SaveAsset";
+import { useEffect, useState } from "react";
+import SavingOption from "./Modals/SavingOption";
 
 export default function ScheduledSavings() {
+  const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
+  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const { scheduledSavings, isLoading, error } = useGetScheduledSavings();
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export default function ScheduledSavings() {
           View all
         </a> */}
       </div>
-      {scheduledSavings.length > 0 ? (
+      {!(scheduledSavings.length > 0) ? (
         scheduledSavings.map((saving, index) => (
           <div key={index} className="mb-6">
             <div className="text-sm mb-4 sm:text-base">
@@ -58,11 +60,16 @@ export default function ScheduledSavings() {
         ))
       ) : (
         <div>
-        <p>You haven't created an automated savings plan yet!</p>
-        <p>Create one</p>
-        <SaveAsset
-          
-        />
+          <p>You haven't created an automated savings plan yet!</p>
+          <p>Create one</p>
+          {/* SavingOption Modal */}
+          <SavingOption
+            isFirstModalOpen={isFirstModalOpen}
+            setIsFirstModalOpen={setIsFirstModalOpen}
+            isSecondModalOpen={isSecondModalOpen}
+            setIsSecondModalOpen={setIsSecondModalOpen}
+            tab="autosave"
+          />
         </div>
       )}
     </div>

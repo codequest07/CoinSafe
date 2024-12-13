@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ interface SavingOptionProps {
   setIsFirstModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isSecondModalOpen: boolean;
   setIsSecondModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  tab?: string;
 }
 
 export default function SavingOption({
@@ -26,6 +27,7 @@ export default function SavingOption({
   setIsFirstModalOpen,
   isSecondModalOpen,
   setIsSecondModalOpen,
+  tab,
 }: SavingOptionProps) {
   const [saveState, setSaveState] = useRecoilState(saveAtom);
 
@@ -54,6 +56,12 @@ export default function SavingOption({
       typeName: event.target.value,
     }));
   };
+
+  useEffect(() => {
+    if(tab === 'autosave') {
+      openSecondModal();
+    }
+  }, [])
 
   return (
     <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
