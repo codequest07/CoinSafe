@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import MemoClipboard from "@/icons/Clipboard";
+// import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
 import { FaucetContract } from "@/lib/contract";
-import { useWriteContract } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/lib/config";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
@@ -85,9 +85,9 @@ export default function Faucet() {
             </p>
             <div className="space-y-6">
               <div>
-                <label htmlFor="evmAddress" className="text-sm font-medium">
+                {/* <label htmlFor="evmAddress" className="text-sm font-medium">
                   EVM address
-                </label>
+                </label> */}
 
                 <div className="sm:max-w-xl my-4">
                   {isError && (
@@ -117,7 +117,7 @@ export default function Faucet() {
                     </div>
                   )}
                 </div>
-                <div className="mt-1 relative">
+                {/* <div className="mt-1 relative">
                   <Input
                     id="evmAddress"
                     type="text"
@@ -133,9 +133,9 @@ export default function Faucet() {
                     <MemoClipboard className="w-5 h-5" />
                     <p>Paste</p>
                   </Button>
-                </div>
+                </div> */}
               </div>
-              <div className="sm:flex space-x-4 sm:justify-end w-full">
+              <div className="sm:flex space-x-4 sm:justify-center w-full">
                 <div className="">
                   <AddTokenToMetaMask />
                 </div>

@@ -22,7 +22,7 @@ import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import { formatUnits } from "viem";
-import { getValidNumberValue } from "@/lib/utils";
+import { getPercentage, getValidNumberValue } from "@/lib/utils";
 import Withdraw from "./Modals/Withdraw";
 
 export default function WalletBalance() {
@@ -300,7 +300,7 @@ export default function WalletBalance() {
             </p>
             <p className="text-[#7F7F7F] text-xs flex items-center justify-center sm:justify-start space-x-1">
               <div className="bg-[#79E7BA] h-[0.6rem] w-1 rounded-xl"></div>
-              <span>15%</span> of total wallet balance
+              <span>{getPercentage(availableBalance, totalBalance)}%</span> of total wallet balance
             </p>
           </div>
         </main>
