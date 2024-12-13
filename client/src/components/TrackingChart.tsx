@@ -296,7 +296,7 @@ const TrackingChart = () => {
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
 
-  // const data = [
+  // const data = [ 
   //   {
   //     date: "10/12/2024",
   //     uv: 0,

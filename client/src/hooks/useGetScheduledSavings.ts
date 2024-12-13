@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { useWriteContract, useConnect } from "wagmi";
 // import { waitForTransactionReceipt } from "@wagmi/core";
 // import { injected } from "wagmi/connectors";
@@ -6,6 +6,7 @@ import { useState } from "react";
 import { config } from "@/lib/config";
 import { readContract } from '@wagmi/core'
 import { CoinSafeContract } from "@/lib/contract";
+import { useAccount } from "wagmi";
 
 export interface ScheduledSaving {
   token: string;
@@ -20,6 +21,7 @@ interface ScheduledSavingsResult {
 }
 
 export const useGetScheduledSavings = (): ScheduledSavingsResult => {
+  const { isConnected, address } = useAccount();
   const [isLoading] = useState(false);
   const [error] = useState<Error | null>(null);
 
@@ -30,13 +32,18 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
         abi: CoinSafeContract.abi.abi,
         address: CoinSafeContract.address as `0x${string}`,
         functionName: 'getScheduledSavings',
+        account: address
       });
 
-      console.log(result);
-      
+      console.log("Scheduled Savings fetched: ", result);
   }
 
-  fetchResult();
+  useEffect(() => {
+    if(isConnected) {
+      fetchResult();
+    }
+  }, [isConnected]);
+
 
   return {
     scheduledSavings,
