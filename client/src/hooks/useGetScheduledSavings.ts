@@ -1,8 +1,8 @@
-import { useCallback, useState } from "react";
-import { useWriteContract, useConnect } from "wagmi";
-import { waitForTransactionReceipt } from "@wagmi/core";
-import { injected } from "wagmi/connectors";
-import { liskSepolia } from "viem/chains";
+import { useState } from "react";
+// import { useWriteContract, useConnect } from "wagmi";
+// import { waitForTransactionReceipt } from "@wagmi/core";
+// import { injected } from "wagmi/connectors";
+// import { liskSepolia } from "viem/chains";
 import { config } from "@/lib/config";
 import { readContract } from '@wagmi/core'
 import { CoinSafeContract } from "@/lib/contract";
@@ -20,8 +20,8 @@ interface ScheduledSavingsResult {
 }
 
 export const useGetScheduledSavings = (): ScheduledSavingsResult => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [isLoading] = useState(false);
+  const [error] = useState<Error | null>(null);
 
   let scheduledSavings: ScheduledSaving[] = [];
 
@@ -36,7 +36,7 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
       
   }
 
-
+  fetchResult();
 
   return {
     scheduledSavings,
