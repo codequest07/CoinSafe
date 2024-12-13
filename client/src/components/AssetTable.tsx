@@ -19,9 +19,12 @@ import { CoinSafeContract } from "@/lib/contract";
 import { useEffect, useState } from "react";
 import Deposit from "./Modals/Deposit";
 import SavingOption from "./Modals/SavingOption";
+import { transformAndAccumulateTokenBalances } from "@/lib/utils";
 
 export default function AssetTable() {
-  const [assetData, setAssetData] = useState([]);
+  const [allAssetData, setAllAssetData] = useState([]);
+  const [liquidAssetData, setLiquidAssetData] = useState([]);
+  const [savedAssetData, setSavedAssetData] = useState<any[]>([]);
 
   // const liquidAssets = allAssets.filter((asset) => asset.liquid);
   // const stakedAssets = allAssets.filter((asset) => asset.staked);
@@ -43,31 +46,68 @@ export default function AssetTable() {
   //   ]
   // });
 
-  const { data: TokenBalances } = useReadContract({
+  const { data: AllTokenBalances } = useReadContract({
     abi: CoinSafeContract.abi.abi,
     address: CoinSafeContract.address as `0x${string}`,
     functionName: "getUserBalances",
     args: [address],
   });
 
+  const { data: LiquidTokenBalances } = useReadContract({
+    abi: CoinSafeContract.abi.abi,
+    address: CoinSafeContract.address as `0x${string}`,
+    functionName: "getAvailableBalances",
+    args: [address],
+  });
+
+  const { data: SavedTokenBalances } = useReadContract({
+    abi: CoinSafeContract.abi.abi,
+    address: CoinSafeContract.address as `0x${string}`,
+    functionName: "getUserSavings",
+    args: [address],
+  });
+
   // const assets:any = TokenBalances?.data![0]?.result;
   // const assets:any = TokenBalances![0]?.result || [];
-  const assets: any = TokenBalances || [];
+  const allAssets: any = AllTokenBalances || [];
+  const liquidAssets: any = LiquidTokenBalances || [];
+  const savedAssets: any = SavedTokenBalances || [];
 
   useEffect(() => {
-    if (assets.length === 0) return;
+    if (allAssets.length === 0) return;
     // Map through the 2D array to create objects
-    const result = assets[0]?.map((key: any, index: string | number) => {
-      return {
-        token: key,
-        balance: formatEther(assets[1][index]),
-      };
-    });
+    const allAssetsRes = allAssets[0]?.map(
+      (key: any, index: string | number) => {
+        return {
+          token: key,
+          balance: formatEther(allAssets[1][index]),
+        };
+      }
+    );
+    setAllAssetData(allAssetsRes);
 
-    // Set the state with the generated objects
-    setAssetData(result);
-    console.log(TokenBalances);
-  }, [assets]); // Empty dependency array to run only on mount
+    if (liquidAssets.length === 0) return;
+    // Map through the 2D array to create objects
+    const liquidAssetsRes = liquidAssets[0]?.map(
+      (key: any, index: string | number) => {
+        return {
+          token: key,
+          balance: formatEther(liquidAssets[1][index]),
+        };
+      }
+    );
+    setLiquidAssetData(liquidAssetsRes);
+
+    if (savedAssets.length === 0) return;
+    // Map through the 2D array to create objects
+    const savedAssetsRes = transformAndAccumulateTokenBalances(savedAssets);
+
+    setSavedAssetData(savedAssetsRes);
+
+    console.log("All Token Balances", AllTokenBalances);
+    console.log("Liquid Token Balances", LiquidTokenBalances);
+    console.log("Saved Token Balances", SavedTokenBalances);
+  }, [allAssets, liquidAssets, savedAssets]);
 
   return (
     <div className="bg-[#010104] border border-[#13131373] overflow-hidden p-4 rounded-[2rem] text-white w-full">
@@ -98,17 +138,17 @@ export default function AssetTable() {
 
           {/* Tab Content for All Assets */}
           <TabsContent value="all-assets">
-            <AssetTableContent assets={assetData} />
+            <AssetTableContent assets={allAssetData} />
           </TabsContent>
 
           {/* Tab Content for Liquid Assets */}
           <TabsContent value="liquid-assets">
-            <AssetTableContent assets={[]} />
+            <AssetTableContent assets={liquidAssetData} />
           </TabsContent>
 
           {/* Tab Content for Saved Assets */}
           <TabsContent value="saved-assets">
-            <AssetTableContent assets={[]} />
+            <AssetTableContent assets={savedAssetData} />
           </TabsContent>
         </Tabs>
       </div>

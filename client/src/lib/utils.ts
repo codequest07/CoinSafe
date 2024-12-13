@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { formatEther } from "viem";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -11,4 +12,25 @@ export function getValidNumberValue(value: any) {
 
 export function getPercentage(a: number, b: number) {
   return (a/b * 100).toFixed();
+}
+
+export function transformAndAccumulateTokenBalances(data: Array<any>): { token: string; balance: string }[] {
+  const tokenMap: { [key: string]: bigint } = {};
+
+  // Accumulate balances for each token
+  data.forEach((item) => {
+    const token = item.token;
+    const amount = BigInt(item.amount);
+    if (tokenMap[token]) {
+      tokenMap[token] += amount; // Add to existing balance
+    } else {
+      tokenMap[token] = amount; // Initialize balance
+    }
+  });
+
+  // Transform the accumulated balances into the desired format
+  return Object.entries(tokenMap).map(([token, balance]) => ({
+    token,
+    balance: formatEther(balance), // Format balance to ether
+  }));
 }
