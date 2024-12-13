@@ -1,14 +1,19 @@
 import { useGetScheduledSavings } from "@/hooks/useGetScheduledSavings";
-import MemoUsdc from "@/icons/Usdc";
-import { tokens } from "@/lib/contract";
 // import { savings } from "@/lib/data";
 import { useEffect, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
+import { Button } from "./ui/button";
+import { format } from "date-fns";
+import AllScheduledSavings from "./Modals/AllScheduledSavings";
 
 export default function ScheduledSavings() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const [openAllScheduledSavings, setOpenAllScheduledSavings] = useState(false);
   const { scheduledSavings, isLoading, error } = useGetScheduledSavings();
+
+  const openFirstModal = () => setIsFirstModalOpen(true);
+  const triggerOpenAllScheduledSavings = () => setOpenAllScheduledSavings(true);
 
   useEffect(() => {
     console.log(scheduledSavings, isLoading, error);
@@ -16,52 +21,53 @@ export default function ScheduledSavings() {
 
   return (
     <div className="bg-[#13131340] text-white p-4 rounded-lg max-w-lg mx-auto sm:max-w-full">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-base font-[500] sm:text-lg">Scheduled savings</h2>
-        {/* <a href="#" className="text-sm font-[400] text-green-400 sm:text-base">
+        <span onClick={triggerOpenAllScheduledSavings} className="text-sm font-[400] text-green-400 sm:text-base cursor-pointer">
           View all
-        </a> */}
+        </span>
       </div>
-      {!(scheduledSavings.length > 0) ? (
-        scheduledSavings.map((saving, index) => (
-          <div key={index} className="mb-6">
-            <div className="text-sm mb-4 sm:text-base">
-              {saving.scheduledDate}
+      {scheduledSavings.length > 0 ? (
+        scheduledSavings.slice(0, 3).map((saving, index) => (
+          <div key={index} className="mb-2">
+            <div className="text-sm mb-1 sm:text-base">
+              {format(saving.scheduledDate, "yyyy-MM-dd")}
             </div>
             <div key={index} className="flex justify-between items-center mb-4">
-              <div className="flex space-x-4 items-center">
-                <MemoUsdc className="w-6 h-6 sm:w-8 sm:h-8" />
+              <div className="flex space-x-2 items-center">
+                {/* <MemoUsdc className="w-6 h-6 sm:w-8 sm:h-8" /> */}
                 <div>
                   {/* <div className="font-[400] text-sm sm:text-base">
                     {.symbol}
                   </div> */}
-                  <div className="text-sm text-gray-400 sm:text-base">
-                    {saving.token === tokens.lsk
-                      ? "LSK"
-                      : saving.token === tokens.safu
-                      ? "SAFU"
-                      : saving.token === tokens.usdt
-                      ? "USDT"
-                      : "Unsupported"}
+                  <div className="text-sm text-gray-400 sm:text-base uppercase">
+                    {saving.token}
                   </div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="font-[400] text-sm sm:text-base">
-                  {saving.amount}
-                  {/* {item.symbol} */}
+                  {saving.amount} {" "}
+                  <span className="text-sm opacity-70">{saving.token}</span>
                 </div>
-                {/* <div className="text-sm text-gray-400 sm:text-base">
-                  ≈ {item.value}
-                </div> */}
+                {saving.token === 'safu' && (
+                  <div className="text-sm text-gray-400 sm:text-base">
+                    ≈ ${saving.value}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         ))
       ) : (
-        <div>
-          <p>You haven't created an automated savings plan yet!</p>
-          <p>Create one</p>
+        <div className="flex flex-col items-center mt-3 justify-center gap-3">
+          <p>You haven't created an automated savings plan yet! Create one?</p>
+          <Button
+            onClick={openFirstModal}
+            className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
+          >
+            Save
+          </Button>
           {/* SavingOption Modal */}
           <SavingOption
             isFirstModalOpen={isFirstModalOpen}
@@ -72,6 +78,12 @@ export default function ScheduledSavings() {
           />
         </div>
       )}
+      <AllScheduledSavings
+        scheduledSavings={scheduledSavings}
+        isModalOpen={openAllScheduledSavings}
+        setisModalOpen={setOpenAllScheduledSavings}
+        onBack={()=> setOpenAllScheduledSavings(false)}
+      />
     </div>
   );
 }

@@ -58,10 +58,10 @@ export default function SavingOption({
   };
 
   useEffect(() => {
-    if(tab === 'autosave') {
+    if(isFirstModalOpen && tab === 'autosave') {
       openSecondModal();
     }
-  }, [])
+  }, [isFirstModalOpen])
 
   return (
     <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
@@ -143,7 +143,7 @@ export default function SavingOption({
           setIsSecondModalOpen(false);
           setIsFirstModalOpen(true);
         }}
-        tab=""
+        tab={tab}
       />
       {/* Modal Manager Component */}
       <SaveSenseModalManager
