@@ -19,7 +19,7 @@ const ClaimCard = ({
   text: string;
 }) => {
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-  const openclaimModal = () => setIsClaimModalOpen(true);
+  // const openclaimModal = () => setIsClaimModalOpen(true);
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
       <div className="flex justify-between items-center pb-4">
