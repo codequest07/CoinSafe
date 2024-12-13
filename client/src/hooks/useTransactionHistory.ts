@@ -14,7 +14,7 @@ export interface Transaction {
   typeOfTransaction: string
   token: string
   user: string
-  status?: string
+  status: number
 
   // ... other fields
 }
@@ -31,6 +31,7 @@ interface TransactionHistoryReturn {
   isLoading: boolean
   isError: boolean
   error: Error | null
+  refetch: () => void
   fetchNextPage: () => void
   fetchPreviousPage: () => void
   hasMore: boolean
@@ -55,7 +56,7 @@ export function useTransactionHistory({
     isError,
     error,
     isLoading,
-    // refetch,
+    refetch,
   } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi,
@@ -93,6 +94,7 @@ export function useTransactionHistory({
     isLoading,
     isError,
     error,
+    refetch,
     fetchNextPage,
     fetchPreviousPage,
     hasMore,
