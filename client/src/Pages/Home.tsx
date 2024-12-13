@@ -1,10 +1,10 @@
 import AssetTable from "@/components/AssetTable";
-import Card from "@/components/Card";
+// import Card from "@/components/Card";
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
-import CumulativeCard from "@/components/CumulativeCard";
-import GasCoverageCard from "@/components/GasCoverageCard";
+// import CumulativeCard from "@/components/CumulativeCard";
+// import GasCoverageCard from "@/components/GasCoverageCard";
 import ConnectModal from "@/components/Modals/ConnectModal";
-import SavingStreakCard from "@/components/SavingStreakCard";
+// import SavingStreakCard from "@/components/SavingStreakCard";
 import ScheduledSavings from "@/components/ScheduledSavingsCard";
 import TrackingChart from "@/components/TrackingChart";
 import { useEffect, useState } from "react";
