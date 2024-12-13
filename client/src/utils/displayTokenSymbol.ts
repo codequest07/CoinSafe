@@ -1,0 +1,6 @@
+export const tokenSymbol = {
+    "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": "SAFU",
+    "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": "LSK",
+    "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909": "USDT",
+    "0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909": "USDT",
+} as any;
