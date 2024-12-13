@@ -115,20 +115,29 @@ export const useDepositAsset = ({
           hash: approveResponse,
         });
 
-        if (approveReceipt.status !== "success") {
-          toast({
-            title: "Error approving token spend",
-            variant: "destructive",
-          });
-          throw new Error("Approve transaction was not successful");
-        } else {
+        console.log(approveReceipt);
+        if (
+          approveReceipt.status === "success" &&
+          approveReceipt.transactionIndex === 1
+        ) {
           // Deposit
+          console.log(
+            "Approval Transaction successful, proceeding with deposit"
+          );
+
+          // Delay function using Promise
+          const delay = (ms: number) =>
+            new Promise((resolve) => setTimeout(resolve, ms));
+
+          // Wait for a delay before proceeding
+          await delay(1500);
+
           const depositResponse = await writeContractAsync({
             chainId: liskSepolia.id,
             address: coinSafeAddress as `0x${string}`,
             functionName: "depositToPool",
             abi: coinSafeAbi,
-            args: [amountWithDecimals, token],
+            args: [amountWithDecimals, token as `0x${string}`],
           });
 
           if (!depositResponse) {
@@ -148,6 +157,12 @@ export const useDepositAsset = ({
           }
 
           onSuccess?.();
+        } else {
+          toast({
+            title: "Error approving token spend",
+            variant: "destructive",
+          });
+          throw new Error("Approve transaction was not successful");
         }
       } catch (err) {
         const error =

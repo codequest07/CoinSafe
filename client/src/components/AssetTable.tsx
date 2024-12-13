@@ -19,6 +19,7 @@ import SavingOption from "./Modals/SavingOption";
 import { transformAndAccumulateTokenBalances } from "@/lib/utils";
 import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
+import CustomConnectButton from "./custom-connect-button";
 
 export default function AssetTable() {
   const [allAssetData, setAllAssetData] = useState([]);
@@ -154,6 +155,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const { isConnected } = useAccount();
 
   const openDepositModal = () => {
     setIsDepositModalOpen(true);
@@ -178,14 +180,18 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             <MemoMoney className="w-16 h-16" />
           </div>
           <h3 className="mb-2 text-sm font-[400] text-white">
-            Too much empty space? fill it up with deposits!
+          {isConnected ?'Too much empty space? fill it up with deposits!': 'No wallet connected, connect your wallet to get the best of coinsafe'}
           </h3>
-          <Button
-            onClick={openDepositModal}
-            className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-          >
-            Deposit
-          </Button>
+          {isConnected ? (
+            <Button
+              onClick={openDepositModal}
+              className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+            >
+              Deposit
+            </Button>
+          ) : (
+            <CustomConnectButton />
+          )}
         </div>
         <Deposit
           isDepositModalOpen={isDepositModalOpen}

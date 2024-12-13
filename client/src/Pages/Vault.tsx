@@ -1,9 +1,9 @@
-import AssetVaultTable from "@/components/AssetVaultTable";
+// import AssetVaultTable from "@/components/AssetVaultTable";
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
 import ClaimCard from "@/components/ClaimCard";
-import CurrencyBreakdown from "@/components/CurrencyBreakdown";
-import SavingsHistoryTable from "@/components/SavingsHistoryTable";
-import SavingsPerformance from "@/components/SavingsPerformance";
+// import CurrencyBreakdown from "@/components/CurrencyBreakdown";
+// import SavingsHistoryTable from "@/components/SavingsHistoryTable";
+// import SavingsPerformance from "@/components/SavingsPerformance";
 import VaultCard from "@/components/VaultCard";
 import { useEffect, useState } from "react";
 import coinSafeAbi from "../abi/coinsafe.json";
@@ -14,6 +14,7 @@ import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import { formatUnits } from "viem";
+import AssetTable from "@/components/AssetTable";
 
 const Vault = () => {
 
@@ -117,7 +118,7 @@ const Vault = () => {
         // Error handling for Savings Plan
         if (SavingsBalances.error) {
           console.error("SavingsBalances Error:", SavingsBalances.error);
-          alert("Could not get Savings balance for tokens");
+          // alert("Could not get Savings balance for tokens");
         }
       } catch (error) {
         console.error("Error in fetching balances:", error);
@@ -146,20 +147,21 @@ const Vault = () => {
         />
       </div>
 
-      <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-4">
+      {/* <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-4">
         <CurrencyBreakdown />
-      </div>
+      </div> */}
 
-      <div className="py-2 pr-2">
+      {/* <div className="py-2 pr-2">
         <SavingsPerformance />
-      </div>
+      </div> */}
 
       <div className="py-2">
-        <AssetVaultTable />
+        {/* <AssetVaultTable /> */}
+        <AssetTable />
       </div>
 
       <div>
-        <SavingsHistoryTable />
+        {/* {isConnected && <SavingsHistoryTable />} */}
       </div>
     </div>
   );

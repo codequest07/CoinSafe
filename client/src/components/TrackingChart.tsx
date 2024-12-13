@@ -296,7 +296,7 @@ const TrackingChart = () => {
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
 
-  // const data = [ 
+  // const data = [
   //   {
   //     date: "10/12/2024",
   //     uv: 0,
@@ -381,7 +381,7 @@ const TrackingChart = () => {
           )}
         </div>
 
-          {/* removeed classnames 'border-b-[1px] border-[#FFFFFF17]' for border bottom styles */}
+        {/* removeed classnames 'border-b-[1px] border-[#FFFFFF17]' for border bottom styles */}
         <div className="sm:flex justify-between pb-6">
           {/* Total wallet balance */}
           <div className="mb-6 sm:mb-0">
@@ -416,12 +416,17 @@ const TrackingChart = () => {
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
-            <div className="flex items-center gap-2 pt-2">
-              <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
-              <span className="text-[#7F7F7F] text-xs">
-                {getPercentage(savingsBalance, totalBalance)}% of total wallet balance
-              </span>
-            </div>
+
+            {isConnected && (
+              <div className="flex items-center gap-2 pt-2">
+                <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
+
+                <span className="text-[#7F7F7F] text-xs">
+                  {getPercentage(savingsBalance, totalBalance)}% of total wallet
+                  balance
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Available balance */}
@@ -435,12 +440,15 @@ const TrackingChart = () => {
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
-            <div className="sm:flex items-center gap-2 pt-2">
-              <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
-              <span className="text-[#7F7F7F] text-xs">
-                {getPercentage(availableBalance, totalBalance)}% of total wallet balance
-              </span>
-            </div>
+            {isConnected && (
+              <div className="sm:flex items-center gap-2 pt-2">
+                <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
+                <span className="text-[#7F7F7F] text-xs">
+                  {getPercentage(availableBalance, totalBalance)}% of total
+                  wallet balance
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
