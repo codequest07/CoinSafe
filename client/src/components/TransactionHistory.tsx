@@ -11,7 +11,7 @@ import { Card } from "@/components/ui/card";
 //   DropdownMenuTrigger,
 // } from "@/components/ui/dropdown-menu";
 // import MemoDropdownIcon from "@/icons/DropdownIcon";
-import { TransactionHistoryData } from "@/lib/data";
+// import { TransactionHistoryData } from "@/lib/data";
 // import { Transaction } from "@/types";
 import { Badge } from "./ui/badge";
 // import MemoCalender from "@/icons/Calender";
@@ -19,26 +19,26 @@ import { Transaction, useTransactionHistory } from "@/hooks/useTransactionHistor
 import { CoinSafeContract } from "@/lib/contract";
 import coinSafeAbi from "../abi/coinsafe.json";
 
-const getColorClass = (status: any) => {
-  switch (status.toLowerCase()) {
-    case "completed":
-      return "text-[#48FF91] bg-[#48FF911A]";
-    case "processing":
-      return "text-[#FFA448] bg-[#FFA3481A]";
-    case "failed":
-      return "text-[#FF484B] bg-[#FF484B1A]";
-    default:
-      return "text-gray-500";
-  }
-};
+// const getColorClass = (status: any) => {
+//   switch (status.toLowerCase()) {
+//     case "completed":
+//       return "text-[#48FF91] bg-[#48FF911A]";
+//     case "processing":
+//       return "text-[#FFA448] bg-[#FFA3481A]";
+//     case "failed":
+//       return "text-[#FF484B] bg-[#FF484B1A]";
+//     default:
+//       return "text-gray-500";
+//   }
+// };
 
 const TransactionHistory = () => {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
-  const [showCalendar, setShowCalendar] = React.useState(false); // State to toggle calendar visibility
+  // const [date, setDate] = React.useState<Date | undefined>(new Date());
+  // const [showCalendar, setShowCalendar] = React.useState(false); // State to toggle calendar visibility
 
-  const handleCalendarToggle = () => {
-    setShowCalendar(!showCalendar);
-  };
+  // const handleCalendarToggle = () => {
+  //   setShowCalendar(!showCalendar);
+  // };
 
   // const groupedTransactions = TransactionHistoryData.reduce<
   //   Record<string, Transaction[]>
@@ -55,10 +55,10 @@ const TransactionHistory = () => {
     isLoading,
     isError,
     error,
-    fetchNextPage,
-    fetchPreviousPage,
-    hasMore,
-    hasPrevious
+    // fetchNextPage,
+    // fetchPreviousPage,
+    // hasMore,
+    // hasPrevious
   } = useTransactionHistory({
     contractAddress: CoinSafeContract.address,
     abi: coinSafeAbi.abi,
