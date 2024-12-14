@@ -58,8 +58,8 @@ const SavingsTools = () => {
           </div>
           <h3 className="text-xl font-semibold">Targeted savings plans</h3>
           <p className="mt-4 text-[#B5B5B5] max-w-[28rem] mx-auto mb-4">
-            Our easy to use browser extension, Whisper automatically locks in
-            savings every time you make a transaction.
+            Whether it’s a dream vacation, a new gadget, or long-term wealth, Coinsafe 
+            helps you create personalized plans and stay on track to achieve them.
           </p>
           <a href="#hero">
             <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
