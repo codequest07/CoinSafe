@@ -30,8 +30,16 @@ contract Savings is ReentrancyGuard {
     error userSpendAndSavePlanAlreadyExists();
     error userAutomatedPlanExistsAlreadyExists();
 
-    enum TokenType { USDT, LSK, SAFU }
-    enum TxStatus { Completed, Pending, Failed }
+    enum TokenType {
+        USDT,
+        LSK,
+        SAFU
+    }
+    enum TxStatus {
+        Completed,
+        Pending,
+        Failed
+    }
 
     struct Safe {
         string typeOfSafe;
@@ -56,6 +64,7 @@ contract Savings is ReentrancyGuard {
         uint256 frequency;
         uint256 duration;
         uint256 lastSavingTimestamp;
+        uint256 nextSavingTimestamp;
     }
 
     struct Transaction {
@@ -65,7 +74,7 @@ contract Savings is ReentrancyGuard {
         string typeOfTransaction;
         uint256 amount;
         uint256 timestamp;
-        TxStatus status; 
+        TxStatus status;
     }
 
     struct ScheduledSaving {
@@ -78,7 +87,15 @@ contract Savings is ReentrancyGuard {
     uint8 public acceptedTokenCount;
     uint256 txCount;
 
-    mapping (address => mapping (address => uint256)) public totalAmountSaved; // user => token => amountSaved
+    address[] public automatedSavingsUsers;
+
+    mapping(address => bool) public isInAutomatedSavingsArray;
+
+    // Modification to track automated savings per user per token
+    mapping(address => mapping(address => bool))
+        public userAutomatedSavingsPerToken;
+
+    mapping(address => mapping(address => uint256)) public totalAmountSaved; // user => token => amountSaved
 
     mapping(address => Transaction[]) public userTransactions;
 
@@ -94,33 +111,88 @@ contract Savings is ReentrancyGuard {
     mapping(address => bool) public userSpendAndSavePlanExists;
     mapping(address => bool) public userAutomatedPlanExists;
 
-    mapping (address => mapping (address => bool)) public isTokenAutoSaved;
+    mapping(address => mapping(address => bool)) public isTokenAutoSaved;
 
     // Events
-    event DepositSuccessful(address indexed user, address indexed token, uint256 amount);
-    event SavedSuccessfully(address indexed user, address indexed token, uint256 amount, uint256 duration);
+    event DepositSuccessful(
+        address indexed user,
+        address indexed token,
+        uint256 amount
+    );
+    event SavedSuccessfully(
+        address indexed user,
+        address indexed token,
+        uint256 amount,
+        uint256 duration
+    );
     event Withdrawn(address indexed user, address tokenType, uint256 amount);
-    event SpendAndSave(address indexed user, address indexed token, uint256 amountSaved);
-    event AutomatedSavingSet(address indexed user, address indexed token, uint256 amount, uint256 frequency);
-    event AutomatedSavingExecuted(address indexed user, address indexed token, uint256 amount);
-    event SavingsWithdrawn(address indexed user, uint256 amount, uint256 fee, bool earlyWithdrawal);
+    event SpendAndSave(
+        address indexed user,
+        address indexed token,
+        uint256 amountSaved
+    );
+    event AutomatedSavingSet(
+        address indexed user,
+        address indexed token,
+        uint256 amount,
+        uint256 frequency
+    );
+    event AutomatedSavingExecuted(
+        address indexed user,
+        address indexed token,
+        uint256 amount
+    );
+    event SavingsWithdrawn(
+        address indexed user,
+        uint256 amount,
+        uint256 fee,
+        bool earlyWithdrawal
+    );
     event TokenAdded(address indexed token, TokenType tokenType);
     event TokenRemoved(address indexed token, TokenType tokenType);
-    event PlanCreated(address indexed user, address indexed token, uint8 percentage, uint256 duration);
-    event AutomatedPlanCreated(address indexed user, address indexed token, uint256 amount, uint256 frequency);
-    event TransactionHistoryUpdated(address indexed user, uint256 txCount, uint256 txId, address indexed token, string typeOfTransaction, uint256 amount, uint256 timestamp, TxStatus status);
+    event PlanCreated(
+        address indexed user,
+        address indexed token,
+        uint8 percentage,
+        uint256 duration
+    );
+    event AutomatedPlanCreated(
+        address indexed user,
+        address indexed token,
+        uint256 amount,
+        uint256 frequency
+    );
+    event TransactionHistoryUpdated(
+        address indexed user,
+        uint256 txCount,
+        uint256 txId,
+        address indexed token,
+        string typeOfTransaction,
+        uint256 amount,
+        uint256 timestamp,
+        TxStatus status
+    );
+
+    event BatchAutomatedSavingsExecuted(uint256 executedCount, uint256 skippedCount);
 
     /**
      * @dev Constructor function to initialize the contract with accepted token addresses
      * @param _erc20TokenAddress The address of the ERC20 token
      * @param _liskTokenAddress The address of the LISK token
      * @param _safuTokenAddress The address of the SAFU token
-    */
-    constructor(address _erc20TokenAddress, address _liskTokenAddress, address _safuTokenAddress) {
+     */
+    constructor(
+        address _erc20TokenAddress,
+        address _liskTokenAddress,
+        address _safuTokenAddress
+    ) {
         owner = msg.sender;
-        
-        if (_erc20TokenAddress == address(0) || _liskTokenAddress == address(0) || _safuTokenAddress == address(0)) 
-            revert AddressZeroDetected();
+
+        if (
+            _erc20TokenAddress == address(0) ||
+            _liskTokenAddress == address(0) ||
+            _safuTokenAddress == address(0)
+        ) revert AddressZeroDetected();
 
         acceptedTokensAddresses[TokenType.USDT] = _erc20TokenAddress;
         acceptedTokensAddresses[TokenType.LSK] = _liskTokenAddress;
@@ -133,23 +205,24 @@ contract Savings is ReentrancyGuard {
         acceptedTokenCount += 3;
     }
 
-    modifier onlyOwner {
+    modifier onlyOwner() {
         require(msg.sender == owner, "Unauthorized caller");
         _;
     }
 
-// ======================================= DEPOSIT TO WALLET ===========================================
+    // ======================================= DEPOSIT TO WALLET ===========================================
 
     /**
      * @notice Deposit a specified amount of tokens to the pool
      * @param _amount The amount of tokens to deposit
      * @param _token The address of the token to deposit
-    */
+     */
     function depositToPool(uint256 _amount, address _token) public {
         if (msg.sender == address(0)) revert AddressZeroDetected();
         if (_amount == 0) revert ZeroValueNotAllowed();
         if (!acceptedTokens[_token]) revert InvalidTokenAddress();
-        if (IERC20(_token).balanceOf(msg.sender) < _amount) revert InsufficientFunds();
+        if (IERC20(_token).balanceOf(msg.sender) < _amount)
+            revert InsufficientFunds();
 
         uint256 allowance = IERC20(_token).allowance(msg.sender, address(this));
         if (allowance < _amount) revert InsufficientAllowance();
@@ -163,7 +236,7 @@ contract Savings is ReentrancyGuard {
         emit DepositSuccessful(msg.sender, _token, _amount);
     }
 
-// ======================================= BASIC SAVING ===========================================
+    // ======================================= BASIC SAVING ===========================================
 
     /**
      * @notice Save a specified amount of tokens for a specific duration
@@ -171,14 +244,19 @@ contract Savings is ReentrancyGuard {
      * @param _amount The amount of tokens to save
      * @param _duration The duration for which to save the tokens
      * @dev this function locks a token away to save for a specified duration. The token will be unlocked after the specified duration. It finds the desired token and queries the user's balance to ensure the user has enough and saves it by moving it from the userTokenBalances mapping to the userSavings mapping.
-    */
-    function save(address _token, uint256 _amount, uint256 _duration) public nonReentrant {
+     */
+    function save(
+        address _token,
+        uint256 _amount,
+        uint256 _duration
+    ) public nonReentrant {
         if (msg.sender == address(0)) revert AddressZeroDetected();
         if (_amount == 0) revert ZeroValueNotAllowed();
         if (!acceptedTokens[_token]) revert InvalidTokenAddress();
         if (_duration == 0) revert InvalidInput();
 
-        if (userTokenBalances[msg.sender][_token] < _amount) revert InsufficientFunds();
+        if (userTokenBalances[msg.sender][_token] < _amount)
+            revert InsufficientFunds();
 
         userTokenBalances[msg.sender][_token] -= _amount;
 
@@ -201,20 +279,24 @@ contract Savings is ReentrancyGuard {
         emit SavedSuccessfully(msg.sender, _token, _amount, _duration);
     }
 
-
-// =================================== CREATE SPEND&SAVE SAVE PLAN =======================================
+    // =================================== CREATE SPEND&SAVE SAVE PLAN =======================================
 
     /**
      * @notice Creates a Spend and Save plan for the user
      * @param _token The address of the token to be saved on every transaction
      * @param _percentage The percentage to save
      * @param _duration The duration of the plan
-    */
-    function createSpendAndSavePlan(address _token, uint8 _percentage, uint256 _duration) external {
+     */
+    function createSpendAndSavePlan(
+        address _token,
+        uint8 _percentage,
+        uint256 _duration
+    ) external {
         if (!acceptedTokens[_token]) revert InvalidTokenAddress();
         if (_percentage == 0 || _percentage > 100) revert InvalidPercentage();
         if (_duration == 0) revert InvalidInput();
-        if (userSpendAndSavePlanExists[msg.sender]) revert userSpendAndSavePlanAlreadyExists();
+        if (userSpendAndSavePlanExists[msg.sender])
+            revert userSpendAndSavePlanAlreadyExists();
 
         userSpendAndSavePlan[msg.sender] = SpendAndSavePlan({
             token: _token,
@@ -228,50 +310,93 @@ contract Savings is ReentrancyGuard {
         emit PlanCreated(msg.sender, _token, _percentage, _duration);
     }
 
-    
-// ======================================= CREATE AUTO SAVING PLAN =======================================
+    // ======================================= CREATE AUTO SAVING PLAN =======================================
 
     /**
-        * @notice Creates an automated savings plan for the user.
-        *
-        * @param _token The address of the token to be used for the savings plan.
-        * @param _amount The amount to be saved in the plan.
-        * @param _frequency The frequency of the savings plan.
-        *
-        * @dev This function creates an automated savings plan for the user, which will automatically save the specified amount at the specified frequency.
-    */         
-    function createAutomatedSavingsPlan(address _token, uint256 _amount, uint256 _frequency, uint256 _duration) external {
+     * @notice Creates an automated savings plan for the user
+     * @param _token The address of the token to be used for the savings plan
+     * @param _amount The amount to be saved in the plan
+     * @param _frequency The frequency of the savings plan
+     * @param _duration The duration of the savings plan
+     */
+    function createAutomatedSavingsPlan(
+        address _token,
+        uint256 _amount,
+        uint256 _frequency,
+        uint256 _duration
+    ) external {
         if (!acceptedTokens[_token]) revert InvalidTokenAddress();
         if (_amount == 0 || _frequency == 0) revert ZeroValueNotAllowed();
         if (_frequency > 365 days) revert InvalidInput();
-        if (userAutomatedPlanExists[msg.sender]) revert userAutomatedPlanExistsAlreadyExists();
+
+        // Check if user already has an automated savings plan for this specific token
+        if (userAutomatedSavingsPerToken[msg.sender][_token])
+            revert("Automated savings plan already exists for this token");
+
+        // Check if user has reached maximum number of automated savings plans
+        if (userAutomatedPlanExists[msg.sender])
+            revert("User already has an automated savings plan");
 
         automatedSavingsPlans[msg.sender] = AutomatedSavingsPlan({
             token: _token,
             amount: _amount,
             frequency: _frequency,
             duration: _duration,
-            lastSavingTimestamp: block.timestamp
+            lastSavingTimestamp: block.timestamp,
+            nextSavingTimestamp: block.timestamp + _frequency
         });
 
         userAutomatedPlanExists[msg.sender] = true;
+        userAutomatedSavingsPerToken[msg.sender][_token] = true;
         isTokenAutoSaved[msg.sender][_token] = true;
+
+        // Add user to the automated savings users array if not already present
+        if (!isInAutomatedSavingsArray[msg.sender]) {
+            automatedSavingsUsers.push(msg.sender);
+            isInAutomatedSavingsArray[msg.sender] = true;
+        }
 
         emit AutomatedPlanCreated(msg.sender, _token, _amount, _frequency);
     }
 
+    // ======================================= GET AND EXECUTE AUTOMATED SAVINGS PLANS DUE =======================================
 
-// ======================================= EXECUTE SPEND AND SAVE =======================================
+    function getAndExecuteAutomatedSavingsPlansDue() external nonReentrant {
+        uint256 dueCount = 0;
+        uint256 skippedCount = 0;
+        
+        for (uint256 i = 0; i < automatedSavingsUsers.length; i++) {
+            address user = automatedSavingsUsers[i];
+            AutomatedSavingsPlan storage plan = automatedSavingsPlans[user];
 
+            // Check if the plan is due and still active
+            if (
+                plan.amount > 0 && block.timestamp >= plan.nextSavingTimestamp
+            ) {
+                try this.executeAutomatedSaving(user) {
+                    dueCount++;
+                } catch {
+                    skippedCount++;
+                }
+            }
+        }
+
+        emit BatchAutomatedSavingsExecuted(dueCount, skippedCount);
+    }
+
+    // ======================================= EXECUTE SPEND AND SAVE =======================================
 
     /**
      * @notice Executes the spend and save functionality by saving a percentage of the spent amount
      * @param _token The address of the token for spend and save
      * @param _amount The amount spent, from which a percentage will be saved
      * @dev This function calculates the amount to save based on the spend percentage set in the user's plan, deposits the required funds from the external wallet to the pool and then saves the funds to the user's savings.
-    */
+     */
     // TODO: ADD ERROR HANDLER TO THROW IF USER HASNT SET UP A SPEND AND SAVE PLAN BEFORE CALLING THIS FUNCTION
-    function spendAndSave(address _token, uint256 _amount) external nonReentrant {
+    function spendAndSave(
+        address _token,
+        uint256 _amount
+    ) external nonReentrant {
         if (msg.sender == address(0)) revert AddressZeroDetected();
         if (_amount == 0) revert ZeroValueNotAllowed();
         if (!acceptedTokens[_token]) revert InvalidTokenAddress();
@@ -281,7 +406,6 @@ contract Savings is ReentrancyGuard {
 
         uint256 amountToSave = (_amount * plan.percentage) / 100;
         if (amountToSave > 0) {
-        
             depositToPool(amountToSave, _token);
 
             uint256 savingsIndex = userSavingsCount[msg.sender];
@@ -304,34 +428,51 @@ contract Savings is ReentrancyGuard {
         }
     }
 
+    // ===================================== EXECUTE AUTOMATED SAVINGS =====================================
 
-// ===================================== EXECUTE AUTOMATED SAVINGS =====================================
-
+    /**
+     * @notice Executes automated savings for a user
+     * @param _user The address of the user
+     * @dev This function is designed to be called internally or by trusted external contracts
+     */
     function executeAutomatedSaving(address _user) external {
-        
         AutomatedSavingsPlan storage plan = automatedSavingsPlans[_user];
-        
+
+        // Check if plan is valid and due
         if (plan.amount == 0 || plan.frequency == 0) return;
         if (block.timestamp < plan.lastSavingTimestamp + plan.frequency) return;
 
+        // Check if plan has exceeded its duration
+        if (block.timestamp > plan.lastSavingTimestamp + plan.duration) {
+            // Clean up the plan
+            userAutomatedPlanExists[_user] = false;
+            userAutomatedSavingsPerToken[_user][plan.token] = false;
+            removeFromAutomatedSavings(_user);
+            delete automatedSavingsPlans[_user];
+            return;
+        }
+
+        // Check if user has sufficient balance
         if (userTokenBalances[_user][plan.token] < plan.amount) return;
 
+        // Update user's token balance
         userTokenBalances[_user][plan.token] -= plan.amount;
 
-        uint256 savingsIndex = userSavingsCount[_user];
-        userSavings[_user][savingsIndex] = Safe({
-            typeOfSafe: "Automated",
-            id: savingsIndex,
-            token: plan.token,
-            amount: plan.amount,
-            duration: 0,
-            startTime: block.timestamp,
-            unlockTime: 0
-        });
-        userSavingsCount[_user]++;
+        // Find or create a new savings slot
+        uint256 savingsIndex = findOrCreateAutomatedSavingsSafe(
+            _user,
+            plan.token
+        );
 
+        // Update the safe
+        userSavings[_user][savingsIndex].amount += plan.amount;
+        userSavings[_user][savingsIndex].startTime = block.timestamp;
+
+        // Update plan timestamps
         plan.lastSavingTimestamp = block.timestamp;
+        plan.nextSavingTimestamp = block.timestamp + plan.frequency;
 
+        // Update total amount saved
         totalAmountSaved[_user][plan.token] += plan.amount;
 
         addTransaction("auto save", plan.token, plan.amount);
@@ -339,18 +480,119 @@ contract Savings is ReentrancyGuard {
         emit AutomatedSavingExecuted(_user, plan.token, plan.amount);
     }
 
+    // Optional: Add a function to remove a user from automated savings if their plan expires or is cancelled
+    function removeFromAutomatedSavings(address _user) internal {
+        if (isInAutomatedSavingsArray[_user]) {
+            // Find and remove the user from the array
+            for (uint256 i = 0; i < automatedSavingsUsers.length; i++) {
+                if (automatedSavingsUsers[i] == _user) {
+                    // Replace with the last element and then remove the last element
+                    automatedSavingsUsers[i] = automatedSavingsUsers[automatedSavingsUsers.length - 1];
+                    automatedSavingsUsers.pop();
+                    isInAutomatedSavingsArray[_user] = false;
+                    break;
+                }
+            }
+        }
+    }
 
-// ======================================= UNLOCK SAVING ===========================================
+    /**
+     * @dev Finds an existing automated savings safe or creates a new one
+     * @param _user The address of the user
+     * @param _token The token address
+     * @return The index of the safe
+     */
+    function findOrCreateAutomatedSavingsSafe(
+        address _user,
+        address _token
+    ) internal returns (uint256) {
+        // First, try to find an existing automated savings safe for the token
+        for (uint256 i = 0; i < userSavingsCount[_user]; i++) {
+            if (
+                userSavings[_user][i].token == _token &&
+                keccak256(abi.encodePacked(userSavings[_user][i].typeOfSafe)) ==
+                keccak256(abi.encodePacked("Automated"))
+            ) {
+                return i;
+            }
+        }
+
+        // If no existing safe found, create a new one
+        uint256 savingsIndex = userSavingsCount[_user];
+        userSavings[_user][savingsIndex] = Safe({
+            typeOfSafe: "Automated",
+            id: savingsIndex,
+            token: _token,
+            amount: 0, // Will be updated in the calling function
+            duration: 0,
+            startTime: block.timestamp,
+            unlockTime: 0
+        });
+        userSavingsCount[_user]++;
+
+        return savingsIndex;
+    }
+
+
+    function getAutomatedSavingsDuePlans() external view returns (address[] memory) {
+        // Count how many plans are due
+        uint256 dueCount = 0;
+        for (uint256 i = 0; i < automatedSavingsUsers.length; i++) {
+            address user = automatedSavingsUsers[i];
+            AutomatedSavingsPlan storage plan = automatedSavingsPlans[user];
+            
+            // Check if the plan is due and still active
+            if (plan.amount > 0 && block.timestamp >= plan.nextSavingTimestamp) {
+                dueCount++;
+            }
+        }
+
+        // Create an array to store due plan addresses
+        address[] memory duePlans = new address[](dueCount);
+        uint256 index = 0;
+
+        // Populate the array with addresses of due plans
+        for (uint256 i = 0; i < automatedSavingsUsers.length; i++) {
+            address user = automatedSavingsUsers[i];
+            AutomatedSavingsPlan storage plan = automatedSavingsPlans[user];
+            
+            // Check if the plan is due and still active
+            if (plan.amount > 0 && block.timestamp >= plan.nextSavingTimestamp) {
+                duePlans[index] = user;
+                index++;
+            }
+        }
+
+        return duePlans;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ======================================= UNLOCK SAVING ===========================================
 
     /**
      * @dev Allows a user to withdraw their savings from a specific safe.
      * @param _savingsIndex The index of the safe from which to withdraw savings
      * @param _acceptEarlyWithdrawalFee Boolean indicating whether the user accepts an early withdrawal fee
-    */
+     */
     // TODO: ERROR BOUNDARY IF USER DOES NOT CHECK _acceptEarlyWithdrawalFee TO TRUE IN CASES OF EMERGENCY
     // TODO: ERROR BOUNDARY IF USER TRYING TO CLAIM ISNT ORIGINAL SAVER
     // TODO: FIGURE OUT A WAY TO NULLIFY SAFE INDEX
-    function withdrawSavings(uint256 _savingsIndex, bool _acceptEarlyWithdrawalFee) external nonReentrant {
+    function withdrawSavings(
+        uint256 _savingsIndex,
+        bool _acceptEarlyWithdrawalFee
+    ) external nonReentrant {
         Safe storage userSafe = userSavings[msg.sender][_savingsIndex];
 
         if (userSafe.amount == 0) revert InvalidWithdrawal();
@@ -384,19 +626,21 @@ contract Savings is ReentrancyGuard {
         emit SavingsWithdrawn(msg.sender, userSafe.amount, fee, !isMatured);
     }
 
-
-// ======================================= WITHDRAW FROM POOL ===========================================
-
+    // ======================================= WITHDRAW FROM POOL ===========================================
 
     /**
      * @notice Withdraw specified token amount to users external wallet
      * @param _token The address of the token to withdraw
      * @param _amount The amount of tokens to save
      * @dev This function withdraws a specified amount of tokens from the userTokenBalances mapping pool to users external wallet.
-    */
-    function withdrawFromPool(address _token, uint256 _amount) external nonReentrant {
+     */
+    function withdrawFromPool(
+        address _token,
+        uint256 _amount
+    ) external nonReentrant {
         if (_amount == 0) revert ZeroValueNotAllowed();
-        if (userTokenBalances[msg.sender][_token] < _amount) revert InsufficientFunds();
+        if (userTokenBalances[msg.sender][_token] < _amount)
+            revert InsufficientFunds();
 
         userTokenBalances[msg.sender][_token] -= _amount;
 
@@ -407,23 +651,21 @@ contract Savings is ReentrancyGuard {
         emit Withdrawn(msg.sender, _token, _amount);
     }
 
-
-// ======================================= CLAIM ALL AVAILABLE SAVINGS ===========================================
+    // ======================================= CLAIM ALL AVAILABLE SAVINGS ===========================================
 
     // TODO: FUNCTION THAT CLAIMS ALL CLAIMABLE SAVINGS
-    function claimAll() external {
-        
-    }
+    function claimAll() external {}
 
-
-// ======================================= BALANCES ==========================================
+    // ======================================= BALANCES ==========================================
 
     /**
      * @dev Returns the total balances (available + saved) of tokens for a specific user
      * @param _user The address of the user
      * @return An array of token addresses and an array of corresponding total balances. which ios culmunation of available balances and saved balances
-    */
-    function getUserBalances(address _user) external view returns (address[] memory, uint256[] memory) {
+     */
+    function getUserBalances(
+        address _user
+    ) external view returns (address[] memory, uint256[] memory) {
         address[] memory tokens = new address[](acceptedTokenCount);
         uint256[] memory balances = new uint256[](acceptedTokenCount);
 
@@ -451,14 +693,15 @@ contract Savings is ReentrancyGuard {
         return (tokens, balances);
     }
 
-
     /**
      * @dev Returns the available balances of tokens for a specific user
      * @param _user The address of the user
      * @return An array of token addresses and an array of corresponding balances of available balances which are funds in the deposit pool that are not locked in savings
      */
-    function getAvailableBalances(address _user) external view returns (address[] memory, uint256[] memory) {
-        address[] memory tokens = new address[](acceptedTokenCount); 
+    function getAvailableBalances(
+        address _user
+    ) external view returns (address[] memory, uint256[] memory) {
+        address[] memory tokens = new address[](acceptedTokenCount);
         uint256[] memory balances = new uint256[](acceptedTokenCount);
 
         tokens[0] = acceptedTokensAddresses[TokenType.USDT];
@@ -475,10 +718,11 @@ contract Savings is ReentrancyGuard {
     /**
      * @dev Returns the savings of a specific user
      * @param _user The address of the user
-     * @return An array of Safe structs representing the user's savings 
-    */
-    function getUserSavings(address _user) external view returns (Safe[] memory) {
-
+     * @return An array of Safe structs representing the user's savings
+     */
+    function getUserSavings(
+        address _user
+    ) external view returns (Safe[] memory) {
         uint256 savingsCount = userSavingsCount[_user];
         Safe[] memory userSavingsArray = new Safe[](savingsCount);
 
@@ -491,24 +735,30 @@ contract Savings is ReentrancyGuard {
 
     // TODO: // Get all users savings across types
 
-
     // Get scheduled savings and next savings action
-    function getScheduledSavings() external view returns (ScheduledSaving[] memory) {
+    function getScheduledSavings()
+        external
+        view
+        returns (ScheduledSaving[] memory)
+    {
         AutomatedSavingsPlan storage plan = automatedSavingsPlans[msg.sender];
-        
+
         // If no plan exists or it's invalid, return empty array
         if (plan.amount == 0 || plan.frequency == 0 || plan.duration == 0) {
             return new ScheduledSaving[](0);
         }
-        
+
         // Calculate how many future savings events there will be
-        uint256 timeRemaining = plan.duration - (block.timestamp - plan.lastSavingTimestamp);
+        uint256 timeRemaining = plan.duration -
+            (block.timestamp - plan.lastSavingTimestamp);
         uint256 numScheduledSavings = timeRemaining / plan.frequency;
-        
-        ScheduledSaving[] memory scheduledSavings = new ScheduledSaving[](numScheduledSavings);
-        
+
+        ScheduledSaving[] memory scheduledSavings = new ScheduledSaving[](
+            numScheduledSavings
+        );
+
         uint256 nextSavingTime = plan.lastSavingTimestamp + plan.frequency;
-        
+
         for (uint256 i = 0; i < numScheduledSavings; i++) {
             scheduledSavings[i] = ScheduledSaving({
                 token: plan.token,
@@ -517,28 +767,30 @@ contract Savings is ReentrancyGuard {
             });
             nextSavingTime += plan.frequency;
         }
-        
+
         return scheduledSavings;
     }
 
-// =================================== GET TRAMNSACTIONS =====================================
+    // =================================== GET TRAMNSACTIONS =====================================
 
     /**
      * @notice Gets the transaction history for the user
      * @param offset The offset for pagination
      * @param limit The limit for pagination
      * @return Transaction[] The array of transactions
-    */
-    function getTransactionHistory(uint256 offset, uint256 limit) external view 
-    returns (Transaction[] memory) {
+     */
+    function getTransactionHistory(
+        uint256 offset,
+        uint256 limit
+    ) external view returns (Transaction[] memory) {
         Transaction[] memory history = userTransactions[msg.sender];
         uint256 length = history.length;
-        
+
         // If there are no transactions, return empty array
         if (length == 0) {
             return new Transaction[](0);
         }
-        
+
         // Adjust offset if it's beyond array bounds
         if (offset >= length) {
             offset = length - (length % limit);
@@ -546,32 +798,35 @@ contract Savings is ReentrancyGuard {
                 offset = length > limit ? length - limit : 0;
             }
         }
-        
+
         // Calculate actual size of returned array
         uint256 size = length - offset;
         if (size > limit) {
             size = limit;
         }
-        
+
         // Create return array and populate it
         Transaction[] memory page = new Transaction[](size);
         for (uint256 i = 0; i < size; i++) {
             page[i] = history[length - 1 - (offset + i)];
         }
-        
+
         return page;
     }
 
-
-// =================================== ADD TRANSACTION =====================================
+    // =================================== ADD TRANSACTION =====================================
 
     /**
      * @notice Adds a new transaction to the user's transaction history
      * @param _type The type of transaction
      * @param _token The address of the token
      * @param _amount The amount of the transaction
-    */
-    function addTransaction(string memory _type, address _token, uint256 _amount) internal {
+     */
+    function addTransaction(
+        string memory _type,
+        address _token,
+        uint256 _amount
+    ) internal {
         Transaction memory newTransaction = Transaction({
             id: txCount++,
             user: msg.sender,
@@ -579,20 +834,28 @@ contract Savings is ReentrancyGuard {
             typeOfTransaction: _type,
             amount: _amount,
             timestamp: block.timestamp,
-            status: TxStatus.Completed  // Or Pending, depending on your needs
+            status: TxStatus.Completed // Or Pending, depending on your needs
         });
-        
+
         userTransactions[msg.sender].push(newTransaction);
 
-        emit TransactionHistoryUpdated(msg.sender, txCount, newTransaction.id, _token, _type, _amount, block.timestamp, TxStatus.Completed);
+        emit TransactionHistoryUpdated(
+            msg.sender,
+            txCount,
+            newTransaction.id,
+            _token,
+            _type,
+            _amount,
+            block.timestamp,
+            TxStatus.Completed
+        );
     }
 
+    // ================================== ADMIN ACTIONS =======================================
 
-// ================================== ADMIN ACTIONS =======================================
-
-
-    function getContractBalance(address _token) external view onlyOwner returns (uint256) {
+    function getContractBalance(
+        address _token
+    ) external view onlyOwner returns (uint256) {
         return IERC20(_token).balanceOf(address(this));
     }
-
 }
