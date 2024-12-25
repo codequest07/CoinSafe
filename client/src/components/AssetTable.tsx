@@ -19,6 +19,21 @@ import SavingOption from "./Modals/SavingOption";
 import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
 import CustomConnectButton from "./custom-connect-button";
+import { readContract } from "@wagmi/core";
+import { config } from "@/lib/config";
+
+async function checkIsTokenAutoSaved(
+  userAddress: `0x${string}`,
+  tokenAddress: string
+) {
+  const result = await readContract(config, {
+    abi: CoinSafeContract.abi.abi,
+    address: CoinSafeContract.address as `0x${string}`,
+    functionName: "isTokenAutoSaved",
+    args: [userAddress, tokenAddress],
+  });
+  return result;
+}
 
 export default function AssetTable() {
   const [assetData, setAssetData] = useState([]);
@@ -135,7 +150,8 @@ function AssetTableContent({ assets }: { assets: any[] }) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const [updatedAssets, setUpdatedAssets] = useState<any>([]);
 
   const openDepositModal = () => {
     setIsDepositModalOpen(true);
@@ -152,6 +168,26 @@ function AssetTableContent({ assets }: { assets: any[] }) {
     (asset) => parseFloat(asset.balance) > 0
   );
 
+  useEffect(() => {
+    async function updateAssets(assets: any[]) {
+      try {
+        const transformedAssets: any[] = await Promise.all(
+          assets.map(async (asset: any) => ({
+            token: asset.token,
+            balance: asset.balance,
+            autosaved: await checkIsTokenAutoSaved(address!, asset.token),
+          }))
+        );
+
+        setUpdatedAssets(transformedAssets);
+      } catch (error) {
+        console.error("Error updating assets:", error);
+      }
+    }
+
+    if (address && assets.length > 0) updateAssets(assets);
+  }, [assets]);
+
   if (!assets || assets.length === 0 || !hasNonZeroAssets) {
     return (
       <>
@@ -160,7 +196,9 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             <MemoMoney className="w-16 h-16" />
           </div>
           <h3 className="mb-2 text-sm font-[400] text-white">
-          {isConnected ?'Too much empty space? fill it up with deposits!': 'No wallet connected, connect your wallet to get the best of coinsafe'}
+            {isConnected
+              ? "Too much empty space? fill it up with deposits!"
+              : "No wallet connected, connect your wallet to get the best of coinsafe"}
           </h3>
           {isConnected ? (
             <Button
@@ -199,7 +237,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             </TableRow>
           </TableHeader>
           <TableBody className="text-[#F1F1F1] w-full">
-            {assets.map((asset, index) => (
+            {updatedAssets.map((asset: any, index: number) => (
               <TableRow
                 key={index}
                 className="w-full flex flex-col sm:table-row"
