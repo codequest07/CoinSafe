@@ -72,7 +72,8 @@ export default function Faucet() {
           <CardHeader>
             <button
               onClick={handleGoBack}
-              className="inline-flex items-center text-sm text-white hover:text-white mb-3">
+              className="inline-flex items-center text-sm text-white hover:text-white mb-3"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to app
             </button>
@@ -109,7 +110,8 @@ export default function Faucet() {
                           href={`https://sepolia-blockscout.lisk.com/tx/${hash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="underline">
+                          className="underline"
+                        >
                           {`${hash.slice(0, 6)}...${hash.slice(-4)}`}
                         </a>
                       </p>
@@ -144,7 +146,8 @@ export default function Faucet() {
                   <Button
                     className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
                     onClick={() => handleClaim()}
-                    disabled={isPending}>
+                    disabled={isPending}
+                  >
                     {isPending ? "Pending" : "Claim faucet"}
                   </Button>
                 )}
@@ -160,7 +163,8 @@ export default function Faucet() {
             {FaucetData.map((items, index) => (
               <Card
                 key={index}
-                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full">
+                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full"
+              >
                 <CardHeader className="p-3 pb-0">
                   <CardTitle className="text-sm mt-3">{items.title}</CardTitle>
                 </CardHeader>
@@ -169,7 +173,8 @@ export default function Faucet() {
                   <Link
                     to={items.link}
                     target="_blank"
-                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline">
+                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline"
+                  >
                     {items.btnTitle}
                   </Link>
                 </CardContent>
