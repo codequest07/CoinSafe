@@ -41,8 +41,8 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
 
     try {
       const response = await fetch(
-        // `https://coinsafe-0q0m.onrender.com/main/${address}`
-        `http://localhost:1234/main/${address}`
+        `https://coinsafe-0q0m.onrender.com/main/${address}`
+        // `http://localhost:1234/main/${address}`
       );
 
       if (!response.ok) {
