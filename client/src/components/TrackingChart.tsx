@@ -111,23 +111,50 @@ const TrackingChart = () => {
           />
 
           {/* Vault balance */}
-          <BalanceCard
-            title="Vault balance"
-            isConnected={isConnected}
-            isLoading={isLoading.savings}
-            balance={savingsBalance}
-            percentage={getPercentage(savingsBalance, totalBalance)}
-            className="border-x-[1px] border-[#FFFFFF17] px-4 sm:px-[150px] mb-6 sm:mb-0"
-          />
+          <div className="border-x-[1px] border-[#FFFFFF17] px-4 sm:px-[150px] mb-6 sm:mb-0">
+            <div className="text-[#CACACA] font-light text-sm pb-4">
+              Vault balance
+            </div>
+            <div>
+              <span className="text-[#F1F1F1] text-3xl pr-2">
+                ${isConnected ? savingsBalance.toFixed(2) ?? "0.00" : "0.00"}
+              </span>
+              <span className="text-[#CACACA] font-light text-xs">USD</span>
+            </div>
+
+            {isConnected && (
+              <div className="flex items-center gap-2 pt-2">
+                <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
+
+                <span className="text-[#7F7F7F] text-xs">
+                  {getPercentage(savingsBalance, totalBalance) || 0}% of total wallet
+                  balance
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Available balance */}
-          <BalanceCard
-            title="Available balance"
-            isConnected={isConnected}
-            isLoading={isLoading.available}
-            balance={availableBalance}
-            percentage={getPercentage(availableBalance, totalBalance)}
-          />
+          <div>
+            <div className="text-[#CACACA] font-light text-sm pb-4">
+              Available balance
+            </div>
+            <div>
+              <span className="text-[#F1F1F1] text-3xl pr-2">
+                ${isConnected ? availableBalance?.toFixed(2) ?? "0.00" : "0.00"}
+              </span>
+              <span className="text-[#CACACA] font-light text-xs">USD</span>
+            </div>
+            {isConnected && (
+              <div className="sm:flex items-center gap-2 pt-2">
+                <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
+                <span className="text-[#7F7F7F] text-xs">
+                  {getPercentage(availableBalance, totalBalance) || 0}% of total
+                  wallet balance
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
