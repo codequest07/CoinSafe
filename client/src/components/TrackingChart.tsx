@@ -422,7 +422,7 @@ const TrackingChart = () => {
                 <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
 
                 <span className="text-[#7F7F7F] text-xs">
-                  {getPercentage(savingsBalance, totalBalance)}% of total wallet
+                  {getPercentage(savingsBalance, totalBalance) || 0}% of total wallet
                   balance
                 </span>
               </div>
@@ -444,7 +444,7 @@ const TrackingChart = () => {
               <div className="sm:flex items-center gap-2 pt-2">
                 <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
                 <span className="text-[#7F7F7F] text-xs">
-                  {getPercentage(availableBalance, totalBalance)}% of total
+                  {getPercentage(availableBalance, totalBalance) || 0}% of total
                   wallet balance
                 </span>
               </div>
