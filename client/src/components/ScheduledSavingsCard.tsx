@@ -64,7 +64,7 @@ export default function ScheduledSavings() {
           {isLoading ? (
             <Loader2 className="w-12 h-12 animate-spin" />
           ) : error ? (
-            <>An error occured: {error}</>
+            <span className="text-red-500">An unexpected error occured: Don't worry it's not from you, we're working on it..</span>
           ) : (
             <>
               <p>
