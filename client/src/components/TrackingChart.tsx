@@ -1,297 +1,19 @@
-import { useEffect, useState } from "react";
-// import {
-//   ResponsiveContainer,
-//   Tooltip,
-//   YAxis,
-//   XAxis,
-//   AreaChart,
-//   Area,
-// } from "recharts";
+import { useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
-import coinSafeAbi from "../abi/coinsafe.json";
-// import { CoinSafeContract } from "@/lib/contract";
-import { useAccount, useReadContract, useWatchContractEvent } from "wagmi";
-
-import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
-
-import { CoinSafeContract, tokens } from "@/lib/contract";
-import { formatUnits } from "viem";
-import { getPercentage, getValidNumberValue } from "@/lib/utils";
-// import { injected } from "wagmi/connectors";
-// import { liskSepolia } from "viem/chains";
-// import { erc20Abi } from "viem";
+import { useAccount } from "wagmi";
+import { getPercentage } from "@/lib/utils";
+import { useBalances } from "@/hooks/useBalances";
+import { Loader2 } from "lucide-react";
 
 const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const { isConnected, address } = useAccount();
-  const [savingsBalance, setSavingsBalance] = useState<number>(0);
-  const [availableBalance, setAvailableBalance] = useState<number>(0);
-  const [totalBalance, setTotalBalance] = useState<number>(0);
-
-  const TotalBalance = useReadContract({
-    abi: coinSafeAbi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    functionName: "getUserBalances",
-    args: [address],
-  });
-
-  const SavingsBalances = useReadContract({
-    abi: coinSafeAbi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    functionName: "getUserSavings",
-    args: [address],
-  });
-
-  const AvailableBalance = useReadContract({
-    abi: coinSafeAbi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    functionName: "getAvailableBalances",
-    args: [address],
-  });
-
-  // console.log("values from reading th contract: ", TotalBalance, SavingsBalances, AvailableBalance);
-
-  useWatchContractEvent({
-    abi: coinSafeAbi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    eventName: "DepositSuccessful",
-    async onLogs(logs) {
-      try {
-        console.log("New logs!", logs);
-
-        // Extract relevant details from the logs
-        const log: any = logs[0]; // Assuming a single log for simplicity
-        const { token, amount } = log.args;
-
-        // console.log(
-        //   `Token: ${token}, Amount: ${amount.toString()}, User: ${user}`
-        // );
-
-        // Define your token addresses (assumed to be predefined)
-        const usdtAddress = tokens.usdt;
-        const safuAddress = tokens.safu;
-        const lskAddress = tokens.lsk;
-
-        let amountInUsd = 0;
-
-        // Check which token was deposited and convert the amount to USD
-        if (token === usdtAddress) {
-          amountInUsd = (await getUsdtToUsd(
-            Number(formatUnits(amount, 6))
-          )) as number; // USDT has 6 decimals
-        } else if (token === safuAddress) {
-          amountInUsd = getSafuToUsd(Number(formatUnits(amount, 18))); // SAFU has 18 decimals
-        } else if (token === lskAddress) {
-          amountInUsd = (await getLskToUsd(
-            Number(formatUnits(amount, 18))
-          )) as number; // LSK has 18 decimals
-        } else {
-          console.error("Unknown token address:", token);
-          return;
-        }
-
-        // Update the available and total balances by adding the new deposit amount
-        setAvailableBalance((prev) => prev + amountInUsd);
-        setTotalBalance((prev) => prev + amountInUsd);
-
-        // alert(`Deposit of ${amountInUsd} USD in token ${token} successful!`);
-      } catch (error) {
-        console.error("Error processing logs:", error);
-      }
-    },
-  });
-
-  useWatchContractEvent({
-    abi: coinSafeAbi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    eventName: "SavedSuccessfully",
-    onLogs(logs: any) {
-      console.log("New logs!", logs);
-
-      // Extract token and amount saved from the event logs
-      const newSave = logs[0]?.args;
-      const tokenAddress = newSave?.token;
-      const savedAmount = newSave?.amount;
-
-      // alert(
-      //   `New Savings Event: Token: ${tokenAddress}, Amount: ${savedAmount}`
-      // );
-
-      // Convert saved amount to USD and update balances
-      async function updateBalances() {
-        let usdValue = 0;
-
-        // Check for the token and convert amount to USD using your conversion function
-        if (tokenAddress === tokens.usdt) {
-          usdValue = (await getUsdtToUsd(
-            Number(formatUnits(savedAmount, 6))
-          )) as number; // USDT has 6 decimals
-        } else if (tokenAddress === tokens.safu) {
-          usdValue = (await getSafuToUsd(
-            Number(formatUnits(savedAmount, 18))
-          )) as number; // Convert SAFU to USD
-        } else if (tokenAddress === tokens.lsk) {
-          usdValue = (await getLskToUsd(
-            Number(formatUnits(savedAmount, 18))
-          )) as number; // Convert LSK to USD
-        }
-
-        // Update the savings balance by adding the new saved amount
-        setSavingsBalance((prevSavings) => prevSavings + usdValue);
-
-        // Assuming availableBalance is reduced by the saved amount
-        setAvailableBalance((prevAvailable) => prevAvailable - usdValue);
-
-        // console.log("Updated Savings Balance:", savingsBalance);
-        // console.log("Updated Available Balance:", availableBalance);
-      }
-
-      updateBalances();
-    },
-  });
-
-  useEffect(() => {
-    async function run() {
-      try {
-        // Process Available Balance
-        if (AvailableBalance.data && Array.isArray(AvailableBalance.data)) {
-          // console.log("Available Balance", AvailableBalance.data);
-
-          let lskVal = 0,
-            safuVal = 0,
-            usdtVal = 0;
-
-          const tokenAddresses = AvailableBalance.data[0]; // Array of token addresses
-          const tokenBalances = AvailableBalance.data[1]; // Array of balances
-
-          for (let i = 0; i < tokenAddresses.length; i++) {
-            const address = tokenAddresses[i];
-            const balance = tokenBalances[i];
-
-            // Check if the token is USDT, SAFU, or LSK and calculate the value in USD
-            if (address === tokens.usdt) {
-              usdtVal = (await getUsdtToUsd(
-                Number(formatUnits(balance, 6))
-              )) as number; // USDT has 6 decimals
-            } else if (address === tokens.safu) {
-              safuVal = getSafuToUsd(Number(formatUnits(balance, 18))); // SAFU has 18 decimals
-            } else if (address === tokens.lsk) {
-              lskVal = (await getLskToUsd(
-                Number(formatUnits(balance, 18))
-              )) as number; // LSK has 18 decimals
-            }
-          }
-
-          // Calculate total available balance in USD
-          const totalAvailableBalanceUSD =
-            getValidNumberValue(lskVal) +
-            getValidNumberValue(usdtVal) +
-            getValidNumberValue(safuVal);
-          setAvailableBalance(totalAvailableBalanceUSD);
-          // console.log("Available balance in USD:", totalAvailableBalanceUSD);
-        }
-
-        // Error handling for Available Balance
-        if (AvailableBalance.error) {
-          console.error("AvailableBalance Error:", AvailableBalance.error);
-        }
-
-        // Process Total Balance
-        if (TotalBalance.data && Array.isArray(TotalBalance.data)) {
-          // console.log("Total Balance", TotalBalance.data);
-
-          let totalLskVal = 0,
-            totalSafuVal = 0,
-            totalUsdtVal = 0;
-
-          const totalTokenAddresses = TotalBalance.data[0]; // Array of token addresses
-          const totalTokenBalances = TotalBalance.data[1]; // Array of balances
-
-          for (let i = 0; i < totalTokenAddresses.length; i++) {
-            const address = totalTokenAddresses[i];
-            const balance = totalTokenBalances[i];
-
-            // Check if the token is USDT, SAFU, or LSK and calculate the value in USD
-            if (address === tokens.usdt) {
-              totalUsdtVal = (await getUsdtToUsd(
-                Number(formatUnits(balance, 6))
-              )) as number;
-            } else if (address === tokens.safu) {
-              totalSafuVal = getSafuToUsd(Number(formatUnits(balance, 18)));
-            } else if (address === tokens.lsk) {
-              totalLskVal = (await getLskToUsd(
-                Number(formatUnits(balance, 18))
-              )) as number;
-            }
-          }
-
-          // Calculate total balance in USD
-          const totalBalanceUSD =
-            getValidNumberValue(totalLskVal) +
-            getValidNumberValue(totalUsdtVal) +
-            getValidNumberValue(totalSafuVal);
-          setTotalBalance(totalBalanceUSD);
-        }
-
-        // Error handling for Total Balance
-        if (TotalBalance.error) {
-          console.error("TotalBalance Error:", TotalBalance.error);
-          alert("Could not get total balance for tokens");
-        }
-
-        // Process Savings Plan
-        if (SavingsBalances.data) {
-          // console.log("Savings Plan", SavingsBalances.data);
-
-          const savingsData: any[] = SavingsBalances.data as any[];
-          let totalUsdBalance = 0;
-
-          // Loop through each savings plan and calculate the total balance in USD
-          for (const plan of savingsData) {
-            const token = plan.token;
-            const amount = plan.amount;
-
-            let usdValue = 0;
-
-            // Assuming you have conversion functions for each token to USD
-            if (token === tokens.usdt) {
-              usdValue = (await getUsdtToUsd(
-                Number(formatUnits(amount, 6))
-              )) as number; // Convert USDT to USD
-            } else if (token === tokens.safu) {
-              usdValue = getSafuToUsd(
-                Number(formatUnits(amount, 18))
-              ) as number; // Convert SAFU to USD
-            } else if (token === tokens.lsk) {
-              usdValue = (await getLskToUsd(
-                Number(formatUnits(amount, 18))
-              )) as number; // Convert LSK to USD
-            }
-
-            // Accumulate the USD value of each token
-            totalUsdBalance += usdValue;
-          }
-
-          // Update the savingsBalance state with the total balance in USD
-          setSavingsBalance(totalUsdBalance);
-
-          // console.log("Total Savings Balance in USD:", totalUsdBalance);
-        }
-        // Error handling for Savings Plan
-        if (SavingsBalances.error) {
-          console.error("SavingsBalances Error:", SavingsBalances.error);
-          alert("Could not get Savings balance for tokens");
-        }
-      } catch (error) {
-        console.error("Error in fetching balances:", error);
-      }
-    }
-    run();
-  }, [AvailableBalance.data, TotalBalance.data, SavingsBalances.data]);
+  const { isLoading, totalBalance, savingsBalance, availableBalance } =
+    useBalances(address as string);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
@@ -389,13 +111,19 @@ const TrackingChart = () => {
               Total wallet balance
             </div>
             <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2">
+              <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
                 $
-                {isConnected
-                  ? totalBalance
-                    ? totalBalance?.toFixed(2)
-                    : "0.00"
-                  : "0.00"}
+                {isConnected ? (
+                  isLoading.total ? (
+                    <Loader2 className="w-6 h-6 text-[#F1F1F1]/60 animate-spin inline" />
+                  ) : totalBalance ? (
+                    totalBalance?.toFixed(2)
+                  ) : (
+                    "0.00"
+                  )
+                ) : (
+                  "0.00"
+                )}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
@@ -411,8 +139,17 @@ const TrackingChart = () => {
               Vault balance
             </div>
             <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2">
-                ${isConnected ? savingsBalance.toFixed(2) ?? "0.00" : "0.00"}
+              <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
+                $
+                {isConnected ? (
+                  isLoading.savings ? (
+                    <Loader2 className="w-6 h-6 text-[#F1F1F1]/60 animate-spin" />
+                  ) : (
+                    savingsBalance.toFixed(2) ?? "0.00"
+                  )
+                ) : (
+                  "0.00"
+                )}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
@@ -422,8 +159,8 @@ const TrackingChart = () => {
                 <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
 
                 <span className="text-[#7F7F7F] text-xs">
-                  {getPercentage(savingsBalance, totalBalance) || 0}% of total wallet
-                  balance
+                  {getPercentage(savingsBalance, totalBalance) ?? 0}% of total
+                  wallet balance
                 </span>
               </div>
             )}
@@ -435,8 +172,17 @@ const TrackingChart = () => {
               Available balance
             </div>
             <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2">
-                ${isConnected ? availableBalance?.toFixed(2) ?? "0.00" : "0.00"}
+              <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
+                $
+                {isConnected ? (
+                  isLoading.available ? (
+                    <Loader2 className="w-6 h-6 text-[#F1F1F1]/60 animate-spin" />
+                  ) : (
+                    availableBalance?.toFixed(2) ?? "0.00"
+                  )
+                ) : (
+                  "0.00"
+                )}
               </span>
               <span className="text-[#CACACA] font-light text-xs">USD</span>
             </div>
@@ -444,7 +190,7 @@ const TrackingChart = () => {
               <div className="sm:flex items-center gap-2 pt-2">
                 <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
                 <span className="text-[#7F7F7F] text-xs">
-                  {getPercentage(availableBalance, totalBalance) || 0}% of total
+                  {getPercentage(availableBalance, totalBalance) ?? 0}% of total
                   wallet balance
                 </span>
               </div>

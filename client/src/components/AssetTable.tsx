@@ -11,7 +11,7 @@ import { CardContent } from "./ui/card";
 import MemoCheckIcon from "@/icons/CheckIcon";
 import MemoXmarkIcon from "@/icons/XmarkIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { CoinSafeContract } from "@/lib/contract";
 import { useEffect, useState } from "react";
@@ -22,6 +22,7 @@ import MemoMoney from "@/icons/Money";
 import CustomConnectButton from "./custom-connect-button";
 import { readContract } from "@wagmi/core";
 import { config } from "@/lib/config";
+import { useBalances } from "@/hooks/useBalances";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
@@ -46,47 +47,15 @@ export default function AssetTable() {
   // const savedAssets = allAssets.filter((asset) => asset.saved);
   const { address } = useAccount();
 
-  // const usdtAddress = tokens.usdt;
-  // const safuAddress = tokens.safu;
-  // const lskAddress = tokens.lsk;
+  const { 
+    AvailableBalance: LiquidTokenBalances, 
+    TotalBalance: AllTokenBalances, 
+    SavingsBalances: SavedTokenBalances 
+  }  = useBalances(address as string);
 
-  // const {data:TokenBalances} = useReadContracts({
-  //   contracts: [
-  //     {
-  //       abi: CoinSafeContract.abi.abi,
-  //       address: CoinSafeContract.address as `0x${string}`,
-  //       functionName: "getUserBalances",
-  //       args: [address],
-  //     }
-  //   ]
-  // });
-
-  const { data: AllTokenBalances } = useReadContract({
-    abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    functionName: "getUserBalances",
-    args: [address],
-  });
-
-  const { data: LiquidTokenBalances } = useReadContract({
-    abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    functionName: "getAvailableBalances",
-    args: [address],
-  });
-
-  const { data: SavedTokenBalances } = useReadContract({
-    abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    functionName: "getUserSavings",
-    args: [address],
-  });
-
-  // const assets:any = TokenBalances?.data![0]?.result;
-  // const assets:any = TokenBalances![0]?.result || [];
-  const allAssets: any = AllTokenBalances || [];
-  const liquidAssets: any = LiquidTokenBalances || [];
-  const savedAssets: any = SavedTokenBalances || [];
+  const allAssets: any = AllTokenBalances?.data || [];
+  const liquidAssets: any = LiquidTokenBalances?.data || [];
+  const savedAssets: any = SavedTokenBalances?.data || [];
 
   useEffect(() => {
     if (allAssets.length === 0) return;
