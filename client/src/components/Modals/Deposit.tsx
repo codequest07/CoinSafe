@@ -20,10 +20,6 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Deposited from "./Deposited";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
-import { readContract } from "@wagmi/core";
-import { config } from "@/lib/config";
-import { erc20Abi, formatUnits } from "viem";
-
 export default function Deposit({
   isDepositModalOpen,
   setIsDepositModalOpen,
