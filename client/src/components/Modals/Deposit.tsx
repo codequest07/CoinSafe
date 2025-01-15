@@ -12,7 +12,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 import coinSafeAbi from "../../abi/coinsafe.json";
 import { CoinSafeContract, tokens } from "@/lib/contract";
@@ -21,6 +21,9 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Deposited from "./Deposited";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
+import { readContract } from "@wagmi/core";
+import { config } from "@/lib/config";
+import { erc20Abi, formatUnits, parseUnits } from "viem";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -36,6 +39,8 @@ export default function Deposit({
 
   const [amount, setAmount] = useState(0);
   const [token, setToken] = useState("");
+  const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
+  const [fetchingTokenbalance, setFetchingTokenBalance] = useState(false);
 
   const openThirdModal = () => {
     console.log("details", token, amount);
@@ -60,11 +65,35 @@ export default function Deposit({
     onError: (error) => {
       toast({
         title: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     },
-    toast
+    toast,
   });
+
+  useEffect(() => {
+    async function fetchTokenBalance() {
+      try {
+        setFetchingTokenBalance(true);
+        const tokenBalance = await readContract(config, {
+          abi: erc20Abi,
+          address: token as `0x${string}`,
+          functionName: "balanceOf",
+          args: [address!],
+        });
+
+        console.log("tokenBalance:: ", tokenBalance);
+        setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+        setFetchingTokenBalance(false);
+      } catch (error) {
+        throw new Error(error as any);
+      }
+    }
+
+    if (address && token) {
+      fetchTokenBalance();
+    }
+  }, [token, address]);
 
   return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
@@ -88,8 +117,8 @@ export default function Deposit({
                   onChange={(e: any) => setAmount(e.target.value)}
                   placeholder="100"
                   required
-                  min={0.05}
-                  className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
+                  min={0.01}
+                  className={`bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full`}
                 />
                 {/* <div className="text-xs text-gray-400 text-center">
                   ≈ $400.56
@@ -118,12 +147,32 @@ export default function Deposit({
           </div>
 
           {/* Wallet Balance Section */}
-          {/* <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-[300] text-gray-300">
-              Deposit assets: <span className="text-gray-400">3000 XRP</span>
-            </div>
-            <div className="text-sm text-green-400 cursor-pointer">Max</div>
-          </div> */}
+          {token && (
+            <>
+              {amount > selectedTokenBalance && (
+                <p className="text-red-500 text-[13px] text-right">Amount greater than balance</p>
+              )}
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-sm font-[300] text-gray-300">
+                  Wallet balance:{" "}
+                  <span className="text-gray-400">
+                    {selectedTokenBalance}{" "}
+                    {token == tokens.safu
+                      ? "SAFU"
+                      : token === tokens.lsk
+                      ? "LSK"
+                      : "USDT"}
+                  </span>
+                </div>
+                <Button
+                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                  onClick={() => setAmount(selectedTokenBalance)}
+                >
+                  Max
+                </Button>
+              </div>
+            </>
+          )}
         </div>
         <DialogFooter>
           <Button
@@ -140,7 +189,7 @@ export default function Deposit({
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading}
+              disabled={isLoading || amount > selectedTokenBalance}
             >
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
