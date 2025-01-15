@@ -37,8 +37,6 @@ export default function Deposit({
 
   const [amount, setAmount] = useState(0);
   const [token, setToken] = useState("");
-  const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-
   const openThirdModal = () => {
     console.log("details", token, amount);
 
@@ -62,7 +60,7 @@ export default function Deposit({
     onError: (error) => {
       toast({
         title: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     },
     toast,
@@ -141,32 +139,12 @@ export default function Deposit({
           </div>
 
           {/* Wallet Balance Section */}
-          {token && (
-            <>
-              {amount > selectedTokenBalance && (
-                <p className="text-red-500 text-[13px] text-right">Amount greater than wallet balance</p>
-              )}
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-[300] text-gray-300">
-                  Wallet balance:{" "}
-                  <span className="text-gray-400">
-                    {selectedTokenBalance}{" "}
-                    {token == tokens.safu
-                      ? "SAFU"
-                      : token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
-                  </span>
-                </div>
-                <Button
-                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}
-                >
-                  Max
-                </Button>
-              </div>
-            </>
-          )}
+        {/* <div className="flex items-center justify-between mb-3">
+            <div className="text-sm font-[300] text-gray-300">
+              Deposit assets: <span className="text-gray-400">3000 XRP</span>
+            </div>
+            <div className="text-sm text-green-400 cursor-pointer">Max</div>
+          </div> */}
         </div>
         <DialogFooter>
           <Button
