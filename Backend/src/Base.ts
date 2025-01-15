@@ -17,7 +17,7 @@ export async function getFilteredTransactions(address: string, apiKey: string): 
   try {
     const response = await axios.get<BasescanResponse>(url);
     
-    // console.log('Full API response:', response.data);
+    console.log('Full API response:', response.data);
 
     if (response.data.status !== '1' && response.data.status !== 1) {
       console.error('API Error:', response.data.message);
