@@ -61,7 +61,31 @@ export default function Deposit({
     },
     toast,
   });
-return (
+  useEffect(() => {
+    async function fetchTokenBalance() {
+      try {
+        setFetchingTokenBalance(true);
+        const tokenBalance = await readContract(config, {
+          abi: erc20Abi,
+          address: token as `0x${string}`,
+          functionName: "balanceOf",
+          args: [address!],
+        });
+
+        console.log("tokenBalance:: ", tokenBalance);
+        setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+        setFetchingTokenBalance(false);
+      } catch (error) {
+        throw new Error(error as any);
+      }
+    }
+
+    if (address && token) {
+      fetchTokenBalance();
+    }
+  }, [token, address]);
+
+  return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
         <DialogTitle className="text-white flex items-center space-x-3">
