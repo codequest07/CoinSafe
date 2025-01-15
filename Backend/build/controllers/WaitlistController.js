@@ -16,7 +16,6 @@ exports.getOne = exports.getAllWaitlistEntries = exports.addToWaitlist = void 0;
 const WaitlistModel_1 = __importDefault(require("../Models/WaitlistModel"));
 const Validation_1 = require("../Validation");
 const email_1 = require("../email");
-const logoUrl = "https://res.cloudinary.com/dfp2rztmd/image/upload/v1733760492/coinsafe/tbamrq8mdmnrs1vj0wwj.svg";
 const addToWaitlist = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, country, email } = req.body;
     if (!name || !country || !email) {
@@ -48,42 +47,6 @@ const addToWaitlist = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome to the CoinSafe Waitlist!</title>
     <style>
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #121212;
-          color: #f1f1f1;
-        }
-        .footer {
-          border-top-color: #333;
-        }
-        .footer p {
-          color: #999;
-        }
-        .logo-light {
-          display: none;
-        }
-        .logo-dark {
-          display: block;
-        }
-      }
-      @media (prefers-color-scheme: light) {
-        body {
-          background-color: #ffffff;
-          color: #333333;
-        }
-        .footer {
-          border-top-color: #eee;
-        }
-        .footer p {
-          color: #666;
-        }
-        .logo-light {
-          display: block;
-        }
-        .logo-dark {
-          display: none;
-        }
-      }
     </style>
   </head>
   <body
@@ -95,10 +58,7 @@ const addToWaitlist = (req, res) => __awaiter(void 0, void 0, void 0, function* 
       padding: 20px;
     ">
     <div style="margin-bottom: 20px">
-      <img
-        src="${logoUrl}"
-        alt="CoinSafe Logo"
-        style="max-width: 150px; height: auto" />
+      <div style="font-family: Arial, sans-serif; font-size: 36px; font-weight: bold; color: #79E7BA; letter-spacing: 2px;">COINSAFE</div>
     </div>
 
     <h1 style="font-size: 28px; margin-bottom: 20px">Hi ${name},</h1>
@@ -154,10 +114,7 @@ const addToWaitlist = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 
     <div class="footer" style="margin-top: 10px; padding-top: 10px">
       <div style="margin-bottom: 20px">
-        <img
-          src="https://res.cloudinary.com/dfp2rztmd/image/upload/v1733760492/coinsafe/tbamrq8mdmnrs1vj0wwj.svg"
-          alt="CoinSafe Logo"
-          style="max-width: 120px; height: auto" />
+        <div style="font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; color: #79E7BA; letter-spacing: 1px;">COINSAFE</div>
       </div>
 
       <p style="font-size: 14px">
