@@ -37,6 +37,9 @@ export default function Deposit({
 
   const [amount, setAmount] = useState(0);
   const [token, setToken] = useState("");
+const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
+  const [fetchingTokenbalance, setFetchingTokenBalance] = useState(false);
+
   const openThirdModal = () => {
     console.log("details", token, amount);
 
@@ -92,6 +95,7 @@ export default function Deposit({
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
         <DialogTitle className="text-white flex items-center space-x-3">
+        <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" />
           <p>Deposit assets</p>
         </DialogTitle>
         <div className="p-8 text-gray-700">
