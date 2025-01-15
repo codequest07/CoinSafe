@@ -23,7 +23,7 @@ import Deposited from "./Deposited";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
 import { readContract } from "@wagmi/core";
 import { config } from "@/lib/config";
-import { erc20Abi, formatUnits, parseUnits } from "viem";
+import { erc20Abi, formatUnits } from "viem";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -40,7 +40,6 @@ export default function Deposit({
   const [amount, setAmount] = useState(0);
   const [token, setToken] = useState("");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const [fetchingTokenbalance, setFetchingTokenBalance] = useState(false);
 
   const openThirdModal = () => {
     console.log("details", token, amount);
@@ -74,7 +73,6 @@ export default function Deposit({
   useEffect(() => {
     async function fetchTokenBalance() {
       try {
-        setFetchingTokenBalance(true);
         const tokenBalance = await readContract(config, {
           abi: erc20Abi,
           address: token as `0x${string}`,
@@ -84,7 +82,6 @@ export default function Deposit({
 
         console.log("tokenBalance:: ", tokenBalance);
         setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
-        setFetchingTokenBalance(false);
       } catch (error) {
         throw new Error(error as any);
       }
@@ -99,7 +96,7 @@ export default function Deposit({
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
         <DialogTitle className="text-white flex items-center space-x-3">
-          <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" />
+          {/* <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" /> */}
           <p>Deposit assets</p>
         </DialogTitle>
         <div className="p-8 text-gray-700">
@@ -150,7 +147,7 @@ export default function Deposit({
           {token && (
             <>
               {amount > selectedTokenBalance && (
-                <p className="text-red-500 text-[13px] text-right">Amount greater than balance</p>
+                <p className="text-red-500 text-[13px] text-right">Amount greater than wallet balance</p>
               )}
               <div className="flex items-center justify-between mb-3">
                 <div className="text-sm font-[300] text-gray-300">
