@@ -68,7 +68,7 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
           setIsLoading(true);
           const result = await fetchResult();
           const scheduledSavingsRes = await transformArrayData(result);
-          setScheduledSavings(scheduledSavingsRes);
+          setScheduledSavings(scheduledSavingsRes.filter(item => item.scheduledDate >= new Date().getTime()));
           setIsLoading(false);
         } catch (err: any) {
           setError(err);

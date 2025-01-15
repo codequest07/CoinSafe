@@ -11,3 +11,18 @@ export const saveAtom = atom({
     frequency: 0,
   },
 });
+
+export const availableBalanceState = atom({
+  key: 'availableBalanceState',
+  default: 0
+});
+
+export const savingsBalanceState = atom({
+  key: 'savingsBalanceState', 
+  default: 0
+});
+
+export const totalBalanceState = atom({
+  key: 'totalBalanceState',
+  default: 0
+});
