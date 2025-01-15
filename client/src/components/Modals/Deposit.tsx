@@ -13,7 +13,6 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import MemoBackIcon from "@/icons/BackIcon";
 import coinSafeAbi from "../../abi/coinsafe.json";
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import { useAccount } from "wagmi";
@@ -28,7 +27,6 @@ import { erc20Abi, formatUnits } from "viem";
 export default function Deposit({
   isDepositModalOpen,
   setIsDepositModalOpen,
-  onBack,
 }: {
   isDepositModalOpen: boolean;
   setIsDepositModalOpen: (open: boolean) => void;
@@ -96,7 +94,6 @@ export default function Deposit({
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
         <DialogTitle className="text-white flex items-center space-x-3">
-          {/* <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" /> */}
           <p>Deposit assets</p>
         </DialogTitle>
         <div className="p-8 text-gray-700">

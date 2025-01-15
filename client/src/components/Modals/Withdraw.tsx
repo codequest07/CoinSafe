@@ -13,7 +13,6 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import MemoBackIcon from "@/icons/BackIcon";
 import { CoinSafeContract, tokens } from "@/lib/contract";
 import { useAccount } from "wagmi";
 import { LoaderCircle } from "lucide-react";
@@ -26,7 +25,6 @@ import { formatUnits } from "viem";
 export default function Withdraw({
   isWithdrawModalOpen,
   setIsWithdrawModalOpen,
-  onBack,
 }: {
   isWithdrawModalOpen: boolean;
   setIsWithdrawModalOpen: (open: boolean) => void;
@@ -91,7 +89,6 @@ export default function Withdraw({
     <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
         <DialogTitle className="text-white flex items-center space-x-3">
-          {/* <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" /> */}
           <p>Withdraw assets</p>
         </DialogTitle>
         <div className="p-8 text-gray-700">
