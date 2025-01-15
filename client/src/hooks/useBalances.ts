@@ -254,9 +254,6 @@ export const useBalances = (address: string) => {
     AvailableBalance,
     TotalBalance,
     SavingsBalances,
-    // setAvailableBalance,
-    // setSavingsBalance,
-    // setTotalBalance,
     isLoading: {
       ...isLoading,
       any: isAnyLoading,
