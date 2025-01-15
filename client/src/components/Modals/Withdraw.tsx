@@ -119,12 +119,14 @@ export default function Withdraw({
           </div>
 
           {/* Wallet Balance Section */}
-          {/* <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-[300] text-gray-300">
-              Withdraw assets: <span className="text-gray-400">3000 XRP</span>
+          {token && (
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm font-[300] text-gray-300">
+                Available balance: <span className="text-gray-400">3000 {token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"}</span>
+              </div>
+              <Button className="text-sm border-nonw outline-none bg-none text-green-400 cursor-pointer">Max</Button>
             </div>
-            <div className="text-sm text-green-400 cursor-pointer">Max</div>
-          </div> */}
+          )}
         </div>
         <DialogFooter>
           <Button
