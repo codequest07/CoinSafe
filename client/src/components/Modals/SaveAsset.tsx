@@ -15,7 +15,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 // import MemoRipple from "@/icons/Ripple";
 import MemoCalenderIcon from "@/icons/CalenderIcon";
@@ -42,6 +42,8 @@ import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import SuccessfulTxModal from "./SuccessfulTxModal";
+import { useBalances } from "@/hooks/useBalances";
+import { formatUnits } from "viem";
 
 export default function SaveAsset({
   isOpen,
@@ -66,7 +68,11 @@ export default function SaveAsset({
   const [unlockDate, setUnlockDate] = useState<Date | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState(tab || "one-time");
+  const { address } = useAccount();
 
+  // const [token, setToken] = useState("");
+  const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
+  const { AvailableBalance } = useBalances(address as string);
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(frequency => frequency.value === value);
@@ -167,7 +173,7 @@ export default function SaveAsset({
   // to multiply the amount based on selected token's decimals
   const [, setDecimals] = useState(1);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
-  const { address } = useAccount();
+  // const { address } = useAccount();
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let _amount = Number(event.target.value);
@@ -256,6 +262,24 @@ export default function SaveAsset({
     setIsThirdModalOpen(true);
     onClose();
   };
+
+  useEffect(() => {
+      if (address && saveState.token && AvailableBalance?.data) {
+        const tokensData = AvailableBalance?.data as any[];
+        if (!tokensData) return;
+  
+        const tokenBalance =
+          tokensData[0]
+            .map((address: string, index: number) => ({
+              address,
+              balance: tokensData[1][index],
+            }))
+            .find((item: any) => item.address.toLowerCase() === saveState.token.toLowerCase())
+            ?.balance || 0n;
+  
+        setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+      }
+    }, [saveState.token, address, AvailableBalance?.data]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -347,6 +371,36 @@ export default function SaveAsset({
                 <div className="text-sm text-green-400 cursor-pointer">
                   Save all
                 </div> */}
+                {/* Wallet Balance Section */}
+          {saveState.token && (
+            <>
+            <div>
+              {saveState.amount > selectedTokenBalance && (
+                <p className="text-red-500 text-[13px] text-right">Amount greater than wallet balance</p>
+              )}
+            </div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-sm font-[300] text-gray-300">
+                  Wallet balance:{" "}
+                  <span className="text-gray-400">
+                    {selectedTokenBalance}{" "}
+                    {saveState.token == tokens.safu
+                      ? "SAFU"
+                      : saveState.token === tokens.lsk
+                      ? "LSK"
+                      : "USDT"}
+                  </span>
+                </div>
+                <Button
+                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                  // onClick={() => setAmount(selectedTokenBalance)}
+                  onClick={() => setSaveState(prev => ({...prev, amount: selectedTokenBalance}))}
+                >
+                  Max
+                </Button>
+              </div>
+            </>
+          )}
               </div>
 
               {/* Duration Section */}
@@ -521,6 +575,37 @@ export default function SaveAsset({
                       )}
                     </div>
                   </div>
+
+                  {/* Wallet balance */}
+                  {saveState.token && (
+            <>
+            <div>
+              {saveState.amount > selectedTokenBalance && (
+                <p className="text-red-500 text-[13px] text-right">Amount greater than wallet balance</p>
+              )}
+            </div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-sm font-[300] text-gray-300">
+                  Wallet balance:{" "}
+                  <span className="text-gray-400">
+                    {selectedTokenBalance}{" "}
+                    {saveState.token == tokens.safu
+                      ? "SAFU"
+                      : saveState.token === tokens.lsk
+                      ? "LSK"
+                      : "USDT"}
+                  </span>
+                </div>
+                <Button
+                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                  // onClick={() => setAmount(selectedTokenBalance)}
+                  onClick={() => setSaveState(prev => ({...prev, amount: selectedTokenBalance}))}
+                >
+                  Max
+                </Button>
+              </div>
+            </>
+          )}
 
                   <div className="space-y-4 py-2 text-white">
                     <Label htmlFor="frequencyAmount">Frequency</Label>
