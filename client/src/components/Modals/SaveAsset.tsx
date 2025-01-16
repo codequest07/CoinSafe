@@ -265,7 +265,7 @@ export default function SaveAsset({
     onClose();
   };
 
-  useEffect(() => {
+useEffect(() => {
     if (address && saveState.token && AvailableBalance?.data) {
       const tokensData = AvailableBalance?.data as any[];
       if (!tokensData) return;
@@ -284,6 +284,24 @@ export default function SaveAsset({
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
     }
   }, [saveState.token, address, AvailableBalance?.data]);
+
+  useEffect(() => {
+      if (address && saveState.token && AvailableBalance?.data) {
+        const tokensData = AvailableBalance?.data as any[];
+        if (!tokensData) return;
+  
+        const tokenBalance =
+          tokensData[0]
+            .map((address: string, index: number) => ({
+              address,
+              balance: tokensData[1][index],
+            }))
+            .find((item: any) => item.address.toLowerCase() === saveState.token.toLowerCase())
+            ?.balance || 0n;
+  
+        setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+      }
+    }, [saveState.token, address, AvailableBalance?.data]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -388,6 +406,9 @@ export default function SaveAsset({
                     Save all
                   </Button>
                 </div>
+              <div className="text-sm text-green-400 cursor-pointer">
+                  Save all
+                </div> */}
               </div>
 
               {/* Duration Section */}
