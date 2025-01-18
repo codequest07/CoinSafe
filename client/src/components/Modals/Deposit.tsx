@@ -37,8 +37,7 @@ export default function Deposit({
 
   const [amount, setAmount] = useState(0);
   const [token, setToken] = useState("");
-const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const [fetchingTokenbalance, setFetchingTokenBalance] = useState(false);
+  const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
 
   const openThirdModal = () => {
     console.log("details", token, amount);
@@ -63,7 +62,7 @@ const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
     onError: (error) => {
       toast({
         title: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     },
     toast,
@@ -95,7 +94,6 @@ const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
         <DialogTitle className="text-white flex items-center space-x-3">
-        <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" />
           <p>Deposit assets</p>
         </DialogTitle>
         <div className="p-8 text-gray-700">
@@ -143,12 +141,32 @@ const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
           </div>
 
           {/* Wallet Balance Section */}
-        {/* <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-[300] text-gray-300">
-              Deposit assets: <span className="text-gray-400">3000 XRP</span>
-            </div>
-            <div className="text-sm text-green-400 cursor-pointer">Max</div>
-          </div> */}
+          {token && (
+            <>
+              {amount > selectedTokenBalance && (
+                <p className="text-red-500 text-[13px] text-right">Amount greater than wallet balance</p>
+              )}
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-sm font-[300] text-gray-300">
+                  Wallet balance:{" "}
+                  <span className="text-gray-400">
+                    {selectedTokenBalance}{" "}
+                    {token == tokens.safu
+                      ? "SAFU"
+                      : token === tokens.lsk
+                      ? "LSK"
+                      : "USDT"}
+                  </span>
+                </div>
+                <Button
+                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                  onClick={() => setAmount(selectedTokenBalance)}
+                >
+                  Max
+                </Button>
+              </div>
+            </>
+          )}
         </div>
         <DialogFooter>
           <Button
