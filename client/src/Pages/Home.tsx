@@ -27,7 +27,7 @@ const Home = () => {
     {
       target: ".step-2",
       content:
-        "Here you can view your tracking chart to monitor your progress.",
+        "Here you can view balance to monitor your progress.",
     },
     {
       target: ".step-3",
