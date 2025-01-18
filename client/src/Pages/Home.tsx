@@ -1,10 +1,6 @@
 import AssetTable from "@/components/AssetTable";
-// import Card from "@/components/Card";
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
-// import CumulativeCard from "@/components/CumulativeCard";
-// import GasCoverageCard from "@/components/GasCoverageCard";
 import ConnectModal from "@/components/Modals/ConnectModal";
-// import SavingStreakCard from "@/components/SavingStreakCard";
 import ScheduledSavings from "@/components/ScheduledSavingsCard";
 import { TourGuide } from "@/components/TourGuide";
 import TrackingChart from "@/components/TrackingChart";
@@ -42,6 +38,7 @@ const Home = () => {
       content: "Set up and view your scheduled savings here.",
     },
   ];
+
   return (
     <main>
       <div className="flex flex-col w-full sm:flex ">
@@ -49,92 +46,10 @@ const Home = () => {
           <div className="step-1">
             <SmarterSavingCard setIsConnectModalOpen={setOpenConnectModal} />
           </div>
-          {/* sm:space-x-4 */}
           <div className="step-2">
             <TrackingChart />
           </div>
         </>
-
-        {/* {isConnected ? (
-          <>
-            <div className="sm:flex gap-3 pt-3 relative">
-              <div className="backdrop-blur-sm absolute w-full h-full flex items-center justify-center">
-                <p className="text-white text-lg max-w-[400px] text-center">
-                  Cards (Rewards, Streaks, Gas badges, Points) <span className="text-[#20FFAF] font-semibold">Coming soon</span>, we're in the kitchen
-                </p>
-              </div>
-              <Card
-                title="Rewards"
-                value={5800000}
-                unit="points"
-                badge="1.2x"
-                emphasize="find out"
-                text="how points will be used"
-              />
-
-              <SavingStreakCard
-                title="Savings streak"
-                value={1000}
-                unit="days"
-                emphasize="maintain"
-                text="streaks for points multipliers"
-              />
-
-              <GasCoverageCard
-                title="Gas coverage"
-                value={0.0005}
-                per={2}
-                unit="tier 5-10"
-                emphasize="find out"
-                text="how points will be used"
-              />
-
-              <CumulativeCard
-                title="Cumulative APY"
-                value={21}
-                unit="per annum"
-                text="sum of staking and saving returns"
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="sm:flex  gap-3 pt-3">
-              <Card
-                title="Rewards"
-                value={0}
-                unit="points"
-                badge="0.0x"
-                emphasize="find out"
-                text="how points will be used"
-              />
-
-              <SavingStreakCard
-                title="Savings streak"
-                value={0}
-                unit="days"
-                emphasize="maintain"
-                text="streaks for points multipliers"
-              />
-
-              <GasCoverageCard
-                title="Gas coverage"
-                value={0}
-                per={0}
-                unit="--"
-                emphasize="find out"
-                text="how points will be used"
-              />
-
-              <CumulativeCard
-                title="Cumulative APY"
-                value={0}
-                unit="per annum"
-                text="sum of staking and saving returns"
-              />
-            </div>
-          </>
-        )} */}
 
         {isConnected && (
           <>
@@ -157,9 +72,10 @@ const Home = () => {
         />
       )}
 
-      <TourGuide steps={tourSteps} />
+      {isConnected && <TourGuide steps={tourSteps} />}
     </main>
   );
 };
 
 export default Home;
+
