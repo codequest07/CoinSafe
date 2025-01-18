@@ -1,20 +1,21 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 import { formatEther } from "viem";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function getValidNumberValue(value: any) {
   return typeof value === "number" && !isNaN(value) ? value : 0;
 }
 
-export function getPercentage(a: number, b: number) {
-  return (a/b * 100).toFixed();
-}
+export const getPercentage = (a: number, b: number): number =>
+  isFinite(a / b) ? Number(((a / b) * 100).toFixed()) : 0;
 
-export function transformAndAccumulateTokenBalances(data: Array<any>): { token: string; balance: string }[] {
+export function transformAndAccumulateTokenBalances(
+  data: Array<any>
+): { token: string; balance: string }[] {
   const tokenMap: { [key: string]: bigint } = {};
 
   // Accumulate balances for each token

@@ -5,7 +5,7 @@ import Deposit from "./Modals/Deposit";
 import { useAccount } from "wagmi";
 import { getPercentage } from "@/lib/utils";
 import { useBalances } from "@/hooks/useBalances";
-import { Loader2 } from "lucide-react";
+import { Skeleton } from "./ui/skeleton";
 
 const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -103,99 +103,33 @@ const TrackingChart = () => {
           )}
         </div>
 
-        {/* removeed classnames 'border-b-[1px] border-[#FFFFFF17]' for border bottom styles */}
-        <div className="sm:flex justify-between pb-6">
+        <div className="sm:flex justify-evenly pb-6">
           {/* Total wallet balance */}
-          <div className="mb-6 sm:mb-0">
-            <div className="text-[#CACACA] font-light text-sm pb-4">
-              Total wallet balance
-            </div>
-            <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
-                $
-                {isConnected ? (
-                  isLoading.total ? (
-                    <Loader2 className="w-6 h-6 text-[#F1F1F1]/60 animate-spin inline" />
-                  ) : totalBalance ? (
-                    totalBalance?.toFixed(2)
-                  ) : (
-                    "0.00"
-                  )
-                ) : (
-                  "0.00"
-                )}
-              </span>
-              <span className="text-[#CACACA] font-light text-xs">USD</span>
-            </div>
-            {/* <div className="text-xs pt-2">
-              <span className="text-[#48FF91]">+18%</span>
-              <span className="text-[#7F7F7F] ml-1">24h</span>
-            </div> */}
-          </div>
+          <BalanceCard
+            title="Total wallet balance"
+            isConnected={isConnected}
+            isLoading={isLoading.total}
+            balance={totalBalance}
+          />
 
           {/* Vault balance */}
-          <div className="border-x-[1px] border-[#FFFFFF17] px-4 sm:px-[150px] mb-6 sm:mb-0">
-            <div className="text-[#CACACA] font-light text-sm pb-4">
-              Vault balance
-            </div>
-            <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
-                $
-                {isConnected ? (
-                  isLoading.savings ? (
-                    <Loader2 className="w-6 h-6 text-[#F1F1F1]/60 animate-spin" />
-                  ) : (
-                    savingsBalance.toFixed(2) ?? "0.00"
-                  )
-                ) : (
-                  "0.00"
-                )}
-              </span>
-              <span className="text-[#CACACA] font-light text-xs">USD</span>
-            </div>
-
-            {isConnected && (
-              <div className="flex items-center gap-2 pt-2">
-                <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
-
-                <span className="text-[#7F7F7F] text-xs">
-                  {getPercentage(savingsBalance, totalBalance) ?? 0}% of total
-                  wallet balance
-                </span>
-              </div>
-            )}
-          </div>
+          <BalanceCard
+            title="Vault balance"
+            isConnected={isConnected}
+            isLoading={isLoading.savings}
+            balance={savingsBalance}
+            percentage={getPercentage(savingsBalance, totalBalance)}
+            className="border-x-[1px] border-[#FFFFFF17] px-4 sm:px-[150px] mb-6 sm:mb-0"
+          />
 
           {/* Available balance */}
-          <div>
-            <div className="text-[#CACACA] font-light text-sm pb-4">
-              Available balance
-            </div>
-            <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
-                $
-                {isConnected ? (
-                  isLoading.available ? (
-                    <Loader2 className="w-6 h-6 text-[#F1F1F1]/60 animate-spin" />
-                  ) : (
-                    availableBalance?.toFixed(2) ?? "0.00"
-                  )
-                ) : (
-                  "0.00"
-                )}
-              </span>
-              <span className="text-[#CACACA] font-light text-xs">USD</span>
-            </div>
-            {isConnected && (
-              <div className="sm:flex items-center gap-2 pt-2">
-                <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
-                <span className="text-[#7F7F7F] text-xs">
-                  {getPercentage(availableBalance, totalBalance) ?? 0}% of total
-                  wallet balance
-                </span>
-              </div>
-            )}
-          </div>
+          <BalanceCard
+            title="Available balance"
+            isConnected={isConnected}
+            isLoading={isLoading.available}
+            balance={availableBalance}
+            percentage={getPercentage(availableBalance, totalBalance)}
+          />
         </div>
       </div>
 
@@ -259,3 +193,54 @@ const TrackingChart = () => {
 };
 
 export default TrackingChart;
+
+function BalanceCard({
+  title,
+  isConnected,
+  isLoading,
+  balance,
+  percentage,
+  className = "",
+}: {
+  title: string;
+  isConnected: boolean;
+  isLoading: boolean;
+  balance: number;
+  percentage?: number;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <div className="text-[#CACACA] font-light text-sm pb-4">{title}</div>
+      <div>
+        <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
+          $
+          {isConnected ? (
+            isLoading ? (
+              <Skeleton className="w-20 h-7" />
+            ) : balance ? (
+              balance.toFixed(2)
+            ) : (
+              "0.00"
+            )
+          ) : (
+            "0.00"
+          )}
+        </span>
+        <span className="text-[#CACACA] font-light text-xs">USD</span>
+      </div>
+      {isConnected && percentage !== undefined && (
+        <div className="flex items-center gap-2 pt-2">
+          <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
+          {isLoading ? (
+            <Skeleton className="w-32 h-3" />
+          ) : (
+            <span className="text-[#7F7F7F] text-xs">
+              {percentage ?? 0}% of total wallet balance
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
