@@ -20,6 +20,10 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Deposited from "./Deposited";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
+import { readContract } from "@wagmi/core";
+import { config } from "@/lib/config";
+import { erc20Abi, formatUnits } from "viem";
+
 export default function Deposit({
   isDepositModalOpen,
   setIsDepositModalOpen,
@@ -33,6 +37,8 @@ export default function Deposit({
 
   const [amount, setAmount] = useState(0);
   const [token, setToken] = useState("");
+  const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
+
   const openThirdModal = () => {
     console.log("details", token, amount);
 
@@ -61,10 +67,10 @@ export default function Deposit({
     },
     toast,
   });
+
   useEffect(() => {
     async function fetchTokenBalance() {
       try {
-        setFetchingTokenBalance(true);
         const tokenBalance = await readContract(config, {
           abi: erc20Abi,
           address: token as `0x${string}`,
@@ -74,7 +80,6 @@ export default function Deposit({
 
         console.log("tokenBalance:: ", tokenBalance);
         setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
-        setFetchingTokenBalance(false);
       } catch (error) {
         throw new Error(error as any);
       }
