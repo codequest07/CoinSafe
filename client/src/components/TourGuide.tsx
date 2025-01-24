@@ -44,7 +44,24 @@ export const TourGuide: React.FC<TourGuideProps> = ({ steps }) => {
         showProgress={true}
         styles={{
           options: {
-            primaryColor: "#092324",
+            primaryColor: "#FFFFFF2B",
+            backgroundColor: "#29292A",
+            textColor: "#F1F1F1",
+          },
+          overlay: {
+            backgroundColor: "#0C1A4B1A",
+          },
+          buttonNext: {
+            backgroundColor: "#FFFFFF2B", 
+            color: "#fff", 
+            borderRadius: "25px", 
+            border:"2px",
+            padding:"10px"
+          },
+          buttonSkip: {
+            color: "#79E7BA",
+            fontSize: "16px",
+            
           },
         }}
         callback={handleJoyrideCallback}

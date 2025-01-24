@@ -89,6 +89,7 @@ export default function Withdraw({
     <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
         <DialogTitle className="text-white flex items-center space-x-3">
+        {/* <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" /> */}
           <p>Withdraw assets</p>
         </DialogTitle>
         <div className="p-8 text-gray-700">
