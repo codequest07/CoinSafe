@@ -89,14 +89,12 @@ const TrackingChart = () => {
             <div className="flex items-center gap-2">
               <Button
                 onClick={openDepositModal}
-                className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer"
-              >
+                className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer">
                 Deposit
               </Button>
               <Button
                 onClick={openFirstModal}
-                className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
-              >
+                className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm">
                 Save
               </Button>
             </div>
@@ -105,96 +103,31 @@ const TrackingChart = () => {
 
         <div className="sm:flex justify-evenly pb-6">
           {/* Total wallet balance */}
-        <div className="mb-6 sm:mb-0">
-            <div className="text-[#CACACA] font-light text-sm pb-4">
-              Total wallet balance
-            </div>
-            <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
-                $
-                {isConnected ? (
-                  isLoading.total ? (
-                    <Loader2 className="w-6 h-6 text-[#F1F1F1]/60 animate-spin inline" />
-                  ) : totalBalance ? (
-                    totalBalance?.toFixed(2)
-                  ) : (
-                    "0.00"
-                  )
-                ) : (
-                  "0.00"
-                )}
-              </span>
-              <span className="text-[#CACACA] font-light text-xs">USD</span>
-            </div>
-            {/* <div className="text-xs pt-2">
-              <span className="text-[#48FF91]">+18%</span>
-              <span className="text-[#7F7F7F] ml-1">24h</span>
-            </div> */}
-          </div>
+          <BalanceCard
+            title="Total wallet balance"
+            isConnected={isConnected}
+            isLoading={isLoading.total}
+            balance={totalBalance}
+          />
 
           {/* Vault balance */}
-        <div className="border-x-[1px] border-[#FFFFFF17] px-4 sm:px-[150px] mb-6 sm:mb-0">
-            <div className="text-[#CACACA] font-light text-sm pb-4">
-              Vault balance
-            </div>
-            <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
-                $
-                {isConnected ? (
-                  isLoading.savings ? (
-                    <Loader2 className="w-6 h-6 text-[#F1F1F1]/60 animate-spin" />
-                  ) : (
-                    savingsBalance.toFixed(2) ?? "0.00"
-                  )
-                ) : (
-                  "0.00"
-                )}
-              </span>
-              <span className="text-[#CACACA] font-light text-xs">USD</span>
-            </div>
-
-            {isConnected && (
-              <div className="flex items-center gap-2 pt-2">
-                <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
-
-                <span className="text-[#7F7F7F] text-xs">
-                  {getPercentage(savingsBalance, totalBalance) ?? 0}% of total
-                  wallet balance
-                </span>
-              </div>
-            )}
-          </div>
+          <BalanceCard
+            title="Vault balance"
+            isConnected={isConnected}
+            isLoading={isLoading.savings}
+            balance={savingsBalance}
+            percentage={getPercentage(savingsBalance, totalBalance)}
+            className="border-x-[1px] border-[#FFFFFF17] px-4 sm:px-[150px] mb-6 sm:mb-0"
+          />
 
           {/* Available balance */}
-        <div>
-            <div className="text-[#CACACA] font-light text-sm pb-4">
-              Available balance
-            </div>
-            <div>
-              <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
-                $
-                {isConnected ? (
-                  isLoading.available ? (
-                    <Loader2 className="w-6 h-6 text-[#F1F1F1]/60 animate-spin" />
-                  ) : (
-                    availableBalance?.toFixed(2) ?? "0.00"
-                  )
-                ) : (
-                  "0.00"
-                )}
-              </span>
-              <span className="text-[#CACACA] font-light text-xs">USD</span>
-            </div>
-            {isConnected && (
-              <div className="sm:flex items-center gap-2 pt-2">
-                <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
-                <span className="text-[#7F7F7F] text-xs">
-                  {getPercentage(availableBalance, totalBalance) ?? 0}% of total
-                  wallet balance
-                </span>
-              </div>
-            )}
-          </div>
+          <BalanceCard
+            title="Available balance"
+            isConnected={isConnected}
+            isLoading={isLoading.available}
+            balance={availableBalance}
+            percentage={getPercentage(availableBalance, totalBalance)}
+          />
         </div>
       </div>
 
