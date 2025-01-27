@@ -98,7 +98,7 @@ export default function Deposit({
         </DialogTitle>
         <div className="p-8 text-gray-700">
           {/* Amount Section */}
-          <div className="flex items-center justify-between mb-6">
+          {/* <div className="flex items-center justify-between mb-6">
             <div className="flex-1">
               <label htmlFor="amount" className="text-sm text-gray-400">
                 Amount
@@ -114,16 +114,12 @@ export default function Deposit({
                   min={0.01}
                   className={`bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full`}
                 />
-                {/* <div className="text-xs text-gray-400 text-center">
-                  ≈ $400.56
-                </div> */}
               </div>
             </div>
             <div className="ml-4">
               <Select onValueChange={handleTokenSelect} required>
                 <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                   <div className="flex items-center">
-                    {/* <MemoRipple className="mr-2" /> */}
                     <SelectValue placeholder="Select Token" />
                   </div>
                 </SelectTrigger>
@@ -138,13 +134,95 @@ export default function Deposit({
                 </SelectContent>
               </Select>
             </div>
+          </div> */}
+
+          <div className="space-y-2">
+            <label className="text-sm text-gray-400">Amount</label>
+            <div className="p-4 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
+              <div className="absolute top-2 right-2">
+                <div className="ml-4">
+                  <Select onValueChange={handleTokenSelect}>
+                    <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
+                      <div className="flex items-center">
+                        {/* <MemoRipple className="mr-2" /> */}
+                        <SelectValue placeholder="Select Token" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
+                        <div className="flex items-center space-x-2">
+                          <p>USDT</p>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                        LSK
+                      </SelectItem>
+                      <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
+                        SAFU
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {/* {validationErrors.token && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {validationErrors.token}
+                        </p>
+                      )} */}
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <input
+                  type="text"
+                  value={amount}
+                  onChange={(e: any) => setAmount(e.target.value)}
+                  className="text-2xl font-medium bg-transparent text-center w-full outline-none"
+                  placeholder="Enter amount"
+                />
+                <div className="text-sm text-gray-400 mt-1">≈ $400.56</div>
+              </div>
+            </div>
+            {/* <div className="flex justify-between text-sm">
+                  <div className="flex items-center gap-1">
+                    <div>
+                      {amount > selectedTokenBalance && (
+                        <p className="text-red-500 text-[13px] text-right">
+                          Amount greater than wallet balance
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-sm font-[300] text-gray-300">
+                      Wallet balance:{" "}
+                      <span className="text-gray-400">
+                        {selectedTokenBalance}{" "}
+                        {saveState.token == tokens.safu
+                          ? "SAFU"
+                          : saveState.token === tokens.lsk
+                          ? "LSK"
+                          : "USDT"}
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() =>
+                      setSaveState((prev) => ({
+                        ...prev,
+                        amount: selectedTokenBalance,
+                      }))
+                    }
+                    variant="link"
+                    className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
+                  >
+                    Save all
+                  </Button>
+                </div> */}
           </div>
 
           {/* Wallet Balance Section */}
           {token && (
             <>
               {amount > selectedTokenBalance && (
-                <p className="text-red-500 text-[13px] text-right">Amount greater than wallet balance</p>
+                <p className="text-red-500 text-[13px] text-right">
+                  Amount greater than wallet balance
+                </p>
               )}
               <div className="flex items-center justify-between mb-3">
                 <div className="text-sm font-[300] text-gray-300">
