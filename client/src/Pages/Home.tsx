@@ -2,6 +2,7 @@ import AssetTable from "@/components/AssetTable";
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
 import ConnectModal from "@/components/Modals/ConnectModal";
 import ScheduledSavings from "@/components/ScheduledSavingsCard";
+import StatsCards from "@/components/stats-cards";
 import { TourGuide } from "@/components/TourGuide";
 import TrackingChart from "@/components/TrackingChart";
 import { useEffect, useState } from "react";
@@ -26,8 +27,7 @@ const Home = () => {
     },
     {
       target: ".step-2",
-      content:
-        "Here you can view balance to monitor your progress.",
+      content: "Here you can view balance to monitor your progress.",
     },
     {
       target: ".step-3",
@@ -53,6 +53,9 @@ const Home = () => {
 
         {isConnected && (
           <>
+            <div className="my-3">
+              <StatsCards />
+            </div>
             <div className="sm:flex py-3">
               <div className="sm:w-2/3 overflow-hidden step-3">
                 <AssetTable />
@@ -78,4 +81,3 @@ const Home = () => {
 };
 
 export default Home;
-
