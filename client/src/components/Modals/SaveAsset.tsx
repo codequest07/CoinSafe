@@ -295,19 +295,16 @@ export default function SaveAsset({
         <Tabs
           defaultValue={tab || "one-time"}
           onValueChange={handleTabChange}
-          className="w-full"
-        >
+          className="w-full">
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               One-time Save
             </TabsTrigger>
             <TabsTrigger
               value="autosave"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               Autosave
             </TabsTrigger>
           </TabsList>
@@ -387,8 +384,7 @@ export default function SaveAsset({
                       }))
                     }
                     variant="link"
-                    className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
-                  >
+                    className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90">
                     Save all
                   </Button>
                 </div>
@@ -410,8 +406,7 @@ export default function SaveAsset({
                     />
                     <Popover
                       open={isCalendarOpen}
-                      onOpenChange={setIsCalendarOpen}
-                    >
+                      onOpenChange={setIsCalendarOpen}>
                       <PopoverTrigger asChild>
                         <span onClick={() => setIsCalendarOpen(true)}>
                           <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -450,8 +445,7 @@ export default function SaveAsset({
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -481,8 +475,7 @@ export default function SaveAsset({
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -625,8 +618,7 @@ export default function SaveAsset({
                               ...prev,
                               amount: selectedTokenBalance,
                             }))
-                          }
-                        >
+                          }>
                           Max
                         </Button>
                       </div>
@@ -671,8 +663,7 @@ export default function SaveAsset({
                   />
                   <Popover
                     open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
+                    onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <span onClick={() => setIsCalendarOpen(true)}>
                         <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -702,8 +693,7 @@ export default function SaveAsset({
           <Button
             onClick={onClose}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
+            type="submit">
             Cancel
           </Button>
           <div>
@@ -711,8 +701,7 @@ export default function SaveAsset({
               onClick={handleSaveAsset}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || autoSavingsLoading}
-            >
+              disabled={isLoading || autoSavingsLoading}>
               {isLoading || autoSavingsLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (

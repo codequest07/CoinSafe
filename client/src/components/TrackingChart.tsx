@@ -6,17 +6,20 @@ import { useAccount } from "wagmi";
 import { getPercentage } from "@/lib/utils";
 import { useBalances } from "@/hooks/useBalances";
 import { Skeleton } from "./ui/skeleton";
+import Withdraw from "./Modals/Withdraw";
 
 const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const { isConnected, address } = useAccount();
   const { isLoading, totalBalance, savingsBalance, availableBalance } =
     useBalances(address as string);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
+  const openWithdrawModal = () => setIsWithdrawModalOpen(true);
 
   // const data = [
   //   {
@@ -64,9 +67,9 @@ const TrackingChart = () => {
   // ];
 
   return (
-    <div className="w-full border-[1px] border-[#FFFFFF17] p-6 rounded-[12px]">
+    <div className="w-full border-[1px] border-[#FFFFFF17] p-2 rounded-[12px]">
       <div className="w-full">
-        <div className="flex justify-end items-center pb-10 text-white">
+        <div className="flex justify-end items-center pb-3 text-white">
           {/* <div className="rounded-[100px] px-3 py-[6px] bg-[#1E1E1E99]">
             <DropdownMenu>
               <DropdownMenuTrigger className="text-sm flex items-center outline-none">
@@ -86,7 +89,12 @@ const TrackingChart = () => {
             </DropdownMenu>
           </div> */}
           {isConnected && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 my-4">
+              <Button
+                onClick={openWithdrawModal}
+                className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
+                Withdraw
+              </Button>
               <Button
                 onClick={openDepositModal}
                 className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer">
@@ -101,33 +109,40 @@ const TrackingChart = () => {
           )}
         </div>
 
-        <div className="sm:flex justify-evenly pb-6">
+        <div className="flex flex-col sm:flex-row justify-start items-stretch gap-6 pb-2">
           {/* Total wallet balance */}
-          <BalanceCard
-            title="Total wallet balance"
-            isConnected={isConnected}
-            isLoading={isLoading.total}
-            balance={totalBalance}
-          />
+          <div className="flex-1 px-2 min-w-0">
+            <BalanceCard
+              title="Total wallet balance"
+              isConnected={isConnected}
+              isLoading={isLoading.total}
+              balance={totalBalance}
+              text="sum of all balances"
+            />
+          </div>
 
           {/* Vault balance */}
-          <BalanceCard
-            title="Vault balance"
-            isConnected={isConnected}
-            isLoading={isLoading.savings}
-            balance={savingsBalance}
-            percentage={getPercentage(savingsBalance, totalBalance)}
-            className="border-x-[1px] border-[#FFFFFF17] px-4 sm:px-[150px] mb-6 sm:mb-0"
-          />
+          <div className="flex-1 min-w-0">
+            <BalanceCard
+              title="Vault balance"
+              isConnected={isConnected}
+              isLoading={isLoading.savings}
+              balance={savingsBalance}
+              percentage={getPercentage(savingsBalance, totalBalance)}
+              className="h-full border-x-[1px] border-[#FFFFFF17] px-4"
+            />
+          </div>
 
           {/* Available balance */}
-          <BalanceCard
-            title="Available balance"
-            isConnected={isConnected}
-            isLoading={isLoading.available}
-            balance={availableBalance}
-            percentage={getPercentage(availableBalance, totalBalance)}
-          />
+          <div className="flex-1 min-w-0">
+            <BalanceCard
+              title="Available balance"
+              isConnected={isConnected}
+              isLoading={isLoading.available}
+              balance={availableBalance}
+              percentage={getPercentage(availableBalance, totalBalance)}
+            />
+          </div>
         </div>
       </div>
 
@@ -174,6 +189,12 @@ const TrackingChart = () => {
         )}
       </div> */}
 
+      {/* withdraw Modal */}
+      <Withdraw
+        isWithdrawModalOpen={isWithdrawModalOpen}
+        setIsWithdrawModalOpen={setIsWithdrawModalOpen}
+        onBack={() => {}}
+      />
       {/* SavingOption Modal */}
       <SavingOption
         isFirstModalOpen={isFirstModalOpen}
@@ -199,6 +220,7 @@ function BalanceCard({
   balance,
   percentage,
   className = "",
+  text,
 }: {
   title: string;
   isConnected: boolean;
@@ -206,11 +228,12 @@ function BalanceCard({
   balance: number;
   percentage?: number;
   className?: string;
+  text?: string;
 }) {
   return (
     <div className={className}>
       <div className="text-[#CACACA] font-light text-sm pb-4">{title}</div>
-      <div>
+      <div className="flex items-center">
         <span className="text-[#F1F1F1] text-3xl pr-2 flex items-center gap-1">
           $
           {isConnected ? (
@@ -225,17 +248,22 @@ function BalanceCard({
             "0.00"
           )}
         </span>
-        <span className="text-[#CACACA] font-light text-xs">USD</span>
+        <span className="text-[#CACACA] font-light text-xs mt-4">USD</span>
       </div>
+      {text && (
+        <div className="text-[#7F7F7F] font-light text-xs pt-2">{text}</div>
+      )}
       {isConnected && percentage !== undefined && (
         <div className="flex items-center gap-2 pt-2">
           <div className="bg-[#79E7BA] w-[4px] h-[13px] rounded-[5px]"></div>
           {isLoading ? (
             <Skeleton className="w-32 h-3" />
           ) : (
-            <span className="text-[#7F7F7F] text-xs">
-              {percentage ?? 0}% of total wallet balance
-            </span>
+            <div>
+              <span className="text-[#7F7F7F] text-xs">
+                {percentage ?? 0}% of total wallet balance
+              </span>
+            </div>
           )}
         </div>
       )}
