@@ -265,26 +265,6 @@ export default function SaveAsset({
     onClose();
   };
 
-useEffect(() => {
-    if (address && saveState.token && AvailableBalance?.data) {
-      const tokensData = AvailableBalance?.data as any[];
-      if (!tokensData) return;
-
-      const tokenBalance =
-        tokensData[0]
-          .map((address: string, index: number) => ({
-            address,
-            balance: tokensData[1][index],
-          }))
-          .find(
-            (item: any) =>
-              item.address.toLowerCase() === saveState.token.toLowerCase()
-          )?.balance || 0n;
-
-      setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
-    }
-  }, [saveState.token, address, AvailableBalance?.data]);
-
   useEffect(() => {
     if (address && saveState.token && AvailableBalance?.data) {
       const tokensData = AvailableBalance?.data as any[];
@@ -304,24 +284,6 @@ useEffect(() => {
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
     }
   }, [saveState.token, address, AvailableBalance?.data]);
-
-  useEffect(() => {
-      if (address && saveState.token && AvailableBalance?.data) {
-        const tokensData = AvailableBalance?.data as any[];
-        if (!tokensData) return;
-  
-        const tokenBalance =
-          tokensData[0]
-            .map((address: string, index: number) => ({
-              address,
-              balance: tokensData[1][index],
-            }))
-            .find((item: any) => item.address.toLowerCase() === saveState.token.toLowerCase())
-            ?.balance || 0n;
-  
-        setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
-      }
-    }, [saveState.token, address, AvailableBalance?.data]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -333,19 +295,16 @@ useEffect(() => {
         <Tabs
           defaultValue={tab || "one-time"}
           onValueChange={handleTabChange}
-          className="w-full"
-        >
+          className="w-full">
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               One-time Save
             </TabsTrigger>
             <TabsTrigger
               value="autosave"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               Autosave
             </TabsTrigger>
           </TabsList>
@@ -425,14 +384,10 @@ useEffect(() => {
                       }))
                     }
                     variant="link"
-                    className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
-                  >
+                    className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90">
                     Save all
                   </Button>
                 </div>
-              <div className="text-sm text-green-400 cursor-pointer">
-                  Save all
-                </div> */}
               </div>
 
               {/* Duration Section */}
@@ -451,8 +406,7 @@ useEffect(() => {
                     />
                     <Popover
                       open={isCalendarOpen}
-                      onOpenChange={setIsCalendarOpen}
-                    >
+                      onOpenChange={setIsCalendarOpen}>
                       <PopoverTrigger asChild>
                         <span onClick={() => setIsCalendarOpen(true)}>
                           <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -491,8 +445,7 @@ useEffect(() => {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -522,8 +475,7 @@ useEffect(() => {
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -666,8 +618,7 @@ useEffect(() => {
                               ...prev,
                               amount: selectedTokenBalance,
                             }))
-                          }
-                        >
+                          }>
                           Max
                         </Button>
                       </div>
@@ -712,8 +663,7 @@ useEffect(() => {
                   />
                   <Popover
                     open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
+                    onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <span onClick={() => setIsCalendarOpen(true)}>
                         <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -743,8 +693,7 @@ useEffect(() => {
           <Button
             onClick={onClose}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
+            type="submit">
             Cancel
           </Button>
           <div>
@@ -752,8 +701,7 @@ useEffect(() => {
               onClick={handleSaveAsset}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || autoSavingsLoading}
-            >
+              disabled={isLoading || autoSavingsLoading}>
               {isLoading || autoSavingsLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (

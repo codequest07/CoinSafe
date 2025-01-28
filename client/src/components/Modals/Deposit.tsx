@@ -20,6 +20,10 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Deposited from "./Deposited";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
+import { readContract } from "@wagmi/core";
+import { config } from "@/lib/config";
+import { erc20Abi, formatUnits } from "viem";
+
 export default function Deposit({
   isDepositModalOpen,
   setIsDepositModalOpen,
@@ -234,8 +238,7 @@ export default function Deposit({
                 </div>
                 <Button
                   className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}
-                >
+                  onClick={() => setAmount(selectedTokenBalance)}>
                   Max
                 </Button>
               </div>
@@ -246,8 +249,7 @@ export default function Deposit({
           <Button
             onClick={() => setIsDepositModalOpen(false)}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
+            type="submit">
             Cancel
           </Button>
           <div>
@@ -257,8 +259,7 @@ export default function Deposit({
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || amount > selectedTokenBalance}
-            >
+              disabled={isLoading || amount > selectedTokenBalance}>
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (
