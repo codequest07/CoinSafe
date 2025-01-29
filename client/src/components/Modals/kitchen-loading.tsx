@@ -13,7 +13,7 @@ export default function KitchenLoading({
 }: KitchenLoadingProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[500px] p-5 border-[#FFFFFF17] bg-black text-white rounded-lg shadow-lg">
+      <DialogContent className="max-w-[500px] p-5 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg">
         <div className="dark:bg-[#000000]">
           <div className="flex w-full flex-col items-center justify-center gap-2">
             <MemoComingSoonIcon className="w-[40%] h-[40vh] text-white" />

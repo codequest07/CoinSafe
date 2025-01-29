@@ -35,7 +35,7 @@ export default function SaveSenseResp({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[800px] p-6 border-[#FFFFFF17] bg-black text-white border rounded-[2rem] shadow-lg">
+      <DialogContent className="max-w-[800px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] border rounded-[2rem] shadow-lg">
         <div className="flex flex-col">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-sm font-normal">

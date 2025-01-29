@@ -11,6 +11,7 @@ import Extension from "./Pages/Extension";
 import SaveSense from "./Pages/SaveSense";
 import { Toaster } from "./components/ui/toaster";
 import Faucet from "./Pages/Faucet";
+import SavingsDetail from "./components/SavingsDetail";
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
           <Route path="/dashboard/" element={<Home />} />
           <Route path="/dashboard/wallet" element={<Portfolio />} />
           <Route path="/dashboard/vault" element={<Vault />} />
+          <Route path="/dashboard/vault/:id" element={<SavingsDetail />} />
           <Route path="/dashboard/staking" element={<Staking />} />
           <Route path="/dashboard/rewards" element={<Rewards />} />
           <Route path="/dashboard/rewards/my-rewards" element={<MyRewards />} />
