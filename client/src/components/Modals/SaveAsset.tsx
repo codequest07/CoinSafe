@@ -287,7 +287,7 @@ export default function SaveAsset({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#09090B] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C] max-h-[90vh] overflow-y-auto">
         <DialogTitle className="text-white flex items-center space-x-3">
           <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" />
           <p>Save your assets</p>

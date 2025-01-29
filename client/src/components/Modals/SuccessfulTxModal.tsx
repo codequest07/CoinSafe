@@ -106,7 +106,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[500px] p-6 bg-black text-white rounded-lg shadow-lg">
+      <DialogContent className="max-w-[500px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg">
         <div className="flex justify-between items-center mb-4">
           <DialogTitle className="text-left text-lg font-semibold">
             {getTransactionTitle()}

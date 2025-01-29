@@ -10,13 +10,13 @@ import {
 import { CardContent } from "./ui/card";
 import MemoCheckIcon from "@/icons/CheckIcon";
 import MemoXmarkIcon from "@/icons/XmarkIcon";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { CoinSafeContract } from "@/lib/contract";
 import { useEffect, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
-import { transformAndAccumulateTokenBalances } from "@/lib/utils";
+// import { transformAndAccumulateTokenBalances } from "@/lib/utils";
 import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
 import CustomConnectButton from "./custom-connect-button";
@@ -39,19 +39,19 @@ async function checkIsTokenAutoSaved(
 
 export default function AssetTable() {
   const [allAssetData, setAllAssetData] = useState([]);
-  const [liquidAssetData, setLiquidAssetData] = useState([]);
-  const [savedAssetData, setSavedAssetData] = useState<any[]>([]);
+  // const [liquidAssetData, setLiquidAssetData] = useState([]);
+  // const [savedAssetData, setSavedAssetData] = useState<any[]>([]);
 
   // const liquidAssets = allAssets.filter((asset) => asset.liquid);
   // const stakedAssets = allAssets.filter((asset) => asset.staked);
   // const savedAssets = allAssets.filter((asset) => asset.saved);
   const { address } = useAccount();
 
-  const { 
-    AvailableBalance: LiquidTokenBalances, 
-    TotalBalance: AllTokenBalances, 
-    SavingsBalances: SavedTokenBalances 
-  }  = useBalances(address as string);
+  const {
+    AvailableBalance: LiquidTokenBalances,
+    TotalBalance: AllTokenBalances,
+    SavingsBalances: SavedTokenBalances,
+  } = useBalances(address as string);
 
   const allAssets: any = AllTokenBalances?.data || [];
   const liquidAssets: any = LiquidTokenBalances?.data || [];
@@ -70,66 +70,58 @@ export default function AssetTable() {
     );
     setAllAssetData(allAssetsRes);
 
-    if (liquidAssets.length === 0) return;
+    // if (liquidAssets.length === 0) return;
     // Map through the 2D array to create objects
-    const liquidAssetsRes = liquidAssets[0]
-      ?.map((key: any, index: string | number) => {
-        if (Number(liquidAssets[1][index]) <= 0) return;
-        return {
-          token: key,
-          balance: formatEther(liquidAssets[1][index]),
-        };
-      })
-      .filter((entry: any) => entry !== undefined);
-    setLiquidAssetData(liquidAssetsRes);
+    // const liquidAssetsRes = liquidAssets[0]
+    //   ?.map((key: any, index: string | number) => {
+    //     if (Number(liquidAssets[1][index]) <= 0) return;
+    //     return {
+    //       token: key,
+    //       balance: formatEther(liquidAssets[1][index]),
+    //     };
+    //   })
+    //   .filter((entry: any) => entry !== undefined);
+    // setLiquidAssetData(liquidAssetsRes);
 
-    if (savedAssets.length === 0) return;
-    // Map through the 2D array to create objects
-    const savedAssetsRes = transformAndAccumulateTokenBalances(savedAssets);
+    // if (savedAssets.length === 0) return;
+    // // Map through the 2D array to create objects
+    // const savedAssetsRes = transformAndAccumulateTokenBalances(savedAssets);
 
-    setSavedAssetData(savedAssetsRes);
-
-    console.log("All Token Balances", AllTokenBalances);
-    console.log("Liquid Token Balances", LiquidTokenBalances);
-    console.log("Saved Token Balances", SavedTokenBalances);
-    console.log("Liquid Assets", liquidAssetsRes);
+    // setSavedAssetData(savedAssetsRes);
   }, [allAssets, liquidAssets, savedAssets]);
 
   return (
     <div className="bg-[#010104] border border-[#13131373] overflow-hidden p-4 rounded-[2rem] text-white w-full">
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">Assets</h1>
-        <Tabs defaultValue="all-assets" className="w-full">
+        {/* <Tabs defaultValue="all-assets" className="w-full">
           <TabsList className="sm:flex space-x-4 hidden bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="all-assets"
-              className="text-white px-4 py-2 rounded-full"
-            >
+              className="text-white px-4 py-2 rounded-full">
               All assets
             </TabsTrigger>
             <TabsTrigger
               value="liquid-assets"
-              className="text-white px-4 py-2 rounded-full"
-            >
+              className="text-white px-4 py-2 rounded-full">
               Liquid assets
             </TabsTrigger>
             <TabsTrigger
               value="saved-assets"
-              className="text-white px-4 py-2 rounded-full"
-            >
+              className="text-white px-4 py-2 rounded-full">
               Saved assets
             </TabsTrigger>
-          </TabsList>
-          <TabsContent value="all-assets">
-            <AssetTableContent assets={allAssetData} />
-          </TabsContent>
-          <TabsContent value="liquid-assets">
-            <AssetTableContent assets={liquidAssetData} />
-          </TabsContent>
-          <TabsContent value="saved-assets">
-            <AssetTableContent assets={savedAssetData} />
-          </TabsContent>
-        </Tabs>
+          </TabsList> */}
+        {/* <TabsContent value="all-assets"> */}
+        <AssetTableContent assets={allAssetData} />
+        {/* </TabsContent> */}
+        {/* <TabsContent value="liquid-assets"> */}
+        {/* <AssetTableContent assets={liquidAssetData} /> */}
+        {/* </TabsContent> */}
+        {/* <TabsContent value="saved-assets"> */}
+        {/* <AssetTableContent assets={savedAssetData} /> */}
+        {/* </TabsContent> */}
+        {/* </Tabs> */}
       </div>
     </div>
   );
@@ -192,8 +184,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
           {isConnected ? (
             <Button
               onClick={openDepositModal}
-              className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-            >
+              className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]">
               Deposit
             </Button>
           ) : (
@@ -229,8 +220,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             {updatedAssets.map((asset: any, index: number) => (
               <TableRow
                 key={index}
-                className="w-full flex flex-col sm:table-row"
-              >
+                className="w-full flex flex-col sm:table-row">
                 <TableCell className="w-full sm:w-1/3">
                   <div className="flex items-center space-x-4">
                     <div className="flex flex-col">
@@ -263,15 +253,13 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                   <Button
                     variant="link"
                     className="text-[#79E7BA]"
-                    onClick={() => setIsDepositModalOpen(true)}
-                  >
+                    onClick={() => setIsDepositModalOpen(true)}>
                     Deposit
                   </Button>
                   <Button
                     variant="link"
                     className="text-[#79E7BA]"
-                    onClick={() => setIsFirstModalOpen(true)}
-                  >
+                    onClick={() => setIsFirstModalOpen(true)}>
                     Save
                   </Button>
                 </TableCell>

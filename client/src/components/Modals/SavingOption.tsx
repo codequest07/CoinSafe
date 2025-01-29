@@ -65,7 +65,7 @@ export default function SavingOption({
 
   return (
     <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
-      <DialogContent className="sm:max-w-[600px] border-0 bg-[#09090B]">
+      <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C]">
         <DialogHeader>
           <DialogTitle className="text-white">
             How would you like to save?

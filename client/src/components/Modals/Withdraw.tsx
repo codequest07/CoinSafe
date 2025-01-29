@@ -88,9 +88,9 @@ export default function Withdraw({
 
   return (
     <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
-      <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
+      <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C]">
         <DialogTitle className="text-white flex items-center space-x-3">
-        {/* <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" /> */}
+          {/* <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" /> */}
           <p>Withdraw assets</p>
         </DialogTitle>
         <div className="p-8 text-gray-700">
@@ -201,8 +201,7 @@ export default function Withdraw({
                 </div>
                 <Button
                   className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}
-                >
+                  onClick={() => setAmount(selectedTokenBalance)}>
                   Max
                 </Button>
               </div>
@@ -213,8 +212,7 @@ export default function Withdraw({
           <Button
             onClick={() => setIsWithdrawModalOpen(false)}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
+            type="submit">
             Cancel
           </Button>
           <div>
@@ -228,8 +226,7 @@ export default function Withdraw({
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || amount > selectedTokenBalance}
-            >
+              disabled={isLoading || amount > selectedTokenBalance}>
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (

@@ -15,7 +15,7 @@ export function PermissionModal({
 }: PermissionModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-[#17171C] border-none text-white p-0">
+      <DialogContent className="sm:max-w-[425px] border-1 border-[#FFFFFF21] text-white bg-[#17171C] p-0">
         <div className="p-6">
           <h2 className="text-xl font-[400] mb-8">Approve access</h2>
 

@@ -92,7 +92,7 @@ export default function Deposit({
 
   return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
-      <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
+      <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C]">
         <DialogTitle className="text-white flex items-center space-x-3">
           <p>Deposit assets</p>
         </DialogTitle>
