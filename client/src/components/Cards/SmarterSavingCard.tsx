@@ -1,19 +1,19 @@
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { SavingsOverviewData } from "@/lib/data";
-import { SaveSenseModalManager } from "./SaveSenseModalManager";
+import { SaveSenseModalManager } from "../Modals/SaveSenseModalManager";
 import { useAccount } from "wagmi";
 import { toast } from "@/hooks/use-toast";
 
 export default function SmarterSavingCard({
-  setIsConnectModalOpen
+  setIsConnectModalOpen,
 }: {
   setIsConnectModalOpen?: (open: boolean) => void;
 }) {
   const { address } = useAccount();
-  const modalManagerRef = useRef<{ 
-    fetchData: () => void; 
-    download: () => void; 
+  const modalManagerRef = useRef<{
+    fetchData: () => void;
+    download: () => void;
   }>(null);
 
   const handleButtonClick = (buttonText: string) => {
@@ -26,7 +26,7 @@ export default function SmarterSavingCard({
         setIsConnectModalOpen && setIsConnectModalOpen(true);
         return;
       }
-      
+
       // Trigger fetch data method on modal manager
       modalManagerRef.current?.fetchData();
     } else if (buttonText === "Download") {
@@ -57,13 +57,13 @@ export default function SmarterSavingCard({
           </div>
         </div>
       ))}
-      
+
       {/* Modal Manager Component */}
-      <SaveSenseModalManager 
+      <SaveSenseModalManager
         trigger={modalManagerRef}
         onClose={() => {
           // Optional: Add any cleanup or additional logic when modals close
-        }} 
+        }}
       />
     </div>
   );

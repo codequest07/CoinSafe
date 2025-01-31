@@ -1,10 +1,10 @@
 import React, { RefObject, useState } from "react";
 import { useAccount } from "wagmi";
 import { toast } from "@/hooks/use-toast";
-import Loading from "../Modals/loading-screen";
-import SaveSenseResp from "../Modals/SaveSenseResp";
-import KitchenLoading from "../Modals/kitchen-loading";
-import { PermissionModal } from "../Modals/Permission-modal";
+import Loading from "./loading-screen";
+import SaveSenseResp from "./SaveSenseResp";
+import KitchenLoading from "./kitchen-loading";
+import { PermissionModal } from "./Permission-modal";
 
 interface SaveSenseModalManagerProps {
   trigger?: RefObject<{ fetchData: () => void; download: () => void }>;
