@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import SaveAsset from "./SaveAsset";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { SaveSenseModalManager } from "../Cards/SaveSenseModalManager";
+import { SaveSenseModalManager } from "./SaveSenseModalManager";
 
 interface SavingOptionProps {
   isFirstModalOpen: boolean;
@@ -58,14 +58,14 @@ export default function SavingOption({
   };
 
   useEffect(() => {
-    if(isFirstModalOpen && tab === 'autosave') {
+    if (isFirstModalOpen && tab === "autosave") {
       openSecondModal();
     }
-  }, [isFirstModalOpen])
+  }, [isFirstModalOpen]);
 
   return (
     <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
-      <DialogContent className="sm:max-w-[600px] border-0 bg-[#09090B]">
+      <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C]">
         <DialogHeader>
           <DialogTitle className="text-white">
             How would you like to save?
@@ -75,8 +75,7 @@ export default function SavingOption({
           <RadioGroup defaultValue="manual" className="flex flex-col gap-2">
             <Label
               htmlFor="manual"
-              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-white"
-            >
+              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-white">
               <input
                 type="radio"
                 id="manual"
@@ -94,8 +93,7 @@ export default function SavingOption({
             </Label>
             <Label
               htmlFor="personalized"
-              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-primary-foreground"
-            >
+              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-primary-foreground">
               <input
                 type="radio"
                 id="personalized-ai"
@@ -119,15 +117,13 @@ export default function SavingOption({
             <Button
               className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] px-8 rounded-[2rem]"
               type="button"
-              onClick={() => setIsFirstModalOpen(false)}
-            >
+              onClick={() => setIsFirstModalOpen(false)}>
               Cancel
             </Button>
             <Button
               className="bg-white hover:bg-white px-8 text-black rounded-[2rem]"
               type="button"
-              onClick={openSecondModal}
-            >
+              onClick={openSecondModal}>
               Proceed
             </Button>
           </div>

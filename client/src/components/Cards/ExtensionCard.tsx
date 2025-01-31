@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
+import type React from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Carousel,
@@ -7,10 +8,13 @@ import {
 } from "@/components/ui/carousel";
 import MemoChrome from "@/icons/Chrome";
 import MemoChromeMagic from "@/icons/ChromeMagic";
-import SaveSenseResp from "../Modals/SaveSenseResp";
-import Loading from "../Modals/loading-screen";
 import { useAccount } from "wagmi";
+import { PermissionModal } from "../Modals/Permission-modal";
+import Loading from "../Modals/loading-screen";
+import SaveSenseResp from "../Modals/SaveSenseResp";
 import KitchenLoading from "../Modals/kitchen-loading";
+import { Toast } from "../ui/toast";
+import { useApprovalStatus } from "@/hooks/useApprovalStatus";
 
 interface ExtensionCardProps {
   title: string;
@@ -32,8 +36,14 @@ const ExtensionCard: React.FC<ExtensionCardProps> = ({
   const handleClick = () => {
     if (btnTitle === "Get started") {
       onButtonClick?.();
-    } else {
+    } else if (btnTitle === "Download") {
       setShowKitchenLoading(true);
+      // Simulate download process
+      setTimeout(() => {
+        setShowKitchenLoading(false);
+        // Here you would typically initiate the actual download
+        console.log("Download completed");
+      }, 3000); // Simulating a 3-second download
     }
   };
 
@@ -71,16 +81,23 @@ export const extensionCardData = [
   },
 ];
 
-export default function ExtensionCardCarousel() {
+export default function ExtensionCardCarousel({
+  onClose,
+}: {
+  onClose?: () => void;
+}) {
   const [api, setApi] = useState<any>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
   const [showKitchenLoading, setShowKitchenLoading] = useState(false);
+  const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
   const [saveSenseData, setSaveSenseData] = useState(null);
+  const { hasApproved, setApproved } = useApprovalStatus();
 
   const { address } = useAccount();
+
   const scrollNext = useCallback(() => {
     if (api) {
       api.scrollNext();
@@ -97,37 +114,61 @@ export default function ExtensionCardCarousel() {
   }, [api]);
 
   useEffect(() => {
-    const timer = setInterval(scrollNext, 4000); // Change slide every 4 seconds
+    const timer = setInterval(scrollNext, 4000);
     return () => clearInterval(timer);
   }, [scrollNext]);
 
-  const handleGetStarted = async () => {
+  const handleGetStarted = () => {
     if (!address) {
-      console.error("No wallet connected");
+      Toast({
+        title: "No wallet connected",
+        variant: "destructive",
+      });
       return;
     }
+    if (hasApproved) {
+      fetchData();
+    } else {
+      setIsPermissionModalOpen(true);
+    }
+  };
 
+  const fetchData = async () => {
     setIsLoadingModalOpen(true);
-
     try {
       const response = await fetch(
         `https://coinsafe-0q0m.onrender.com/main/${address}`
       );
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-      const data = await response.json();
 
+      const data = await response.json();
       setSaveSenseData(data);
       setIsLoadingModalOpen(false);
       setIsSaveSenseModalOpen(true);
     } catch (error) {
       console.error("Error fetching data:", error);
       setIsLoadingModalOpen(false);
+      Toast({
+        title: "Failed to fetch data",
+        // description: "Please try again later",
+        variant: "destructive",
+      });
     }
   };
 
-  const closeSaveSenseModal = () => setIsSaveSenseModalOpen(false);
+  const handlePermissionApprove = () => {
+    setIsPermissionModalOpen(false);
+    setApproved();
+    fetchData();
+  };
+
+  const handlePermissionReject = () => {
+    setIsPermissionModalOpen(false);
+    onClose?.();
+  };
 
   return (
     <div className="flex flex-col items-center">
@@ -135,7 +176,7 @@ export default function ExtensionCardCarousel() {
         setApi={setApi}
         className="w-full max-w-xs"
         opts={{
-          loop: true, // Enable looping
+          loop: true,
         }}>
         <CarouselContent>
           {extensionCardData.map((card, index) => (
@@ -161,13 +202,19 @@ export default function ExtensionCardCarousel() {
           />
         ))}
       </div>
+      <PermissionModal
+        isOpen={isPermissionModalOpen}
+        onClose={() => setIsPermissionModalOpen(false)}
+        onApprove={handlePermissionApprove}
+        onReject={handlePermissionReject}
+      />
       <Loading
         isOpen={isLoadingModalOpen}
         onClose={() => setIsLoadingModalOpen(false)}
       />
       <SaveSenseResp
         isOpen={isSaveSenseModalOpen}
-        onClose={closeSaveSenseModal}
+        onClose={() => setIsSaveSenseModalOpen(false)}
         data={saveSenseData}
       />
       <KitchenLoading

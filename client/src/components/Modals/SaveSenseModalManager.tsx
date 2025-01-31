@@ -1,10 +1,11 @@
 import React, { RefObject, useState } from "react";
 import { useAccount } from "wagmi";
 import { toast } from "@/hooks/use-toast";
-import Loading from "../Modals/loading-screen";
-import SaveSenseResp from "../Modals/SaveSenseResp";
-import KitchenLoading from "../Modals/kitchen-loading";
-import { PermissionModal } from "../Modals/Permission-modal";
+import Loading from "./loading-screen";
+import SaveSenseResp from "./SaveSenseResp";
+import KitchenLoading from "./kitchen-loading";
+import { PermissionModal } from "./Permission-modal";
+import { useApproval } from "@/contexts/ApprovalContext";
 
 interface SaveSenseModalManagerProps {
   trigger?: RefObject<{ fetchData: () => void; download: () => void }>;
@@ -20,6 +21,7 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
   const [saveSenseData, setSaveSenseData] = useState(null);
   const [showKitchenLoading, setShowKitchenLoading] = useState(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
+  const { hasApproved, setApproved } = useApproval();
 
   const { address } = useAccount();
 
@@ -32,17 +34,19 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
       return;
     }
 
-    setIsPermissionModalOpen(true);
+    if (hasApproved) {
+      fetchDataFromAPI();
+    } else {
+      setIsPermissionModalOpen(true);
+    }
   };
 
-  const handlePermissionApprove = async () => {
-    setIsPermissionModalOpen(false);
+  const fetchDataFromAPI = async () => {
     setIsLoadingModalOpen(true);
 
     try {
       const response = await fetch(
         `https://coinsafe-0q0m.onrender.com/main/${address}`
-        // `http://localhost:1234/main/${address}`
       );
 
       if (!response.ok) {
@@ -64,10 +68,17 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
     }
   };
 
+  const handlePermissionApprove = () => {
+    setIsPermissionModalOpen(false);
+    setApproved();
+    fetchDataFromAPI();
+  };
+
   const handlePermissionReject = () => {
     setIsPermissionModalOpen(false);
     onClose?.();
   };
+
   const handleDownload = () => {
     setShowKitchenLoading(true);
   };

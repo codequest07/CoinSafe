@@ -75,7 +75,9 @@ export default function SaveAsset({
   const { AvailableBalance } = useBalances(address as string);
 
   function getFrequencyLabel(value: string) {
-    const frequency = frequencies.find(frequency => frequency.value === value);
+    const frequency = frequencies.find(
+      (frequency) => frequency.value === value
+    );
     return frequency ? frequency.label : undefined; // Return the label or null if not found
   }
 
@@ -264,26 +266,28 @@ export default function SaveAsset({
   };
 
   useEffect(() => {
-      if (address && saveState.token && AvailableBalance?.data) {
-        const tokensData = AvailableBalance?.data as any[];
-        if (!tokensData) return;
-  
-        const tokenBalance =
-          tokensData[0]
-            .map((address: string, index: number) => ({
-              address,
-              balance: tokensData[1][index],
-            }))
-            .find((item: any) => item.address.toLowerCase() === saveState.token.toLowerCase())
-            ?.balance || 0n;
-  
-        setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
-      }
-    }, [saveState.token, address, AvailableBalance?.data]);
+    if (address && saveState.token && AvailableBalance?.data) {
+      const tokensData = AvailableBalance?.data as any[];
+      if (!tokensData) return;
+
+      const tokenBalance =
+        tokensData[0]
+          .map((address: string, index: number) => ({
+            address,
+            balance: tokensData[1][index],
+          }))
+          .find(
+            (item: any) =>
+              item.address.toLowerCase() === saveState.token.toLowerCase()
+          )?.balance || 0n;
+
+      setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+    }
+  }, [saveState.token, address, AvailableBalance?.data]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#09090B]">
+      <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C] max-h-[90vh] overflow-y-auto">
         <DialogTitle className="text-white flex items-center space-x-3">
           <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" />
           <p>Save your assets</p>
@@ -291,116 +295,99 @@ export default function SaveAsset({
         <Tabs
           defaultValue={tab || "one-time"}
           onValueChange={handleTabChange}
-          className="w-full"
-        >
+          className="w-full">
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               One-time Save
             </TabsTrigger>
             <TabsTrigger
               value="autosave"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
+              className="flex justify-center rounded-2xl items-center flex-1">
               Autosave
             </TabsTrigger>
           </TabsList>
           <TabsContent value="one-time">
             <div className="p-8 text-gray-700">
               {/* Amount Section */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex-1">
-                  <label htmlFor="amount" className="text-sm text-gray-400">
-                    Amount
-                  </label>
-                  <div className="flex flex-col items-center justify-center">
+              <div className="space-y-2">
+                <label className="text-sm text-gray-400">Amount</label>
+                <div className="p-4 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
+                  <div className="absolute top-2 right-2">
+                    <div className="ml-4">
+                      <Select onValueChange={handleTokenSelect}>
+                        <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
+                          <div className="flex items-center">
+                            {/* <MemoRipple className="mr-2" /> */}
+                            <SelectValue placeholder="Select Token" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
+                            <div className="flex items-center space-x-2">
+                              <p>USDT</p>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                            LSK
+                          </SelectItem>
+                          <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
+                            SAFU
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {validationErrors.token && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {validationErrors.token}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center">
                     <input
-                      type="number" // Line 179: Changed to number input
-                      id="amount"
-                      name="amount"
-                      placeholder="Enter amount" // Line 182: Added placeholder
-                      value={saveState.amount || ""} // Line 183: Added fallback
+                      type="text"
+                      value={saveState.amount}
                       onChange={handleAmountChange}
-                      className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
+                      className="text-2xl font-medium bg-transparent text-center w-full outline-none"
+                      placeholder="Enter amount"
                     />
-                    {validationErrors.amount && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {validationErrors.amount}
-                      </p>
-                    )}
+                    <div className="text-sm text-gray-400 mt-1">≈ $400.56</div>
                   </div>
                 </div>
-                <div className="ml-4">
-                  <Select onValueChange={handleTokenSelect}>
-                    <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
-                      <div className="flex items-center">
-                        {/* <MemoRipple className="mr-2" /> */}
-                        <SelectValue placeholder="Select Token" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
-                        <div className="flex items-center space-x-2">
-                          <p>USDT</p>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
-                        LSK
-                      </SelectItem>
-                      <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
-                        SAFU
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {validationErrors.token && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {validationErrors.token}
-                    </p>
-                  )}
+                <div className="flex justify-between text-sm">
+                  <div className="flex items-center gap-1">
+                    <div>
+                      {saveState.amount > selectedTokenBalance && (
+                        <p className="text-red-500 text-[13px] text-right">
+                          Amount greater than wallet balance
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-sm font-[300] text-gray-300">
+                      Wallet balance:{" "}
+                      <span className="text-gray-400">
+                        {selectedTokenBalance}{" "}
+                        {saveState.token == tokens.safu
+                          ? "SAFU"
+                          : saveState.token === tokens.lsk
+                          ? "LSK"
+                          : "USDT"}
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() =>
+                      setSaveState((prev) => ({
+                        ...prev,
+                        amount: selectedTokenBalance,
+                      }))
+                    }
+                    variant="link"
+                    className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90">
+                    Save all
+                  </Button>
                 </div>
-              </div>
-
-              {/* Wallet Balance Section */}
-              <div className="flex items-center justify-between mb-3">
-                {/* <div className="text-sm font-[300] text-gray-300">
-                  Wallet balance:{" "}
-                  <span className="text-gray-400">3000 XRP</span>
-                </div>
-                <div className="text-sm text-green-400 cursor-pointer">
-                  Save all
-                </div> */}
-                {/* Wallet Balance Section */}
-          {saveState.token && (
-            <>
-            <div>
-              {saveState.amount > selectedTokenBalance && (
-                <p className="text-red-500 text-[13px] text-right">Amount greater than wallet balance</p>
-              )}
-            </div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-[300] text-gray-300">
-                  Wallet balance:{" "}
-                  <span className="text-gray-400">
-                    {selectedTokenBalance}{" "}
-                    {saveState.token == tokens.safu
-                      ? "SAFU"
-                      : saveState.token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
-                  </span>
-                </div>
-                <Button
-                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  // onClick={() => setAmount(selectedTokenBalance)}
-                  onClick={() => setSaveState(prev => ({...prev, amount: selectedTokenBalance}))}
-                >
-                  Max
-                </Button>
-              </div>
-            </>
-          )}
               </div>
 
               {/* Duration Section */}
@@ -419,8 +406,7 @@ export default function SaveAsset({
                     />
                     <Popover
                       open={isCalendarOpen}
-                      onOpenChange={setIsCalendarOpen}
-                    >
+                      onOpenChange={setIsCalendarOpen}>
                       <PopoverTrigger asChild>
                         <span onClick={() => setIsCalendarOpen(true)}>
                           <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -450,54 +436,77 @@ export default function SaveAsset({
           </TabsContent>
           <TabsContent value="autosave">
             <div className="space-y-4 py-4">
-              <p className="font-[200] text-base">Choose savings method</p>
-              <div className="flex gap-2">
-                {/* <Label
-                  htmlFor="per-transaction"
-                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400">
-                  <input
-                    type="radio"
-                    id="per-transaction"
-                    name="savingOption"
-                    value="per-transaction"
-                    checked={selectedOption === "per-transaction"}
-                    onChange={() => setSelectedOption("per-transaction")}
-                    className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
-                  />
-                  <div className="flex-1 ml-3">
-                    <div className="font-medium mb-1">Per transaction</div>
-                    <p className="text-xs font-[400] text-muted-foreground">
-                      Save a percentage of every transaction
-                    </p>
-                  </div>
-                </Label> */}
-                <Label
-                  htmlFor="by-frequency"
-                  className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400"
-                >
-                  <input
-                    type="radio"
-                    id="by-frequency"
-                    name="savingOption"
-                    value="by-frequency"
-                    checked={selectedOption === "by-frequency"}
-                    onChange={() => setSelectedOption("by-frequency")}
-                    className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
-                  />
-                  <div className="flex-1 ml-3">
-                    <div className="font-medium mb-1">By frequency</div>
-                    <p className="text-xs font-[400] text-white">
-                      Save a fixed amount by frequency
-                    </p>
-                  </div>
-                </Label>
+              <div className="py-4 pb-6 border-b-[1px] border-[#FFFFFF21]">
+                <p className="font-[200] text-base">Choose savings method</p>
+                <div className="flex gap-2">
+                  <Label
+                    htmlFor="per-transaction"
+                    className={`w-full flex flex-col items-start justify-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${
+                      selectedOption === "per-transaction"
+                        ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
+                        : ""
+                    }`}>
+                    <div>
+                      <div className="flex gap-2">
+                        <input
+                          type="radio"
+                          id="per-transaction"
+                          name="savingOption"
+                          value="per-transaction"
+                          checked={selectedOption === "per-transaction"}
+                          onChange={() => setSelectedOption("per-transaction")}
+                          className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
+                        />
+
+                        <div className="font-medium mb-1 text-white">
+                          Spend and save
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-[400] text-[#C7C7D1]">
+                          Save a percentage of every transaction
+                        </p>
+                      </div>
+                    </div>
+                  </Label>
+                  <Label
+                    htmlFor="by-frequency"
+                    className={`w-full flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${
+                      selectedOption === "by-frequency"
+                        ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
+                        : ""
+                    }`}>
+                    <div>
+                      <div className="flex gap-2">
+                        <input
+                          type="radio"
+                          id="by-frequency"
+                          name="savingOption"
+                          value="by-frequency"
+                          checked={selectedOption === "by-frequency"}
+                          onChange={() => setSelectedOption("by-frequency")}
+                          className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
+                        />
+
+                        <div className="font-medium mb-1 text-white">
+                          By frequency
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-[400] text-[#C7C7D1]">
+                          save a fixed amount by frequency
+                        </p>
+                      </div>
+                    </div>
+                  </Label>
+                </div>
               </div>
 
               {/* Conditionally Rendered Content */}
               {selectedOption === "per-transaction" && (
                 <div className="space-y-4 py-2 text-white">
                   <Label htmlFor="transactionPercentage">
-                    Transaction Percentage
+                    {"Save on every transaction (percentage)"}
                   </Label>
                   <Input
                     id="transactionPercentage"
@@ -522,11 +531,14 @@ export default function SaveAsset({
 
               {selectedOption === "by-frequency" && (
                 <div>
-                  <div className="flex items-center justify-between mb-6">
+                  <label htmlFor="amount" className="text-sm text-gray-400">
+                    Amount
+                  </label>
+                  <div className="flex items-center justify-between mb-6 border-[1px] border-[#FFFFFF3D] rounded-[8px] py-6 px-4">
                     <div className="flex-1">
-                      <label htmlFor="amount" className="text-sm text-gray-400">
+                      {/* <label htmlFor="amount" className="text-sm text-gray-400">
                         Amount
-                      </label>
+                      </label> */}
                       <div className="flex flex-col items-center justify-center">
                         <input
                           type="text"
@@ -536,9 +548,9 @@ export default function SaveAsset({
                           onChange={handleAmountChange}
                           className="bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full"
                         />
-                        {/* <div className="text-xs text-gray-400 text-center">
+                        <div className="text-xs text-gray-400 text-center">
                           ≈ $400.56
-                        </div> */}
+                        </div>
                       </div>
                       {validationErrors.amount && (
                         <p className="text-red-500 text-sm mt-1">
@@ -578,34 +590,40 @@ export default function SaveAsset({
 
                   {/* Wallet balance */}
                   {saveState.token && (
-            <>
-            <div>
-              {saveState.amount > selectedTokenBalance && (
-                <p className="text-red-500 text-[13px] text-right">Amount greater than wallet balance</p>
-              )}
-            </div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-[300] text-gray-300">
-                  Wallet balance:{" "}
-                  <span className="text-gray-400">
-                    {selectedTokenBalance}{" "}
-                    {saveState.token == tokens.safu
-                      ? "SAFU"
-                      : saveState.token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
-                  </span>
-                </div>
-                <Button
-                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  // onClick={() => setAmount(selectedTokenBalance)}
-                  onClick={() => setSaveState(prev => ({...prev, amount: selectedTokenBalance}))}
-                >
-                  Max
-                </Button>
-              </div>
-            </>
-          )}
+                    <>
+                      <div>
+                        {saveState.amount > selectedTokenBalance && (
+                          <p className="text-red-500 text-[13px] text-right">
+                            Amount greater than wallet balance
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="text-sm font-[300] text-gray-300">
+                          Wallet balance:{" "}
+                          <span className="text-gray-400">
+                            {selectedTokenBalance}{" "}
+                            {saveState.token == tokens.safu
+                              ? "SAFU"
+                              : saveState.token === tokens.lsk
+                              ? "LSK"
+                              : "USDT"}
+                          </span>
+                        </div>
+                        <Button
+                          className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                          // onClick={() => setAmount(selectedTokenBalance)}
+                          onClick={() =>
+                            setSaveState((prev) => ({
+                              ...prev,
+                              amount: selectedTokenBalance,
+                            }))
+                          }>
+                          Max
+                        </Button>
+                      </div>
+                    </>
+                  )}
 
                   <div className="space-y-4 py-2 text-white">
                     <Label htmlFor="frequencyAmount">Frequency</Label>
@@ -645,8 +663,7 @@ export default function SaveAsset({
                   />
                   <Popover
                     open={isCalendarOpen}
-                    onOpenChange={setIsCalendarOpen}
-                  >
+                    onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <span onClick={() => setIsCalendarOpen(true)}>
                         <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -676,8 +693,7 @@ export default function SaveAsset({
           <Button
             onClick={onClose}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
+            type="submit">
             Cancel
           </Button>
           <div>
@@ -685,8 +701,7 @@ export default function SaveAsset({
               onClick={handleSaveAsset}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || autoSavingsLoading}
-            >
+              disabled={isLoading || autoSavingsLoading}>
               {isLoading || autoSavingsLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (
@@ -706,19 +721,27 @@ export default function SaveAsset({
             : "USDT"
         }
         duration={saveState.duration}
-        isOpen={isThirdModalOpen && currentTab === 'one-time'}
+        isOpen={isThirdModalOpen && currentTab === "one-time"}
         onClose={() => setIsThirdModalOpen(false)}
       />
       <SuccessfulTxModal
         transactionType="setup-recurring-save"
         amount={saveState.amount}
         token={
-          saveState.token == tokens.safu ? "SAFU" : saveState.token === tokens.lsk ? "LSK" : "USDT"
+          saveState.token == tokens.safu
+            ? "SAFU"
+            : saveState.token === tokens.lsk
+            ? "LSK"
+            : "USDT"
         }
-        isOpen={isThirdModalOpen && currentTab === "autosave" && selectedOption === 'by-frequency'}
+        isOpen={
+          isThirdModalOpen &&
+          currentTab === "autosave" &&
+          selectedOption === "by-frequency"
+        }
         onClose={() => setIsThirdModalOpen(false)}
         additionalDetails={{
-          frequency: getFrequencyLabel(saveState.frequency.toString())
+          frequency: getFrequencyLabel(saveState.frequency.toString()),
         }}
       />
     </Dialog>

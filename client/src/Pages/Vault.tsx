@@ -1,13 +1,14 @@
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
-import ClaimCard from "@/components/ClaimCard";
+// import ClaimCard from "@/components/ClaimCard";
 import VaultCard from "@/components/VaultCard";
 import { useAccount } from "wagmi";
 import AssetTable from "@/components/AssetTable";
 import { useBalances } from "@/hooks/useBalances";
+import SavingsCards from "@/components/SavingsCards";
 
 const Vault = () => {
   const { isConnected, address } = useAccount();
-  const { savingsBalance }  = useBalances(address as string);
+  const { savingsBalance } = useBalances(address as string);
 
   return (
     <div>
@@ -16,19 +17,19 @@ const Vault = () => {
       <div className="flex gap-2 pr-4 pb-2">
         <VaultCard
           title="Vault balance"
-          value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.00 : 0.00}
+          value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}
           unit="USD"
           text=""
           // text="+18% (compared to your previous savings)"
         />
-        <ClaimCard
+        {/* <ClaimCard
           title="Claimable balance"
-          value={0.00}
+          value={0.0}
           unit="USD"
           text="sum of all your claimable assets"
-        />
+        /> */}
       </div>
-
+      <SavingsCards />
       {/* <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-4">
         <CurrencyBreakdown />
       </div> */}
@@ -42,9 +43,7 @@ const Vault = () => {
         <AssetTable />
       </div>
 
-      <div>
-        {/* {isConnected && <SavingsHistoryTable />} */}
-      </div>
+      <div>{/* {isConnected && <SavingsHistoryTable />} */}</div>
     </div>
   );
 };

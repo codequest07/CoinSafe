@@ -2,6 +2,7 @@ import MemoChrome from "@/icons/Chrome";
 import { Button } from "./ui/button";
 import MemoTarget from "@/icons/Target";
 import MemoInvestement from "@/icons/Investement";
+import { Link } from "react-router-dom";
 
 const SavingsTools = () => {
   return (
@@ -14,8 +15,7 @@ const SavingsTools = () => {
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
-          className=" sm:text-3xl text-[35px] font-bold"
-        >
+          className=" sm:text-3xl text-[35px] font-bold">
           All the tools you need to save and earn in{" "}
           <span className="text-green-500">one place</span>
         </h2>
@@ -33,11 +33,11 @@ const SavingsTools = () => {
             Our easy-to-use browser extension, Whisper automatically locks in
             savings every time you make a transaction.
           </p>
-          <a href="#hero">
+          <Link to="/dashboard">
             <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
               Start saving
             </Button>
-          </a>
+          </Link>
         </div>
 
         {/* Whisper Permissions */}
@@ -58,14 +58,15 @@ const SavingsTools = () => {
           </div>
           <h3 className="text-xl font-semibold">Targeted savings plans</h3>
           <p className="mt-4 text-[#B5B5B5] max-w-[28rem] mx-auto mb-4">
-            Whether it’s a dream vacation, a new gadget, or long-term wealth, Coinsafe 
-            helps you create personalized plans and stay on track to achieve them.
+            Whether it’s a dream vacation, a new gadget, or long-term wealth,
+            Coinsafe helps you create personalized plans and stay on track to
+            achieve them.
           </p>
-          <a href="#hero">
+          <Link to="/dashboard">
             <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
               Start saving
             </Button>
-          </a>
+          </Link>
         </div>
 
         {/* Investment Options */}
@@ -78,11 +79,11 @@ const SavingsTools = () => {
             Choose from high-yield savings vaults and staking opportunities
             tailored to your risk level and goals.
           </p>
-          <a href="#hero">
+          <Link to="/dashboard">
             <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
               Start saving
             </Button>
-          </a>
+          </Link>
         </div>
       </div>
     </section>

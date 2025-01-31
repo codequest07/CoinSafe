@@ -24,6 +24,7 @@ import { WagmiProvider } from "wagmi";
 // } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { config } from "./lib/config.ts";
+import { ApprovalProvider } from "./contexts/ApprovalContext.tsx";
 
 const queryClient = new QueryClient();
 
@@ -38,10 +39,11 @@ createRoot(document.getElementById("root")!).render(
               accentColorForeground: "#010104",
               fontStack: "system",
               borderRadius: "large",
-            })}
-          >
+            })}>
             <RecoilRoot>
-              <App />
+              <ApprovalProvider>
+                <App />
+              </ApprovalProvider>
             </RecoilRoot>
           </RainbowKitProvider>
         </QueryClientProvider>
