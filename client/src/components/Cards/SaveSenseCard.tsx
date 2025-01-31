@@ -3,6 +3,7 @@ import "aos/dist/aos.css";
 import { useEffect } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
+import { Link } from "react-router-dom";
 
 const SaveSenseCard = () => {
   useEffect(() => {
@@ -28,14 +29,13 @@ const SaveSenseCard = () => {
             Saving doesn’t have to feel boring. Earn rewards like Gas Badges and
             bonuses when you stay consistent with your financial goals.
           </p>
-          <a href="#hero">
+          <Link to="/dashboard">
             <Button
               variant="outline"
-              className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]"
-            >
+              className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
               Start saving
             </Button>
-          </a>
+          </Link>
         </CardContent>
       </Card>
     </div>

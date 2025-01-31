@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
+import { Link } from "react-router-dom";
 
 const WhisperDownloadCard = () => {
   useEffect(() => {
@@ -30,14 +31,13 @@ const WhisperDownloadCard = () => {
             automatically, helping you build wealth without even thinking about
             it.
           </p>
-          <a href="#hero">
+          <Link to="/dashboard">
             <Button
               variant="outline"
-              className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]"
-            >
+              className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
               Start saving
             </Button>
-          </a>
+          </Link>
         </CardContent>
       </Card>
     </div>
