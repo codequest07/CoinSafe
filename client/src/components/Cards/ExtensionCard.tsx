@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Carousel,
@@ -8,12 +8,13 @@ import {
 } from "@/components/ui/carousel";
 import MemoChrome from "@/icons/Chrome";
 import MemoChromeMagic from "@/icons/ChromeMagic";
-import SaveSenseResp from "../Modals/SaveSenseResp";
-import Loading from "../Modals/loading-screen";
 import { useAccount } from "wagmi";
-import KitchenLoading from "../Modals/kitchen-loading";
 import { PermissionModal } from "../Modals/Permission-modal";
+import Loading from "../Modals/loading-screen";
+import SaveSenseResp from "../Modals/SaveSenseResp";
+import KitchenLoading from "../Modals/kitchen-loading";
 import { Toast } from "../ui/toast";
+import { useApprovalStatus } from "@/hooks/useApprovalStatus";
 
 interface ExtensionCardProps {
   title: string;
@@ -93,8 +94,10 @@ export default function ExtensionCardCarousel({
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
   const [saveSenseData, setSaveSenseData] = useState(null);
+  const { hasApproved, setApproved } = useApprovalStatus();
 
   const { address } = useAccount();
+
   const scrollNext = useCallback(() => {
     if (api) {
       api.scrollNext();
@@ -111,26 +114,30 @@ export default function ExtensionCardCarousel({
   }, [api]);
 
   useEffect(() => {
-    const timer = setInterval(scrollNext, 4000); // Change slide every 4 seconds
+    const timer = setInterval(scrollNext, 4000);
     return () => clearInterval(timer);
   }, [scrollNext]);
 
   const handleGetStarted = () => {
     if (!address) {
-      console.error("No wallet connected");
+      Toast({
+        title: "No wallet connected",
+        variant: "destructive",
+      });
       return;
     }
-    setIsPermissionModalOpen(true);
+    if (hasApproved) {
+      fetchData();
+    } else {
+      setIsPermissionModalOpen(true);
+    }
   };
 
-  const handlePermissionApprove = async () => {
-    setIsPermissionModalOpen(false);
+  const fetchData = async () => {
     setIsLoadingModalOpen(true);
-
     try {
       const response = await fetch(
         `https://coinsafe-0q0m.onrender.com/main/${address}`
-        // `http://localhost:1234/main/${address}`
       );
 
       if (!response.ok) {
@@ -146,17 +153,22 @@ export default function ExtensionCardCarousel({
       setIsLoadingModalOpen(false);
       Toast({
         title: "Failed to fetch data",
-        variant: "destructive",
         // description: "Please try again later",
+        variant: "destructive",
       });
     }
+  };
+
+  const handlePermissionApprove = () => {
+    setIsPermissionModalOpen(false);
+    setApproved();
+    fetchData();
   };
 
   const handlePermissionReject = () => {
     setIsPermissionModalOpen(false);
     onClose?.();
   };
-  const closeSaveSenseModal = () => setIsSaveSenseModalOpen(false);
 
   return (
     <div className="flex flex-col items-center">
@@ -164,7 +176,7 @@ export default function ExtensionCardCarousel({
         setApi={setApi}
         className="w-full max-w-xs"
         opts={{
-          loop: true, // Enable looping
+          loop: true,
         }}>
         <CarouselContent>
           {extensionCardData.map((card, index) => (
@@ -202,7 +214,7 @@ export default function ExtensionCardCarousel({
       />
       <SaveSenseResp
         isOpen={isSaveSenseModalOpen}
-        onClose={closeSaveSenseModal}
+        onClose={() => setIsSaveSenseModalOpen(false)}
         data={saveSenseData}
       />
       <KitchenLoading
