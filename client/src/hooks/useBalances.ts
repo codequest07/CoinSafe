@@ -1,15 +1,14 @@
 import { useRecoilState } from "recoil";
-import { useReadContract, useWatchContractEvent } from "wagmi";
+import { useReadContract } from "wagmi";
 import {
   availableBalanceState,
   savingsBalanceState,
   totalBalanceState,
 } from "../store/atoms/save";
-import { CoinSafeContract, tokens } from "@/lib/contract";
-import { formatUnits } from "viem";
-import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+import { CoinSafeContract } from "@/lib/contract";
 import { useEffect, useState } from "react";
 import { getValidNumberValue } from "@/lib/utils";
+import { convertTokenAmountToUsd } from "@/lib/utils";
 
 export const useBalances = (address: string) => {
   const [availableBalance, setAvailableBalance] = useRecoilState(
@@ -45,114 +44,6 @@ export const useBalances = (address: string) => {
     address: CoinSafeContract.address as `0x${string}`,
     functionName: "getAvailableBalances",
     args: [address],
-  });
-
-  // Helper function to convert token amounts to USD
-  const convertTokenAmountToUsd = async (
-    token: string,
-    amount: bigint
-  ): Promise<number> => {
-    switch (token) {
-      case tokens.usdt:
-        return (await getUsdtToUsd(
-          Number(formatUnits(amount, 6))
-        )) as Promise<number>;
-      case tokens.safu:
-        return getSafuToUsd(Number(formatUnits(amount, 18)));
-      case tokens.lsk:
-        return (await getLskToUsd(
-          Number(formatUnits(amount, 18))
-        )) as Promise<number>;
-      default:
-        console.error("Unknown token address:", token);
-        return 0;
-    }
-  };
-
-  // Helper function to update balances based on event type
-  const handleBalanceUpdate = (
-    eventType: "deposit" | "withdraw" | "save",
-    amountInUsd: number,
-    setAvailableBalance: (cb: (prev: number) => number) => void,
-    setTotalBalance?: (cb: (prev: number) => number) => void,
-    setSavingsBalance?: (cb: (prev: number) => number) => void
-  ) => {
-    switch (eventType) {
-      case "deposit":
-        setAvailableBalance((prev) => prev + amountInUsd);
-        setTotalBalance?.((prev) => prev + amountInUsd);
-        break;
-      case "withdraw":
-        setAvailableBalance((prev) => prev - amountInUsd);
-        setTotalBalance?.((prev) => prev - amountInUsd);
-        break;
-      case "save":
-        setAvailableBalance((prev) => prev - amountInUsd);
-        setSavingsBalance?.((prev) => prev + amountInUsd);
-        break;
-    }
-  };
-
-  // Main event handler function
-  const createEventHandler = (
-    eventType: "deposit" | "withdraw" | "save",
-    setAvailableBalance: (cb: (prev: number) => number) => void,
-    setTotalBalance?: (cb: (prev: number) => number) => void,
-    setSavingsBalance?: (cb: (prev: number) => number) => void
-  ) => {
-    return async (logs: any) => {
-      try {
-        console.log("New logs!", logs);
-
-        const log = logs[0];
-        const { token, amount } = log.args;
-
-        const amountInUsd = await convertTokenAmountToUsd(token, amount);
-
-        if (amountInUsd === 0) return;
-
-        handleBalanceUpdate(
-          eventType,
-          amountInUsd,
-          setAvailableBalance,
-          setTotalBalance,
-          setSavingsBalance
-        );
-      } catch (error) {
-        console.error(`Error processing ${eventType} logs:`, error);
-      }
-    };
-  };
-
-  // Usage in hooks
-  useWatchContractEvent({
-    abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    eventName: "DepositSuccessful",
-    onLogs: createEventHandler("deposit", setAvailableBalance, setTotalBalance),
-  });
-
-  useWatchContractEvent({
-    abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    eventName: "Withdrawn",
-    onLogs: createEventHandler(
-      "withdraw",
-      setAvailableBalance,
-      setTotalBalance
-    ),
-  });
-
-  useWatchContractEvent({
-    abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    eventName: "SavedSuccessfully",
-    onLogs: createEventHandler(
-      "save",
-      setAvailableBalance,
-      undefined,
-      setSavingsBalance
-    ),
   });
 
   // Process available balances

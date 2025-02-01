@@ -12,8 +12,30 @@ import SaveSense from "./Pages/SaveSense";
 import { Toaster } from "./components/ui/toaster";
 import Faucet from "./Pages/Faucet";
 import SavingsDetail from "./components/SavingsDetail";
+import { useRecoilState } from "recoil";
+import { availableBalanceState, savingsBalanceState, totalBalanceState } from "./store/atoms/save";
+import { useContractEvents } from "./hooks/useWatchEvents";
 
 const App = () => {
+  const [, setAvailableBalance] = useRecoilState(availableBalanceState);
+  const [, setSavingsBalance] = useRecoilState(savingsBalanceState);
+  const [, setTotalBalance] = useRecoilState(totalBalanceState);
+
+  useContractEvents({
+    onDeposit: (amountInUsd) => {
+      setAvailableBalance((prev) => prev + amountInUsd);
+      setTotalBalance((prev) => prev + amountInUsd);
+    },
+    onWithdraw: (amountInUsd) => {
+      setAvailableBalance((prev) => prev - amountInUsd);
+      setTotalBalance((prev) => prev - amountInUsd);
+    },
+    onSave: (amountInUsd) => {
+      setAvailableBalance((prev) => prev - amountInUsd);
+      setSavingsBalance((prev) => prev + amountInUsd);
+    },
+  });
+
   return (
     <div className="bg-[#010104]">
       <Routes>
