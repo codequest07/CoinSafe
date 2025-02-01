@@ -52,7 +52,7 @@ export default function SavingsCards() {
               <div className="shrink-0">
                 <Button
                   variant="outline"
-                  className="h-[120px] w-[180px] flex flex-col items-center justify-center border-dashed border-gray-700 bg-transparent text-white hover:bg-gray-900">
+                  className="h-[120px] w-[180px] flex flex-col items-center justify-center border-dashed border-gray-700 bg-transparent text-white hover:text-white hover:bg-gray-900">
                   <Plus className="h-6 w-6 mb-2" />
                   <span>Set up a target</span>
                 </Button>
