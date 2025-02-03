@@ -46,7 +46,7 @@ import { useBalances } from "@/hooks/useBalances";
 import { formatUnits } from "viem";
 import { SavingsTargetSelect } from "../SavingsTarget";
 import { DurationSelector } from "../DurationSelector";
-import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+// import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 
 interface SavingsTarget {
   id: string;
@@ -386,11 +386,14 @@ export default function SaveAsset({
                   {/* absolute top-2 right-2  */}
                   <div className="">
                     <div className="ml-4">
-                      <Select onValueChange={handleTokenSelect} value={saveState.token}>
+                      <Select
+                        onValueChange={handleTokenSelect}
+                        value={saveState.token}
+                      >
                         <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                           <div className="flex items-center">
                             {/* <MemoRipple className="mr-2" /> */}
-                            <SelectValue placeholder="Select Token"/>
+                            <SelectValue placeholder="Select Token" />
                           </div>
                         </SelectTrigger>
                         <SelectContent>
@@ -606,7 +609,8 @@ export default function SaveAsset({
               {/* Conditionally Rendered Content */}
               {selectedOption === "per-transaction" && (
                 <div className="flex flex-col items-center justify-center space-y-4 py-2 text-white">
-                  <MemoComingSoonIcon className="w-[70%] h-[55vh] text-white" />
+                  {/* <MemoComingSoonIcon className="w-[70%] h-[55vh] text-white" /> */}
+                  <img src="/assets/coming-soon-orb.png" alt="coming soon" />
                   <h1 className="text-3xl font-bold my-2 text-white leading-tight">
                     We’re in the kitchen!
                   </h1>
@@ -669,7 +673,10 @@ export default function SaveAsset({
                       )}
                     </div>
                     <div className="ml-4">
-                      <Select onValueChange={handleTokenSelect} value={saveState.token}>
+                      <Select
+                        onValueChange={handleTokenSelect}
+                        value={saveState.token}
+                      >
                         <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                           <div className="flex items-center">
                             {/* <MemoRipple className="mr-2" /> */}
