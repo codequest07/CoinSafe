@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, ChevronRight } from "lucide-react";
+import {  ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -49,14 +49,14 @@ export default function SavingsCards() {
         <div className="relative">
           <ScrollArea className="w-full">
             <div ref={scrollContainerRef} className="flex space-x-4 pb-4">
-              <div className="shrink-0">
+              {/* <div className="shrink-0">
                 <Button
                   variant="outline"
-                  className="h-[120px] w-[180px] flex flex-col items-center justify-center border-dashed border-gray-700 bg-transparent text-white hover:bg-gray-900">
+                  className="h-[120px] w-[180px] flex flex-col items-center justify-center border-dashed border-gray-700 bg-transparent text-white hover:text-white hover:bg-gray-900">
                   <Plus className="h-6 w-6 mb-2" />
                   <span>Set up a target</span>
                 </Button>
-              </div>
+              </div> */}
               {targets.map((target) => (
                 <button
                   key={target.id}

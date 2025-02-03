@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { formatEther } from "viem";
+import { formatEther, formatUnits } from "viem";
+import { tokens } from "@/lib/contract";
+import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -35,3 +37,24 @@ export function transformAndAccumulateTokenBalances(
     balance: formatEther(balance), // Format balance to ether
   }));
 }
+
+export const convertTokenAmountToUsd = async (
+  token: string,
+  amount: bigint
+): Promise<number> => {
+  switch (token) {
+    case tokens.usdt:
+      return (await getUsdtToUsd(
+        Number(formatUnits(amount, 6))
+      )) as Promise<number>;
+    case tokens.safu:
+      return getSafuToUsd(Number(formatUnits(amount, 18)));
+    case tokens.lsk:
+      return (await getLskToUsd(
+        Number(formatUnits(amount, 18))
+      )) as Promise<number>;
+    default:
+      console.error("Unknown token address:", token);
+      return 0;
+  }
+};

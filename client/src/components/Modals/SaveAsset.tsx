@@ -386,11 +386,11 @@ export default function SaveAsset({
                   {/* absolute top-2 right-2  */}
                   <div className="">
                     <div className="ml-4">
-                      <Select onValueChange={handleTokenSelect}>
+                      <Select onValueChange={handleTokenSelect} value={saveState.token}>
                         <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                           <div className="flex items-center">
                             {/* <MemoRipple className="mr-2" /> */}
-                            <SelectValue placeholder="Select Token" />
+                            <SelectValue placeholder="Select Token"/>
                           </div>
                         </SelectTrigger>
                         <SelectContent>
@@ -653,7 +653,7 @@ export default function SaveAsset({
                         <input
                           type="text"
                           id="amount"
-                          placeholder="345,000.67 XRP"
+                          placeholder="345,000.67"
                           value={saveState.amount || ""} // Line 183: Added fallback
                           onChange={handleAmountChange}
                           className="bg-transparent text-xl font-light text-gray-200 border-none focus:outline-none text-left w-full"
@@ -669,7 +669,7 @@ export default function SaveAsset({
                       )}
                     </div>
                     <div className="ml-4">
-                      <Select onValueChange={handleTokenSelect}>
+                      <Select onValueChange={handleTokenSelect} value={saveState.token}>
                         <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                           <div className="flex items-center">
                             {/* <MemoRipple className="mr-2" /> */}
