@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectTrigger,
@@ -18,14 +18,14 @@ import {
 import { useEffect, useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 // import MemoRipple from "@/icons/Ripple";
-import MemoCalenderIcon from "@/icons/CalenderIcon";
-import { Calendar } from "@/components/ui/calendar"; // Line 20: Added Shadcn Calendar
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"; // Line 24: Added Popover for calendar
-import { format, differenceInDays, addDays } from "date-fns";
+// import MemoCalenderIcon from "@/icons/CalenderIcon";
+// import { Calendar } from "@/components/ui/calendar"; // Line 20: Added Shadcn Calendar
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover"; // Line 24: Added Popover for calendar
+import { format, addDays } from "date-fns";
 
 import { useAccount } from "wagmi";
 // import { waitForTransactionReceipt } from "@wagmi/core";
@@ -72,10 +72,10 @@ export default function SaveAsset({
     { value: "604800", label: "Weekly" }, // 1 week = 604800 seconds
     { value: "2592000", label: "Monthly" }, // 1 month = 2592000 seconds (approx. 30 days)
   ]);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [daysInput, setDaysInput] = useState<number | string>("");
-  const [unlockDate, setUnlockDate] = useState<Date | null>(null);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [, setSelectedDate] = useState<Date | undefined>(undefined);
+  // const [daysInput, setDaysInput] = useState<number | string>("");
+  const [, setUnlockDate] = useState<Date | null>(null);
+  // const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState(tab || "one-time");
   const { address } = useAccount();
 
@@ -91,30 +91,30 @@ export default function SaveAsset({
   }
 
   // Line 50-64: New handler for calendar date selection
-  const handleDateSelect = (selectedDay: Date | undefined) => {
-    if (selectedDay) {
-      setSelectedDate(selectedDay);
+  // const handleDateSelect = (selectedDay: Date | undefined) => {
+  //   if (selectedDay) {
+  //     setSelectedDate(selectedDay);
 
-      // Calculate days difference from today
-      const days = differenceInDays(selectedDay, new Date());
+  //     // Calculate days difference from today
+  //     const days = differenceInDays(selectedDay, new Date());
 
-      // Update days input and set unlock date
-      setDaysInput(days);
+  //     // Update days input and set unlock date
+  //     setDaysInput(days);
 
-      // Calculate duration in seconds for smart contract
-      const durationInSeconds = days * 24 * 60 * 60;
+  //     // Calculate duration in seconds for smart contract
+  //     const durationInSeconds = days * 24 * 60 * 60;
 
-      setSaveState((prevState) => ({
-        ...prevState,
-        duration: durationInSeconds,
-      }));
+  //     setSaveState((prevState) => ({
+  //       ...prevState,
+  //       duration: durationInSeconds,
+  //     }));
 
-      setUnlockDate(selectedDay);
+  //     setUnlockDate(selectedDay);
 
-      // Close calendar popover
-      setIsCalendarOpen(false);
-    }
-  };
+  //     // Close calendar popover
+  //     setIsCalendarOpen(false);
+  //   }
+  // };
 
   // const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
   //   const days = Number(event.target.value);
@@ -182,9 +182,7 @@ export default function SaveAsset({
     console.log(`Savings duration changed to ${duration} days`);
   };
 
-  const [selectedTarget, setSelectedTarget] = useState<SavingsTarget | null>(
-    null
-  );
+  const [, setSelectedTarget] = useState<SavingsTarget | null>(null);
 
   const handleSelectTarget = (target: SavingsTarget) => {
     setSelectedTarget(target);

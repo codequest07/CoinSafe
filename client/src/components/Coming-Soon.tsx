@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+// import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 import { Button } from "./ui/button";
 
 export default function ComingSoon() {

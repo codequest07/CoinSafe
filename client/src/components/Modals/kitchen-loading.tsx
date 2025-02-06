@@ -1,6 +1,6 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+// import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 
 interface KitchenLoadingProps {
   isOpen: boolean;
