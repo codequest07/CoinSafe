@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+// import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 import { Button } from "./ui/button";
 
 export default function ComingSoon() {
@@ -12,7 +12,7 @@ export default function ComingSoon() {
   return (
     <div className="h-svh dark:bg-[#000000]">
       <div className="flex h-[90vh] w-full flex-col items-center justify-center gap-2">
-        <MemoComingSoonIcon className="w-[70%] h-[55vh] text-white" />
+        {/* <MemoComingSoonIcon className="w-[70%] h-[55vh] text-white" /> */}
         <h1 className="text-3xl font-bold my-2 text-white leading-tight">
           We’re in the kitchen!
         </h1>
@@ -22,7 +22,8 @@ export default function ComingSoon() {
         </p>
         <Button
           className="rounded-[2rem] my-2 py-5 px-6 bg-[#FFFFFF2B] font-[300] hover:bg-[#FFFFFF2B]"
-          onClick={handleGoBack}>
+          onClick={handleGoBack}
+        >
           Continue saving
         </Button>
       </div>
