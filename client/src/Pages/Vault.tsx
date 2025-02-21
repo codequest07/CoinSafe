@@ -1,5 +1,5 @@
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
-// import ClaimCard from "@/components/ClaimCard";
+import ClaimCard from "@/components/ClaimCard";
 import VaultCard from "@/components/VaultCard";
 import { useAccount } from "wagmi";
 import AssetTable from "@/components/AssetTable";
@@ -19,15 +19,19 @@ const Vault = () => {
           title="Vault balance"
           value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}
           unit="USD"
-          text=""
-          // text="+18% (compared to your previous savings)"
+          text={
+            <>
+              <span className="text-[#48FF91]">+18%</span> (compared to your
+              previous savings)
+            </>
+          }
         />
-        {/* <ClaimCard
+        <ClaimCard
           title="Claimable balance"
           value={0.0}
           unit="USD"
           text="sum of all your claimable assets"
-        /> */}
+        />
       </div>
       <SavingsCards />
       {/* <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-4">
