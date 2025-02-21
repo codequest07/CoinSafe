@@ -32,3 +32,11 @@ const connectors = connectorsForWallets(
     },
     ssr: false, // If your dApp uses server side rendering (SSR)
 });
+
+// src/client.ts
+import { createThirdwebClient } from "thirdweb";
+ 
+export const client = createThirdwebClient({
+  clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID,
+  secretKey: import.meta.env.VITE_THIRDWEB_SECRET_KEY,
+});

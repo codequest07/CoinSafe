@@ -29,7 +29,7 @@ import { Button } from "./ui/button";
 import MemoStory from "@/icons/Story";
 import SavingOption from "./Modals/SavingOption";
 import Deposit from "./Modals/Deposit";
-import CustomConnectButton from "./custom-connect-button";
+import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { useAccount } from "wagmi";
 enum TxStatus {
   Completed = 0,
@@ -180,7 +180,7 @@ const TransactionHistory = () => {
               </Button>
             </div>
           ) : (
-            <CustomConnectButton />
+            <ThirdwebConnectButton />
           )}
         </div>
         <Deposit

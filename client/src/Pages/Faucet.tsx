@@ -14,7 +14,7 @@ import { config } from "@/lib/config";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import CustomConnectButton from "@/components/custom-connect-button";
+import ThirdwebConnectButton from "@/components/ThirdwebConnectButton";
 
 export default function Faucet() {
   const { isConnected } = useAccount();
@@ -141,7 +141,7 @@ export default function Faucet() {
                   <AddTokenToMetaMask />
                 </div>
                 {!isConnected ? (
-                  <CustomConnectButton />
+                  <ThirdwebConnectButton />
                 ) : (
                   <Button
                     className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"

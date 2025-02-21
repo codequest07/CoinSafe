@@ -4,7 +4,7 @@ import MemoSmile2 from "@/icons/Smile2";
 import MemoAngry2 from "@/icons/Angry2";
 import MemoAngry from "@/icons/Angry";
 import { useAccount } from "wagmi";
-import CustomConnectButton from "./custom-connect-button";
+import ThirdwebConnectButton from "./ThirdwebConnectButton";
 
 export default function SmileFace() {
   const { isConnected } = useAccount();
@@ -14,7 +14,7 @@ export default function SmileFace() {
     <div className="flex items-center sm:space-x-3">
       {/* Button for connected wallets */}
       <div>
-        <CustomConnectButton />
+        <ThirdwebConnectButton />
       </div>
       {/* <Button className="bg-transparent hover:bg-transparent border py-5 border-[#7F7F7F] rounded-2xl">
         Connect wallet
@@ -27,7 +27,8 @@ export default function SmileFace() {
             isHovered ? "shadow-lg shadow-[#7AE7BA]" : "shadow-none"
           }`}
           onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}>
+          onMouseLeave={() => setIsHovered(false)}
+        >
           {isHovered ? (
             <MemoSmile2 className="w-12 h-12 transition-all duration-1000" />
           ) : (
@@ -40,7 +41,8 @@ export default function SmileFace() {
             isHovered ? "shadow-lg shadow-[#FF484B85]" : "shadow-none"
           }`}
           onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}>
+          onMouseLeave={() => setIsHovered(false)}
+        >
           {isHovered ? (
             <MemoAngry2 className="w-12 h-12 transition-all duration-1000" />
           ) : (

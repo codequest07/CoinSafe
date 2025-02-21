@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 
 import "@rainbow-me/rainbowkit/styles.css";
+import { ThirdwebProvider } from "thirdweb/react";
 import {
   darkTheme,
   // getDefaultConfig,
@@ -39,10 +40,13 @@ createRoot(document.getElementById("root")!).render(
               accentColorForeground: "#010104",
               fontStack: "system",
               borderRadius: "large",
-            })}>
+            })}
+          >
             <RecoilRoot>
               <ApprovalProvider>
-                <App />
+                <ThirdwebProvider>
+                  <App />
+                </ThirdwebProvider>
               </ApprovalProvider>
             </RecoilRoot>
           </RainbowKitProvider>
