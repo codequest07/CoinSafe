@@ -33,7 +33,7 @@ export default function Withdraw({
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const { address } = useAccount();
 
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<number>();
   const [token, setToken] = useState("");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const { AvailableBalance } = useBalances(address as string);
@@ -46,7 +46,7 @@ export default function Withdraw({
   };
 
   const { withdrawAsset, isLoading } = useWithdrawAsset({
-    address,
+    address: address as `0x${string}`,
     token: token as `0x${string}`,
     amount,
     coinSafeAddress: CoinSafeContract.address as `0x${string}`,
@@ -135,11 +135,11 @@ export default function Withdraw({
 
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Amount</label>
-            <div className="p-4 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
-              <div className="absolute top-2 right-2">
+            <div className="p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
+              <div className="absolute top-3 right-3">
                 <div className="ml-4">
                   <Select onValueChange={handleTokenSelect}>
-                    <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
+                    <SelectTrigger className="w-[140px] bg-gray-700  border border-[#FFFFFF3D] bg-[#1E1E1E99] text-white rounded-lg">
                       <div className="flex items-center">
                         {/* <MemoRipple className="mr-2" /> */}
                         <SelectValue placeholder="Select Token" />
@@ -168,13 +168,13 @@ export default function Withdraw({
               </div>
               <div className="flex flex-col items-center">
                 <input
-                  type="text"
+                  type="number"
                   value={amount}
                   onChange={(e: any) => setAmount(e.target.value)}
-                  className="text-2xl font-medium bg-transparent text-center w-full outline-none"
-                  placeholder="Enter amount"
+                  className="text-2xl font-medium bg-transparent text-center text-white w-full outline-none"
+                  placeholder="0"
                 />
-                <div className="text-sm text-gray-400 mt-1">≈ $400.56</div>
+                {/* <div className="text-sm text-gray-400 mt-1">≈ $400.56</div> */}
               </div>
             </div>
           </div>
@@ -182,8 +182,8 @@ export default function Withdraw({
           {/* Wallet Balance Section */}
           {token && (
             <>
-              {amount > selectedTokenBalance && (
-                <p className="text-red-500 text-[13px] text-right">
+              {amount && amount > selectedTokenBalance && (
+                <p className="text-red-500 text-[13px] mt-3 text-right">
                   Amount greater than available balance
                 </p>
               )}
@@ -226,7 +226,7 @@ export default function Withdraw({
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || amount > selectedTokenBalance}>
+              disabled={isLoading || (amount || 0) > selectedTokenBalance}>
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (
@@ -238,7 +238,7 @@ export default function Withdraw({
       </DialogContent>
       <SuccessfulTxModal
         transactionType="withdraw"
-        amount={amount}
+        amount={amount || 0}
         token={
           token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
         }

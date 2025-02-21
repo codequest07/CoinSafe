@@ -240,7 +240,7 @@ export default function SaveAsset({
   // const { address } = useAccount();
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let _amount = Number(event.target.value);
+    const _amount = Number(event.target.value);
     setSaveState((prevState) => ({
       ...prevState,
       amount: _amount,
@@ -248,7 +248,7 @@ export default function SaveAsset({
   };
 
   const handleFrequencyChange = (value: string) => {
-    let _frequency = Number(value);
+    const _frequency = Number(value);
     setSaveState((prevState) => ({
       ...prevState,
       frequency: _frequency,
@@ -273,7 +273,7 @@ export default function SaveAsset({
   };
 
   const { saveAsset, isLoading } = useSaveAsset({
-    address,
+    address: address as `0x${string}`,
     saveState,
     coinSafeAddress: CoinSafeContract.address as `0x${string}`,
     coinSafeAbi: coinSafeAbi.abi,
@@ -291,7 +291,7 @@ export default function SaveAsset({
 
   const { createAutoSavings, isLoading: autoSavingsLoading } =
     usecreateAutoSavings({
-      address,
+      address: address as `0x${string}`,
       saveState,
       coinSafeAddress: CoinSafeContract.address as `0x${string}`,
       coinSafeAbi: coinSafeAbi.abi,
@@ -359,15 +359,21 @@ export default function SaveAsset({
           onValueChange={handleTabChange}
           className="w-full"
         >
+          className="w-full"
+        >
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
+              className="flex justify-center rounded-2xl items-center flex-1"
+            >
               className="flex justify-center rounded-2xl items-center flex-1"
             >
               One-time Save
             </TabsTrigger>
             <TabsTrigger
               value="autosave"
+              className="flex justify-center rounded-2xl items-center flex-1"
+            >
               className="flex justify-center rounded-2xl items-center flex-1"
             >
               Autosave
@@ -391,6 +397,7 @@ export default function SaveAsset({
                         <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                           <div className="flex items-center">
                             {/* <MemoRipple className="mr-2" /> */}
+                            <SelectValue placeholder="Select Token" />
                             <SelectValue placeholder="Select Token" />
                           </div>
                         </SelectTrigger>
@@ -417,35 +424,34 @@ export default function SaveAsset({
                   </div>
                   <div className="flex flex-col items-center">
                     <input
-                      type="text"
+                      type="number"
                       value={saveState.amount}
                       onChange={handleAmountChange}
                       className="text-2xl text-[#B5B5B5] font-medium bg-transparent text-left w-full outline-none"
                       placeholder="Enter amount"
                     />
                     {/* <div className="text-sm text-gray-400 mt-1">≈ $400.56</div> */}
+                    {/* <div className="text-sm text-gray-400 mt-1">≈ $400.56</div> */}
                   </div>
                 </div>
+                <div>
+                  {saveState.amount > selectedTokenBalance && (
+                    <p className="text-red-500 text-[13px] mt-1 text-right">
+                      Amount greater than wallet balance
+                    </p>
+                  )}
+                </div>
                 <div className="flex justify-between text-sm">
-                  <div className="flex items-center gap-1">
-                    <div>
-                      {saveState.amount > selectedTokenBalance && (
-                        <p className="text-red-500 text-[13px] text-right">
-                          Amount greater than wallet balance
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-sm font-[300] text-gray-300">
-                      Wallet balance:{" "}
-                      <span className="text-gray-400">
-                        {selectedTokenBalance}{" "}
-                        {saveState.token == tokens.safu
-                          ? "SAFU"
-                          : saveState.token === tokens.lsk
-                          ? "LSK"
-                          : "USDT"}
-                      </span>
-                    </div>
+                  <div className="text-sm font-[300] text-gray-300">
+                    Wallet balance:{" "}
+                    <span className="text-gray-400">
+                      {selectedTokenBalance}{" "}
+                      {saveState.token == tokens.safu
+                        ? "SAFU"
+                        : saveState.token === tokens.lsk
+                        ? "LSK"
+                        : "USDT"}
+                    </span>
                   </div>
                   <Button
                     onClick={() =>
@@ -455,6 +461,8 @@ export default function SaveAsset({
                       }))
                     }
                     variant="link"
+                    className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
+                  >
                     className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
                   >
                     Save all
@@ -505,6 +513,8 @@ export default function SaveAsset({
                       open={isCalendarOpen}
                       onOpenChange={setIsCalendarOpen}
                     >
+                      onOpenChange={setIsCalendarOpen}
+                    >
                       <PopoverTrigger asChild>
                         <span onClick={() => setIsCalendarOpen(true)}>
                           <MemoCalenderIcon className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
@@ -547,6 +557,8 @@ export default function SaveAsset({
                         : ""
                     }`}
                   >
+                    }`}
+                  >
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -576,6 +588,8 @@ export default function SaveAsset({
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
+                    }`}
+                  >
                     }`}
                   >
                     <div>
@@ -653,15 +667,17 @@ export default function SaveAsset({
                       </label> */}
                       <div className="flex flex-col items-center justify-center">
                         <input
-                          type="text"
+                          type="number"
                           id="amount"
-                          placeholder="345,000.67"
-                          value={saveState.amount || ""} // Line 183: Added fallback
+                          placeholder="0"
+                          value={saveState.amount || 0} // Line 183: Added fallback
                           onChange={handleAmountChange}
                           className="bg-transparent text-xl font-light text-gray-200 border-none focus:outline-none text-left w-full"
                         />
                         {/* <div className="text-xs text-gray-400 text-center">
+                        {/* <div className="text-xs text-gray-400 text-center">
                           ≈ $400.56
+                        </div> */}
                         </div> */}
                       </div>
                       {validationErrors.amount && (
@@ -734,6 +750,7 @@ export default function SaveAsset({
                               amount: selectedTokenBalance,
                             }))
                           }
+                        
                         >
                           Max
                         </Button>
@@ -805,6 +822,8 @@ export default function SaveAsset({
                   />
                   <Popover
                     open={isCalendarOpen}
+                    onOpenChange={setIsCalendarOpen}
+                  >
                     onOpenChange={setIsCalendarOpen}
                   >
                     <PopoverTrigger asChild>
