@@ -51,7 +51,7 @@ export default function Deposit({
   };
 
   const { depositAsset, isLoading } = useDepositAsset({
-    address,
+    address: address as `0x${string}`,
     token: token as `0x${string}`,
     amount,
     coinSafeAddress: CoinSafeContract.address as `0x${string}`,

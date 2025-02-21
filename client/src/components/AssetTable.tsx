@@ -14,12 +14,12 @@ import MemoXmarkIcon from "@/icons/XmarkIcon";
 import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { CoinSafeContract } from "@/lib/contract";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 // import { transformAndAccumulateTokenBalances } from "@/lib/utils";
 import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
-import CustomConnectButton from "./custom-connect-button";
+import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { readContract } from "@wagmi/core";
 import { config } from "@/lib/config";
 import { useBalances } from "@/hooks/useBalances";
@@ -53,9 +53,18 @@ export default function AssetTable() {
     SavingsBalances: SavedTokenBalances,
   } = useBalances(address as string);
 
-  const allAssets: any = AllTokenBalances?.data || [];
-  const liquidAssets: any = LiquidTokenBalances?.data || [];
-  const savedAssets: any = SavedTokenBalances?.data || [];
+  const allAssets: any = useMemo(
+    () => AllTokenBalances?.data || [],
+    [AllTokenBalances?.data]
+  );
+  const liquidAssets: any = useMemo(
+    () => LiquidTokenBalances?.data || [],
+    [LiquidTokenBalances?.data]
+  );
+  const savedAssets: any = useMemo(
+    () => SavedTokenBalances?.data || [],
+    [SavedTokenBalances?.data]
+  );
 
   useEffect(() => {
     if (allAssets.length === 0) return;
@@ -156,7 +165,10 @@ function AssetTableContent({ assets }: { assets: any[] }) {
           assets.map(async (asset: any) => ({
             token: asset.token,
             balance: asset.balance,
-            autosaved: await checkIsTokenAutoSaved(address!, asset.token),
+            autosaved: await checkIsTokenAutoSaved(
+              address! as `0x${string}`,
+              asset.token
+            ),
           }))
         );
 
@@ -167,7 +179,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
     }
 
     if (address && assets.length > 0) updateAssets(assets);
-  }, [assets]);
+  }, [assets, address]);
 
   if (!assets || assets.length === 0 || !hasNonZeroAssets) {
     return (
@@ -184,11 +196,12 @@ function AssetTableContent({ assets }: { assets: any[] }) {
           {isConnected ? (
             <Button
               onClick={openDepositModal}
-              className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]">
+              className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+            >
               Deposit
             </Button>
           ) : (
-            <CustomConnectButton />
+            <ThirdwebConnectButton />
           )}
         </div>
         <Deposit
@@ -220,7 +233,8 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             {updatedAssets.map((asset: any, index: number) => (
               <TableRow
                 key={index}
-                className="w-full flex flex-col sm:table-row">
+                className="w-full flex flex-col sm:table-row"
+              >
                 <TableCell className="w-full sm:w-1/3">
                   <div className="flex items-center space-x-4">
                     <div className="flex flex-col">
@@ -253,13 +267,15 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                   <Button
                     variant="link"
                     className="text-[#79E7BA]"
-                    onClick={() => setIsDepositModalOpen(true)}>
+                    onClick={() => setIsDepositModalOpen(true)}
+                  >
                     Deposit
                   </Button>
                   <Button
                     variant="link"
                     className="text-[#79E7BA]"
-                    onClick={() => setIsFirstModalOpen(true)}>
+                    onClick={() => setIsFirstModalOpen(true)}
+                  >
                     Save
                   </Button>
                 </TableCell>

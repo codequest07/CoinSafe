@@ -211,7 +211,7 @@ export default function SaveAsset({
   };
 
   const { saveAsset, isLoading } = useSaveAsset({
-    address,
+    address: address as `0x${string}`,
     saveState,
     coinSafeAddress: CoinSafeContract.address as `0x${string}`,
     coinSafeAbi: coinSafeAbi.abi,
@@ -229,7 +229,7 @@ export default function SaveAsset({
 
   const { createAutoSavings, isLoading: autoSavingsLoading } =
     usecreateAutoSavings({
-      address,
+      address: address as `0x${string}`,
       saveState,
       coinSafeAddress: CoinSafeContract.address as `0x${string}`,
       coinSafeAbi: coinSafeAbi.abi,

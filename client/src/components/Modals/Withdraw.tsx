@@ -46,7 +46,7 @@ export default function Withdraw({
   };
 
   const { withdrawAsset, isLoading } = useWithdrawAsset({
-    address,
+    address: address as `0x${string}`,
     token: token as `0x${string}`,
     amount,
     coinSafeAddress: CoinSafeContract.address as `0x${string}`,
