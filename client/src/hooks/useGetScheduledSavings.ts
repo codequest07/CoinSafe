@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import { config } from "@/lib/config";
 import { readContract } from "@wagmi/core";
 import { CoinSafeContract, tokens } from "@/lib/contract";
-import { useAccount } from "wagmi";
 import { formatUnits } from "viem";
 import { getSafuToUsd } from "@/lib";
+import { useActiveAccount } from "thirdweb/react";
 
 export interface ScheduledSaving {
   token: string;
@@ -44,7 +44,9 @@ export function transformArrayData(
 }
 
 export const useGetScheduledSavings = (): ScheduledSavingsResult => {
-  const { isConnected, address } = useAccount();
+  const account = useActiveAccount();
+    const isConnected = !!account?.address;
+    const address = account?.address;
   const [isLoading, setIsLoading] = useState(false);
   const [scheduledSavings, setScheduledSavings] = useState<ScheduledSaving[]>(
     []

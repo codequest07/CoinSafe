@@ -1,11 +1,11 @@
 import React, { RefObject, useState } from "react";
-import { useAccount } from "wagmi";
 import { toast } from "@/hooks/use-toast";
 import Loading from "./loading-screen";
 import SaveSenseResp from "./SaveSenseResp";
 import KitchenLoading from "./kitchen-loading";
 import { PermissionModal } from "./Permission-modal";
 import { useApproval } from "@/contexts/ApprovalContext";
+import { useActiveAccount } from "thirdweb/react";
 
 interface SaveSenseModalManagerProps {
   trigger?: RefObject<{ fetchData: () => void; download: () => void }>;
@@ -23,7 +23,8 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const { hasApproved, setApproved } = useApproval();
 
-  const { address } = useAccount();
+  const account = useActiveAccount();
+  const address = account?.address;
 
   const handleFetchData = async () => {
     if (!address) {

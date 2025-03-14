@@ -3,6 +3,7 @@ import { atom } from "recoil";
 export const saveAtom = atom({
   key: "saveState",
   default: {
+    target: "",
     token: '',
     amount: 0,
     duration: 0,

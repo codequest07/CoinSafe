@@ -29,8 +29,8 @@ import { Button } from "./ui/button";
 import MemoStory from "@/icons/Story";
 import SavingOption from "./Modals/SavingOption";
 import Deposit from "./Modals/Deposit";
-import CustomConnectButton from "./custom-connect-button";
-import { useAccount } from "wagmi";
+import ThirdwebConnectButton from "./ThirdwebConnectButton";
+import { useActiveAccount } from "thirdweb/react";
 enum TxStatus {
   Completed = 0,
   Pending = 1,
@@ -79,7 +79,8 @@ const TransactionHistory = () => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
-  const { isConnected } = useAccount();
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => {
@@ -180,7 +181,7 @@ const TransactionHistory = () => {
               </Button>
             </div>
           ) : (
-            <CustomConnectButton />
+            <ThirdwebConnectButton />
           )}
         </div>
         <Deposit

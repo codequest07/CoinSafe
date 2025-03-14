@@ -6,10 +6,12 @@ import StatsCards from "@/components/stats-cards";
 import { TourGuide } from "@/components/TourGuide";
 import TrackingChart from "@/components/TrackingChart";
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useActiveAccount } from "thirdweb/react";
 
 const Home = () => {
-  const { isConnected, address } = useAccount();
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
+  const address = account?.address;
   const [openConnectModal, setOpenConnectModal] = useState(false);
 
   useEffect(() => {

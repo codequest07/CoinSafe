@@ -8,16 +8,18 @@ import Footer from "@/components/Footer";
 // import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
 import { FaucetContract } from "@/lib/contract";
-import { useAccount, useWriteContract } from "wagmi";
+import { useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "@/lib/config";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import CustomConnectButton from "@/components/custom-connect-button";
+import ThirdwebConnectButton from "@/components/ThirdwebConnectButton";
+import { useActiveAccount } from "thirdweb/react";
 
 export default function Faucet() {
-  const { isConnected } = useAccount();
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
   const navigate = useNavigate();
 
   //Read contract data
@@ -141,7 +143,7 @@ export default function Faucet() {
                   <AddTokenToMetaMask />
                 </div>
                 {!isConnected ? (
-                  <CustomConnectButton />
+                  <ThirdwebConnectButton />
                 ) : (
                   <Button
                     className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"

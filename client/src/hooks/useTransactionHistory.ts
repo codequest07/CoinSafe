@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
+import { useActiveAccount } from 'thirdweb/react'
 import { 
   useReadContract,
-  useAccount,
 } from 'wagmi'
 
 // Types for the transaction history
@@ -48,7 +48,8 @@ export function useTransactionHistory({
 }: TransactionHistoryParams): TransactionHistoryReturn {
   const [currentOffset, setCurrentOffset] = useState(offset)
   const [currentLimit] = useState(limit)
-  const { address } = useAccount()
+  const account = useActiveAccount();
+    const address = account?.address;
 
   // Read contract using wagmi's useReadContract hook
   const {

@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectTrigger,
@@ -18,21 +18,24 @@ import {
 import { useEffect, useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 // import MemoRipple from "@/icons/Ripple";
-import MemoCalenderIcon from "@/icons/CalenderIcon";
-import { Calendar } from "@/components/ui/calendar"; // Line 20: Added Shadcn Calendar
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"; // Line 24: Added Popover for calendar
-import { format, differenceInDays, addDays } from "date-fns";
+// import MemoCalenderIcon from "@/icons/CalenderIcon";
+// import { Calendar } from "@/components/ui/calendar"; // Line 20: Added Shadcn Calendar
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover"; // Line 24: Added Popover for calendar
+import { format, addDays } from "date-fns";
 
-import { useAccount } from "wagmi";
-// import { waitForTransactionReceipt } from "@wagmi/core";
 import { liskSepolia } from "viem/chains";
-// import { injected } from "wagmi/connectors";
-import { CoinSafeContract, tokens } from "@/lib/contract";
+
+import {
+  CoinSafeContract,
+  CoinsafeDiamondContract,
+  tokens,
+} from "@/lib/contract";
 import coinSafeAbi from "../../abi/coinsafe.json";
+import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 // import { config } from "@/lib/config";
@@ -44,6 +47,16 @@ import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useBalances } from "@/hooks/useBalances";
 import { formatUnits } from "viem";
+import { SavingsTargetSelect } from "../SavingsTarget";
+import { DurationSelector } from "../DurationSelector";
+import { useActiveAccount } from "thirdweb/react";
+// import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+
+interface SavingsTarget {
+  id: string;
+  name: string;
+  description?: string;
+}
 
 export default function SaveAsset({
   isOpen,
@@ -63,12 +76,15 @@ export default function SaveAsset({
     { value: "604800", label: "Weekly" }, // 1 week = 604800 seconds
     { value: "2592000", label: "Monthly" }, // 1 month = 2592000 seconds (approx. 30 days)
   ]);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [daysInput, setDaysInput] = useState<number | string>("");
-  const [unlockDate, setUnlockDate] = useState<Date | null>(null);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [, setSelectedDate] = useState<Date | undefined>(undefined);
+  // const [daysInput, setDaysInput] = useState<number | string>("");
+  const [, setUnlockDate] = useState<Date | null>(null);
+  // const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState(tab || "one-time");
-  const { address } = useAccount();
+  const smartAccount = useActiveAccount();
+  const address = smartAccount?.address;
+
+  // console.log("Smart Account", smartAccount);
 
   // const [token, setToken] = useState("");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
@@ -82,46 +98,46 @@ export default function SaveAsset({
   }
 
   // Line 50-64: New handler for calendar date selection
-  const handleDateSelect = (selectedDay: Date | undefined) => {
-    if (selectedDay) {
-      setSelectedDate(selectedDay);
+  // const handleDateSelect = (selectedDay: Date | undefined) => {
+  //   if (selectedDay) {
+  //     setSelectedDate(selectedDay);
 
-      // Calculate days difference from today
-      const days = differenceInDays(selectedDay, new Date());
+  //     // Calculate days difference from today
+  //     const days = differenceInDays(selectedDay, new Date());
 
-      // Update days input and set unlock date
-      setDaysInput(days);
+  //     // Update days input and set unlock date
+  //     setDaysInput(days);
 
-      // Calculate duration in seconds for smart contract
-      const durationInSeconds = days * 24 * 60 * 60;
+  //     // Calculate duration in seconds for smart contract
+  //     const durationInSeconds = days * 24 * 60 * 60;
 
-      setSaveState((prevState) => ({
-        ...prevState,
-        duration: durationInSeconds,
-      }));
+  //     setSaveState((prevState) => ({
+  //       ...prevState,
+  //       duration: durationInSeconds,
+  //     }));
 
-      setUnlockDate(selectedDay);
+  //     setUnlockDate(selectedDay);
 
-      // Close calendar popover
-      setIsCalendarOpen(false);
-    }
-  };
+  //     // Close calendar popover
+  //     setIsCalendarOpen(false);
+  //   }
+  // };
 
-  const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const days = Number(event.target.value);
-    setDaysInput(days);
+  // const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const days = Number(event.target.value);
+  //   setDaysInput(days);
 
-    const calculatedUnlockDate = addDays(new Date(), days);
-    const durationInSeconds = days * 24 * 60 * 60;
+  //   const calculatedUnlockDate = addDays(new Date(), days);
+  //   const durationInSeconds = days * 24 * 60 * 60;
 
-    setSaveState((prevState) => ({
-      ...prevState,
-      duration: durationInSeconds,
-    }));
+  //   setSaveState((prevState) => ({
+  //     ...prevState,
+  //     duration: durationInSeconds,
+  //   }));
 
-    setUnlockDate(calculatedUnlockDate);
-    setSelectedDate(calculatedUnlockDate);
-  };
+  //   setUnlockDate(calculatedUnlockDate);
+  //   setSelectedDate(calculatedUnlockDate);
+  // };
 
   const [selectedOption, setSelectedOption] = useState("by-frequency");
   const [validationErrors, setValidationErrors] = useState<{
@@ -131,6 +147,59 @@ export default function SaveAsset({
     transactionPercentage?: string;
     frequency?: string;
   }>({});
+  const [savingsTargets, setSavingsTargets] = useState<SavingsTarget[]>([
+    { id: "1", name: "Growing up", description: "investment ipsum" },
+    { id: "2", name: "Vacation", description: "save for annual vacation" },
+  ]);
+
+  const savingsDurationOptions = [
+    { value: 30, label: "30 days" },
+    { value: 60, label: "60 days" },
+    { value: 120, label: "120 days" },
+  ];
+
+  const [savingsDuration, setSavingsDuration] = useState(30);
+  const [endDate, setEndDate] = useState("");
+
+  const calculateEndDate = (days: number) => {
+    const currentDate = new Date();
+    const futureDate = addDays(currentDate, days);
+    return format(futureDate, "dd MMMM yyyy");
+  };
+
+  useEffect(() => {
+    setEndDate(calculateEndDate(savingsDuration));
+  }, [savingsDuration, calculateEndDate]);
+
+  const handleDurationChange = (duration: number) => {
+    setSavingsDuration(duration);
+    setEndDate(calculateEndDate(duration));
+
+    const durationInSeconds = duration * 24 * 60 * 60;
+
+    setSaveState((prevState) => ({
+      ...prevState,
+      duration: durationInSeconds,
+    }));
+
+    const calculatedUnlockDate = addDays(new Date(), duration);
+
+    setUnlockDate(calculatedUnlockDate);
+    setSelectedDate(calculatedUnlockDate);
+    console.log(`Savings duration changed to ${duration} days`);
+  };
+
+  const [, setSelectedTarget] = useState<SavingsTarget | null>(null);
+
+  const handleSelectTarget = (target: SavingsTarget) => {
+    setSelectedTarget(target);
+    console.log("Selected target:", target);
+  };
+
+  const handleCreateTarget = (newTarget: SavingsTarget) => {
+    setSavingsTargets((prev) => [...prev, newTarget]);
+    console.log("Created new target:", newTarget);
+  };
 
   // LINE 37-60: Comprehensive validation function
   const validateForm = () => {
@@ -175,7 +244,6 @@ export default function SaveAsset({
   // to multiply the amount based on selected token's decimals
   const [, setDecimals] = useState(1);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
-  // const { address } = useAccount();
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const _amount = Number(event.target.value);
@@ -210,11 +278,11 @@ export default function SaveAsset({
     setCurrentTab(value);
   };
 
-  const { saveAsset, isLoading } = useSaveAsset({
-    address,
+  const { saveAsset, isPending: isLoading } = useSaveAsset({
+    address: address as `0x${string}`,
     saveState,
-    coinSafeAddress: CoinSafeContract.address as `0x${string}`,
-    coinSafeAbi: coinSafeAbi.abi,
+    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAbi: savingsFacetAbi,
     chainId: liskSepolia.id,
     onSuccess: () => {
       openThirdModal();
@@ -229,10 +297,12 @@ export default function SaveAsset({
 
   const { createAutoSavings, isLoading: autoSavingsLoading } =
     usecreateAutoSavings({
-      address,
+      address: address as `0x${string}`,
       saveState,
       coinSafeAddress: CoinSafeContract.address as `0x${string}`,
+      // coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
       coinSafeAbi: coinSafeAbi.abi,
+      // coinSafeAbi: savingsFacetAbi.abi,
       chainId: liskSepolia.id,
       onSuccess: () => {
         openThirdModal();
@@ -266,8 +336,8 @@ export default function SaveAsset({
   };
 
   useEffect(() => {
-    if (address && saveState.token && AvailableBalance?.data) {
-      const tokensData = AvailableBalance?.data as any[];
+    if (address && saveState.token && AvailableBalance) {
+      const tokensData = AvailableBalance;
       if (!tokensData) return;
 
       const tokenBalance =
@@ -283,7 +353,7 @@ export default function SaveAsset({
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
     }
-  }, [saveState.token, address, AvailableBalance?.data]);
+  }, [saveState.token, address, AvailableBalance]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -311,33 +381,39 @@ export default function SaveAsset({
               Autosave
             </TabsTrigger>
           </TabsList>
+
+          {/* One-time tab content section */}
           <TabsContent value="one-time">
             <div className="p-8 text-gray-700">
               {/* Amount Section */}
-              <div className="space-y-2">
+              <div className="space-y-2 pb-6 border-b-[1px] border-b-[#FFFFFF21]">
                 <label className="text-sm text-gray-400">Amount</label>
-                <div className="p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
-                  <div className="absolute top-3 right-3">
+                <div className="flex flex-row-reverse justify-between items-center py-7 px-4 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
+                  {/* absolute top-2 right-2  */}
+                  <div className="">
                     <div className="ml-4">
                       <Select
                         onValueChange={handleTokenSelect}
                         value={saveState.token}
                       >
-                        <SelectTrigger className="w-[140px] bg-gray-700 border-[1px] border-[#FFFFFF3D] bg-[#1E1E1E99] text-white rounded-lg">
+                        <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                           <div className="flex items-center">
                             {/* <MemoRipple className="mr-2" /> */}
+                            <SelectValue placeholder="Select Token" />
                             <SelectValue placeholder="Select Token" />
                           </div>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
+                          <SelectItem value="0xf7b20c0f7c77da06494235bb824dcaee0d8bcbd6">
                             <div className="flex items-center space-x-2">
                               <p>USDT</p>
                             </div>
                           </SelectItem>
-                          <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                          <SelectItem value="0x7a9c712570bb9eb804631836cf333ba9a25fc77d">
                             LSK
                           </SelectItem>
+                          {/* 0xe4923e889a875eae8c164ac1592b57b5684ed90e - new from Ite */}
+                          {/* 0xcf300d5a3d0fc71865a7c92bbc11d6b79c4d1480 - current */}
                           <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
                             SAFU
                           </SelectItem>
@@ -355,9 +431,10 @@ export default function SaveAsset({
                       type="number"
                       value={saveState.amount}
                       onChange={handleAmountChange}
-                      className="text-2xl font-medium bg-transparent text-center text-white w-full outline-none"
-                      placeholder="0"
+                      className="text-2xl text-[#B5B5B5] font-medium bg-transparent text-left w-full outline-none"
+                      placeholder="Enter amount"
                     />
+                    {/* <div className="text-sm text-gray-400 mt-1">≈ $400.56</div> */}
                     {/* <div className="text-sm text-gray-400 mt-1">≈ $400.56</div> */}
                   </div>
                 </div>
@@ -390,13 +467,40 @@ export default function SaveAsset({
                     variant="link"
                     className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
                   >
+                    {/* className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
+                  > */}
                     Save all
                   </Button>
                 </div>
               </div>
 
+              {/* savings target section */}
+              <div className="py-4">
+                <SavingsTargetSelect
+                  options={savingsTargets}
+                  onSelect={handleSelectTarget}
+                  onCreate={handleCreateTarget}
+                  className="text-white"
+                />
+              </div>
+
+              <div className="py-4">
+                <DurationSelector
+                  options={savingsDurationOptions}
+                  selectedValue={savingsDuration}
+                  onChange={handleDurationChange}
+                  className="mb-4"
+                />
+
+                <div className="py-4">
+                  <p className="text-[12px] font-semibold text-[#CACACA]">
+                    Unlocks on <span className="text-[#CACACA]">{endDate}</span>
+                  </p>
+                </div>
+              </div>
+
               {/* Duration Section */}
-              <div className="space-y-4 py-6 text-white">
+              {/* <div className="space-y-4 py-6 text-white">
                 <div className="space-y-2 relative">
                   <Label htmlFor="duration">Duration</Label>
                   <div className="relative flex items-center">
@@ -411,6 +515,8 @@ export default function SaveAsset({
                     />
                     <Popover
                       open={isCalendarOpen}
+                      onOpenChange={setIsCalendarOpen}
+                    >
                       onOpenChange={setIsCalendarOpen}
                     >
                       <PopoverTrigger asChild>
@@ -430,16 +536,18 @@ export default function SaveAsset({
                     </Popover>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Unlock Date Section */}
-              <div className="text-sm text-gray-300">
+              {/* <div className="text-sm text-gray-300">
                 {unlockDate
                   ? `Unlocks on ${format(unlockDate, "dd MMM, yyyy")}`
                   : "Enter duration to see unlock date"}
-              </div>
+              </div> */}
             </div>
           </TabsContent>
+
+          {/* Autosave Tab Content section */}
           <TabsContent value="autosave">
             <div className="space-y-4 py-4">
               <div className="py-4 pb-6 border-b-[1px] border-[#FFFFFF21]">
@@ -453,6 +561,8 @@ export default function SaveAsset({
                         : ""
                     }`}
                   >
+                    {/* }`}
+                  > */}
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -484,6 +594,8 @@ export default function SaveAsset({
                         : ""
                     }`}
                   >
+                    {/* }`}
+                  > */}
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -512,8 +624,18 @@ export default function SaveAsset({
 
               {/* Conditionally Rendered Content */}
               {selectedOption === "per-transaction" && (
-                <div className="space-y-4 py-2 text-white">
-                  <Label htmlFor="transactionPercentage">
+                <div className="flex flex-col items-center justify-center space-y-4 py-2 text-white">
+                  {/* <MemoComingSoonIcon className="w-[70%] h-[55vh] text-white" /> */}
+                  <img src="/assets/coming-soon-orb.png" alt="coming soon" />
+                  <h1 className="text-3xl font-bold my-2 text-white leading-tight">
+                    We’re in the kitchen!
+                  </h1>
+                  <p className="text-center max-w-md text-muted-foreground">
+                    We’re in the kitchen, putting the final touches on this
+                    feature. We’ll let you know as soon as it’s ready! Continue
+                    saving for now.
+                  </p>
+                  {/* <Label htmlFor="transactionPercentage">
                     {"Save on every transaction (percentage)"}
                   </Label>
                   <Input
@@ -533,7 +655,7 @@ export default function SaveAsset({
                     <p className="text-red-500 text-sm mt-1">
                       {validationErrors.transactionPercentage}
                     </p>
-                  )}
+                  )} */}
                 </div>
               )}
 
@@ -554,11 +676,13 @@ export default function SaveAsset({
                           placeholder="0"
                           value={saveState.amount || 0} // Line 183: Added fallback
                           onChange={handleAmountChange}
-                          className="bg-transparent text-2xl font-light text-white border-none focus:outline-none text-center w-full"
+                          className="bg-transparent text-xl font-light text-gray-200 border-none focus:outline-none text-left w-full"
                         />
+                        {/* <div className="text-xs text-gray-400 text-center">
                         {/* <div className="text-xs text-gray-400 text-center">
                           ≈ $400.56
                         </div> */}
+                        {/* </div> */}
                       </div>
                       {validationErrors.amount && (
                         <p className="text-red-500 text-sm mt-1">
@@ -571,7 +695,7 @@ export default function SaveAsset({
                         onValueChange={handleTokenSelect}
                         value={saveState.token}
                       >
-                        <SelectTrigger className="w-[140px] bg-gray-700 border-[1px] border-[#FFFFFF3D] bg-[#1E1E1E99] text-white rounded-lg">
+                        <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                           <div className="flex items-center">
                             {/* <MemoRipple className="mr-2" /> */}
                             <SelectValue placeholder="Select Token" />
@@ -631,6 +755,8 @@ export default function SaveAsset({
                             }))
                           }
                         >
+                          {/* }
+                        > */}
                           Max
                         </Button>
                       </div>
@@ -657,11 +783,37 @@ export default function SaveAsset({
                       </p>
                     )}
                   </div>
+
+                  {/* savings target section */}
+                  <div>
+                    <SavingsTargetSelect
+                      options={savingsTargets}
+                      onSelect={handleSelectTarget}
+                      onCreate={handleCreateTarget}
+                      className=""
+                    />
+                  </div>
+
+                  <div className="py-4">
+                    <DurationSelector
+                      options={savingsDurationOptions}
+                      selectedValue={savingsDuration}
+                      onChange={handleDurationChange}
+                      className="mb-4"
+                    />
+
+                    <div className="py-4">
+                      <p className="text-[12px] font-semibold text-[#CACACA]">
+                        Unlocks on{" "}
+                        <span className="text-[#CACACA]">{endDate}</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* Common Duration Section */}
-              <div className="space-y-2 relative">
+              {/* <div className="space-y-2 relative">
                 <Label htmlFor="duration">Duration</Label>
                 <div className="relative flex items-center">
                   <Input
@@ -675,6 +827,8 @@ export default function SaveAsset({
                   />
                   <Popover
                     open={isCalendarOpen}
+                    onOpenChange={setIsCalendarOpen}
+                  >
                     onOpenChange={setIsCalendarOpen}
                   >
                     <PopoverTrigger asChild>
@@ -698,33 +852,38 @@ export default function SaveAsset({
                     ? `Unlocks on ${format(unlockDate, "dd MMM, yyyy")}`
                     : "Enter duration to see unlock date"}
                 </div>
-              </div>
+              </div> */}
             </div>
           </TabsContent>
         </Tabs>
-        <DialogFooter>
-          <Button
-            onClick={onClose}
-            className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
-            Cancel
-          </Button>
-          <div>
-            <Button
-              onClick={handleSaveAsset}
-              className="text-black px-8 rounded-[2rem]"
-              variant="outline"
-              disabled={isLoading || autoSavingsLoading}
-            >
-              {isLoading || autoSavingsLoading ? (
-                <LoaderCircle className="animate-spin" />
-              ) : (
-                "Save assets"
-              )}
-            </Button>
-          </div>
-        </DialogFooter>
+
+        {selectedOption === "by-frequency" && (
+          <>
+            <DialogFooter>
+              <Button
+                onClick={onClose}
+                className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
+                type="submit"
+              >
+                Cancel
+              </Button>
+              <div>
+                <Button
+                  onClick={handleSaveAsset}
+                  className="text-black px-8 rounded-[2rem]"
+                  variant="outline"
+                  disabled={isLoading || autoSavingsLoading}
+                >
+                  {isLoading || autoSavingsLoading ? (
+                    <LoaderCircle className="animate-spin" />
+                  ) : (
+                    "Save assets"
+                  )}
+                </Button>
+              </div>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
       <SaveSuccessful
         amount={saveState.amount}

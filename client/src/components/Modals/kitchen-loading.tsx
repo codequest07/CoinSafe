@@ -1,6 +1,6 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
-import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+// import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 
 interface KitchenLoadingProps {
   isOpen: boolean;
@@ -16,7 +16,7 @@ export default function KitchenLoading({
       <DialogContent className="max-w-[500px] p-5 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg">
         <div className="dark:bg-[#000000]">
           <div className="flex w-full flex-col items-center justify-center gap-2">
-            <MemoComingSoonIcon className="w-[40%] h-[40vh] text-white" />
+            {/* <MemoComingSoonIcon className="w-[40%] h-[40vh] text-white" /> */}
             <h1 className="text-2xl font-bold my-2 text-white leading-tight">
               We’re in the kitchen!
             </h1>
