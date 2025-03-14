@@ -13,16 +13,17 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import coinSafeAbi from "../../abi/coinsafe.json";
-import { CoinSafeContract, tokens } from "@/lib/contract";
-import { useAccount } from "wagmi";
+import fundingFacetAbi from "../../abi/FundingFacet.json";
+import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Deposited from "./Deposited";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
-import { readContract } from "@wagmi/core";
-import { config } from "@/lib/config";
-import { erc20Abi, formatUnits } from "viem";
+import { formatUnits } from "viem";
+import { useActiveAccount } from "thirdweb/react";
+import { getContract } from "thirdweb";
+import { client, liskSepolia } from "@/lib/config";
+import { getBalance } from "thirdweb/extensions/erc20";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -33,7 +34,8 @@ export default function Deposit({
   onBack: () => void;
 }) {
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
-  const { address } = useAccount();
+  const smartAccount = useActiveAccount();
+  const address = smartAccount?.address;
 
   const [amount, setAmount] = useState<number>();
   const [token, setToken] = useState("");
@@ -50,12 +52,21 @@ export default function Deposit({
     setToken(value);
   };
 
+  const contract = getContract({
+    client,
+    address: tokens.safu,
+    // abi: erc20Abi,
+    chain: liskSepolia,
+  });
+
   const { depositAsset, isLoading } = useDepositAsset({
     address: address as `0x${string}`,
+    account: smartAccount,
     token: token as `0x${string}`,
     amount,
-    coinSafeAddress: CoinSafeContract.address as `0x${string}`,
-    coinSafeAbi: coinSafeAbi.abi,
+    // coinSafeAddress: CoinSafeContract.address as `0x${string}`,
+    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAbi: fundingFacetAbi,
     onSuccess: () => {
       openThirdModal();
     },
@@ -71,15 +82,27 @@ export default function Deposit({
   useEffect(() => {
     async function fetchTokenBalance() {
       try {
-        const tokenBalance = await readContract(config, {
-          abi: erc20Abi,
-          address: token as `0x${string}`,
-          functionName: "balanceOf",
-          args: [address!],
-        });
+        // const { data: tokenBalance, isLoading: tokenBalanceLoading } = useReadContract({
+        //       contract,
+        //       method: "balanceOf",
+        //       abi: erc20Abi,
+        //       params: [address], // type safe params
+        //     });
 
+        // const tokenBalance = await balanceOf({
+        //   contract,
+        //   address: address as `0x${string}`,
+        // });
+        const tokenBalance = await getBalance({ contract, address: address! });
+
+        // const tokenBalance = await readContract(config, {
+        //   abi: erc20Abi,
+        //   address: token as `0x${string}`,
+        //   functionName: "balanceOf",
+        //   args: [address!],
+        // });
         console.log("tokenBalance:: ", tokenBalance);
-        setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+        setSelectedTokenBalance(Number(formatUnits(tokenBalance.value, 18)));
       } catch (error) {
         throw new Error(error as any);
       }
@@ -238,7 +261,8 @@ export default function Deposit({
                 </div>
                 <Button
                   className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}>
+                  onClick={() => setAmount(selectedTokenBalance)}
+                >
                   Max
                 </Button>
               </div>
@@ -249,7 +273,8 @@ export default function Deposit({
           <Button
             onClick={() => setIsDepositModalOpen(false)}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit">
+            type="submit"
+          >
             Cancel
           </Button>
           <div>
@@ -259,7 +284,8 @@ export default function Deposit({
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || (amount || 0) > selectedTokenBalance}>
+              disabled={isLoading || (amount || 0) > selectedTokenBalance}
+            >
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (

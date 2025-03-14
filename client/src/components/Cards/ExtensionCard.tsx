@@ -8,13 +8,13 @@ import {
 } from "@/components/ui/carousel";
 import MemoChrome from "@/icons/Chrome";
 import MemoChromeMagic from "@/icons/ChromeMagic";
-import { useAccount } from "wagmi";
 import { PermissionModal } from "../Modals/Permission-modal";
 import Loading from "../Modals/loading-screen";
 import SaveSenseResp from "../Modals/SaveSenseResp";
 import KitchenLoading from "../Modals/kitchen-loading";
 import { Toast } from "../ui/toast";
 import { useApprovalStatus } from "@/hooks/useApprovalStatus";
+import { useActiveAccount } from "thirdweb/react";
 
 interface ExtensionCardProps {
   title: string;
@@ -58,7 +58,8 @@ const ExtensionCard: React.FC<ExtensionCardProps> = ({
         <button
           className="bg-white text-[#010104] font-[500] py-2 px-6 rounded-full"
           aria-label={btnTitle}
-          onClick={handleClick}>
+          onClick={handleClick}
+        >
           {btnTitle}
         </button>
       </CardContent>
@@ -96,7 +97,8 @@ export default function ExtensionCardCarousel({
   const [saveSenseData, setSaveSenseData] = useState(null);
   const { hasApproved, setApproved } = useApprovalStatus();
 
-  const { address } = useAccount();
+  const account = useActiveAccount();
+  const address = account?.address;
 
   const scrollNext = useCallback(() => {
     if (api) {
@@ -177,7 +179,8 @@ export default function ExtensionCardCarousel({
         className="w-full max-w-xs"
         opts={{
           loop: true,
-        }}>
+        }}
+      >
         <CarouselContent>
           {extensionCardData.map((card, index) => (
             <CarouselItem key={index}>

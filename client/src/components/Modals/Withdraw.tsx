@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { CoinSafeContract, tokens } from "@/lib/contract";
-import { useAccount } from "wagmi";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useWithdrawAsset } from "@/hooks/useWithdrawAsset";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useBalances } from "@/hooks/useBalances";
 import { formatUnits } from "viem";
+import { useActiveAccount } from "thirdweb/react";
 
 export default function Withdraw({
   isWithdrawModalOpen,
@@ -31,7 +31,8 @@ export default function Withdraw({
   onBack: () => void;
 }) {
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
-  const { address } = useAccount();
+  const account = useActiveAccount();
+  const address = account?.address;
 
   const [amount, setAmount] = useState<number>();
   const [token, setToken] = useState("");
@@ -68,8 +69,8 @@ export default function Withdraw({
   };
 
   useEffect(() => {
-    if (address && token && AvailableBalance?.data) {
-      const tokensData = AvailableBalance?.data as any[];
+    if (address && token && AvailableBalance) {
+      const tokensData = AvailableBalance;
       if (!tokensData) return;
 
       const tokenBalance =
@@ -84,7 +85,7 @@ export default function Withdraw({
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
     }
-  }, [token, address, AvailableBalance?.data]);
+  }, [token, address, AvailableBalance]);
 
   return (
     <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
@@ -201,7 +202,8 @@ export default function Withdraw({
                 </div>
                 <Button
                   className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}>
+                  onClick={() => setAmount(selectedTokenBalance)}
+                >
                   Max
                 </Button>
               </div>
@@ -212,7 +214,8 @@ export default function Withdraw({
           <Button
             onClick={() => setIsWithdrawModalOpen(false)}
             className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit">
+            type="submit"
+          >
             Cancel
           </Button>
           <div>
@@ -226,7 +229,8 @@ export default function Withdraw({
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || (amount || 0) > selectedTokenBalance}>
+              disabled={isLoading || (amount || 0) > selectedTokenBalance}
+            >
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (

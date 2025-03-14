@@ -3,11 +3,12 @@ import MemoSmile from "@/icons/Smile";
 import MemoSmile2 from "@/icons/Smile2";
 import MemoAngry2 from "@/icons/Angry2";
 import MemoAngry from "@/icons/Angry";
-import { useAccount } from "wagmi";
+import { useActiveAccount } from "thirdweb/react";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 
 export default function SmileFace() {
-  const { isConnected } = useAccount();
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
   const [isHovered, setIsHovered] = useState(false);
 
   return (

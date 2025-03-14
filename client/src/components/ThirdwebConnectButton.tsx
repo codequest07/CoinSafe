@@ -1,11 +1,8 @@
 import { ConnectButton } from "thirdweb/react";
 import { darkTheme } from "thirdweb/react";
-import {
-  inAppWallet,
-  createWallet,
-} from "thirdweb/wallets";
-import { ethereum } from "thirdweb/chains";
-import { client } from "@/lib/config";
+import { inAppWallet, createWallet } from "thirdweb/wallets";
+// import { ethereum } from "thirdweb/chains";
+import { client, liskSepolia } from "@/lib/config";
 
 const wallets = [
   inAppWallet({
@@ -44,7 +41,7 @@ export default function ThirdwebConnectButton() {
       })}
       connectModal={{ size: "compact" }}
       accountAbstraction={{
-        chain: ethereum, // replace with the chain you want
+        chain: liskSepolia, // replace with the chain you want
         sponsorGas: true,
       }}
     />

@@ -1,5 +1,6 @@
 // import { useState, useEffect } from 'react';
-import { useAccount, useReadContract } from 'wagmi';
+import { useActiveAccount } from 'thirdweb/react';
+import { useReadContract } from 'wagmi';
 // import { type Hex } from 'viem';
 
 // Type definition for the Safe struct
@@ -37,7 +38,8 @@ export function useUserSavings({
   abi,
   userAddress,
 }: UseUserSavingsParams): UseUserSavingsReturn {
-  const { address: connectedAddress } = useAccount();
+  const account = useActiveAccount();
+    const connectedAddress = account?.address;
   const targetAddress = userAddress || connectedAddress;
   
   const {
