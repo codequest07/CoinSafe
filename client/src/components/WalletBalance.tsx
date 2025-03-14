@@ -2,23 +2,25 @@ import { Button } from "./ui/button";
 import SavingOption from "./Modals/SavingOption";
 import { useState } from "react";
 import Deposit from "./Modals/Deposit";
-import { useAccount } from "wagmi";
 import { getPercentage } from "@/lib/utils";
 import Withdraw from "./Modals/Withdraw";
 import { useBalances } from "@/hooks/useBalances";
+import { useActiveAccount } from "thirdweb/react";
 
 export default function WalletBalance() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
-  const { isConnected, address } = useAccount();
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
+  const address = account?.address;
 
   const openDepositModal = () => setIsDepositModalOpen(true);
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openWithdrawModal = () => setIsWithdrawModalOpen(true);
 
-  const { totalBalance, availableBalance }  = useBalances(address as string);
+  const { totalBalance, availableBalance } = useBalances(address as string);
 
   return (
     <div className="bg-black text-white p-6 flex flex-col ">
@@ -75,7 +77,8 @@ export default function WalletBalance() {
             {isConnected && (
               <p className="text-[#7F7F7F] text-xs flex items-center justify-center sm:justify-start space-x-1">
                 <div className="bg-[#79E7BA] h-[0.6rem] w-1 rounded-xl"></div>
-                <span>{getPercentage(availableBalance, totalBalance)}%</span> of total wallet balance
+                <span>{getPercentage(availableBalance, totalBalance)}%</span> of
+                total wallet balance
               </p>
             )}
           </div>
