@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ReactNode } from "react";
 import SavingOption from "./Modals/SavingOption";
-import { useAccount } from "wagmi";
+import { useActiveAccount } from "thirdweb/react";
 
 const VaultCard = ({
   title,
@@ -22,7 +22,8 @@ const VaultCard = ({
 }) => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
-  const { isConnected } = useAccount();
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   return (

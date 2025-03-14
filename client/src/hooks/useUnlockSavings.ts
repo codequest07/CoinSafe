@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { 
   useWriteContract, 
   useWaitForTransactionReceipt,
-  useAccount 
 } from 'wagmi';
 // import { type Hash } from 'viem';
 import { useUserSavings } from './useUserSavings';
+import { useActiveAccount } from 'thirdweb/react';
 
 interface WithdrawSavingsParams {
   contractAddress: string;
@@ -19,7 +19,8 @@ interface WithdrawSavingsArgs {
 
 export function useWithdrawSavings({ contractAddress, abi }: WithdrawSavingsParams) {
   const [isPending, setIsPending] = useState(false);
-  const { address: userAddress } = useAccount();
+  const account = useActiveAccount();
+    const userAddress = account?.address;
   
   // Get user's savings to check maturity and validate withdrawal
   const { savings, refetch: refetchSavings } = useUserSavings({

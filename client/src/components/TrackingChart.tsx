@@ -2,20 +2,28 @@ import { useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
-import { useAccount } from "wagmi";
 import { getPercentage } from "@/lib/utils";
 import { useBalances } from "@/hooks/useBalances";
 import { Skeleton } from "./ui/skeleton";
 import Withdraw from "./Modals/Withdraw";
+import { useActiveAccount } from "thirdweb/react";
 
 const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
-  const { isConnected, address } = useAccount();
-  const { isLoading, totalBalance, savingsBalance, availableBalance } =
-    useBalances(address as string);
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
+  const address = account?.address;
+  const {
+    userBalanceLoading,
+    savingsBalanceLoading,
+    availableBalanceLoading,
+    totalBalance,
+    savingsBalance,
+    availableBalance,
+  } = useBalances(address as string);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
@@ -92,17 +100,20 @@ const TrackingChart = () => {
             <div className="flex items-center gap-2 my-4">
               <Button
                 onClick={openWithdrawModal}
-                className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
+                className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full"
+              >
                 Withdraw
               </Button>
               <Button
                 onClick={openDepositModal}
-                className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer">
+                className="rounded-[100px] px-8 py-2  bg-[#1E1E1E99] text-sm cursor-pointer"
+              >
                 Deposit
               </Button>
               <Button
                 onClick={openFirstModal}
-                className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm">
+                className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
+              >
                 Save
               </Button>
             </div>
@@ -115,7 +126,7 @@ const TrackingChart = () => {
             <BalanceCard
               title="Total wallet balance"
               isConnected={isConnected}
-              isLoading={isLoading.total}
+              isLoading={userBalanceLoading}
               balance={totalBalance}
               text="sum of all balances"
             />
@@ -126,7 +137,7 @@ const TrackingChart = () => {
             <BalanceCard
               title="Vault balance"
               isConnected={isConnected}
-              isLoading={isLoading.savings}
+              isLoading={savingsBalanceLoading}
               balance={savingsBalance}
               percentage={getPercentage(savingsBalance, totalBalance)}
               className="h-full border-x-[1px] border-[#FFFFFF17] px-4"
@@ -138,7 +149,7 @@ const TrackingChart = () => {
             <BalanceCard
               title="Available balance"
               isConnected={isConnected}
-              isLoading={isLoading.available}
+              isLoading={availableBalanceLoading}
               balance={availableBalance}
               percentage={getPercentage(availableBalance, totalBalance)}
             />

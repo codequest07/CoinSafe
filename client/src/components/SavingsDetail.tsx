@@ -2,14 +2,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VaultCard from "./VaultCard";
-import { useAccount } from "wagmi";
 import { useBalances } from "@/hooks/useBalances";
 import AssetTable from "./AssetTable";
+import { useActiveAccount } from "thirdweb/react";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { isConnected, address } = useAccount();
+
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
+  const address = account?.address;
   const { savingsBalance } = useBalances(address as string);
 
   return (

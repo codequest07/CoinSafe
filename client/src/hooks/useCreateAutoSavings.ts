@@ -5,7 +5,7 @@ import {
 } from 'wagmi';
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { injected } from 'wagmi/connectors';
-import { config } from '@/lib/config';
+// import { config } from '@/lib/config';
 import { liskSepolia } from 'viem/chains';
 
 interface SaveState {
@@ -97,13 +97,13 @@ export const usecreateAutoSavings = ({
       }
 
       // Wait for transaction confirmation
-      const saveReceipt = await waitForTransactionReceipt(config, {
-        hash: saveResponse,
-      });
+      // const saveReceipt = await waitForTransactionReceipt(config, {
+      //   hash: saveResponse,
+      // });
 
-      if (saveReceipt.status !== 'success') {
-        throw new Error('Create Auto Save transaction was not successful');
-      }
+      // if (saveReceipt.status !== 'success') {
+      //   throw new Error('Create Auto Save transaction was not successful');
+      // }
 
       onSuccess?.();
 

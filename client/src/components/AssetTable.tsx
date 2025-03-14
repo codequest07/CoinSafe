@@ -11,7 +11,6 @@ import { CardContent } from "./ui/card";
 import MemoCheckIcon from "@/icons/CheckIcon";
 import MemoXmarkIcon from "@/icons/XmarkIcon";
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAccount } from "wagmi";
 import { formatEther } from "viem";
 import { CoinSafeContract } from "@/lib/contract";
 import { useEffect, useMemo, useState } from "react";
@@ -23,6 +22,7 @@ import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { readContract } from "@wagmi/core";
 import { config } from "@/lib/config";
 import { useBalances } from "@/hooks/useBalances";
+import { useActiveAccount } from "thirdweb/react";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
@@ -45,7 +45,8 @@ export default function AssetTable() {
   // const liquidAssets = allAssets.filter((asset) => asset.liquid);
   // const stakedAssets = allAssets.filter((asset) => asset.staked);
   // const savedAssets = allAssets.filter((asset) => asset.saved);
-  const { address } = useAccount();
+  const account = useActiveAccount();
+  const address = account?.address;
 
   const {
     AvailableBalance: LiquidTokenBalances,
@@ -54,16 +55,16 @@ export default function AssetTable() {
   } = useBalances(address as string);
 
   const allAssets: any = useMemo(
-    () => AllTokenBalances?.data || [],
-    [AllTokenBalances?.data]
+    () => AllTokenBalances || [],
+    [AllTokenBalances]
   );
   const liquidAssets: any = useMemo(
-    () => LiquidTokenBalances?.data || [],
-    [LiquidTokenBalances?.data]
+    () => LiquidTokenBalances || [],
+    [LiquidTokenBalances]
   );
   const savedAssets: any = useMemo(
-    () => SavedTokenBalances?.data || [],
-    [SavedTokenBalances?.data]
+    () => SavedTokenBalances || [],
+    [SavedTokenBalances]
   );
 
   useEffect(() => {
@@ -140,8 +141,11 @@ function AssetTableContent({ assets }: { assets: any[] }) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const { isConnected, address } = useAccount();
   const [updatedAssets, setUpdatedAssets] = useState<any>([]);
+
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
+  const address = account?.address;
 
   const openDepositModal = () => {
     setIsDepositModalOpen(true);
