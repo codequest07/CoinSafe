@@ -27,12 +27,15 @@ import MemoBackIcon from "@/icons/BackIcon";
 // } from "@/components/ui/popover"; // Line 24: Added Popover for calendar
 import { format, addDays } from "date-fns";
 
-import { useAccount } from "wagmi";
-// import { waitForTransactionReceipt } from "@wagmi/core";
 import { liskSepolia } from "viem/chains";
-// import { injected } from "wagmi/connectors";
-import { CoinSafeContract, tokens } from "@/lib/contract";
+
+import {
+  CoinSafeContract,
+  CoinsafeDiamondContract,
+  tokens,
+} from "@/lib/contract";
 import coinSafeAbi from "../../abi/coinsafe.json";
+import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 // import { config } from "@/lib/config";
@@ -46,6 +49,7 @@ import { useBalances } from "@/hooks/useBalances";
 import { formatUnits } from "viem";
 import { SavingsTargetSelect } from "../SavingsTarget";
 import { DurationSelector } from "../DurationSelector";
+import { useActiveAccount } from "thirdweb/react";
 // import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 
 interface SavingsTarget {
@@ -77,7 +81,10 @@ export default function SaveAsset({
   const [, setUnlockDate] = useState<Date | null>(null);
   // const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState(tab || "one-time");
-  const { address } = useAccount();
+  const smartAccount = useActiveAccount();
+  const address = smartAccount?.address;
+
+  // console.log("Smart Account", smartAccount);
 
   // const [token, setToken] = useState("");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
@@ -237,7 +244,6 @@ export default function SaveAsset({
   // to multiply the amount based on selected token's decimals
   const [, setDecimals] = useState(1);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
-  // const { address } = useAccount();
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const _amount = Number(event.target.value);
@@ -272,11 +278,11 @@ export default function SaveAsset({
     setCurrentTab(value);
   };
 
-  const { saveAsset, isLoading } = useSaveAsset({
+  const { saveAsset, isPending: isLoading } = useSaveAsset({
     address: address as `0x${string}`,
     saveState,
-    coinSafeAddress: CoinSafeContract.address as `0x${string}`,
-    coinSafeAbi: coinSafeAbi.abi,
+    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAbi: savingsFacetAbi,
     chainId: liskSepolia.id,
     onSuccess: () => {
       openThirdModal();
@@ -294,7 +300,9 @@ export default function SaveAsset({
       address: address as `0x${string}`,
       saveState,
       coinSafeAddress: CoinSafeContract.address as `0x${string}`,
+      // coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
       coinSafeAbi: coinSafeAbi.abi,
+      // coinSafeAbi: savingsFacetAbi.abi,
       chainId: liskSepolia.id,
       onSuccess: () => {
         openThirdModal();
@@ -328,8 +336,8 @@ export default function SaveAsset({
   };
 
   useEffect(() => {
-    if (address && saveState.token && AvailableBalance?.data) {
-      const tokensData = AvailableBalance?.data as any[];
+    if (address && saveState.token && AvailableBalance) {
+      const tokensData = AvailableBalance;
       if (!tokensData) return;
 
       const tokenBalance =
@@ -345,7 +353,7 @@ export default function SaveAsset({
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
     }
-  }, [saveState.token, address, AvailableBalance?.data]);
+  }, [saveState.token, address, AvailableBalance]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -359,21 +367,15 @@ export default function SaveAsset({
           onValueChange={handleTabChange}
           className="w-full"
         >
-          className="w-full"
-        >
           <TabsList className="sm:flex space-x-4 text-center justify-between bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
             <TabsTrigger
               value="one-time"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
               className="flex justify-center rounded-2xl items-center flex-1"
             >
               One-time Save
             </TabsTrigger>
             <TabsTrigger
               value="autosave"
-              className="flex justify-center rounded-2xl items-center flex-1"
-            >
               className="flex justify-center rounded-2xl items-center flex-1"
             >
               Autosave
@@ -402,14 +404,16 @@ export default function SaveAsset({
                           </div>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
+                          <SelectItem value="0xf7b20c0f7c77da06494235bb824dcaee0d8bcbd6">
                             <div className="flex items-center space-x-2">
                               <p>USDT</p>
                             </div>
                           </SelectItem>
-                          <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                          <SelectItem value="0x7a9c712570bb9eb804631836cf333ba9a25fc77d">
                             LSK
                           </SelectItem>
+                          {/* 0xe4923e889a875eae8c164ac1592b57b5684ed90e - new from Ite */}
+                          {/* 0xcf300d5a3d0fc71865a7c92bbc11d6b79c4d1480 - current */}
                           <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
                             SAFU
                           </SelectItem>
@@ -463,8 +467,8 @@ export default function SaveAsset({
                     variant="link"
                     className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
                   >
-                    className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
-                  >
+                    {/* className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
+                  > */}
                     Save all
                   </Button>
                 </div>
@@ -557,8 +561,8 @@ export default function SaveAsset({
                         : ""
                     }`}
                   >
-                    }`}
-                  >
+                    {/* }`}
+                  > */}
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -590,8 +594,8 @@ export default function SaveAsset({
                         : ""
                     }`}
                   >
-                    }`}
-                  >
+                    {/* }`}
+                  > */}
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -678,7 +682,7 @@ export default function SaveAsset({
                         {/* <div className="text-xs text-gray-400 text-center">
                           ≈ $400.56
                         </div> */}
-                        </div> */}
+                        {/* </div> */}
                       </div>
                       {validationErrors.amount && (
                         <p className="text-red-500 text-sm mt-1">
@@ -750,8 +754,9 @@ export default function SaveAsset({
                               amount: selectedTokenBalance,
                             }))
                           }
-                        
                         >
+                          {/* }
+                        > */}
                           Max
                         </Button>
                       </div>

@@ -1,13 +1,16 @@
 import { useCallback, useState } from "react";
 import { useWriteContract, useConnect } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
-import { injected } from "wagmi/connectors";
+import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import { client } from '@/lib/config';
+import { liskSepolia } from '@/lib/config';
+import { Account } from "thirdweb/wallets";
+import { tokens } from "@/lib/contract";
 import { erc20Abi } from "viem";
-import { liskSepolia } from "viem/chains";
-import { config } from "@/lib/config";
 
 interface UseDepositAssetParams {
   address?: `0x${string}`;
+  account: Account | undefined;
   token?: `0x${string}`;
   amount?: number;
   coinSafeAddress: `0x${string}`;
@@ -26,6 +29,7 @@ interface DepositAssetResult {
 
 export const useDepositAsset = ({
   address,
+  account,
   token,
   amount,
   coinSafeAddress,
@@ -40,6 +44,8 @@ export const useDepositAsset = ({
   const { connectAsync } = useConnect();
   const { writeContractAsync } = useWriteContract();
 
+  // const { mutate: sendTransaction, isPending, data: transactionResult, error: transactionError } = useSendTransaction();
+
   const getTokenDecimals = (token: string): number => {
     const tokenDecimals: Record<string, number> = {
       USDT: 6,
@@ -53,25 +59,40 @@ export const useDepositAsset = ({
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
-
+      
+      setIsLoading(true)
       try {
-        setIsLoading(true);
+        // setIsLoading(true);
+        const contract = getContract({
+                client,
+                chain: liskSepolia,
+                address: coinSafeAddress,
+              });
 
-        if (!address) {
-          try {
-            await connectAsync({
-              chainId: liskSepolia.id,
-              connector: injected(),
-            });
-          } catch (error) {
-            toast({
-              title: "Error Connecting Wallet",
-              variant: "destructive",
-            });
-            console.log("Error", error);
-            throw new Error("Failed to connect wallet: " + error);
-          }
-        }
+              const safuContract = getContract({
+                  client,
+                  address: tokens.safu,
+                  chain: liskSepolia,
+                  abi: erc20Abi
+                });
+
+                console.log("SAFU", safuContract)
+
+        // if (!address) {
+        //   try {
+        //     await connectAsync({
+        //       chainId: liskSepolia.id,
+        //       connector: injected(),
+        //     });
+        //   } catch (error) {
+        //     toast({
+        //       title: "Error Connecting Wallet",
+        //       variant: "destructive",
+        //     });
+        //     console.log("Error", error);
+        //     throw new Error("Failed to connect wallet: " + error);
+        //   }
+        // }
 
         if (!amount) {
           toast({
@@ -94,76 +115,147 @@ export const useDepositAsset = ({
         const decimals = getTokenDecimals(token);
         const amountWithDecimals = BigInt(amount * 10 ** decimals);
 
-        // Approve token
-        const approveResponse = await writeContractAsync({
-          chainId: liskSepolia.id,
-          address: token as `0x${string}`,
-          functionName: "approve",
-          abi: erc20Abi,
-          args: [coinSafeAddress, amountWithDecimals],
-        });
+        if(account) {
 
-        if (!approveResponse) {
+          try {
+            const approveTx = prepareContractCall({
+              contract: safuContract,
+              method: "approve",
+              params: [coinSafeAddress, BigInt(amount * 10 ** 18)], // Assuming 18 decimals
+            });
+      
+            const { transactionHash } = await sendTransaction({
+              transaction: approveTx,
+              account,
+            });
+      
+            alert(`Approval successful! Tx Hash: ${transactionHash}`);
+          } catch (error) {
+            console.error("Approval failed:", error);
+            alert("Approval failed. Check the console for details.");
+          } finally {
+            setIsLoading(false)
+          }
+
+          setIsLoading(true)
+          try {
+            const depositTx = prepareContractCall({
+              contract,
+              method: "function depositToPool(uint256 _amount, address _token) external",
+              params: [amountWithDecimals, token as `0x${string}`],
+            });
+      
+            const { transactionHash } = await sendTransaction({
+              transaction: depositTx,
+              account,
+            });
+      
+            alert(`Deposit successful! Tx Hash: ${transactionHash}`);
+            toast({
+                                  title: `Deposit successful! Tx Hash: ${transactionHash}`,
+                                  variant: 'default'
+                              });
+          } catch (error) {
+            console.error("Deposit failed:", error);
+            toast({
+              title: `Deposit failed:", ${error}`,
+              variant: 'destructive'
+          });
+            alert("Deposit failed. Check the console for details.");
+          } finally {
+            setIsLoading(false)
+          }
+
+          // const approveResponse = await getApprovalForTransaction({
+          //   transaction: transaction,
+          //   account, // the connected account
+          // });
+
+          // console.log("APPROVE RES", approveResponse)
+
+          // if (approveResponse) {
+          //   await sendAndConfirmTransaction({
+          //     transaction: approveResponse,
+          //     account,
+          //   })
+          // }
+
+          // Once approved, you can finally perform the buy transaction
+  // await sendAndConfirmTransaction({
+  //   transaction: transaction,
+  //   account,
+  // });
+          // if (!approveResponse) {
+          //   toast({
+          //     title: "Error approving token spend",
+          //     variant: "destructive",
+          //   });
+          //   throw new Error("Approve transaction failed");
+          // }
+  
+          // sendTransaction(transaction)
+        } else {
           toast({
-            title: "Error approving token spend",
+            title: "No account. Connect an account",
             variant: "destructive",
           });
           throw new Error("Approve transaction failed");
         }
 
-        const approveReceipt = await waitForTransactionReceipt(config, {
-          hash: approveResponse,
-        });
 
-        console.log(approveReceipt);
-        if (
-          approveReceipt.status === "success" &&
-          approveReceipt.transactionIndex === 1
-        ) {
-          // Deposit
-          console.log(
-            "Approval Transaction successful, proceeding with deposit"
-          );
+        // const approveReceipt = await waitForTransactionReceipt(config, {
+        //   hash: approveResponse,
+        // });
 
-          // Delay function using Promise
-          const delay = (ms: number) =>
-            new Promise((resolve) => setTimeout(resolve, ms));
+        // console.log(approveReceipt);
+        // if (
+        //   approveReceipt.status === "success" &&
+        //   approveReceipt.transactionIndex === 1
+        // ) {
+        //   // Deposit
+        //   console.log(
+        //     "Approval Transaction successful, proceeding with deposit"
+        //   );
 
-          // Wait for a delay before proceeding
-          await delay(3000);
+        //   // Delay function using Promise
+        //   const delay = (ms: number) =>
+        //     new Promise((resolve) => setTimeout(resolve, ms));
 
-          const depositResponse = await writeContractAsync({
-            chainId: liskSepolia.id,
-            address: coinSafeAddress as `0x${string}`,
-            functionName: "depositToPool",
-            abi: coinSafeAbi,
-            args: [amountWithDecimals, token as `0x${string}`],
-          });
+        //   // Wait for a delay before proceeding
+        //   await delay(3000);
 
-          if (!depositResponse) {
-            throw new Error("Deposit transaction failed");
-          }
+        //   const depositResponse = await writeContractAsync({
+        //     chainId: liskSepolia.id,
+        //     address: coinSafeAddress as `0x${string}`,
+        //     functionName: "depositToPool",
+        //     abi: coinSafeAbi,
+        //     args: [amountWithDecimals, token as `0x${string}`],
+        //   });
 
-          const depositReceipt = await waitForTransactionReceipt(config, {
-            hash: depositResponse,
-          });
+        //   if (!depositResponse) {
+        //     throw new Error("Deposit transaction failed");
+        //   }
 
-          if (depositReceipt.status !== "success") {
-            toast({
-              title: "Error depositing token",
-              variant: "destructive",
-            });
-            throw new Error("Deposit transaction was not successful");
-          }
+        //   const depositReceipt = await waitForTransactionReceipt(config, {
+        //     hash: depositResponse,
+        //   });
 
-          onSuccess?.();
-        } else {
-          toast({
-            title: "Error approving token spend",
-            variant: "destructive",
-          });
-          throw new Error("Approve transaction was not successful");
-        }
+        //   if (depositReceipt.status !== "success") {
+        //     toast({
+        //       title: "Error depositing token",
+        //       variant: "destructive",
+        //     });
+        //     throw new Error("Deposit transaction was not successful");
+        //   }
+
+        //   onSuccess?.();
+        // } else {
+        //   toast({
+        //     title: "Error approving token spend",
+        //     variant: "destructive",
+        //   });
+        //   throw new Error("Approve transaction was not successful");
+        // }
       } catch (err) {
         const error =
           err instanceof Error ? err : new Error("An unknown error occurred");
@@ -176,12 +268,16 @@ export const useDepositAsset = ({
     },
     [
       address,
+      account,
       token,
       amount,
       coinSafeAddress,
       coinSafeAbi,
       onSuccess,
       onError,
+      // isPending,
+      // transactionResult,
+      // transactionError,
       toast,
       connectAsync,
       writeContractAsync,

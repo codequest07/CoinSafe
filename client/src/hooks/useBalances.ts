@@ -1,14 +1,17 @@
 import { useRecoilState } from "recoil";
-import { useReadContract } from "wagmi";
 import {
   availableBalanceState,
   savingsBalanceState,
   totalBalanceState,
 } from "../store/atoms/save";
-import { CoinSafeContract } from "@/lib/contract";
+import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useEffect, useState } from "react";
 import { getValidNumberValue } from "@/lib/utils";
 import { convertTokenAmountToUsd } from "@/lib/utils";
+import { getContract } from "thirdweb";
+import { liskSepolia } from '@/lib/config';
+import { client } from '@/lib/config';
+import { useReadContract } from "thirdweb/react";
 
 export const useBalances = (address: string) => {
   const [availableBalance, setAvailableBalance] = useRecoilState(
@@ -18,32 +21,38 @@ export const useBalances = (address: string) => {
     useRecoilState(savingsBalanceState);
   const [totalBalance, setTotalBalance] = useRecoilState(totalBalanceState);
 
+  const contract = getContract({
+    client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskSepolia,
+  });
+   
+    const { data: TotalBalance, isLoading: userBalanceLoading } = useReadContract({
+      contract,
+      method: "function getUserBalances(address _user) external view returns (address[] memory, uint256[] memory)",
+      params: [address],
+    });
+
+
   // Loading states
-  const [isLoading, setIsLoading] = useState({
+  const [_isLoading, setIsLoading] = useState({
     available: false,
     total: false,
     savings: false,
   });
 
-  const TotalBalance = useReadContract({
-    abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    functionName: "getUserBalances",
-    args: [address],
+  
+  const { data: SavingsBalances, isLoading: savingsBalanceLoading } = useReadContract({
+    contract,
+    method: "function getUserSavings(address _user) external view returns (LibDiamond.Safe[] memory)",
+    params: [address],
   });
+  console.log("SAVINGS BAL", SavingsBalances)
 
-  const SavingsBalances = useReadContract({
-    abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    functionName: "getUserSavings",
-    args: [address],
-  });
-
-  const AvailableBalance = useReadContract({
-    abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
-    functionName: "getAvailableBalances",
-    args: [address],
+  const { data: AvailableBalance, isLoading: availableBalanceLoading } = useReadContract({
+    contract,
+    method: "function getAvailableBalances(address _user) external view returns (address[] memory, uint256[] memory)",
+    params: [address],
   });
 
   // Process available balances
@@ -115,40 +124,45 @@ export const useBalances = (address: string) => {
 
   useEffect(() => {
     async function processBalances() {
-      if (AvailableBalance.data && Array.isArray(AvailableBalance.data)) {
-        await processAvailableBalances(AvailableBalance.data);
+      if (AvailableBalance && Array.isArray(AvailableBalance)) {
+        await processAvailableBalances(AvailableBalance);
       }
 
-      if (TotalBalance.data && Array.isArray(TotalBalance.data)) {
-        await processTotalBalances(TotalBalance.data);
+      if (TotalBalance && Array.isArray(TotalBalance)) {
+        await processTotalBalances(TotalBalance);
       }
 
-      if (SavingsBalances.data) {
-        await processSavingsBalances(SavingsBalances.data as any[]);
+      if (SavingsBalances) {
+        await processSavingsBalances(SavingsBalances as any[]);
       }
     }
 
     processBalances();
-  }, [AvailableBalance.data, TotalBalance.data, SavingsBalances.data]);
+  }, [AvailableBalance, TotalBalance, SavingsBalances]);
 
-  const isAnyLoading =
-    isLoading.available || isLoading.total || isLoading.savings;
-  const isContractLoading =
-    AvailableBalance.isLoading ||
-    TotalBalance.isLoading ||
-    SavingsBalances.isLoading;
+  // [AvailableBalance.data, TotalBalance.data, SavingsBalances.data]
+
+  // const isAnyLoading =
+  //   isLoading.available || isLoading.total || isLoading.savings;
+  // const isContractLoading =
+  //   AvailableBalance.isLoading ||
+  //   TotalBalance.isLoading ||
+  //   SavingsBalances.isLoading;
 
   return {
     availableBalance,
+    availableBalanceLoading,
     savingsBalance,
     totalBalance,
     AvailableBalance,
     TotalBalance,
+    userBalanceLoading,
     SavingsBalances,
-    isLoading: {
-      ...isLoading,
-      any: isAnyLoading,
-      contract: isContractLoading,
-    },
+    savingsBalanceLoading,
+    // isLoading: {
+    //   ...isLoading,
+    //   any: isAnyLoading,
+    //   contract: isContractLoading,
+    // },
   };
 };
