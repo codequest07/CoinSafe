@@ -2,8 +2,8 @@ import { useCallback, useState } from "react";
 import { useWriteContract, useConnect } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
-import { client } from '@/lib/config';
-import { liskSepolia } from '@/lib/config';
+import { client } from "@/lib/config";
+import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { tokens } from "@/lib/contract";
 import { erc20Abi } from "viem";
@@ -59,24 +59,24 @@ export const useDepositAsset = ({
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
-      
-      setIsLoading(true)
+
+      setIsLoading(true);
       try {
         // setIsLoading(true);
         const contract = getContract({
-                client,
-                chain: liskSepolia,
-                address: coinSafeAddress,
-              });
+          client,
+          chain: liskSepolia,
+          address: coinSafeAddress,
+        });
 
-              const safuContract = getContract({
-                  client,
-                  address: tokens.safu,
-                  chain: liskSepolia,
-                  abi: erc20Abi
-                });
+        const safuContract = getContract({
+          client,
+          address: tokens.safu,
+          chain: liskSepolia,
+          abi: erc20Abi,
+        });
 
-                console.log("SAFU", safuContract)
+        console.log("SAFU", safuContract);
 
         // if (!address) {
         //   try {
@@ -115,55 +115,55 @@ export const useDepositAsset = ({
         const decimals = getTokenDecimals(token);
         const amountWithDecimals = BigInt(amount * 10 ** decimals);
 
-        if(account) {
-
+        if (account) {
           try {
             const approveTx = prepareContractCall({
               contract: safuContract,
               method: "approve",
               params: [coinSafeAddress, BigInt(amount * 10 ** 18)], // Assuming 18 decimals
             });
-      
+
             const { transactionHash } = await sendTransaction({
               transaction: approveTx,
               account,
             });
-      
+
             alert(`Approval successful! Tx Hash: ${transactionHash}`);
           } catch (error) {
             console.error("Approval failed:", error);
             alert("Approval failed. Check the console for details.");
           } finally {
-            setIsLoading(false)
+            setIsLoading(false);
           }
 
-          setIsLoading(true)
+          setIsLoading(true);
           try {
             const depositTx = prepareContractCall({
               contract,
-              method: "function depositToPool(uint256 _amount, address _token) external",
+              method:
+                "function depositToPool(uint256 _amount, address _token) external",
               params: [amountWithDecimals, token as `0x${string}`],
             });
-      
+
             const { transactionHash } = await sendTransaction({
               transaction: depositTx,
               account,
             });
-      
+
             alert(`Deposit successful! Tx Hash: ${transactionHash}`);
             toast({
-                                  title: `Deposit successful! Tx Hash: ${transactionHash}`,
-                                  variant: 'default'
-                              });
+              title: `Deposit successful! Tx Hash: ${transactionHash}`,
+              variant: "default",
+            });
           } catch (error) {
             console.error("Deposit failed:", error);
             toast({
               title: `Deposit failed:", ${error}`,
-              variant: 'destructive'
-          });
+              variant: "destructive",
+            });
             alert("Deposit failed. Check the console for details.");
           } finally {
-            setIsLoading(false)
+            setIsLoading(false);
           }
 
           // const approveResponse = await getApprovalForTransaction({
@@ -181,10 +181,10 @@ export const useDepositAsset = ({
           // }
 
           // Once approved, you can finally perform the buy transaction
-  // await sendAndConfirmTransaction({
-  //   transaction: transaction,
-  //   account,
-  // });
+          // await sendAndConfirmTransaction({
+          //   transaction: transaction,
+          //   account,
+          // });
           // if (!approveResponse) {
           //   toast({
           //     title: "Error approving token spend",
@@ -192,7 +192,7 @@ export const useDepositAsset = ({
           //   });
           //   throw new Error("Approve transaction failed");
           // }
-  
+
           // sendTransaction(transaction)
         } else {
           toast({
@@ -201,7 +201,6 @@ export const useDepositAsset = ({
           });
           throw new Error("Approve transaction failed");
         }
-
 
         // const approveReceipt = await waitForTransactionReceipt(config, {
         //   hash: approveResponse,
