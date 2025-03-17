@@ -35,7 +35,7 @@ export const useBalances = (address: string) => {
 
 
   // Loading states
-  const [_isLoading, setIsLoading] = useState({
+  const [, setIsLoading] = useState({
     available: false,
     total: false,
     savings: false,
@@ -132,6 +132,7 @@ export const useBalances = (address: string) => {
         await processTotalBalances(TotalBalance);
       }
 
+      console.log("Savings Balances", SavingsBalances);
       if (SavingsBalances) {
         await processSavingsBalances(SavingsBalances as any[]);
       }

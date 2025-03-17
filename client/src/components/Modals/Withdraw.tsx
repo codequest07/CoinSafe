@@ -13,7 +13,8 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { CoinSafeContract, tokens } from "@/lib/contract";
+import {CoinsafeDiamondContract, tokens } from "@/lib/contract";
+import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useWithdrawAsset } from "@/hooks/useWithdrawAsset";
@@ -48,10 +49,11 @@ export default function Withdraw({
 
   const { withdrawAsset, isLoading } = useWithdrawAsset({
     address: address as `0x${string}`,
+    account,
     token: token as `0x${string}`,
     amount,
-    coinSafeAddress: CoinSafeContract.address as `0x${string}`,
-    coinSafeAbi: CoinSafeContract.abi.abi,
+    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAbi: fundingFacetAbi,
     onSuccess: () => {
       openThirdModal();
     },
