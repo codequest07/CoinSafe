@@ -30,7 +30,7 @@ export const useWithdrawAsset = ({
   amount,
   coinSafeAddress,
   // coinSafeAbi,
-  // onSuccess,
+  onSuccess,
   onError,
   toast,
 }: UseWithdrawAssetParams): WithdrawAssetResult => {
@@ -91,23 +91,19 @@ export const useWithdrawAsset = ({
               params: [token as `0x${string}`, amountWithDecimals],
             });
 
-            const { transactionHash } = await sendTransaction({
+            await sendTransaction({
               transaction: WithdrawTx,
               account,
             });
 
-            alert(`Withdraw successful! Tx Hash: ${transactionHash}`);
-            toast({
-              title: `Withdraw successful! Tx Hash: ${transactionHash}`,
-              variant: "default",
-            });
+            onSuccess?.();
           } catch (error) {
             console.error("Withdraw failed:", error);
             toast({
               title: `Withdraw failed:", ${error}`,
               variant: "destructive",
             });
-            alert("Withdraw failed. Check the console for details.");
+            throw new Error("Withdraw transaction was not successful");
           } finally {
             setIsLoading(false);
           }

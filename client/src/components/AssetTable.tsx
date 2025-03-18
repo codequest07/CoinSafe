@@ -12,7 +12,7 @@ import MemoCheckIcon from "@/icons/CheckIcon";
 import MemoXmarkIcon from "@/icons/XmarkIcon";
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatEther } from "viem";
-import { CoinSafeContract } from "@/lib/contract";
+import { CoinSafeContract, CoinsafeDiamondContract } from "@/lib/contract";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 // import { transformAndAccumulateTokenBalances } from "@/lib/utils";
@@ -30,7 +30,7 @@ async function checkIsTokenAutoSaved(
 ) {
   const result = await readContract(config, {
     abi: CoinSafeContract.abi.abi,
-    address: CoinSafeContract.address as `0x${string}`,
+    address: CoinsafeDiamondContract.address as `0x${string}`,
     functionName: "isTokenAutoSaved",
     args: [userAddress, tokenAddress],
   });
