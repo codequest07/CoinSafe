@@ -17,6 +17,8 @@ const Home = () => {
   useEffect(() => {
     if (!isConnected || !address) {
       setOpenConnectModal(true);
+    } else {
+      setOpenConnectModal(false);
     }
   }, [isConnected, address]);
 
