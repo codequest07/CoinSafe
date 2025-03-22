@@ -64,7 +64,7 @@ const Home = () => {
               <div className="sm:w-2/3 overflow-hidden step-3">
                 <AssetTable />
               </div>
-              <div className="sm:w-1/3 p-3 step-4">
+              <div className="sm:w-1/3 hidden md:block  p-3 step-4">
                 <ScheduledSavings />
               </div>
             </div>
