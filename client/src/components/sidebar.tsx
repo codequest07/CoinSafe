@@ -2,7 +2,7 @@ import { Link, NavLink } from "react-router-dom";
 import MemoLogo from "@/icons/Logo";
 import { NavLinks } from "@/lib/data";
 import ExtensionCard from "./Cards/ExtensionCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ConnectModal from "./Modals/ConnectModal";
 import { useActiveAccount } from "thirdweb/react";
 
@@ -18,6 +18,15 @@ const Sidebar = () => {
       setOpenConnectModal(true);
     }
   };
+
+  useEffect(() => {
+      if (!isConnected) {
+        setOpenConnectModal(true);
+      } else {
+        setOpenConnectModal(false);
+      }
+    }, [isConnected, account]);
+
   return (
     <main>
       <div className="grid min-h-screen w-full md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr]">

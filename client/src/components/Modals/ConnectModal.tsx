@@ -25,9 +25,9 @@ const ConnectModal = ({
           >
             Close
           </Button>
-          <span onClick={() => setIsConnectModalOpen(false)}>
+          {/* <span onClick={() => setIsConnectModalOpen(false)}> */}
             <ThirdwebConnectButton />
-          </span>
+          {/* </span> */}
         </div>
       </DialogContent>
     </Dialog>
