@@ -10,7 +10,7 @@ export default function ApproveDeposit({
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[500px] p-6 bg-black text-white rounded-lg shadow-lg">
+      <DialogContent className="max-w-[390px] sm:max-w-[500px] p-6 bg-black text-white rounded-lg shadow-lg">
         <div className="flex justify-between items-center mb-4">
           <DialogTitle className="text-lg font-semibold">
             Approve transaction

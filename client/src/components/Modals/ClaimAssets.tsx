@@ -22,7 +22,7 @@ export default function ClaimAssets({
 
   return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
-      <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
+      <DialogContent className="max-w-[390px] sm:max-w-[600px] border-0 text-white bg-[#010104]">
         <DialogTitle className="text-white flex items-center">
           <p>Claim all assets</p>
         </DialogTitle>
