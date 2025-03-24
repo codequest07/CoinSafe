@@ -23,30 +23,80 @@ export default function WalletBalance() {
   const { totalBalance, availableBalance } = useBalances(address as string);
 
   return (
-    <div className="bg-black text-white p-6 flex flex-col ">
-      <div className="">
-        {/* Network Selector */}
-        {/* 
-        <Select>
-          <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-[2rem]">
-            <div className="flex items-center">
-              <SelectValue placeholder="All networks" />
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ripple">
-              <div className="flex items-center space-x-2">
-                <p>Ripple</p>
+    <div className="bg-black text-white p-6 flex flex-col">
+      {/* Mobile View (Buttons on top, balances below) - Only visible on small screens */}
+      <div className="sm:hidden flex flex-col space-y-6 mb-4">
+        {/* Action Buttons */}
+        {isConnected && (
+          <div className="flex flex-row justify-center gap-3">
+            <Button
+              onClick={openWithdrawModal}
+              className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
+              Withdraw
+            </Button>
+            <Button
+              onClick={openDepositModal}
+              className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
+              Deposit
+            </Button>
+            <Button
+              onClick={openFirstModal}
+              className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-full text-sm flex-1">
+              Save
+            </Button>
+          </div>
+        )}
+
+        {/* Wallet Balance Information */}
+        <div className="sm:hidden overflow-x-auto pb-4 no-scrollbar">
+          <div className="flex gap-3 px-1">
+            {/* Total Wallet Balance */}
+            <div className="min-w-[280px] bg-[#111111] rounded-xl p-4">
+              <div className="bg-[#121212] rounded-xl p-4 flex flex-col">
+                <p className="text-[#CACACA] text-sm">Total wallet balance</p>
+                <p className="text-2xl font-bold text-[#F1F1F1] mt-1">
+                  $
+                  {isConnected
+                    ? totalBalance
+                      ? totalBalance?.toFixed(2)
+                      : "0.00"
+                    : "0.00"}{" "}
+                  <span className="text-xs font-[300]">USD</span>
+                </p>
+                <p className="text-[#7F7F7F] text-xs mt-1">
+                  sum of all balances
+                </p>
               </div>
-            </SelectItem>
-            <SelectItem value="bitcoin">Bitcoin</SelectItem>
-            <SelectItem value="ethereum">Ethereum</SelectItem>
-          </SelectContent>
-        </Select> */}
+            </div>
+
+            {/* Available Balance */}
+            <div className="min-w-[280px] bg-[#111111] rounded-xl p-4">
+              <div className="bg-[#121212] rounded-xl p-4 flex flex-col">
+                <p className="text-[#CACACA] text-sm">Available balance</p>
+                <p className="text-2xl font-bold text-[#F1F1F1] mt-1">
+                  $
+                  {isConnected
+                    ? availableBalance?.toFixed(2) ?? "0.00"
+                    : "0.00"}{" "}
+                  <span className="text-xs font-[300]">USD</span>
+                </p>
+                {isConnected && (
+                  <p className="text-[#7F7F7F] text-xs flex items-center mt-1 space-x-1">
+                    <div className="bg-[#79E7BA] h-[0.6rem] w-1 rounded-xl"></div>
+                    <span>
+                      {getPercentage(availableBalance, totalBalance)}%
+                    </span>{" "}
+                    of total wallet balance
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Wallet Balance Information */}
-      <div className="flex-grow flex flex-col sm:flex-row items-center justify-between">
+      {/* Original Desktop Layout - Hidden on mobile, visible on sm and up */}
+      <div className="hidden sm:flex flex-grow flex-col sm:flex-row items-center justify-between">
         {/* Main content */}
         <main className="flex flex-col sm:flex-row items-center sm:space-x-12 my-6 space-y-6 sm:space-y-0">
           {/* Total Wallet Balance */}
@@ -86,23 +136,20 @@ export default function WalletBalance() {
 
         {/* Action Buttons */}
         {isConnected && (
-          <div className="flex flex-row  space-x-4">
+          <div className="flex flex-row space-x-4">
             <Button
               onClick={openWithdrawModal}
-              className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full"
-            >
+              className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
               Withdraw
             </Button>
             <Button
               onClick={openDepositModal}
-              className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full"
-            >
+              className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
               Deposit
             </Button>
             <Button
               onClick={openFirstModal}
-              className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-black px-6 py-2 rounded-full"
-            >
+              className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-black px-6 py-2 rounded-full">
               Save
             </Button>
           </div>
