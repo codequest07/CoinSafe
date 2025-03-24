@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import { ConnectOptions } from "mongoose";
 import WaitlistRouter from "./Routes/WaitlistRouter";
 import dotenv from "dotenv"
+import faucetRouter from "./Routes/FaucetClaimRoute";
 dotenv.config()
 const app = express();
 app.use(express.json());
@@ -23,6 +24,8 @@ app.use(AiRouter);
 app.use('/', BaseRouter)
 
 app.use('/',WaitlistRouter);
+
+app.use(faucetRouter)
 
 app.use(CoinGeckoApiRouter);
 const mongodb = process.env.MONGO_URI || 'mongodb+srv://agbakwuruoluchicoinsafe:SDYRnmD6FrVp09fo@cluster0.g6csr.mongodb.net';
