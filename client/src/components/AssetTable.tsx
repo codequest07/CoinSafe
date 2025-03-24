@@ -101,7 +101,7 @@ export default function AssetTable() {
   }, [allAssets, liquidAssets, savedAssets]);
 
   return (
-    <div className="bg-[#010104] border border-[#13131373] overflow-hidden p-4 rounded-[2rem] text-white w-full">
+    <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">Assets</h1>
         {/* <Tabs defaultValue="all-assets" className="w-full">
@@ -190,7 +190,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
       <>
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-6 rounded-full p-6">
-            <MemoMoney className="w-16 h-16" />
+            <MemoMoney className="w-20 h-20" />
           </div>
           <h3 className="mb-2 text-sm font-[400] text-white">
             {isConnected
@@ -200,7 +200,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
           {isConnected ? (
             <Button
               onClick={openDepositModal}
-              className="mt-4 bg-[#1E1E1E99] rounded-[2rem] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
             >
               Deposit
             </Button>
