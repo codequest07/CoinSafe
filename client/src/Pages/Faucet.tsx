@@ -1,66 +1,61 @@
-// import { useState } from "react";
 import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-// import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
-import { FaucetContract } from "@/lib/contract";
-import { useWriteContract } from "wagmi";
-import { waitForTransactionReceipt } from "@wagmi/core";
-import { config } from "@/lib/config";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ThirdwebConnectButton from "@/components/ThirdwebConnectButton";
 import { useActiveAccount } from "thirdweb/react";
+import { useState } from "react";
 
 export default function Faucet() {
   const account = useActiveAccount();
   const isConnected = !!account?.address;
   const navigate = useNavigate();
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const [isLoading, setIsLoading] = useState(false);
 
-  //Read contract data
-  // const faucetBalance = useReadContract({
-  //   abi: FaucetContract.abi.abi,
-  //   address: FaucetContract.address as `0x${string}`,
-  //   functionName: "getContractBalance",
-  // });
+  const handleClaim = async () => {
+    try {
+      setIsLoading(true); // Set loading state before request
 
-  // Write to contract
-  const {
-    data: hash,
-    error,
-    isError,
-    isPending,
-    isSuccess,
-    writeContractAsync,
-  } = useWriteContract();
+      const response = await fetch(
+        "https://coinsafe-0q0m.onrender.com/faucet/claim",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address: account?.address || "" }),
+        }
+      );
 
-  async function handleClaim() {
-    const claimTnx = await writeContractAsync({
-      address: FaucetContract.address as `0x${string}`,
-      abi: FaucetContract.abi.abi,
-      functionName: "claim",
-    });
-    // console.log(claimTnx);
+      const data = await response.json();
 
-    if (claimTnx) {
-      const transactionReceipt = await waitForTransactionReceipt(config, {
-        hash: claimTnx,
+      if (!response.ok) {
+        // Handle specific error cases
+        if (data.error?.includes("Claim too soon")) {
+          const match = data.error.match(/\w{3} \w{3} \d{2} \d{4} .* GMT.*/);
+          if (match) {
+            const nextClaimTime = new Date(match[0]);
+            const formattedTime = nextClaimTime.toLocaleString();
+            throw new Error(`⏳ You can claim again at: ${formattedTime}`);
+          }
+        }
+        throw new Error(data.error || "Faucet claim failed");
+      }
+
+      // Show success message in UI
+      setMessage({
+        type: "success",
+        text: `✅ Success! You received ${data.amount} SAFU!`,
       });
-
-      console.log(transactionReceipt);
+    } catch (error: any) {
+      setMessage({ type: "error", text: `❌ Error: ${error.message}` });
+    } finally {
+      setIsLoading(false); // Reset loading state
     }
-  }
-
-  const getShortErrorMessage = (message: string) => {
-    const maxLength = 60;
-    return message.length > maxLength
-      ? `${message.substring(0, maxLength)}...`
-      : message;
   };
 
   const handleGoBack = () => {
@@ -74,8 +69,7 @@ export default function Faucet() {
           <CardHeader>
             <button
               onClick={handleGoBack}
-              className="inline-flex items-center text-sm text-white hover:text-white mb-3"
-            >
+              className="inline-flex items-center text-sm text-white hover:text-white mb-3">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to app
             </button>
@@ -90,53 +84,18 @@ export default function Faucet() {
                 {/* <label htmlFor="evmAddress" className="text-sm font-medium">
                   EVM address
                 </label> */}
-
-                <div className="sm:max-w-xl my-4">
-                  {isError && (
-                    <div className="bg-[#FF484B24] p-3 rounded-[2rem]">
-                      <p className="text-[#FF484B] text-xs break-words">
-                        {getShortErrorMessage(
-                          (error?.message?.includes("ClaimTooSoon")
-                            ? "You can only claim once every 24 hours! Try again tomorrow"
-                            : error?.message) ||
-                            "Too many tries, try again later"
-                        )}
-                      </p>
+                {message.text && (
+                  <main className="flex justify-center">
+                    <div
+                      className={`p-3 rounded-[2rem] my-3 text-center w-fit ${
+                        message.type === "error"
+                          ? "bg-[#FF484B24] text-[#FF484B]"
+                          : "bg-[#48FF9124] text-[#48FF91]"
+                      }`}>
+                      <p className="text-xs break-words">{message.text}</p>
                     </div>
-                  )}
-                  {isSuccess && (
-                    <div className=" bg-[#48FF9124] p-3 rounded-[2rem]">
-                      <p className="text-[#48FF91] text-xs break-words">
-                        Faucet claim is successful! View on explorer{" "}
-                        <a
-                          href={`https://sepolia-blockscout.lisk.com/tx/${hash}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          {`${hash.slice(0, 6)}...${hash.slice(-4)}`}
-                        </a>
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {/* <div className="mt-1 relative">
-                  <Input
-                    id="evmAddress"
-                    type="text"
-                    value={evmAddress}
-                    onChange={(e) => setEvmAddress(e.target.value)}
-                    className="w-full py-5 bg-[#13131373] text-white border-zinc-700"
-                  />
-                  <Button
-                    className="absolute bg-transparent hidden  hover:bg-transparent  sm:flex space-x-[2px] right-2 top-1/2 transform -translate-y-1/2 text-zinc-400"
-                    onClick={() =>
-                      navigator.clipboard.readText().then(setEvmAddress)
-                    }>
-                    <MemoClipboard className="w-5 h-5" />
-                    <p>Paste</p>
-                  </Button>
-                </div> */}
+                  </main>
+                )}
               </div>
               <div className="sm:flex space-x-4 sm:justify-center w-full">
                 <div className="">
@@ -147,26 +106,24 @@ export default function Faucet() {
                 ) : (
                   <Button
                     className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
-                    onClick={() => handleClaim()}
-                    disabled={isPending}
-                  >
-                    {isPending ? "Pending" : "Claim faucet"}
+                    onClick={handleClaim}
+                    disabled={isLoading}>
+                    {isLoading ? "Processing..." : "Claim faucet"}
                   </Button>
                 )}
               </div>
             </div>
           </CardContent>
         </Card>
-        <div className="mt-6">
-          <h2 className="text-base font-[400] mb-3 sm:ml-96">
+        <div className="mt-6 ">
+          <h2 className="text-base font-[400] mb-3 sm:ml-[443px]">
             Claim other test tokens
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-xl h-56 mx-auto">
             {FaucetData.map((items, index) => (
               <Card
                 key={index}
-                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full"
-              >
+                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full">
                 <CardHeader className="p-3 pb-0">
                   <CardTitle className="text-sm mt-3">{items.title}</CardTitle>
                 </CardHeader>
@@ -175,8 +132,7 @@ export default function Faucet() {
                   <Link
                     to={items.link}
                     target="_blank"
-                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline"
-                  >
+                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline">
                     {items.btnTitle}
                   </Link>
                 </CardContent>
