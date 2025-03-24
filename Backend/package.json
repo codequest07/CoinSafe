@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node build/server.js",
-    "dev": "ts-node src/server.ts",
+    "dev": "NODE_OPTIONS='--max-old-space-size=2048' ts-node src/server.ts",
     "test": "nodemon src/server.ts",
     "build": "tsc"
   },
