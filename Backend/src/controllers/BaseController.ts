@@ -7,7 +7,7 @@ export async function getTransactions(req: Request, res: Response) {
   const { address } = req.query;
   const apiKey = process.env.BASESCAN_API_KEY || 'H4TPWFCD9FCZIVSPRVF3RBZFYASMBBSQ6Y'; 
    
-  console.log('API Key:', apiKey); 
+  // console.log('API Key:', apiKey); 
 
   if (!address || !apiKey) {
     return res.status(400).json({ error: 'Address or API key is missing' });
