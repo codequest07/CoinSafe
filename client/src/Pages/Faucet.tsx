@@ -64,7 +64,7 @@ export default function Faucet() {
   return (
     <main>
       <Navbar />
-      <div className="min-h-fit  bg-[#13131373] text-white p-8 mt-20">
+      <div className="sm:min-h-fit  bg-[#13131373] text-white p-8 mt-20">
         <Card className="w-full sm:max-w-xl border-[#FFFFFF17] sm:mx-auto bg-[#13131373] text-white">
           <CardHeader>
             <button
@@ -97,7 +97,7 @@ export default function Faucet() {
                   </main>
                 )}
               </div>
-              <div className="sm:flex space-x-4 sm:justify-center w-full">
+              <div className="flex space-x-2 sm:space-x-4 justify-center w-full">
                 <div className="">
                   <AddTokenToMetaMask />
                 </div>
@@ -119,7 +119,7 @@ export default function Faucet() {
           <h2 className="text-base font-[400] mb-3 sm:ml-[443px]">
             Claim other test tokens
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-xl h-56 mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl sm:h-56 mx-auto">
             {FaucetData.map((items, index) => (
               <Card
                 key={index}
