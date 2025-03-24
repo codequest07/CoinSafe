@@ -115,7 +115,7 @@ export default function Deposit({
 
   return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
-      <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#17171C]">
+      <DialogContent className=" sm:max-w-[600px] border-0 text-white bg-[#17171C]">
         <DialogTitle className="text-white flex items-center space-x-3">
           <p>Deposit assets</p>
         </DialogTitle>
@@ -163,7 +163,7 @@ export default function Deposit({
             <label className="text-sm text-gray-400">Amount</label>
             <div className="p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
               <div className="absolute top-3 right-3">
-                <div className="ml-4">
+                <div className="sm:ml-4">
                   <Select onValueChange={handleTokenSelect}>
                     <SelectTrigger className="w-[140px] border border-[#FFFFFF3D] bg-[#1E1E1E99] text-white rounded-lg">
                       <div className="flex items-center">
@@ -192,12 +192,12 @@ export default function Deposit({
                       )} */}
                 </div>
               </div>
-              <div className="flex flex-col items-center">
+              <div className="sm:flex sm:flex-col sm:items-center">
                 <input
                   type="number"
                   value={amount}
                   onChange={(e: any) => setAmount(e.target.value)}
-                  className="text-2xl font-medium bg-transparent text-white text-center w-full outline-none"
+                  className="text-2xl font-medium bg-transparent text-white text-center sm:w-full outline-none"
                   placeholder="0"
                 />
                 {/* <div className="text-sm text-gray-400 mt-1">≈ $400.56</div>*/}
@@ -261,31 +261,29 @@ export default function Deposit({
                 </div>
                 <Button
                   className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}
-                >
+                  onClick={() => setAmount(selectedTokenBalance)}>
                   Max
                 </Button>
               </div>
             </>
           )}
         </div>
-        <DialogFooter>
-          <Button
-            onClick={() => setIsDepositModalOpen(false)}
-            className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
-            Cancel
-          </Button>
-          <div>
+        <DialogFooter className="">
+          <div className="flex space-x-4 justify-between">
+            <Button
+              onClick={() => setIsDepositModalOpen(false)}
+              className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
+              type="submit">
+              Cancel
+            </Button>
+
             <Button
               onClick={(e) => {
                 depositAsset(e);
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || (amount || 0) > selectedTokenBalance}
-            >
+              disabled={isLoading || (amount || 0) > selectedTokenBalance}>
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (

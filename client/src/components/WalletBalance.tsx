@@ -23,7 +23,7 @@ export default function WalletBalance() {
   const { totalBalance, availableBalance } = useBalances(address as string);
 
   return (
-    <div className="bg-black text-white p-6 flex flex-col">
+    <div className="bg-black text-white px-6 flex flex-col">
       {/* Mobile View (Buttons on top, balances below) - Only visible on small screens */}
       <div className="sm:hidden flex flex-col space-y-6 mb-4">
         {/* Action Buttons */}
@@ -96,9 +96,9 @@ export default function WalletBalance() {
       </div>
 
       {/* Original Desktop Layout - Hidden on mobile, visible on sm and up */}
-      <div className="hidden sm:flex flex-grow flex-col sm:flex-row items-center justify-between">
+      <div className="hidden sm:flex flex-grow flex-col sm:flex-row items-end mb-3 justify-between">
         {/* Main content */}
-        <main className="flex flex-col sm:flex-row items-center sm:space-x-12 my-6 space-y-6 sm:space-y-0">
+        <main className="flex flex-col sm:flex-row items-center sm:space-x-12 mt-6  space-y-6 sm:space-y-0">
           {/* Total Wallet Balance */}
           <div className="text-center sm:text-left">
             <p className="text-[#CACACA] text-sm">Total wallet balance</p>

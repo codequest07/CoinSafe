@@ -12,14 +12,14 @@ const limiter = new Bottleneck({
 export async function main(tokenId: string): Promise<any | null> {
   if (!tokenId) return new Error("tokenId not passed");
   try {
-    console.log("Beginning the fetch ");
+    // console.log("Beginning the fetch ");
     const currentTime = Date.now();
     // Serve from cache if available and not expired
     if (
       cache[tokenId] &&
       currentTime - cache[tokenId].timestamp < CACHE_DURATION
     ) {
-      console.log("Checking cache...", cache)
+      // console.log("Checking cache...", cache)
       return cache[tokenId].data;
     }
 
@@ -37,7 +37,7 @@ export async function main(tokenId: string): Promise<any | null> {
       timestamp: currentTime,
     };
 
-    console.log("Cache updated", cache)
+    // console.log("Cache updated", cache)
 
     return data.data || null;
   } catch (error) {
