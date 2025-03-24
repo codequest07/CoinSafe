@@ -1,5 +1,5 @@
 import express from "express";
-import { claimFaucet } from "../faucetClaim";
+import { claimFaucet } from "../controllers/faucetClaim";
 
 const faucetRouter = express.Router();
 

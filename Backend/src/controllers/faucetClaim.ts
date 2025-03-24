@@ -30,35 +30,61 @@ export const claimFaucet = async (req: Request, res: Response) => {
   try {
     console.log(`🚀 Starting Claim Process...`);
 
-    // Checking wallet balance
+    // ✅ Step 1: Check Wallet Balance
+    console.time("Checking Wallet Balance");
     const userBalance = await tokenContract.balanceOf(wallet.address);
-    console.log(`💰 Wallet Balance: ${ethers.formatUnits(userBalance, 18)} SAFU`);
+    console.timeEnd("Checking Wallet Balance");
+    console.log(
+      `💰 Wallet Balance: ${ethers.formatUnits(userBalance, 18)} SAFU`
+    );
 
-    // Checking faucet balance
+    // ✅ Step 2: Check Faucet Balance
+    console.time("Checking Faucet Balance");
     const faucetBalance = await tokenContract.balanceOf(FAUCET_ADDRESS);
-    console.log(`🏦 Faucet Balance: ${ethers.formatUnits(faucetBalance, 18)} SAFU`);
+    console.timeEnd("Checking Faucet Balance");
+    console.log(
+      `🏦 Faucet Balance: ${ethers.formatUnits(faucetBalance, 18)} SAFU`
+    );
 
     if (faucetBalance < ethers.parseUnits("70", 18)) {
-      return res.status(400).json({ error: "Faucet does not have enough tokens. Try again later." });
-    }
-
-    // Checking if the user can claim again
-    const nextClaimTime = await faucetContract.getNextClaimTime(wallet.address);
-    const currentTime = Math.floor(Date.now() / 1000);
-    if (currentTime < Number(nextClaimTime)) {
       return res.status(400).json({
-        error: `Claim too soon. Next claim available at: ${new Date(Number(nextClaimTime) * 1000)}`,
+        error: "Faucet does not have enough tokens. Try again later.",
       });
     }
 
+    // ✅ Step 3: Check Next Claim Time
+    console.time("Checking Next Claim Time");
+    const nextClaimTime = await faucetContract.getNextClaimTime(wallet.address);
+    console.timeEnd("Checking Next Claim Time");
+
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (currentTime < Number(nextClaimTime)) {
+      return res.status(400).json({
+        error: `Claim too soon. Next claim available at: ${new Date(
+          Number(nextClaimTime) * 1000
+        )}`,
+      });
+    }
+
+    // ✅ Step 4: Send Claim Transaction
     console.log(`⏳ Claiming 70 SAFU...`);
+    console.time("Sending Claim Transaction");
     const tx = await faucetContract.claim();
-    await tx.wait();
+    console.timeEnd("Sending Claim Transaction");
+
+    // ✅ Step 5: Wait for Transaction Confirmation
+    console.time("Waiting for Transaction Confirmation");
+    await tx.wait(1); // Reduced confirmation time
+    console.timeEnd("Waiting for Transaction Confirmation");
     console.log(`✅ Claim successful! Transaction: ${tx.hash}`);
 
-    // Checking updated balance
+    // ✅ Step 6: Check Updated Wallet Balance
+    console.time("Checking New Wallet Balance");
     const newBalance = await tokenContract.balanceOf(wallet.address);
-    console.log(`💰 New Wallet Balance: ${ethers.formatUnits(newBalance, 18)} SAFU`);
+    console.timeEnd("Checking New Wallet Balance");
+    console.log(
+      `💰 New Wallet Balance: ${ethers.formatUnits(newBalance, 18)} SAFU`
+    );
 
     res.json({
       message: "Claim successful!",
