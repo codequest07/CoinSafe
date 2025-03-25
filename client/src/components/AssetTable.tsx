@@ -11,30 +11,31 @@ import {
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
 import { formatEther } from "viem";
-import { CoinSafeContract, CoinsafeDiamondContract } from "@/lib/contract";
+// import { CoinSafeContract, CoinsafeDiamondContract } from "@/lib/contract";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { readContract } from "@wagmi/core";
-import { config } from "@/lib/config";
+// import { readContract } from "@wagmi/core";
+// import { config } from "@/lib/config";
 import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import { Check, X } from "lucide-react";
+import { getSafuToUsd } from "@/lib";
 
-async function checkIsTokenAutoSaved(
-  userAddress: `0x${string}`,
-  tokenAddress: string
-) {
-  const result = await readContract(config, {
-    abi: CoinSafeContract.abi.abi,
-    address: CoinsafeDiamondContract.address as `0x${string}`,
-    functionName: "isTokenAutoSaved",
-    args: [userAddress, tokenAddress],
-  });
-  return result;
-}
+// async function checkIsTokenAutoSaved(
+//   userAddress: `0x${string}`,
+//   tokenAddress: string
+// ) {
+//   const result = await readContract(config, {
+//     abi: CoinSafeContract.abi.abi,
+//     address: CoinsafeDiamondContract.address as `0x${string}`,
+//     functionName: "isTokenAutoSaved",
+//     args: [userAddress, tokenAddress],
+//   });
+//   return result;
+// }
 
 export default function AssetTable() {
   const [allAssetData, setAllAssetData] = useState([]);
@@ -44,7 +45,6 @@ export default function AssetTable() {
   const {
     AvailableBalance: LiquidTokenBalances,
     TotalBalance: AllTokenBalances,
-    SavingsBalances: SavedTokenBalances,
   } = useBalances(address as string);
 
   const allAssets: any = useMemo(
@@ -55,10 +55,6 @@ export default function AssetTable() {
     () => LiquidTokenBalances || [],
     [LiquidTokenBalances]
   );
-  const savedAssets: any = useMemo(
-    () => SavedTokenBalances || [],
-    [SavedTokenBalances]
-  );
 
   useEffect(() => {
     if (allAssets.length === 0) return;
@@ -68,12 +64,18 @@ export default function AssetTable() {
         return {
           token: key,
           balance: formatEther(allAssets[1][index]),
+          saved: formatEther(
+            BigInt(allAssets[1][index] - liquidAssets[1][index])
+          ),
         };
       }
     );
-    console.log("All Assets Ressssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss", allAssetsRes);
+    console.log(
+      "All Assets Ressssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
+      allAssetsRes
+    );
     setAllAssetData(allAssetsRes);
-  }, [allAssets, liquidAssets, savedAssets]);
+  }, [allAssets, liquidAssets]);
 
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
@@ -99,51 +101,48 @@ function AssetTableContent({ assets }: { assets: any[] }) {
     setIsDepositModalOpen(true);
   };
 
-  const tokenData = {
-    "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
-      symbol: "AVAX",
-      name: "Avalanche",
-      value: 5.0,
-    },
-    "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": {
-      symbol: "AVAX",
-      name: "Avalanche",
-      value: 5.0,
-    },
-    "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909": {
-      symbol: "AVAX",
-      name: "Avalanche",
-      value: 5.0,
-    },
-    "0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909": {
-      symbol: "AVAX",
-      name: "Avalanche",
-      value: 5.0,
-    },
-  } as any;
-
   const hasNonZeroAssets = assets.some(
     (asset) => Number.parseFloat(asset.balance) > 0
   );
 
   useEffect(() => {
+    console.log("Assets in the assets table sub component", assets);
+    const tokenData = {
+      "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
+        symbol: "SAFU",
+        chain: "Lisk",
+        color: "#22c55e",
+      },
+    } as any;
+
     async function updateAssets(assets: any[]) {
       try {
+        console.log("====================================");
+        console.log("updating assetssssssssssssssssss");
+        console.log("====================================");
         const transformedAssets: any[] = await Promise.all(
           assets.map(async (asset: any) => ({
             token: asset.token,
             balance: asset.balance,
-            autosaved: await checkIsTokenAutoSaved(
-              address! as `0x${string}`,
-              asset.token
-            ),
+            saved: asset.saved,
+            balance_usd: await getSafuToUsd(Number(asset.balance)),
+            saved_usd: await getSafuToUsd(Number(asset.saved)),
+            autosaved: true,
+            // await checkIsTokenAutoSaved(
+            //   address! as `0x${string}`,
+            //   asset.token
+            // ),
             tokenInfo: tokenData[asset.token] || {
-              symbol: "AVAX",
-              name: "Avalanche",
-              value: 5.0,
+              symbol: "SAFU",
+              name: "Lisk",
+              color: "#22c55e",
             },
           }))
         );
+
+        console.log("====================================");
+        console.log("Transformed assets", transformedAssets);
+        console.log("====================================");
 
         setUpdatedAssets(transformedAssets);
       } catch (error) {
@@ -152,62 +151,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
     }
 
     if (address && assets.length > 0) updateAssets(assets);
-    else {
-      // Mock data for demonstration
-      setUpdatedAssets([
-        {
-          token: "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a",
-          balance: "0.00234",
-          autosaved: true,
-          tokenInfo: {
-            symbol: "AVAX",
-            name: "Avalanche",
-            value: 5.0,
-          },
-        },
-        {
-          token: "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D",
-          balance: "0.00234",
-          autosaved: false,
-          tokenInfo: {
-            symbol: "AVAX",
-            name: "Avalanche",
-            value: 5.0,
-          },
-        },
-        {
-          token: "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909",
-          balance: "0.00234",
-          autosaved: true,
-          tokenInfo: {
-            symbol: "AVAX",
-            name: "Avalanche",
-            value: 5.0,
-          },
-        },
-        {
-          token: "0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909",
-          balance: "0.00234",
-          autosaved: true,
-          tokenInfo: {
-            symbol: "AVAX",
-            name: "Avalanche",
-            value: 5.0,
-          },
-        },
-        {
-          token: "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a",
-          balance: "0.00234",
-          autosaved: false,
-          tokenInfo: {
-            symbol: "AVAX",
-            name: "Avalanche",
-            value: 5.0,
-          },
-        },
-      ]);
-    }
-  }, [assets, address, tokenData]);
+  }, [assets, address]);
 
   if (!assets || assets.length === 0 || !hasNonZeroAssets) {
     return (
@@ -269,15 +213,15 @@ function AssetTableContent({ assets }: { assets: any[] }) {
               <TableRow key={index} className="border-b border-[#1D1D1D]">
                 <TableCell className="py-4 px-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white font-medium">
-                      A
+                    <div className={`w-8 h-8 rounded-full bg-[${asset.tokenInfo.color}] flex items-center justify-center text-white font-medium`}>
+                      {asset.tokenInfo.symbol?.charAt(0)}
                     </div>
                     <div className="flex flex-col">
                       <p className="font-medium text-white">
                         {asset.tokenInfo.symbol}
                       </p>
                       <p className="text-xs text-gray-400">
-                        {asset.tokenInfo.name}
+                        {asset.tokenInfo.chain}
                       </p>
                     </div>
                   </div>
@@ -288,17 +232,17 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                       {asset.balance} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ ${asset.tokenInfo.value.toFixed(2)}
+                      ≈ ${asset.balance_usd.toFixed(2)}
                     </p>
                   </div>
                 </TableCell>
                 <TableCell className="py-4 px-4">
                   <div className="flex flex-col">
                     <p className="text-white">
-                      {asset.balance} {asset.tokenInfo.symbol}
+                      {asset.saved} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ ${asset.tokenInfo.value.toFixed(2)}
+                      ≈ ${asset.saved_usd.toFixed(2)}
                     </p>
                   </div>
                 </TableCell>
@@ -315,7 +259,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                       <>
                         <span className="text-white">No</span>
                         <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
-                          <X className="w-3 h-3 text-white"/>
+                          <X className="w-3 h-3 text-white" />
                         </div>
                       </>
                     )}

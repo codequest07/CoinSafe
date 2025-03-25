@@ -50,7 +50,6 @@ export const useBalances = (address: string) => {
         "function getUserSavings(address _user) external view returns (LibDiamond.Safe[] memory)",
       params: [address],
     });
-  console.log("SAVINGS BAL", SavingsBalances);
 
   const { data: AvailableBalance, isLoading: availableBalanceLoading } =
     useReadContract({
@@ -137,7 +136,6 @@ export const useBalances = (address: string) => {
         await processTotalBalances(TotalBalance);
       }
 
-      console.log("Savings Balances", SavingsBalances);
       if (SavingsBalances) {
         await processSavingsBalances(SavingsBalances as any[]);
       }
