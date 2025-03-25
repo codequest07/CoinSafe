@@ -29,12 +29,8 @@ import { format, addDays } from "date-fns";
 
 import { liskSepolia } from "viem/chains";
 
-import {
-  CoinSafeContract,
-  CoinsafeDiamondContract,
-  tokens,
-} from "@/lib/contract";
-import coinSafeAbi from "../../abi/coinsafe.json";
+import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
+// import coinSafeAbi from "../../abi/coinsafe.json";
 import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
@@ -299,9 +295,9 @@ export default function SaveAsset({
     usecreateAutoSavings({
       address: address as `0x${string}`,
       saveState,
-      coinSafeAddress: CoinSafeContract.address as `0x${string}`,
+      coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
       // coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-      coinSafeAbi: coinSafeAbi.abi,
+      coinSafeAbi: savingsFacetAbi,
       // coinSafeAbi: savingsFacetAbi.abi,
       chainId: liskSepolia.id,
       onSuccess: () => {

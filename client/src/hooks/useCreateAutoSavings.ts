@@ -4,12 +4,18 @@ import {
   useConnect 
 } from 'wagmi';
 import { waitForTransactionReceipt } from "@wagmi/core";
-import { injected } from 'wagmi/connectors';
+// import { injected } from 'wagmi/connectors';
 // import { config } from '@/lib/config';
-import { liskSepolia } from 'viem/chains';
+// import { liskSepolia } from 'viem/chains';
+import { getContract, prepareContractCall, sendTransaction } from 'thirdweb';
+import { client, liskSepolia } from '@/lib/config';
+import { toBigInt } from 'ethers';
+import { useActiveAccount } from 'thirdweb/react';
+import { toast } from './use-toast';
 
 interface SaveState {
     token: string;
+    target: string;
     amount: number;
     duration: number;
     typeName: string;
@@ -51,6 +57,8 @@ export const usecreateAutoSavings = ({
   const { writeContractAsync } = useWriteContract();
 //   const { waitForTransactionReceipt } = useWaitForTransactionReceipt();
 
+const account = useActiveAccount();
+
   const tokenDecimals: TokenDecimals = {
     'USDT': 6,
     'DEFAULT': 18
@@ -67,34 +75,60 @@ export const usecreateAutoSavings = ({
 
     try {
       // Connect wallet if not connected
-      if (!address) {
-        try {
-          await connectAsync({
-            chainId: liskSepolia.id,
-            connector: injected(),
-          });
-        } catch (error) {
-          throw new Error('Failed to connect wallet: ' + (error instanceof Error ? error.message : 'Unknown error'));
-        }
-      }
+      // if (!address) {
+      //   try {
+      //     await connectAsync({
+      //       chainId: liskSepolia.id,
+      //       connector: injected(),
+      //     });
+      //   } catch (error) {
+      //     throw new Error('Failed to connect wallet: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      //   }
+      // }
 
       setIsLoading(true);
+
+      const contract = getContract({
+          client,
+          chain: liskSepolia,
+          address: coinSafeAddress,
+      });
 
       // Calculate amount with appropriate decimals
       const amountWithDecimals = getAmountWithDecimals(saveState.amount, saveState.token);
 
-      // Call save function
-      const saveResponse = await writeContractAsync({
-        chainId: liskSepolia.id,
-        address: coinSafeAddress,
-        functionName: "createAutomatedSavingsPlan",
-        abi: coinSafeAbi,
-        args: [saveState.token, amountWithDecimals, saveState.frequency, saveState.duration],
+      const transaction = prepareContractCall({
+          contract,
+          method: "function createAutomatedSavingsPlan(string memory _target, address _token, uint256 _amount, uint256 frequency, uint256 _duration)",
+          params: [saveState.target, saveState.token, amountWithDecimals, toBigInt(saveState.frequency), toBigInt(saveState.duration)],
       });
 
-      if (!saveResponse) {
-        throw new Error('Auto Save transaction failed');
+      if(account) {
+                  
+        const { transactionHash } = await sendTransaction({
+          transaction,
+          account,
+        });
+                  
+          alert(`Save successful! Tx Hash: ${transactionHash}`);
+          toast({
+            title: "Save successful! Tx Hash",
+           className: "bg-[#79E7BA]"
+          });
       }
+
+      // Call save function
+      // const saveResponse = await writeContractAsync({
+      //   chainId: liskSepolia.id,
+      //   address: coinSafeAddress,
+      //   functionName: "createAutomatedSavingsPlan",
+      //   abi: coinSafeAbi,
+      //   args: [saveState.token, amountWithDecimals, saveState.frequency, saveState.duration],
+      // });
+
+      // if (!saveResponse) {
+      //   throw new Error('Auto Save transaction failed');
+      // }
 
       // Wait for transaction confirmation
       // const saveReceipt = await waitForTransactionReceipt(config, {
@@ -121,6 +155,12 @@ export const usecreateAutoSavings = ({
           errorMessage = err.message;
         }
       }
+
+      console.error("Error writing data to contract:", err);
+      toast({
+        title: "Error writing data to contract",
+        variant: "destructive"
+      });
 
       const error = new Error(errorMessage);
       setError(error);
