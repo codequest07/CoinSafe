@@ -70,10 +70,6 @@ export default function AssetTable() {
         };
       }
     );
-    console.log(
-      "All Assets Ressssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
-      allAssetsRes
-    );
     setAllAssetData(allAssetsRes);
   }, [allAssets, liquidAssets]);
 
@@ -117,9 +113,6 @@ function AssetTableContent({ assets }: { assets: any[] }) {
 
     async function updateAssets(assets: any[]) {
       try {
-        console.log("====================================");
-        console.log("updating assetssssssssssssssssss");
-        console.log("====================================");
         const transformedAssets: any[] = await Promise.all(
           assets.map(async (asset: any) => ({
             token: asset.token,
@@ -139,10 +132,6 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             },
           }))
         );
-
-        console.log("====================================");
-        console.log("Transformed assets", transformedAssets);
-        console.log("====================================");
 
         setUpdatedAssets(transformedAssets);
       } catch (error) {

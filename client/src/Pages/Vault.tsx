@@ -13,10 +13,10 @@ const Vault = () => {
   const { savingsBalance } = useBalances(address as string);
 
   return (
-    <div>
+    <div className="pr-4">
       <SmarterSavingCard />
 
-      <div className="flex gap-2 pr-4 pb-2">
+      <div className="flex gap-2 pb-2">
         <VaultCard
           title="Vault balance"
           value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}

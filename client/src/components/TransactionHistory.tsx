@@ -19,8 +19,6 @@ import {
   Transaction,
   useTransactionHistory,
 } from "@/hooks/useTransactionHistory";
-import { CoinSafeContract } from "@/lib/contract";
-import coinSafeAbi from "../abi/coinsafe.json";
 import { formatTimestamp } from "@/utils/formatTimestamp";
 import { formatEther } from "viem";
 import { tokenSymbol } from "@/utils/displayTokenSymbol";
@@ -113,18 +111,17 @@ const TransactionHistory = () => {
     // fetchPreviousPage,
     // hasMore,
     // hasPrevious
-  } = useTransactionHistory({
-    contractAddress: CoinSafeContract.address,
-    abi: coinSafeAbi.abi,
-    // limit: 10
-  });
+  } = useTransactionHistory({});
 
   useEffect(() => {
+    console.log("====================================");
+    console.log();
+    console.log("====================================");
     console.log("loading", isLoading);
     console.log("error?", isError);
     console.log("error text", error);
     console.log("transactions", transactions);
-    refetch();
+    // refetch();
   }, [transactions]);
 
   const groupedTransactions = transactions?.reduce<
@@ -149,13 +146,13 @@ const TransactionHistory = () => {
 
   if (!transactions || transactions.length === 0) {
     return (
-      <Card className="bg-[#13131373] border-0 text-white p-5">
+      <Card className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg">
         <div className="flex sm:flex-row flex-col sm:space-y-0 space-y-3 justify-between sm:items-center mb-4">
           <h2 className="text-lg font-semibold">Transaction History</h2>
         </div>
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="mb-6 rounded-full  p-6">
-            <MemoStory className="w-16 h-16" />
+          <div className="rounded-full  p-6">
+            <MemoStory className="w-20 h-20" />
           </div>
           <p className=" text-base max-w-[24rem] my-8">
             {isConnected
