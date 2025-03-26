@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-// import { useWriteContract, useConnect } from "wagmi";
-// import { waitForTransactionReceipt } from "@wagmi/core";
-// import { injected } from "wagmi/connectors";
-// import { liskSepolia } from "viem/chains";
-import { config } from "@/lib/config";
-import { readContract } from "@wagmi/core";
-import { CoinSafeContract, tokens } from "@/lib/contract";
+import { getContract } from "thirdweb";
+import { liskSepolia } from "@/lib/config";
+import { client } from "@/lib/config";
+import { useReadContract } from "thirdweb/react";
+import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { formatUnits } from "viem";
 import { getSafuToUsd } from "@/lib";
 import { useActiveAccount } from "thirdweb/react";
@@ -45,42 +43,47 @@ export function transformArrayData(
 
 export const useGetScheduledSavings = (): ScheduledSavingsResult => {
   const account = useActiveAccount();
-    const isConnected = !!account?.address;
-    const address = account?.address;
-  const [isLoading, setIsLoading] = useState(false);
+  const isConnected = !!account?.address;
+  const address = account?.address;
   const [scheduledSavings, setScheduledSavings] = useState<ScheduledSaving[]>(
     []
   );
   const [error, setError] = useState<Error | null>(null);
 
-  async function fetchResult() {
-    const result = (await readContract(config, {
-      abi: CoinSafeContract.abi.abi,
-      address: CoinSafeContract.address as `0x${string}`,
-      functionName: "getScheduledSavings",
-      account: address,
-    })) as Array<{ token: string; amount: bigint; scheduledDate: bigint }>;
-    return result;
-  }
+  const contract = getContract({
+      client,
+      address: CoinsafeDiamondContract.address,
+      chain: liskSepolia,
+    });
+  const { data: result, isLoading } = useReadContract(
+      {
+        contract,
+        method:
+          "function getScheduledSavings() external view returns (LibDiamond.ScheduledSaving[] memory)",
+        params: [address],
+      }
+    );
 
   useEffect(() => {
     async function run() {
       if (isConnected) {
         try {
-          setIsLoading(true);
-          const result = await fetchResult();
-          const scheduledSavingsRes = await transformArrayData(result);
-          setScheduledSavings(scheduledSavingsRes.filter(item => item.scheduledDate >= new Date().getTime()));
-          setIsLoading(false);
+          if(result) {
+            console.log(result);
+            const scheduledSavingsRes = await transformArrayData(result as []);
+            setScheduledSavings(
+              scheduledSavingsRes.filter(
+                (item) => item.scheduledDate >= new Date().getTime()
+              )
+            );
+          }
         } catch (err: any) {
           setError(err);
-        } finally {
-          setIsLoading(false);
         }
       }
     }
-    run();    
-  }, [isConnected]);
+    run();
+  }, [isConnected, result]);
 
   return {
     scheduledSavings,

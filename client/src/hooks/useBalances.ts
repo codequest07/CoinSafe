@@ -9,8 +9,8 @@ import { useEffect, useState } from "react";
 import { getValidNumberValue } from "@/lib/utils";
 import { convertTokenAmountToUsd } from "@/lib/utils";
 import { getContract } from "thirdweb";
-import { liskSepolia } from '@/lib/config';
-import { client } from '@/lib/config';
+import { liskSepolia } from "@/lib/config";
+import { client } from "@/lib/config";
 import { useReadContract } from "thirdweb/react";
 
 export const useBalances = (address: string) => {
@@ -26,34 +26,39 @@ export const useBalances = (address: string) => {
     address: CoinsafeDiamondContract.address,
     chain: liskSepolia,
   });
-   
-    const { data: TotalBalance, isLoading: userBalanceLoading } = useReadContract({
-      contract,
-      method: "function getUserBalances(address _user) external view returns (address[] memory, uint256[] memory)",
-      params: [address],
-    });
 
+  const { data: TotalBalance, isLoading: userBalanceLoading } = useReadContract(
+    {
+      contract,
+      method:
+        "function getUserBalances(address _user) external view returns (address[] memory, uint256[] memory)",
+      params: [address],
+    }
+  );
 
   // Loading states
-  const [_isLoading, setIsLoading] = useState({
+  const [, setIsLoading] = useState({
     available: false,
     total: false,
     savings: false,
   });
 
-  
-  const { data: SavingsBalances, isLoading: savingsBalanceLoading } = useReadContract({
-    contract,
-    method: "function getUserSavings(address _user) external view returns (LibDiamond.Safe[] memory)",
-    params: [address],
-  });
-  console.log("SAVINGS BAL", SavingsBalances)
+  const { data: SavingsBalances, isLoading: savingsBalanceLoading } =
+    useReadContract({
+      contract,
+      method:
+        "function getUserSavings(address _user) external view returns (LibDiamond.Safe[] memory)",
+      params: [address],
+    });
+  console.log("SAVINGS BAL", SavingsBalances);
 
-  const { data: AvailableBalance, isLoading: availableBalanceLoading } = useReadContract({
-    contract,
-    method: "function getAvailableBalances(address _user) external view returns (address[] memory, uint256[] memory)",
-    params: [address],
-  });
+  const { data: AvailableBalance, isLoading: availableBalanceLoading } =
+    useReadContract({
+      contract,
+      method:
+        "function getAvailableBalances(address _user) external view returns (address[] memory, uint256[] memory)",
+      params: [address],
+    });
 
   // Process available balances
   const processAvailableBalances = async (data: any[]) => {
@@ -132,6 +137,7 @@ export const useBalances = (address: string) => {
         await processTotalBalances(TotalBalance);
       }
 
+      console.log("Savings Balances", SavingsBalances);
       if (SavingsBalances) {
         await processSavingsBalances(SavingsBalances as any[]);
       }

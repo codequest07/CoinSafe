@@ -11,7 +11,7 @@ const ConnectModal = ({
 }) => {
   return (
     <Dialog open={isConnectModalOpen} onOpenChange={setIsConnectModalOpen}>
-      <DialogContent className="sm:max-w-[400px] border-0 text-white bg-[#17171C]">
+      <DialogContent className="max-w-[390px] sm:max-w-[400px] border-0 text-white bg-[#17171C]">
         <div className="flex items-center justify-center">
           <img src="/assets/wallet.png" alt="wallet-icon" className="w-32" />
         </div>
@@ -25,9 +25,9 @@ const ConnectModal = ({
           >
             Close
           </Button>
-          <span onClick={() => setIsConnectModalOpen(false)}>
+          {/* <span onClick={() => setIsConnectModalOpen(false)}> */}
             <ThirdwebConnectButton />
-          </span>
+          {/* </span> */}
         </div>
       </DialogContent>
     </Dialog>

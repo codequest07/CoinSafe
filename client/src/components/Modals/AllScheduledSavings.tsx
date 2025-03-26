@@ -15,7 +15,7 @@ export default function AllScheduledSavings({
 }) {
   return (
     <Dialog open={isModalOpen} onOpenChange={setisModalOpen}>
-      <DialogContent className="sm:max-w-[600px] border-0 text-white bg-[#010104]">
+      <DialogContent className="max-w-[390px] sm:max-w-[600px] border-0 text-white bg-[#010104]">
         <DialogTitle className="text-white flex items-center mb-4">
           <p>All Scheduled Savings ({scheduledSavings?.length || 0})</p>
         </DialogTitle>

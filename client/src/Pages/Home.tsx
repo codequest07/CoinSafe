@@ -17,6 +17,8 @@ const Home = () => {
   useEffect(() => {
     if (!isConnected || !address) {
       setOpenConnectModal(true);
+    } else {
+      setOpenConnectModal(false);
     }
   }, [isConnected, address]);
 
@@ -43,7 +45,7 @@ const Home = () => {
 
   return (
     <main>
-      <div className="flex flex-col w-full sm:flex ">
+      <div className="flex flex-col w-full sm:flex pr-3">
         <>
           <div className="step-1">
             <SmarterSavingCard setIsConnectModalOpen={setOpenConnectModal} />
@@ -62,7 +64,7 @@ const Home = () => {
               <div className="sm:w-2/3 overflow-hidden step-3">
                 <AssetTable />
               </div>
-              <div className="sm:w-1/3 p-3 step-4">
+              <div className="sm:w-1/3 hidden md:block pl-3 step-4">
                 <ScheduledSavings />
               </div>
             </div>

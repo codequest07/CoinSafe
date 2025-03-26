@@ -7,11 +7,13 @@ import {
 // import { liskSepolia } from 'viem/chains'; // Still used for chain ID reference
 import { getContract, prepareContractCall, sendTransaction } from 'thirdweb';
 import { client, liskSepolia } from '@/lib/config';
+import { Account } from 'thirdweb/wallets';
 // import { toast } from './use-toast';
 // import { config } from '@/lib/config'; // Assuming this contains Thirdweb client config
 
 interface UseWithdrawAssetParams {
   address?: `0x${string}`;
+  account: Account | undefined;
   token?: `0x${string}`;
   amount?: number;
   coinSafeAddress: `0x${string}`;
@@ -19,7 +21,7 @@ interface UseWithdrawAssetParams {
   chainId?: number;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
-  toast: (props: { title: string; variant: 'default' | 'destructive' }) => void;
+  toast: (props: { title: string; variant: "default" | "destructive" }) => void;
 }
 
 interface WithdrawAssetResult {
@@ -36,7 +38,7 @@ export const useWithdrawAsset = ({
   coinSafeAbi,
   onSuccess,
   onError,
-  toast
+  toast,
 }: UseWithdrawAssetParams): WithdrawAssetResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -57,16 +59,17 @@ export const useWithdrawAsset = ({
 
   const getTokenDecimals = (token: string): number => {
     const tokenDecimals: Record<string, number> = {
-      'USDT': 6,
-      'DEFAULT': 18
+      USDT: 6,
+      DEFAULT: 18,
     };
-    
+
     return tokenDecimals[token] || tokenDecimals.DEFAULT;
   };
 
-  const withdrawAsset = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const withdrawAsset = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
 
     try {
       setIsLoading(true);
@@ -89,14 +92,14 @@ export const useWithdrawAsset = ({
         }
       }
 
-      if (!amount) {
-        toast({
-          title: "Please input a value for amount to Withdraw",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
+        if (!amount) {
+          toast({
+            title: "Please input a value for amount to Withdraw",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
 
       if (!token) {
         toast({
@@ -111,8 +114,8 @@ export const useWithdrawAsset = ({
         throw new Error('Contract not initialized');
       }
 
-      const decimals = getTokenDecimals(token);
-      const amountWithDecimals = BigInt(amount * (10 ** decimals));
+        const decimals = getTokenDecimals(token);
+        const amountWithDecimals = BigInt(amount * 10 ** decimals);
 
       // Prepare the contract call for withdrawFromPool
       const transaction = prepareContractCall({

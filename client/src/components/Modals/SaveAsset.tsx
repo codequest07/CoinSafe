@@ -396,7 +396,6 @@ export default function SaveAsset({
                           <div className="flex items-center">
                             {/* <MemoRipple className="mr-2" /> */}
                             <SelectValue placeholder="Select Token" />
-                            <SelectValue placeholder="Select Token" />
                           </div>
                         </SelectTrigger>
                         <SelectContent>
