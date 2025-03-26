@@ -13,7 +13,8 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import {CoinsafeDiamondContract, tokens } from "@/lib/contract";
+import { tokens, CoinsafeDiamondContract } from "@/lib/contract";
+// import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
