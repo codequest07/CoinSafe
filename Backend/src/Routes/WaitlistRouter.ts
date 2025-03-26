@@ -3,14 +3,17 @@ import {
   addToWaitlist,
   getAllWaitlistEntries,
   getOne,
+  getWaitlistCount,
 } from "../controllers/WaitlistController";
 
 const WaitlistRouter = Router();
 
-WaitlistRouter.post("/api/waitlist", addToWaitlist);
+WaitlistRouter.post("/", addToWaitlist);
 
-WaitlistRouter.get("/api/waitlist", getAllWaitlistEntries);
+WaitlistRouter.get("/count", getWaitlistCount);
 
-WaitlistRouter.get("/api/waitlist/:email", getOne);
+WaitlistRouter.get("/", getAllWaitlistEntries);
+
+WaitlistRouter.get("/:email", getOne);
 
 export default WaitlistRouter;

@@ -23,7 +23,7 @@ app.use(AiRouter);
 
 app.use("/", BaseRouter);
 
-app.use("/", WaitlistRouter);
+app.use("/api/waitlist", WaitlistRouter);
 
 app.use("/faucet", faucetRouter);
 
