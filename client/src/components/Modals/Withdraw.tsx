@@ -150,16 +150,16 @@ export default function Withdraw({
                       </div>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
+                      <SelectItem value={tokens.safu}>
+                        SAFU
+                      </SelectItem>
+                      <SelectItem value={tokens.usdt}>
                         <div className="flex items-center space-x-2">
                           <p>USDT</p>
                         </div>
                       </SelectItem>
-                      <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                      <SelectItem value={tokens.lsk}>
                         LSK
-                      </SelectItem>
-                      <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
-                        SAFU
                       </SelectItem>
                     </SelectContent>
                   </Select>

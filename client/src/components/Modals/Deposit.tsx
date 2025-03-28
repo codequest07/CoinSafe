@@ -19,7 +19,6 @@ import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Deposited from "./Deposited";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
-import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
 import { getContract } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
@@ -52,13 +51,6 @@ export default function Deposit({
     setToken(value);
   };
 
-  const contract = getContract({
-    client,
-    address: tokens.safu,
-    // abi: erc20Abi,
-    chain: liskSepolia,
-  });
-
   const { depositAsset, isLoading } = useDepositAsset({
     address: address as `0x${string}`,
     account: smartAccount,
@@ -82,28 +74,19 @@ export default function Deposit({
   useEffect(() => {
     async function fetchTokenBalance() {
       try {
-        // const { data: tokenBalance, isLoading: tokenBalanceLoading } = useReadContract({
-        //       contract,
-        //       method: "balanceOf",
-        //       abi: erc20Abi,
-        //       params: [address], // type safe params
-        //     });
+        const contract = getContract({
+          client,
+          address: token,
+          // abi: erc20Abi,
+          chain: liskSepolia,
+        });
 
-        // const tokenBalance = await balanceOf({
-        //   contract,
-        //   address: address as `0x${string}`,
-        // });
         const tokenBalance = await getBalance({ contract, address: address! });
 
-        // const tokenBalance = await readContract(config, {
-        //   abi: erc20Abi,
-        //   address: token as `0x${string}`,
-        //   functionName: "balanceOf",
-        //   args: [address!],
-        // });
         console.log("tokenBalance:: ", tokenBalance);
-        setSelectedTokenBalance(Number(formatUnits(tokenBalance.value, 18)));
+        setSelectedTokenBalance(Number(tokenBalance.displayValue));
       } catch (error) {
+        console.error(error);
         throw new Error(error as any);
       }
     }
@@ -172,16 +155,16 @@ export default function Deposit({
                       </div>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
+                      <SelectItem value={tokens.safu}>
+                        SAFU
+                      </SelectItem>
+                      <SelectItem value={tokens.usdt}>
                         <div className="flex items-center space-x-2">
                           <p>USDT</p>
                         </div>
                       </SelectItem>
-                      <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                      <SelectItem value={tokens.lsk}>
                         LSK
-                      </SelectItem>
-                      <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
-                        SAFU
                       </SelectItem>
                     </SelectContent>
                   </Select>

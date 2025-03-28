@@ -399,17 +399,17 @@ export default function SaveAsset({
                           </div>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0xf7b20c0f7c77da06494235bb824dcaee0d8bcbd6">
+                          <SelectItem value={tokens.usdt}>
                             <div className="flex items-center space-x-2">
                               <p>USDT</p>
                             </div>
                           </SelectItem>
-                          <SelectItem value="0x7a9c712570bb9eb804631836cf333ba9a25fc77d">
+                          <SelectItem value={tokens.lsk}>
                             LSK
                           </SelectItem>
                           {/* 0xe4923e889a875eae8c164ac1592b57b5684ed90e - new from Ite */}
                           {/* 0xcf300d5a3d0fc71865a7c92bbc11d6b79c4d1480 - current */}
-                          <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
+                          <SelectItem value={tokens.safu}>
                             SAFU
                           </SelectItem>
                         </SelectContent>
@@ -697,15 +697,15 @@ export default function SaveAsset({
                           </div>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909">
+                          <SelectItem value={tokens.usdt}>
                             <div className="flex items-center space-x-2">
                               <p>USDT</p>
                             </div>
                           </SelectItem>
-                          <SelectItem value="0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D">
+                          <SelectItem value={tokens.lsk}>
                             LSK
                           </SelectItem>
-                          <SelectItem value="0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a">
+                          <SelectItem value={tokens.safu}>
                             SAFU
                           </SelectItem>
                         </SelectContent>

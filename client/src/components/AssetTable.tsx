@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -8,50 +10,41 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
-import MemoCheckIcon from "@/icons/CheckIcon";
-import MemoXmarkIcon from "@/icons/XmarkIcon";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatEther } from "viem";
-import { CoinSafeContract, CoinsafeDiamondContract } from "@/lib/contract";
+// import { CoinSafeContract, CoinsafeDiamondContract } from "@/lib/contract";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
-// import { transformAndAccumulateTokenBalances } from "@/lib/utils";
 import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { readContract } from "@wagmi/core";
-import { config } from "@/lib/config";
+// import { readContract } from "@wagmi/core";
+// import { config } from "@/lib/config";
 import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
+import { Check, X } from "lucide-react";
+import { getSafuToUsd } from "@/lib";
 
-async function checkIsTokenAutoSaved(
-  userAddress: `0x${string}`,
-  tokenAddress: string
-) {
-  const result = await readContract(config, {
-    abi: CoinSafeContract.abi.abi,
-    address: CoinsafeDiamondContract.address as `0x${string}`,
-    functionName: "isTokenAutoSaved",
-    args: [userAddress, tokenAddress],
-  });
-  return result;
-}
+// async function checkIsTokenAutoSaved(
+//   userAddress: `0x${string}`,
+//   tokenAddress: string
+// ) {
+//   const result = await readContract(config, {
+//     abi: CoinSafeContract.abi.abi,
+//     address: CoinsafeDiamondContract.address as `0x${string}`,
+//     functionName: "isTokenAutoSaved",
+//     args: [userAddress, tokenAddress],
+//   });
+//   return result;
+// }
 
 export default function AssetTable() {
   const [allAssetData, setAllAssetData] = useState([]);
-  // const [liquidAssetData, setLiquidAssetData] = useState([]);
-  // const [savedAssetData, setSavedAssetData] = useState<any[]>([]);
-
-  // const liquidAssets = allAssets.filter((asset) => asset.liquid);
-  // const stakedAssets = allAssets.filter((asset) => asset.staked);
-  // const savedAssets = allAssets.filter((asset) => asset.saved);
   const account = useActiveAccount();
   const address = account?.address;
 
   const {
     AvailableBalance: LiquidTokenBalances,
     TotalBalance: AllTokenBalances,
-    SavingsBalances: SavedTokenBalances,
   } = useBalances(address as string);
 
   const allAssets: any = useMemo(
@@ -62,10 +55,6 @@ export default function AssetTable() {
     () => LiquidTokenBalances || [],
     [LiquidTokenBalances]
   );
-  const savedAssets: any = useMemo(
-    () => SavedTokenBalances || [],
-    [SavedTokenBalances]
-  );
 
   useEffect(() => {
     if (allAssets.length === 0) return;
@@ -75,63 +64,20 @@ export default function AssetTable() {
         return {
           token: key,
           balance: formatEther(allAssets[1][index]),
+          saved: formatEther(
+            BigInt(allAssets[1][index] - liquidAssets[1][index])
+          ),
         };
       }
     );
     setAllAssetData(allAssetsRes);
-
-    // if (liquidAssets.length === 0) return;
-    // Map through the 2D array to create objects
-    // const liquidAssetsRes = liquidAssets[0]
-    //   ?.map((key: any, index: string | number) => {
-    //     if (Number(liquidAssets[1][index]) <= 0) return;
-    //     return {
-    //       token: key,
-    //       balance: formatEther(liquidAssets[1][index]),
-    //     };
-    //   })
-    //   .filter((entry: any) => entry !== undefined);
-    // setLiquidAssetData(liquidAssetsRes);
-
-    // if (savedAssets.length === 0) return;
-    // // Map through the 2D array to create objects
-    // const savedAssetsRes = transformAndAccumulateTokenBalances(savedAssets);
-
-    // setSavedAssetData(savedAssetsRes);
-  }, [allAssets, liquidAssets, savedAssets]);
+  }, [allAssets, liquidAssets]);
 
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">Assets</h1>
-        {/* <Tabs defaultValue="all-assets" className="w-full">
-          <TabsList className="sm:flex space-x-4 hidden bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
-            <TabsTrigger
-              value="all-assets"
-              className="text-white px-4 py-2 rounded-full">
-              All assets
-            </TabsTrigger>
-            <TabsTrigger
-              value="liquid-assets"
-              className="text-white px-4 py-2 rounded-full">
-              Liquid assets
-            </TabsTrigger>
-            <TabsTrigger
-              value="saved-assets"
-              className="text-white px-4 py-2 rounded-full">
-              Saved assets
-            </TabsTrigger>
-          </TabsList> */}
-        {/* <TabsContent value="all-assets"> */}
         <AssetTableContent assets={allAssetData} />
-        {/* </TabsContent> */}
-        {/* <TabsContent value="liquid-assets"> */}
-        {/* <AssetTableContent assets={liquidAssetData} /> */}
-        {/* </TabsContent> */}
-        {/* <TabsContent value="saved-assets"> */}
-        {/* <AssetTableContent assets={savedAssetData} /> */}
-        {/* </TabsContent> */}
-        {/* </Tabs> */}
       </div>
     </div>
   );
@@ -151,28 +97,39 @@ function AssetTableContent({ assets }: { assets: any[] }) {
     setIsDepositModalOpen(true);
   };
 
-  const tokenData = {
-    "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": "SAFU",
-    "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": "LSK",
-    "0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909": "USDT",
-    "0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909": "USDT",
-  } as any;
-
   const hasNonZeroAssets = assets.some(
-    (asset) => parseFloat(asset.balance) > 0
+    (asset) => Number.parseFloat(asset.balance) > 0
   );
 
   useEffect(() => {
+    console.log("Assets in the assets table sub component", assets);
+    const tokenData = {
+      "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
+        symbol: "SAFU",
+        chain: "Lisk",
+        color: "#22c55e",
+      },
+    } as any;
+
     async function updateAssets(assets: any[]) {
       try {
         const transformedAssets: any[] = await Promise.all(
           assets.map(async (asset: any) => ({
             token: asset.token,
             balance: asset.balance,
-            autosaved: await checkIsTokenAutoSaved(
-              address! as `0x${string}`,
-              asset.token
-            ),
+            saved: asset.saved,
+            balance_usd: await getSafuToUsd(Number(asset.balance)),
+            saved_usd: await getSafuToUsd(Number(asset.saved)),
+            autosaved: true,
+            // await checkIsTokenAutoSaved(
+            //   address! as `0x${string}`,
+            //   asset.token
+            // ),
+            tokenInfo: tokenData[asset.token] || {
+              symbol: "SAFU",
+              name: "Lisk",
+              color: "#22c55e",
+            },
           }))
         );
 
@@ -189,7 +146,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
     return (
       <>
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="mb-6 rounded-full p-6">
+          <div className="mb-4 rounded-full p-6">
             <MemoMoney className="w-20 h-20" />
           </div>
           <h3 className="mb-2 text-sm font-[400] text-white">
@@ -218,70 +175,102 @@ function AssetTableContent({ assets }: { assets: any[] }) {
   }
 
   return (
-    <div className="bg-[#010104] w-full p-4 rounded-lg">
-      <CardContent>
-        <Table className="w-full">
-          <TableHeader className="bg-[#1E1E1E99] text-[#CACACA]">
-            <TableRow className="w-full">
-              <TableHead className="w-1/3">Ticker</TableHead>
-              <TableHead className="w-1/3">Amount</TableHead>
-              <TableHead className="hidden md:table-cell w-1/3">
-                Autosaved
+    <div className="w-full">
+      <CardContent className="p-0">
+        <Table className="w-full border-collapse">
+          <TableHeader className="bg-[#1D1D1D73]/40">
+            <TableRow className="border-b border-[#1D1D1D]">
+              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                TICKER
               </TableHead>
-              <TableHead className="hidden sm:table-cell w-1/3">
+              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                AMOUNT
+              </TableHead>
+              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                IN VAULT
+              </TableHead>
+              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                AUTOSAVED
+              </TableHead>
+              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 <span className="sr-only">Actions</span>
               </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="text-[#F1F1F1] w-full">
+          <TableBody className="text-white">
             {updatedAssets.map((asset: any, index: number) => (
-              <TableRow
-                key={index}
-                className="w-full flex flex-col sm:table-row"
-              >
-                <TableCell className="w-full sm:w-1/3">
-                  <div className="flex items-center space-x-4">
+              <TableRow key={index} className="border-b border-[#1D1D1D]">
+                <TableCell className="py-4 px-4">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-full bg-[${asset.tokenInfo.color}] flex items-center justify-center text-white font-medium`}>
+                      {asset.tokenInfo.symbol?.charAt(0)}
+                    </div>
                     <div className="flex flex-col">
-                      <p className="font-[400] text-base">
-                        {tokenData[asset.token]}
+                      <p className="font-medium text-white">
+                        {asset.tokenInfo.symbol}
                       </p>
-                      <span className="font-[400] text-xs">{asset.name}</span>
+                      <p className="text-xs text-gray-400">
+                        {asset.tokenInfo.chain}
+                      </p>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="w-full sm:w-1/3">
+                <TableCell className="py-4 px-4">
                   <div className="flex flex-col">
-                    <p>{asset.balance}</p>
-                    <span className="text-xs">{asset.value}</span>
+                    <p className="text-white">
+                      {asset.balance} {asset.tokenInfo.symbol}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      ≈ ${asset.balance_usd.toFixed(2)}
+                    </p>
                   </div>
                 </TableCell>
-                <TableCell className="hidden md:table-cell w-1/3">
-                  <div className="flex items-center">
-                    <span className="mr-2">
-                      {asset.autosaved ? "Yes" : "No"}
-                    </span>
+                <TableCell className="py-4 px-4">
+                  <div className="flex flex-col">
+                    <p className="text-white">
+                      {asset.saved} {asset.tokenInfo.symbol}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      ≈ ${asset.saved_usd.toFixed(2)}
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell className="py-4 px-4">
+                  <div className="flex items-center gap-2">
                     {asset.autosaved ? (
-                      <MemoCheckIcon className="text-green-500 w-5 h-5" />
+                      <>
+                        <span className="text-[#48FF91]">Yes</span>
+                        <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
+                          <Check className="w-4 h-4 text-white" />
+                        </div>
+                      </>
                     ) : (
-                      <MemoXmarkIcon className="text-red-500 w-5 h-5" />
+                      <>
+                        <span className="text-white">No</span>
+                        <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
+                          <X className="w-3 h-3 text-white" />
+                        </div>
+                      </>
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="flex justify-start space-x-6 sm:justify-end w-full sm:w-2/3">
-                  <Button
-                    variant="link"
-                    className="text-[#79E7BA]"
-                    onClick={() => setIsDepositModalOpen(true)}
-                  >
-                    Deposit
-                  </Button>
-                  <Button
-                    variant="link"
-                    className="text-[#79E7BA]"
-                    onClick={() => setIsFirstModalOpen(true)}
-                  >
-                    Save
-                  </Button>
+                <TableCell className="py-4 px-4 text-right">
+                  <div className="flex justify-end gap-4">
+                    <Button
+                      variant="link"
+                      className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                      onClick={() => setIsDepositModalOpen(true)}
+                    >
+                      Deposit
+                    </Button>
+                    <Button
+                      variant="link"
+                      className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                      onClick={() => setIsFirstModalOpen(true)}
+                    >
+                      Save
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

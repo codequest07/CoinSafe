@@ -51,24 +51,37 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
   const [error, setError] = useState<Error | null>(null);
 
   const contract = getContract({
-      client,
-      address: CoinsafeDiamondContract.address,
-      chain: liskSepolia,
-    });
-  const { data: result, isLoading } = useReadContract(
-      {
-        contract,
-        method:
-          "function getScheduledSavings() external view returns (LibDiamond.ScheduledSaving[] memory)",
-        params: [address],
-      }
-    );
+    client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskSepolia,
+  });
+
+  const { data: result, isLoading } = useReadContract({
+    contract,
+    method:
+      "function getScheduledSavings() external view returns (LibDiamond.ScheduledSaving[] memory)",
+    queryOptions: {
+      enabled: Boolean(address),
+    },
+    from: address,
+  });
 
   useEffect(() => {
     async function run() {
+      console.log("====================================");
+      console.log("Runningggggggg");
+      console.log("====================================");
+
       if (isConnected) {
         try {
-          if(result) {
+          console.log("====================================");
+          console.log("Tryingggg");
+          console.log("====================================");
+          console.log(result);
+          if (result) {
+            console.log("====================================");
+            console.log();
+            console.log("====================================");
             console.log(result);
             const scheduledSavingsRes = await transformArrayData(result as []);
             setScheduledSavings(
