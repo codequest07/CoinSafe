@@ -96,7 +96,7 @@ export function useTransactionHistory({
     queryOptions: {
       enabled: Boolean(address),
     },
-    // from: address,
+    from: address,
   }) as unknown as {
     data: Transaction[];
     isError: boolean;

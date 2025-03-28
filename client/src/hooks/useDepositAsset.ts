@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import { getContract, prepareContractCall, sendAndConfirmTransaction } from "thirdweb";
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
@@ -97,7 +97,7 @@ export const useDepositAsset = ({
               params: [coinSafeAddress, BigInt(amount * 10 ** 18)], // Assuming 18 decimals
             });
 
-            await sendTransaction({
+            await sendAndConfirmTransaction({
               transaction: approveTx,
               account,
             });
@@ -125,7 +125,7 @@ export const useDepositAsset = ({
               params: [amountWithDecimals, token as `0x${string}`],
             });
 
-            await sendTransaction({
+            await sendAndConfirmTransaction({
               transaction: depositTx,
               account,
             });

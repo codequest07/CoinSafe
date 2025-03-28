@@ -106,7 +106,7 @@ const TransactionHistory = () => {
     isLoading,
     isError,
     error,
-    refetch,
+    // refetch,
     // fetchNextPage,
     // fetchPreviousPage,
     // hasMore,
