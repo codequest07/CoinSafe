@@ -107,7 +107,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
       "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
         symbol: "SAFU",
         chain: "Lisk",
-        color: "#22c55e",
+        color: "bg-[#22c55e]",
       },
     } as any;
 
@@ -128,7 +128,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             tokenInfo: tokenData[asset.token] || {
               symbol: "SAFU",
               name: "Lisk",
-              color: "#22c55e",
+              color: "bg-[#22c55e]",
             },
           }))
         );
@@ -202,7 +202,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
               <TableRow key={index} className="border-b border-[#1D1D1D]">
                 <TableCell className="py-4 px-4">
                   <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-full bg-[${asset.tokenInfo.color}] flex items-center justify-center text-white font-medium`}>
+                    <div className={`w-8 h-8 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
                       {asset.tokenInfo.symbol?.charAt(0)}
                     </div>
                     <div className="flex flex-col">

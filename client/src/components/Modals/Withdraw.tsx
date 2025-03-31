@@ -23,6 +23,7 @@ import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useBalances } from "@/hooks/useBalances";
 import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
+import MemoRipple from "@/icons/Ripple";
 
 export default function Withdraw({
   isWithdrawModalOpen,
@@ -139,13 +140,13 @@ export default function Withdraw({
 
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Amount</label>
-            <div className="p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
-              <div className="absolute top-3 right-3">
+            <div className="flex-row-reverse items-center justify-between p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
+              <div className="">
                 <div className="ml-4">
                   <Select onValueChange={handleTokenSelect}>
-                    <SelectTrigger className="w-[140px] bg-gray-700  border border-[#FFFFFF3D] bg-[#1E1E1E99] text-white rounded-lg">
+                    <SelectTrigger className="w-[160px] py-2.5 bg-gray-700  border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
                       <div className="flex items-center">
-                        {/* <MemoRipple className="mr-2" /> */}
+                        <MemoRipple className="mr-2" />
                         <SelectValue placeholder="Select Token" />
                       </div>
                     </SelectTrigger>
@@ -175,7 +176,7 @@ export default function Withdraw({
                   type="number"
                   value={amount}
                   onChange={(e: any) => setAmount(e.target.value)}
-                  className="text-2xl font-medium bg-transparent text-center text-white w-full outline-none"
+                  className="text-2xl font-medium bg-transparent text-white w-full outline-none"
                   placeholder="0"
                 />
                 {/* <div className="text-sm text-gray-400 mt-1">≈ $400.56</div> */}

@@ -17,12 +17,14 @@ import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import Deposited from "./Deposited";
+// import Deposited from "./Deposited";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
 import { useActiveAccount } from "thirdweb/react";
 import { getContract } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { getBalance } from "thirdweb/extensions/erc20";
+import MemoRipple from "@/icons/Ripple";
+import SuccessfulTxModal from "./SuccessfulTxModal";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -41,8 +43,6 @@ export default function Deposit({
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
 
   const openThirdModal = () => {
-    console.log("details", token, amount);
-
     setIsThirdModalOpen(true);
     setIsDepositModalOpen(false);
   };
@@ -103,54 +103,15 @@ export default function Deposit({
           <p>Deposit assets</p>
         </DialogTitle>
         <div className="p-8 text-gray-700">
-          {/* Amount Section */}
-          {/* <div className="flex items-center justify-between mb-6">
-            <div className="flex-1">
-              <label htmlFor="amount" className="text-sm text-gray-400">
-                Amount
-              </label>
-              <div className="flex flex-col items-center justify-center">
-                <input
-                  type="number"
-                  id="amount"
-                  value={amount}
-                  onChange={(e: any) => setAmount(e.target.value)}
-                  placeholder="100"
-                  required
-                  min={0.01}
-                  className={`bg-transparent text-base font-light text-gray-200 border-none focus:outline-none text-center w-full`}
-                />
-              </div>
-            </div>
-            <div className="ml-4">
-              <Select onValueChange={handleTokenSelect} required>
-                <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
-                  <div className="flex items-center">
-                    <SelectValue placeholder="Select Token" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={tokens.usdt}>
-                    <div className="flex items-center space-x-2">
-                      <p>USDT</p>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value={tokens.lsk}>LSK</SelectItem>
-                  <SelectItem value={tokens.safu}>SAFU</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div> */}
-
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Amount</label>
-            <div className="p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
-              <div className="absolute top-3 right-3">
+            <div className="flex-row-reverse items-center justify-between p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
+              <div className="">
                 <div className="sm:ml-4">
                   <Select onValueChange={handleTokenSelect}>
-                    <SelectTrigger className="w-[140px] border border-[#FFFFFF3D] bg-[#1E1E1E99] text-white rounded-lg">
+                    <SelectTrigger className="w-[160px] border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
                       <div className="flex items-center">
-                        {/* <MemoRipple className="mr-2" /> */}
+                        <MemoRipple className="mr-2" />
                         <SelectValue placeholder="Select Token" />
                       </div>
                     </SelectTrigger>
@@ -180,7 +141,7 @@ export default function Deposit({
                   type="number"
                   value={amount}
                   onChange={(e: any) => setAmount(e.target.value)}
-                  className="text-2xl font-medium bg-transparent text-white text-center sm:w-full outline-none"
+                  className="text-2xl font-medium bg-transparent text-white sm:w-full outline-none"
                   placeholder="0"
                 />
                 {/* <div className="text-sm text-gray-400 mt-1">≈ $400.56</div>*/}
@@ -276,13 +237,17 @@ export default function Deposit({
           </div>
         </DialogFooter>
       </DialogContent>
-      <Deposited
+      <SuccessfulTxModal
         amount={amount || 0}
         token={
           token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
         }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
+        transactionType="deposit"
+        additionalDetails={{
+          subText: "Assets will be available in your wallet."
+        }}
       />
     </Dialog>
   );
