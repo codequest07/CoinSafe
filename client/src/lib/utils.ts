@@ -44,15 +44,15 @@ export const convertTokenAmountToUsd = async (
 ): Promise<number> => {
   switch (token) {
     case tokens.usdt:
-      return (await getUsdtToUsd(
+      return await getUsdtToUsd(
         Number(formatUnits(amount, 6))
-      )) as Promise<number>;
+      );
     case tokens.safu:
       return getSafuToUsd(Number(formatUnits(amount, 18)));
     case tokens.lsk:
-      return (await getLskToUsd(
+      return await getLskToUsd(
         Number(formatUnits(amount, 18))
-      )) as Promise<number>;
+      );
     default:
       console.error("Unknown token address:", token);
       return 0;
