@@ -26,6 +26,7 @@ import { getBalance } from "thirdweb/extensions/erc20";
 import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+import ApproveTxModal from "./ApproveTxModal";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -36,6 +37,7 @@ export default function Deposit({
   onBack: () => void;
 }) {
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
+  const [approveTxModalOpen, setApproveTxModalOpen] = useState(false);
   const smartAccount = useActiveAccount();
   const address = smartAccount?.address;
 
@@ -47,6 +49,10 @@ export default function Deposit({
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
     setIsDepositModalOpen(false);
+  };
+
+  const promptApproveModal = () => {
+    setApproveTxModalOpen(true);
   };
 
   const handleTokenSelect = (value: string) => {
@@ -63,6 +69,9 @@ export default function Deposit({
     coinSafeAbi: fundingFacetAbi,
     onSuccess: () => {
       openThirdModal();
+    },
+    onApprove: () => {
+      promptApproveModal();
     },
     onError: (error) => {
       toast({
@@ -243,6 +252,16 @@ export default function Deposit({
         additionalDetails={{
           subText: "Assets will be available in your wallet.",
         }}
+      />
+
+      <ApproveTxModal
+        isOpen={approveTxModalOpen}
+        onClose={() => setApproveTxModalOpen(false)}
+        amount={amount || 0}
+        token={
+          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+        }
+        text="To Deposit"
       />
     </Dialog>
   );

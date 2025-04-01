@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import MemoLogo2 from "@/icons/Logo2";
+import { useEffect } from 'react';
 
 export default function ApproveTxModal({
   amount,
@@ -14,6 +15,15 @@ export default function ApproveTxModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  useEffect(() => {
+      if (isOpen) {
+        const timer = setTimeout(() => {
+          onClose();
+        }, 5000); // Close modal after 3 seconds
+  
+        return () => clearTimeout(timer); // Cleanup timer on unmount
+      }
+    }, [isOpen, onClose]);
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[390px] sm:max-w-[500px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg">
@@ -30,8 +40,8 @@ export default function ApproveTxModal({
 
           {/* Description */}
           <p className="text-center text-lg font-bold">
-            {text}
-            <span className="text-[#20FFAF] font-semibold">{amount} {token}</span>
+            {text} {" "}
+            <span className="text-[#20FFAF] font-semibold">{amount} {" "} {token}</span>
           </p>
 
           {/* Subtext  */}

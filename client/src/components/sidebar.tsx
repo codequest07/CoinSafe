@@ -29,8 +29,8 @@ const Sidebar = () => {
 
   return (
     <main>
-      <div className="grid min-h-screen w-full md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr]">
-        <div className="hidden rounded-2xl border-r p-2 border-[#13131373]  bg-[#13131373]  md:block">
+      <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr] lg:grid-cols-[280px_1fr]">
+        <div className="hidden rounded-2xl border-r p-2 border-[#13131373]  bg-[#13131373]  md:flex flex-col">
           <div className="flex h-full max-h-fit shadow-lg  rounded-xl  flex-col gap-2">
             <div className="flex items-center py-12 px-4 lg:h-[60px] lg:px-6">
               <Link
@@ -66,10 +66,9 @@ const Sidebar = () => {
                 ))}
               </nav>
             </div>
-
-            <div className="mt-auto p-4">
+          </div>
+          <div className="mt-auto p-4">
               <ExtensionCard />
-            </div>
           </div>
         </div>
       </div>
