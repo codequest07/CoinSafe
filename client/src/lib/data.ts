@@ -1,7 +1,7 @@
 import MemoDashboard from "@/icons/Dashboard";
 import MemoPortfolio from "@/icons/Portfolio";
 import MemoReward from "@/icons/Reward";
-import MemoStaking from "@/icons/Staking";
+// import MemoStaking from "@/icons/Staking";
 import MemoVault from "@/icons/Vault";
 import MemoMagicPen from "@/icons/MagicPen";
 import MemoChrome from "@/icons/Chrome";
@@ -25,7 +25,7 @@ import b10 from "@/icons/badges/b10.svg";
 import MemoPortfolioActive from "@/icons/PortfolioActive";
 import MemoDashboardActive from "@/icons/DashboardActive";
 import MemoVaultActive from "@/icons/VaultActive";
-import MemoStakingActive from "@/icons/StakingActive";
+// import MemoStakingActive from "@/icons/StakingActive";
 import MemoRewardActive from "@/icons/RewardActive";
 
 export type Asset = {
@@ -62,13 +62,6 @@ export const NavLinks = [
     icon: MemoVault,
     activeIcon: MemoVaultActive,
     label: "Vault",
-  },
-
-  {
-    to: "/dashboard/staking",
-    icon: MemoStaking,
-    activeIcon: MemoStakingActive,
-    label: "Staking",
   },
   {
     to: "/dashboard/rewards",

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface SuccessfulTxModalProps {
@@ -23,6 +23,16 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
   token,
   additionalDetails,
 }) => {
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 3000); // Close modal after 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup timer on unmount
+    }
+  }, [isOpen, onClose]);
   // Generate transaction description based on type
   const getTransactionDescription = () => {
     switch (transactionType) {
@@ -130,7 +140,6 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             </div>
           )}
         </div>
-
         <div className="text-center text-sm text-[#B5B5B5]">{additionalDetails?.subText}</div>
       </DialogContent>
     </Dialog>

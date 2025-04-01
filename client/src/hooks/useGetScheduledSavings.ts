@@ -60,39 +60,38 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
     contract,
     method:
       "function getScheduledSavings() external view returns (LibDiamond.ScheduledSaving[] memory)",
-    queryOptions: {
-      enabled: Boolean(address),
-    },
     from: address,
+    // queryOptions: {
+    //   refetchInterval: 0,
+    // },
   });
 
   useEffect(() => {
     async function run() {
-      console.log("====================================");
-      console.log("Runningggggggg");
-      console.log("====================================");
+      // console.log("====================================");
+      // console.log("Runningggggggg");
+      // console.log("====================================");
+      if (!isConnected || !result) return;
 
-      if (isConnected) {
-        try {
-          console.log("====================================");
-          console.log("Tryingggg");
-          console.log("====================================");
-          console.log(result);
-          if (result) {
-            console.log("====================================");
-            console.log();
-            console.log("====================================");
-            console.log(result);
-            const scheduledSavingsRes = await transformArrayData(result as []);
-            setScheduledSavings(
-              scheduledSavingsRes.filter(
-                (item) => item.scheduledDate >= new Date().getTime()
-              )
-            );
-          }
-        } catch (err: any) {
-          setError(err);
+      try {
+        // console.log("====================================");
+        // console.log("Tryingggg");
+        // console.log("====================================");
+        // console.log(result);
+        if (result) {
+          // console.log("====================================");
+          // console.log();
+          // console.log("====================================");
+          // console.log(result);
+          const scheduledSavingsRes = await transformArrayData(result as []);
+          setScheduledSavings(
+            scheduledSavingsRes.filter(
+              (item) => item.scheduledDate >= new Date().getTime()
+            )
+          );
         }
+      } catch (err: any) {
+        setError(err);
       }
     }
     run();
