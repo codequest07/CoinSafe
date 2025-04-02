@@ -4,41 +4,12 @@ import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { NavLinks } from "@/lib/data";
 import MemoLogo from "@/icons/Logo";
 import SmileFace from "./Smile";
 import ExtensionCard from "./Cards/ExtensionCard";
 import ClaimBtn from "./ClaimBtn";
-
-// Utility function to generate random non-human names
-const generateRandomName = () => {
-  const RandomName = [
-    "VaultVanguard",
-    "CryptoKeeper",
-    "NovaGuard",
-    "StellarShield",
-    "SafeSparrow",
-    "QuantumHaven",
-    "FortressFlare",
-    "PrismProtector",
-    "EchoVault",
-    "AtlasLock",
-    "CelestialVault",
-    "IronCipher",
-    "OrbitGuardian",
-    "BlazeSentinel",
-    "FrostHaven",
-    "AeroVault",
-    "ShadowFort",
-    "TitanSecure",
-    "GlintSeeker",
-    "EonSentinel",
-  ];
-
-  const names = RandomName[Math.floor(Math.random() * RandomName.length)];
-  return `${names}`;
-};
 
 const getRandomMessage = () => {
   const messages = [
@@ -54,12 +25,26 @@ const getRandomMessage = () => {
 };
 
 const DashHeader = () => {
-  const [randomName, setRandomName] = useState("");
+  const location = useLocation();
   const [randomMessage, setRandomMessage] = useState("");
 
+  // Get current route name - only the last segment
+  const getCurrentRouteName = () => {
+    const path = location.pathname;
+
+    // Return Dashboard for root path
+    if (path === "/") return "Dashboard";
+
+    // Split the path by '/' and get the last non-empty segment
+    const segments = path.split("/").filter((segment) => segment !== "");
+    const lastSegment = segments[segments.length - 1];
+
+    // Capitalize the first letter
+    return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
+  };
+
   useEffect(() => {
-    // Generate a new random name when the component mounts
-    setRandomName(generateRandomName());
+    // Generate a new random message when the component mounts
     setRandomMessage(getRandomMessage());
   }, []);
 
@@ -119,9 +104,11 @@ const DashHeader = () => {
         <div className="w-full hidden md:block rounded-0 md:p-3 ">
           <div className="flex items-start justify-between text-white p-1">
             <div className="sm:flex flex-col space-y-2 hidden items-start">
-              {/* Random Name and Badge */}
+              {/* Current Route Name and Badge */}
               <div className="flex space-x-2 items-center">
-                <span className="text-sm text-gray-400">{randomName}</span>
+                <span className="text-sm text-[#F1F1F1]">
+                  {getCurrentRouteName()}
+                </span>
                 <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
                   1000 days 🔥
                 </span>
