@@ -1,10 +1,10 @@
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
-// import ClaimCard from "@/components/ClaimCard";
+import ClaimCard from "@/components/ClaimCard";
 import VaultCard from "@/components/VaultCard";
-import AssetTable from "@/components/AssetTable";
 import { useBalances } from "@/hooks/useBalances";
 import SavingsCards from "@/components/SavingsCards";
 import { useActiveAccount } from "thirdweb/react";
+import { AssetTabs } from "@/components/Asset-tabs";
 
 const Vault = () => {
   const account = useActiveAccount();
@@ -18,22 +18,17 @@ const Vault = () => {
 
       <div className="flex gap-2 pb-2">
         <VaultCard
-          title="Vault balance"
+          title="Savings balance"
           value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}
           unit="USD"
-          text={
-            <>
-              <span className="text-[#48FF91]">+18%</span> (compared to your
-              previous savings)
-            </>
-          }
+          text={<>sum of all balances</>}
         />
-        {/* <ClaimCard
+        <ClaimCard
           title="Claimable balance"
           value={0.0}
           unit="USD"
           text="sum of all your claimable assets"
-        /> */}
+        />
       </div>
       <SavingsCards />
       {/* <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-4">
@@ -45,8 +40,7 @@ const Vault = () => {
       </div> */}
 
       <div className="py-2">
-        {/* <AssetVaultTable /> */}
-        <AssetTable />
+        <AssetTabs />
       </div>
 
       <div>{/* {isConnected && <SavingsHistoryTable />} */}</div>
