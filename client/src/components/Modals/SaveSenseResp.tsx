@@ -8,19 +8,17 @@ import {
 } from "@/components/ui/card";
 import MemoMagicIcon from "@/icons/MagicIcon";
 
-export default function SaveSenseResp({
-  isOpen,
-  onClose,
-  data,
-}: {
+interface SaveSenseRespProps {
   isOpen: boolean;
   onClose: () => void;
-  data: string | null;
-}) {
-  const formatResponse = (response: string | null) => {
-    if (!response) return null;
+  data: { savingsPlan: string } | null; // Updated type
+}
 
-    const sections = response.split("\n\n");
+export default function SaveSenseResp({ isOpen, onClose, data }: SaveSenseRespProps) {
+  const formatResponse = (response: { savingsPlan: string } | null) => {
+    if (!response?.savingsPlan) return null;
+
+    const sections = response.savingsPlan.split("\n\n");
     return sections.map((section, index) => (
       <p key={index} className="mb-4">
         {section.split("\n").map((line, lineIndex) => (
@@ -49,7 +47,8 @@ export default function SaveSenseResp({
           <CardFooter className="justify-end space-x-4 mt-4">
             <Button
               onClick={onClose}
-              className="text-white bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#1E1E1E99]">
+              className="text-white bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#1E1E1E99]"
+            >
               Close
             </Button>
           </CardFooter>
