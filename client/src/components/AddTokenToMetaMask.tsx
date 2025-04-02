@@ -38,7 +38,7 @@ const AddTokenToMetaMask = () => {
         onClick={handleAddToken}
         disabled={isAdding}>
         <MemoMmIcon />
-        <span> {isAdding ? "Adding..." : "Add Token to MetaMask"}</span>
+        <span> {isAdding ? "Adding..." : "Add to Metamask"}</span>
       </Button>
     </div>
   );
