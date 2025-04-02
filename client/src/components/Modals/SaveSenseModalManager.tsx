@@ -47,12 +47,16 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
 
     try {
       const response = await fetch(
-        `https://coinsafe-0q0m.onrender.com/main/${address}`
+        `https://coinsafe-0q0m.onrender.com/api/ai/savings-plan`,
+        // `http://localhost:1234/api/ai/savings-plan`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ address }),
+        }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
 
       const data = await response.json();
       setSaveSenseData(data);

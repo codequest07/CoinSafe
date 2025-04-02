@@ -37,7 +37,7 @@ export async function getClaudeSavingsPlan(
   const API_KEY = anthropicApiKey;
   const API_URL = "https://api.anthropic.com/v1/messages";
 
-  // console.log("API Key:", API_KEY ? "Set (not shown for security)" : "Not set");
+  console.log("API Key:", API_KEY ? "Set (not shown for security)" : "Not set");
 
   if (!API_KEY) {
     console.error("ANTHROPIC_API_KEY is not set");
@@ -89,7 +89,7 @@ export async function getClaudeSavingsPlan(
 }
 
 export async function main(address: string): Promise<string | null> {
-  // console.log("Received address:", address, "Type:", typeof address);
+  console.log("Received address:", address, "Type:", typeof address);
 
   try {
     if (typeof address !== "string" || !address) {
@@ -100,7 +100,7 @@ export async function main(address: string): Promise<string | null> {
       throw new Error("Invalid Ethereum address format");
     }
 
-    // console.log("Fetching asset transfers for address:", address);
+    console.log("Fetching asset transfers for address:", address);
     const getTransfers = await alchemy.core.getAssetTransfers({
       fromBlock: "0x0",
       toBlock: "latest",
@@ -108,7 +108,7 @@ export async function main(address: string): Promise<string | null> {
       excludeZeroValue: true,
       category: [AssetTransfersCategory.ERC20],
     });
-    // console.log("Fetched ERC20 transfers:", getTransfers);
+    console.log("Fetched ERC20 transfers:", getTransfers);
 
     const getInternalTransfers: AssetTransfersResponse =
       await alchemy.core.getAssetTransfers({
@@ -145,9 +145,9 @@ export async function main(address: string): Promise<string | null> {
 
     const savingsPlan = await getClaudeSavingsPlan(transfersData);
     if (savingsPlan) {
-      // console.log("Savings plan", savingsPlan);
+      console.log("Savings plan", savingsPlan);
     } else {
-      // console.log("Failed to generate savings plan");
+      console.log("Failed to generate savings plan");
     }
     return savingsPlan || null;
   } catch (error) {
