@@ -1,3 +1,5 @@
+"use client";
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,29 +43,27 @@ export default function SaveSenseResp({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[800px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] border rounded-[2rem] shadow-lg">
+      <DialogContent className="max-w-[550px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] border rounded-[2rem] shadow-lg">
         <div className="flex flex-col h-full">
-          <CardHeader>
+          <CardHeader className="border-b border-[#FFFFFF21] ">
             <CardTitle className="flex items-center space-x-2 text-sm font-normal">
               <MemoMagicIcon className="h-6 w-6" />
               <p>SaveSense response:</p>
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="text-sm max-h-[60vh] overflow-y-auto flex-1">
+          <CardContent className="text-sm max-h-[60vh] overflow-y-auto flex-1 scrollbar-hide">
             {data ? (
-              <div className="p-2 bg-gray-900 rounded-lg">
-                {formatResponse(data)}
-              </div>
+              <div className="p-2 rounded-lg">{formatResponse(data)}</div>
             ) : (
               <p className="text-gray-400">No data available</p>
             )}
           </CardContent>
 
-          <CardFooter className="justify-end space-x-4 mt-4">
+          <CardFooter className="justify-end border-t border-[#FFFFFF21]  space-x-4 mt-4">
             <Button
               onClick={onClose}
-              className="text-white bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#1E1E1E99]">
+              className="text-white bg-[#3F3F3F99] px-8 rounded-[2rem] mt-4 hover:bg-[#1E1E1E99]">
               Close
             </Button>
           </CardFooter>
