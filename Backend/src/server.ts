@@ -15,7 +15,7 @@ import faucetRouter from "./Routes/FaucetClaimRoute";
 import { TransactionModel } from "./Models/TransactionModel";
 import { AnthropicService } from "./services/AnthropicService";
 import { SavingsPlanController } from "./controllers/SavingsPlanController";
-import { savingsPlanRoutes } from "./Routes/savingsPlanRoutes";
+import { savingsPlanRoutes } from "./Routes/SavingsAiRoutes";
 
 dotenv.config();
 const app = express();
