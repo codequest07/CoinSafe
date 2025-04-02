@@ -63,12 +63,14 @@ export default function SavingsCards() {
           <div
             ref={scrollContainerRef}
             className="flex space-x-4 pb-4 overflow-x-auto hide-scrollbar"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             {targets.map((target) => (
               <button
                 key={target.id}
                 onClick={() => navigate(`/dashboard/vault/${target.id}`)}
-                className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-gray-800 transition-colors hover:bg-gray-900">
+                className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-gray-800 transition-colors hover:bg-gray-900"
+              >
                 <div className="flex justify-between items-start mb-4">
                   <div className="text-sm text-gray-400 font-[300]">
                     {target.name}
@@ -76,7 +78,8 @@ export default function SavingsCards() {
                   <Badge
                     className={`
                       bg-[#79E7BA33] font-[400] text-[#F1F1F1] rounded-xl flex items-center p-1 px-2 hover:bg-[#79E7BA33]
-                    `}>
+                    `}
+                  >
                     {target.status}
                   </Badge>
                 </div>
@@ -97,7 +100,8 @@ export default function SavingsCards() {
             variant="ghost"
             size="icon"
             onClick={handleScrollBack}
-            className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/80 hover:bg-black/70 text-white z-10 border border-gray-700">
+            className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/80 hover:bg-black/70 text-white z-10 border border-gray-700"
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
 
@@ -105,7 +109,8 @@ export default function SavingsCards() {
             variant="ghost"
             size="icon"
             onClick={handleScroll}
-            className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/80 hover:bg-black/70 text-white z-10 border border-gray-700">
+            className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/80 hover:bg-black/70 text-white z-10 border border-gray-700"
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>

@@ -86,12 +86,13 @@ export default function SmarterSavingCard({
   return (
     <>
       {/* Mobile View Carousel */}
-      <div className="block sm:hidden mb-6 relative">
+      <div className="block w-full sm:hidden mb-6 relative">
         {/* Card */}
         <div
           className="relative bg-[#092324] rounded-[16px] p-5 text-[#F1F1F1] overflow-hidden mb-3"
           onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setTimeout(() => setIsPaused(false), 10000)}>
+          onTouchEnd={() => setTimeout(() => setIsPaused(false), 10000)}
+        >
           <div className="flex justify-between items-start">
             <div className="max-w-[70%]">
               <h3 className="text-sm">
@@ -117,7 +118,8 @@ export default function SmarterSavingCard({
               className={`w-1.5 h-1.5 rounded-full ${
                 index === activeSlide ? "bg-[#20FFAF]" : "bg-[#FFFFFF33]"
               } cursor-pointer`}
-              onClick={() => goToSlide(index)}></div>
+              onClick={() => goToSlide(index)}
+            ></div>
           ))}
         </div>
 
@@ -125,13 +127,15 @@ export default function SmarterSavingCard({
         <button
           onClick={prevSlide}
           className="absolute left-2 top-1/3 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/20 rounded-full text-white opacity-0"
-          aria-label="Previous slide">
+          aria-label="Previous slide"
+        >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={nextSlide}
           className="absolute right-2 top-1/3 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-black/20 rounded-full text-white opacity-0"
-          aria-label="Next slide">
+          aria-label="Next slide"
+        >
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
@@ -141,7 +145,8 @@ export default function SmarterSavingCard({
         {SavingsOverviewData.map((items, index) => (
           <div
             key={index}
-            className="flex border-0 items-center space-x-4 justify-between bg-[#092324] rounded-[12px] p-4 text-[#F1F1F1]">
+            className="flex border-0 items-center space-x-4 justify-between bg-[#092324] rounded-[12px] p-4 text-[#F1F1F1]"
+          >
             <div>
               <items.icon className="w-9 h-9 text-[#20FFAF]" />
             </div>
@@ -152,7 +157,8 @@ export default function SmarterSavingCard({
             <div>
               <Button
                 onClick={() => handleButtonClick(items.buttonText)}
-                className="px-4 py-2 text-white bg-[#FFFFFF2B] text-sm text-nowrap rounded-[100px]">
+                className="px-4 py-2 text-white bg-[#FFFFFF2B] text-sm text-nowrap rounded-[100px]"
+              >
                 {items.buttonText}
               </Button>
             </div>

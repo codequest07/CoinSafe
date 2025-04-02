@@ -5,6 +5,7 @@ import VaultCard from "./VaultCard";
 import { useBalances } from "@/hooks/useBalances";
 import AssetTable from "./AssetTable";
 import { useActiveAccount } from "thirdweb/react";
+import SavingsBalanceCard from "./Cards/SavingsBalanceCard";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
@@ -30,13 +31,16 @@ export default function SavingsDetail() {
           <h1 className="text-xl">{id} savings</h1>
         </div>
 
-        <VaultCard
-          title="Vault balance"
-          value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}
-          unit="USD"
-          text=""
-          // text="+18% (compared to your previous savings)"
-        />
+        <div className="grid grid-cols-2 gap-2">
+          <SavingsBalanceCard />
+          <VaultCard
+            title="Vault balance"
+            value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}
+            unit="USD"
+            text=""
+            // text="+18% (compared to your previous savings)"
+          />
+        </div>
 
         <div className="py-2">
           <AssetTable />
