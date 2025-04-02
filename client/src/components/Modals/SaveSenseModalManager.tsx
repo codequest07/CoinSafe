@@ -18,7 +18,9 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
 }) => {
   const [isLoadingModalOpen, setIsLoadingModalOpen] = useState(false);
   const [isSaveSenseModalOpen, setIsSaveSenseModalOpen] = useState(false);
-  const [saveSenseData, setSaveSenseData] = useState(null);
+  const [saveSenseData, setSaveSenseData] = useState<{
+    savingsPlan: string;
+  } | null>(null);
   const [showKitchenLoading, setShowKitchenLoading] = useState(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const { hasApproved, setApproved } = useApproval();
@@ -35,8 +37,9 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
       return;
     }
 
+    console.log("Current approval status:", hasApproved);
     if (hasApproved) {
-      fetchDataFromAPI();
+      await fetchDataFromAPI();
     } else {
       setIsPermissionModalOpen(true);
     }
@@ -44,6 +47,7 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
 
   const fetchDataFromAPI = async () => {
     setIsLoadingModalOpen(true);
+    setSaveSenseData(null); // Reset previous data
 
     try {
       const response = await fetch(
@@ -58,25 +62,38 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
         }
       );
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("API response:", result);
+
+      // Handle both direct and nested response structures
+      const data = result.savingsPlan ? result : result.data;
+      if (!data?.savingsPlan) {
+        throw new Error("Invalid data format: missing savingsPlan");
+      }
+
       setSaveSenseData(data);
-      setIsLoadingModalOpen(false);
       setIsSaveSenseModalOpen(true);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setIsLoadingModalOpen(false);
       toast({
         title: "Failed to fetch data",
-        description: "Please try again later",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsLoadingModalOpen(false);
     }
   };
 
-  const handlePermissionApprove = () => {
+  const handlePermissionApprove = async () => {
     setIsPermissionModalOpen(false);
     setApproved();
-    fetchDataFromAPI();
+    await fetchDataFromAPI();
   };
 
   const handlePermissionReject = () => {
@@ -97,7 +114,6 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
     setShowKitchenLoading(false);
   };
 
-  // Expose methods to trigger from parent component
   React.useImperativeHandle(trigger, () => ({
     fetchData: handleFetchData,
     download: handleDownload,
@@ -111,15 +127,18 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
         onApprove={handlePermissionApprove}
         onReject={handlePermissionReject}
       />
+
       <Loading
         isOpen={isLoadingModalOpen}
         onClose={() => setIsLoadingModalOpen(false)}
       />
+
       <SaveSenseResp
         isOpen={isSaveSenseModalOpen}
         onClose={closeSaveSenseModal}
         data={saveSenseData}
       />
+
       <KitchenLoading
         isOpen={showKitchenLoading}
         onClose={closeKitchenLoading}
