@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOne = exports.getAllWaitlistEntries = exports.addToWaitlist = void 0;
+exports.getWaitlistCount = exports.getOne = exports.getAllWaitlistEntries = exports.addToWaitlist = void 0;
 const WaitlistModel_1 = __importDefault(require("../Models/WaitlistModel"));
 const Validation_1 = require("../Validation");
 const email_1 = require("../email");
@@ -176,4 +176,24 @@ const getOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getOne = getOne;
+const getWaitlistCount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        console.log("Attempting to count waitlist entries..."); // Debug log
+        const count = yield WaitlistModel_1.default.countDocuments();
+        console.log(`Found ${count} entries`); // Debug log
+        res.status(200).json({
+            success: true,
+            count,
+            timestamp: new Date().toISOString(),
+        });
+    }
+    catch (error) {
+        console.error("Database count error:", error);
+        res.status(500).json({
+            success: false,
+            error: "Internal server error",
+        });
+    }
+});
+exports.getWaitlistCount = getWaitlistCount;
 //# sourceMappingURL=WaitlistController.js.map

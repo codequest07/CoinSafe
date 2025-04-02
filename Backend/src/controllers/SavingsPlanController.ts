@@ -4,74 +4,138 @@ import { AnthropicService } from "../services/AnthropicService";
 import { TransfersData } from "../types/ai";
 
 export class SavingsPlanController {
-  private transactionModel: TransactionModel;
-  private anthropicService: AnthropicService;
-
   constructor(
-    transactionModel: TransactionModel,
-    anthropicService: AnthropicService
-  ) {
-    this.transactionModel = transactionModel;
-    this.anthropicService = anthropicService;
-  }
+    private readonly transactionModel: TransactionModel,
+    private readonly anthropicService: AnthropicService
+  ) {}
 
-  async getSavingsPlan(req: Request, res: Response): Promise<void> {
+  public async getSavingsPlan(req: Request, res: Response): Promise<void> {
     const { address } = req.body;
 
+    // Input validation
     if (!address) {
-      res.status(400).json({ error: "Address is required" });
+      this.sendErrorResponse(res, 400, "Wallet address is required");
       return;
     }
 
-    console.log("Received address:", address, "Type:", typeof address);
+    try {
+      const normalizedAddress = this.validateAndNormalizeAddress(address);
+      const transfers = await this.fetchTransactions(normalizedAddress);
+      const savingsPlan = await this.generatePlan(transfers);
+
+      this.sendSuccessResponse(res, {
+        address: normalizedAddress,
+        savingsPlan,
+        transactionCount: transfers.length,
+      });
+    } catch (error) {
+      this.handleControllerError(res, error);
+    }
+  }
+
+  private validateAndNormalizeAddress(address: string): string {
+    const normalizedAddress = address.trim().toLowerCase();
+
+    // Basic validation
+    if (typeof address !== "string") {
+      throw new Error("Address must be a string");
+    }
+
+    if (normalizedAddress.length === 0) {
+      throw new Error("Address cannot be empty");
+    }
+
+    // Ethereum address validation
+    const ethAddressRegex = /^0x[a-f0-9]{40}$/;
+    if (!ethAddressRegex.test(normalizedAddress)) {
+      throw new Error(
+        `Invalid Ethereum address format. Expected 42 characters (0x prefix + 40 hex chars), got ${normalizedAddress.length} chars.`
+      );
+    }
+
+    return normalizedAddress;
+  }
+
+  private async fetchTransactions(address: string): Promise<any[]> {
+    console.log(`Fetching transactions for address: ${address}`);
+    try {
+      const transfers = await this.transactionModel.getTransactions(address);
+
+      if (!Array.isArray(transfers)) {
+        throw new Error("Invalid transactions data format");
+      }
+
+      console.log(`Found ${transfers.length} transactions`);
+      return transfers;
+    } catch (error) {
+      console.error("Failed to fetch transactions:", error);
+      throw new Error("Could not retrieve transaction history");
+    }
+  }
+
+  private async generatePlan(transfers: any[]): Promise<string> {
+    const transfersData: TransfersData = {
+      erc20Transfers: transfers.filter((t) => t.category === "erc20"),
+      nativeTransfers: transfers.filter((t) => t.category === "native"),
+      internalTransfers: [],
+    };
+
+    console.log(
+      `Processing ${transfersData.erc20Transfers.length} ERC20 transfers`
+    );
 
     try {
-      // Validate the address
-      if (typeof address !== "string" || !address) {
-        throw new Error("Invalid address: must be a non-empty string");
-      }
-
-      // Trim whitespace and normalize case
-      const normalizedAddress = address.trim().toLowerCase();
-      console.log("Normalized address:", normalizedAddress);
-      console.log("Address length:", normalizedAddress.length);
-      console.log("Address after 0x:", normalizedAddress.slice(2));
-      console.log("Length after 0x:", normalizedAddress.slice(2).length);
-
-      // Use a regex to validate Ethereum address format
-      const addressRegex = /^0x[a-f0-9]{40}$/;
-      console.log("Regex test result:", addressRegex.test(normalizedAddress));
-      if (!addressRegex.test(normalizedAddress)) {
-        throw new Error(
-          `Invalid Ethereum address format: Address must be 42 characters long (0x + 40 hexadecimal characters). Got length ${
-            normalizedAddress.length
-          }, with ${normalizedAddress.slice(2).length} characters after 0x.`
-        );
-      }
-
-      console.log("Fetching transactions for address:", normalizedAddress);
-      const transfers = await this.transactionModel.getTransactions(
-        normalizedAddress
-      );
-
-      const transfersData: TransfersData = {
-        erc20Transfers: transfers.filter((t) => t.category === "erc20"),
-        internalTransfers: [], // Etherscan doesn't provide internal transfers
-      };
-
       const savingsPlan = await this.anthropicService.getSavingsPlan(
         transfersData
       );
-      if (savingsPlan) {
-        console.log("Savings plan:", savingsPlan);
-        res.status(200).json({ savingsPlan });
-      } else {
-        console.log("Failed to generate savings plan");
-        res.status(500).json({ error: "Failed to generate savings plan" });
+      if (!savingsPlan) {
+        throw new Error("Failed to generate savings plan: result is null");
       }
+      return savingsPlan;
     } catch (error) {
-      console.error("Error generating savings plan:", error);
-      res.status(400).json({ error: (error as Error).message });
+      console.error("AI service error:", error);
+      throw new Error("Failed to generate savings plan");
     }
+  }
+
+  private sendSuccessResponse(
+    res: Response,
+    data: {
+      address: string;
+      savingsPlan: string;
+      transactionCount: number;
+    }
+  ): void {
+    res.status(200).json({
+      success: true,
+      data: {
+        ...data,
+        generatedAt: new Date().toISOString(),
+      },
+    });
+  }
+
+  private sendErrorResponse(
+    res: Response,
+    code: number,
+    message: string
+  ): void {
+    console.error(`Error ${code}: ${message}`);
+    res.status(code).json({
+      success: false,
+      error: message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  private handleControllerError(res: Response, error: unknown): void {
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+
+    this.sendErrorResponse(
+      res,
+      error instanceof Error && error.message.includes("Invalid") ? 400 : 500,
+      errorMessage
+    );
   }
 }

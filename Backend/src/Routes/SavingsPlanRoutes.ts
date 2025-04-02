@@ -1,12 +1,15 @@
 import { Router } from "express";
 import { SavingsPlanController } from "../controllers/SavingsPlanController";
 
-export function savingsPlanRoutes(controller: SavingsPlanController): Router {
+export const savingsPlanRoutes = (controller: SavingsPlanController) => {
   const router = Router();
 
-  router.post("/savings-plan", (req, res) =>
-    controller.getSavingsPlan(req, res)
-  );
+  /**
+   * @route POST /api/ai/savings-plan
+   * @desc Generate personalized savings plan
+   * @access Public
+   */
+  router.post("/savings-plan", controller.getSavingsPlan.bind(controller));
 
   return router;
-}
+};

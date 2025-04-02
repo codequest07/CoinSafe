@@ -8,6 +8,7 @@ export interface Transfer {
 }
 
 export interface TransfersData {
-  erc20Transfers: Transfer[];
-  internalTransfers: Transfer[];
+  erc20Transfers: any[];
+  nativeTransfers: any[];
+  internalTransfers: any[];
 }
