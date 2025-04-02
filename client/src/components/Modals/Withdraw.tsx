@@ -23,6 +23,8 @@ import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useBalances } from "@/hooks/useBalances";
 import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
+import MemoRipple from "@/icons/Ripple";
+import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 
 export default function Withdraw({
   isWithdrawModalOpen,
@@ -38,6 +40,7 @@ export default function Withdraw({
 
   const [amount, setAmount] = useState<number>();
   const [token, setToken] = useState("");
+  const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const { AvailableBalance } = useBalances(address as string);
 
@@ -71,6 +74,40 @@ export default function Withdraw({
     setToken(value);
   };
 
+  async function getTokenPrice(token: string, amount: number | undefined) {
+    if (!token || !amount) return "0.00";
+
+    try {
+      switch (token) {
+        case tokens.safu: {
+          const safuPrice = await getSafuToUsd(amount);
+          return safuPrice.toFixed(2);
+        }
+        case tokens.lsk: {
+          const lskPrice = await getLskToUsd(amount);
+          return lskPrice.toFixed(2);
+        }
+        case tokens.usdt: {
+          const usdtPrice = await getUsdtToUsd(amount);
+          return usdtPrice.toFixed(2);
+        }
+        default:
+          return "0.00";
+      }
+    } catch (error) {
+      console.error("Error getting token price:", error);
+      return "0.00";
+    }
+  }
+
+  useEffect(() => {
+    const updatePrice = async () => {
+      const price: string = await getTokenPrice(token, amount);
+      setTokenPrice(price);
+    };
+    updatePrice();
+  }, [token, amount]);
+
   useEffect(() => {
     if (address && token && AvailableBalance) {
       const tokensData = AvailableBalance;
@@ -92,12 +129,12 @@ export default function Withdraw({
 
   return (
     <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
-      <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C]">
+      <DialogContent className="w-11/12 sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C]">
         <DialogTitle className="text-white flex items-center space-x-3">
           {/* <MemoBackIcon onClick={onBack} className="w-6 h-6 cursor-pointer" /> */}
           <p>Withdraw assets</p>
         </DialogTitle>
-        <div className="p-8 text-gray-700">
+        <div className="sm:p-8 text-gray-700">
           {/* Amount Section */}
           {/* <div className="flex items-center justify-between mb-6">
             <div className="flex-1">
@@ -139,46 +176,42 @@ export default function Withdraw({
 
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Amount</label>
-            <div className="p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
-              <div className="absolute top-3 right-3">
-                <div className="ml-4">
-                  <Select onValueChange={handleTokenSelect}>
-                    <SelectTrigger className="w-[140px] bg-gray-700  border border-[#FFFFFF3D] bg-[#1E1E1E99] text-white rounded-lg">
-                      <div className="flex items-center">
-                        {/* <MemoRipple className="mr-2" /> */}
-                        <SelectValue placeholder="Select Token" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={tokens.safu}>
-                        SAFU
-                      </SelectItem>
-                      <SelectItem value={tokens.usdt}>
-                        <div className="flex items-center space-x-2">
-                          <p>USDT</p>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value={tokens.lsk}>
-                        LSK
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {/* {validationErrors.token && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {validationErrors.token}
-                        </p>
-                      )} */}
-                </div>
-              </div>
-              <div className="flex flex-col items-center">
+            <div className="flex items-center justify-between p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
+              <div className="flex flex-col items-start">
                 <input
                   type="number"
                   value={amount}
                   onChange={(e: any) => setAmount(e.target.value)}
-                  className="text-2xl font-medium bg-transparent text-center text-white w-full outline-none"
+                  className="text-2xl font-medium bg-transparent text-white w-16 sm:w-full outline-none"
                   placeholder="0"
                 />
-                {/* <div className="text-sm text-gray-400 mt-1">≈ $400.56</div> */}
+                <div className="text-sm text-gray-400 mt-1">
+                  ≈ ${tokenPrice}
+                </div>
+              </div>
+              <div className="ml-4">
+                <Select onValueChange={handleTokenSelect} value={token}>
+                  <SelectTrigger className="w-[160px] py-2.5 bg-gray-700  border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
+                    <div className="flex items-center">
+                      <MemoRipple className="mr-2" />
+                      <SelectValue placeholder="Select Token" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={tokens.safu}>SAFU</SelectItem>
+                    <SelectItem value={tokens.usdt}>
+                      <div className="flex items-center space-x-2">
+                        <p>USDT</p>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value={tokens.lsk}>LSK</SelectItem>
+                  </SelectContent>
+                </Select>
+                {/* {validationErrors.token && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {validationErrors.token}
+                        </p>
+                      )} */}
               </div>
             </div>
           </div>
@@ -187,11 +220,11 @@ export default function Withdraw({
           {token && (
             <>
               {amount && amount > selectedTokenBalance && (
-                <p className="text-red-500 text-[13px] mt-3 text-right">
+                <p className="text-red-500 text-[13px] mt-1 text-right">
                   Amount greater than available balance
                 </p>
               )}
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between my-2">
                 <div className="text-sm font-[300] text-gray-300">
                   Available balance:{" "}
                   <span className="text-gray-400">
@@ -214,14 +247,14 @@ export default function Withdraw({
           )}
         </div>
         <DialogFooter>
-          <Button
-            onClick={() => setIsWithdrawModalOpen(false)}
-            className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-            type="submit"
-          >
-            Cancel
-          </Button>
-          <div>
+          <div className="flex sm:space-x-4 justify-between mt-2">
+            <Button
+              onClick={() => setIsWithdrawModalOpen(false)}
+              className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
+              type="submit"
+            >
+              Cancel
+            </Button>
             <Button
               onClick={(e) => {
                 withdrawAsset(e);
@@ -251,6 +284,9 @@ export default function Withdraw({
         }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
+        additionalDetails={{
+          subText: "Assets will be available in your wallet.",
+        }}
       />
     </Dialog>
   );

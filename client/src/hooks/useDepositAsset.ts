@@ -15,6 +15,7 @@ interface UseDepositAssetParams {
   coinSafeAbi: any;
   chainId?: number;
   onSuccess?: () => void;
+  onApprove?: () => void;
   onError?: (error: Error) => void;
   toast: (props: { title: string; variant: "default" | "destructive" }) => void;
 }
@@ -33,6 +34,7 @@ export const useDepositAsset = ({
   coinSafeAddress,
   // coinSafeAbi,
   onSuccess,
+  onApprove,
   onError,
   toast,
 }: UseDepositAssetParams): DepositAssetResult => {
@@ -96,16 +98,13 @@ export const useDepositAsset = ({
               method: "approve",
               params: [coinSafeAddress, BigInt(amount * 10 ** 18)], // Assuming 18 decimals
             });
+            
+            onApprove?.();
 
             await sendAndConfirmTransaction({
               transaction: approveTx,
               account,
             });
-
-            toast({
-              title: "Approve transaction successful, Proceeding with depositing..",
-              variant: "default",
-            })
           } catch (error) {
             console.error("Approval failed:", error);
             toast({

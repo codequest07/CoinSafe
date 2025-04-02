@@ -14,7 +14,7 @@ export const getLskToUsd = async (lsk: number) => {
     }
   } catch (err) {
     console.error(err);
-    return err;
+    return 0;
   }
 };
 
@@ -34,7 +34,7 @@ export const getUsdtToUsd = async (usdt: number) => {
     }
   } catch (err) {
     console.error(err);
-    return err;
+    return 0;
   }
 };
 

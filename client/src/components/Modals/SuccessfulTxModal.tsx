@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import MemoLogo2 from "@/icons/Logo2";
 
 export interface SuccessfulTxModalProps {
   isOpen: boolean;
@@ -12,6 +11,7 @@ export interface SuccessfulTxModalProps {
     frequency?: string;
     savingGoal?: number;
     poolName?: string;
+    subText?: string
   };
 }
 
@@ -23,6 +23,16 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
   token,
   additionalDetails,
 }) => {
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 3000); // Close modal after 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup timer on unmount
+    }
+  }, [isOpen, onClose]);
   // Generate transaction description based on type
   const getTransactionDescription = () => {
     switch (transactionType) {
@@ -40,7 +50,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
       case "withdraw":
         return (
           <>
-            You withdrew{" "}
+            You've withdrawn{" "}
             {
               <span className="text-[#20FFAF] font-semibold">
                 {amount} {token}
@@ -66,11 +76,17 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
       case "setup-recurring-save":
         return (
           <>
-            You set up an <span className="text-[#20FFAF] font-semibold">automated savings</span> plan to save{" "}
+            You set up an{" "}
+            <span className="text-[#20FFAF] font-semibold">
+              automated savings
+            </span>{" "}
+            plan to save{" "}
             <span className="text-[#20FFAF] font-semibold">
               {amount} {token}
             </span>{" "}
-            <span className="font-semibold lowercase">{additionalDetails?.frequency || "every day"}</span>
+            <span className="font-semibold lowercase">
+              {additionalDetails?.frequency || "every day"}
+            </span>
           </>
         );
       default:
@@ -92,11 +108,11 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
   const getTransactionTitle = () => {
     switch (transactionType) {
       case "deposit":
-        return "Deposit Successful";
+        return "Deposit Transaction Successful";
       case "withdraw":
-        return "Withdrawal Successful";
+        return "Withdrawal Transaction Successful";
       case "save":
-        return "Saving Successful";
+        return "Saving Transaction Successful";
       case "setup-recurring-save":
         return "Create Automated Savings Successful";
       default:
@@ -106,16 +122,14 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[500px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg">
-        <div className="flex justify-between items-center mb-4">
-          <DialogTitle className="text-left text-lg font-semibold">
-            {getTransactionTitle()}
-          </DialogTitle>
-        </div>
+      <DialogContent className="max-w-[360px] sm:max-w-[410px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg" noX={true}>
+        <DialogTitle className="text-center">
+          {getTransactionTitle()}
+        </DialogTitle>
 
-        <div className="flex flex-col items-center space-y-6 mb-4">
+        <div className="flex flex-col items-center space-y-6">
           {/* Logo */}
-          <MemoLogo2 className="md:w-[25rem] h-28" />
+          <img src="/assets/empty-wallet-tick.png" className="w-24 h-24" />
 
           {/* Description */}
           <p className="text-center text-lg">{getTransactionDescription()}</p>
@@ -126,8 +140,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             </div>
           )}
         </div>
-
-        <div className="text-center text-2xl">🥳💃</div>
+        <div className="text-center text-sm text-[#B5B5B5]">{additionalDetails?.subText}</div>
       </DialogContent>
     </Dialog>
   );
