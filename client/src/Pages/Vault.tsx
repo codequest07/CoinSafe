@@ -1,5 +1,4 @@
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
-import ClaimCard from "@/components/ClaimCard";
 import VaultCard from "@/components/VaultCard";
 import { useBalances } from "@/hooks/useBalances";
 import SavingsCards from "@/components/SavingsCards";
