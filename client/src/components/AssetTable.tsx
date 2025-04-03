@@ -202,7 +202,9 @@ function AssetTableContent({ assets }: { assets: any[] }) {
               <TableRow key={index} className="border-b border-[#1D1D1D]">
                 <TableCell className="py-4 px-4">
                   <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
+                    <div
+                      className={`w-8 h-8 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                    >
                       {asset.tokenInfo.symbol?.charAt(0)}
                     </div>
                     <div className="flex flex-col">

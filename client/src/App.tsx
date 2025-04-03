@@ -12,6 +12,7 @@ import SaveSense from "./Pages/SaveSense";
 import { Toaster } from "./components/ui/toaster";
 import Faucet from "./Pages/Faucet";
 import SavingsDetail from "./components/SavingsDetail";
+import SaveAssets from "./Pages/SaveAssets";
 // import { useRecoilState } from "recoil";
 // import { availableBalanceState, savingsBalanceState, totalBalanceState } from "./store/atoms/save";
 // import { useContractEvents } from "./hooks/useWatchEvents";
@@ -53,6 +54,8 @@ const App = () => {
           <Route path="/dashboard/rewards" element={<Rewards />} />
           <Route path="/dashboard/rewards/my-rewards" element={<MyRewards />} />
           <Route path="/dashboard/SaveSense" element={<SaveSense />} />
+          {/* Test */}
+          <Route path="/dashboard/save-assets" element={<SaveAssets />} />
         </Route>
       </Routes>
       <Toaster />

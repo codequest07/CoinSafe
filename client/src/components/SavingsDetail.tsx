@@ -26,7 +26,8 @@ export default function SavingsDetail() {
               variant="ghost"
               size="icon"
               className="rounded-full"
-              onClick={() => navigate(-1)}>
+              onClick={() => navigate(-1)}
+            >
               <ArrowLeft className="h-6 w-6" />
             </Button>
             <div className="flex items-center gap-2">
