@@ -56,8 +56,8 @@ export default function SavingsCards() {
   ];
 
   return (
-    <div className="bg-black text-white p-4">
-      <div className="max-w-[73rem] ">
+    <div className="bg-black text-white p-4 w-full">
+      <div className="max-w-[73rem] w-full">
         <h2 className="text-xl mb-4">Your savings targets</h2>
         <div className="relative">
           <div
