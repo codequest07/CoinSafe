@@ -1,5 +1,5 @@
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
-import VaultCard from "@/components/VaultCard";
+import VaultCard from "@/components/Cards/VaultCard";
 import { useBalances } from "@/hooks/useBalances";
 import SavingsCards from "@/components/SavingsCards";
 import { useActiveAccount } from "thirdweb/react";
