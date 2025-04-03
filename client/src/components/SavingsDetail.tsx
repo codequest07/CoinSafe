@@ -1,11 +1,12 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import VaultCard from "./VaultCard";
 import { useBalances } from "@/hooks/useBalances";
-import AssetTable from "./AssetTable";
 import { useActiveAccount } from "thirdweb/react";
-import SavingsBalanceCard from "./Cards/SavingsBalanceCard";
+import ClaimCard from "./Cards/ClaimCard";
+import { AssetTabs } from "./Asset-tabs";
+import { Badge } from "./ui/badge";
+import SavingsCard from "./Cards/SavingsCard";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
@@ -19,31 +20,45 @@ export default function SavingsDetail() {
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </Button>
-          <h1 className="text-xl">{id} savings</h1>
+        <div className="mb-8">
+          <div className="flex items-center gap-4 ">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl">{id} savings</h1>
+              <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
+                Unlocks every 30 days
+              </Badge>
+            </div>
+          </div>
+          <p className="text-base my-1 ml-[3.3rem] text-gray-300">
+            Next unlock date: 25th December, 2025
+          </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <SavingsBalanceCard />
-          <VaultCard
-            title="Vault balance"
+        <div className="flex gap-2 pr-4 pb-2">
+          <SavingsCard
+            title="Savings balance"
             value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}
             unit="USD"
-            text=""
-            // text="+18% (compared to your previous savings)"
+            text={<>sum of all balances</>}
+          />
+          <ClaimCard
+            title="Claimable balance"
+            value={0.0}
+            unit="USD"
+            text="sum of all your claimable assets"
           />
         </div>
 
         <div className="py-2">
-          <AssetTable />
+          <AssetTabs />
         </div>
       </div>
     </div>
