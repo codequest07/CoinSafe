@@ -44,7 +44,7 @@ import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useBalances } from "@/hooks/useBalances";
 import { formatUnits } from "viem";
 import { SavingsTargetSelect } from "../SavingsTarget";
-import { DurationSelector } from "../DurationSelector";
+// import { DurationSelector } from "../DurationSelector";
 import { useActiveAccount } from "thirdweb/react";
 // import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 
@@ -72,9 +72,9 @@ export default function SaveAsset({
     { value: "604800", label: "Weekly" }, // 1 week = 604800 seconds
     { value: "2592000", label: "Monthly" }, // 1 month = 2592000 seconds (approx. 30 days)
   ]);
-  const [, setSelectedDate] = useState<Date | undefined>(undefined);
-  // const [daysInput, setDaysInput] = useState<number | string>("");
-  const [, setUnlockDate] = useState<Date | null>(null);
+  // const [, setSelectedDate] = useState<Date | undefined>(undefined);
+  // // const [daysInput, setDaysInput] = useState<number | string>("");
+  // const [, setUnlockDate] = useState<Date | null>(null);
   // const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState(tab || "one-time");
   const smartAccount = useActiveAccount();
@@ -93,48 +93,6 @@ export default function SaveAsset({
     return frequency ? frequency.label : undefined; // Return the label or null if not found
   }
 
-  // Line 50-64: New handler for calendar date selection
-  // const handleDateSelect = (selectedDay: Date | undefined) => {
-  //   if (selectedDay) {
-  //     setSelectedDate(selectedDay);
-
-  //     // Calculate days difference from today
-  //     const days = differenceInDays(selectedDay, new Date());
-
-  //     // Update days input and set unlock date
-  //     setDaysInput(days);
-
-  //     // Calculate duration in seconds for smart contract
-  //     const durationInSeconds = days * 24 * 60 * 60;
-
-  //     setSaveState((prevState) => ({
-  //       ...prevState,
-  //       duration: durationInSeconds,
-  //     }));
-
-  //     setUnlockDate(selectedDay);
-
-  //     // Close calendar popover
-  //     setIsCalendarOpen(false);
-  //   }
-  // };
-
-  // const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const days = Number(event.target.value);
-  //   setDaysInput(days);
-
-  //   const calculatedUnlockDate = addDays(new Date(), days);
-  //   const durationInSeconds = days * 24 * 60 * 60;
-
-  //   setSaveState((prevState) => ({
-  //     ...prevState,
-  //     duration: durationInSeconds,
-  //   }));
-
-  //   setUnlockDate(calculatedUnlockDate);
-  //   setSelectedDate(calculatedUnlockDate);
-  // };
-
   const [selectedOption, setSelectedOption] = useState("by-frequency");
   const [validationErrors, setValidationErrors] = useState<{
     amount?: string;
@@ -148,13 +106,13 @@ export default function SaveAsset({
     { id: "2", name: "Vacation", description: "save for annual vacation" },
   ]);
 
-  const savingsDurationOptions = [
-    { value: 30, label: "30 days" },
-    { value: 60, label: "60 days" },
-    { value: 120, label: "120 days" },
-  ];
+  // const savingsDurationOptions = [
+  //   { value: 30, label: "30 days" },
+  //   { value: 60, label: "60 days" },
+  //   { value: 120, label: "120 days" },
+  // ];
 
-  const [savingsDuration, setSavingsDuration] = useState(30);
+  const [savingsDuration, _] = useState(30);
   const [endDate, setEndDate] = useState("");
 
   const calculateEndDate = (days: number) => {
@@ -167,23 +125,23 @@ export default function SaveAsset({
     setEndDate(calculateEndDate(savingsDuration));
   }, [savingsDuration, calculateEndDate]);
 
-  const handleDurationChange = (duration: number) => {
-    setSavingsDuration(duration);
-    setEndDate(calculateEndDate(duration));
+  // const handleDurationChange = (duration: number) => {
+  //   setSavingsDuration(duration);
+  //   setEndDate(calculateEndDate(duration));
 
-    const durationInSeconds = duration * 24 * 60 * 60;
+  //   const durationInSeconds = duration * 24 * 60 * 60;
 
-    setSaveState((prevState) => ({
-      ...prevState,
-      duration: durationInSeconds,
-    }));
+  //   setSaveState((prevState) => ({
+  //     ...prevState,
+  //     duration: durationInSeconds,
+  //   }));
 
-    const calculatedUnlockDate = addDays(new Date(), duration);
+  //   const calculatedUnlockDate = addDays(new Date(), duration);
 
-    setUnlockDate(calculatedUnlockDate);
-    setSelectedDate(calculatedUnlockDate);
-    console.log(`Savings duration changed to ${duration} days`);
-  };
+  //   setUnlockDate(calculatedUnlockDate);
+  //   setSelectedDate(calculatedUnlockDate);
+  //   console.log(`Savings duration changed to ${duration} days`);
+  // };
 
   const [, setSelectedTarget] = useState<SavingsTarget | null>(null);
 
@@ -404,14 +362,10 @@ export default function SaveAsset({
                               <p>USDT</p>
                             </div>
                           </SelectItem>
-                          <SelectItem value={tokens.lsk}>
-                            LSK
-                          </SelectItem>
+                          <SelectItem value={tokens.lsk}>LSK</SelectItem>
                           {/* 0xe4923e889a875eae8c164ac1592b57b5684ed90e - new from Ite */}
                           {/* 0xcf300d5a3d0fc71865a7c92bbc11d6b79c4d1480 - current */}
-                          <SelectItem value={tokens.safu}>
-                            SAFU
-                          </SelectItem>
+                          <SelectItem value={tokens.safu}>SAFU</SelectItem>
                         </SelectContent>
                       </Select>
                       {validationErrors.token && (
@@ -480,12 +434,12 @@ export default function SaveAsset({
               </div>
 
               <div className="py-4">
-                <DurationSelector
+                {/* <DurationSelector
                   options={savingsDurationOptions}
                   selectedValue={savingsDuration}
                   onChange={handleDurationChange}
                   className="mb-4"
-                />
+                /> */}
 
                 <div className="py-4">
                   <p className="text-[12px] font-semibold text-[#CACACA]">
@@ -702,12 +656,8 @@ export default function SaveAsset({
                               <p>USDT</p>
                             </div>
                           </SelectItem>
-                          <SelectItem value={tokens.lsk}>
-                            LSK
-                          </SelectItem>
-                          <SelectItem value={tokens.safu}>
-                            SAFU
-                          </SelectItem>
+                          <SelectItem value={tokens.lsk}>LSK</SelectItem>
+                          <SelectItem value={tokens.safu}>SAFU</SelectItem>
                         </SelectContent>
                       </Select>
                       {validationErrors.token && (
@@ -790,12 +740,12 @@ export default function SaveAsset({
                   </div>
 
                   <div className="py-4">
-                    <DurationSelector
+                    {/* <DurationSelector
                       options={savingsDurationOptions}
                       selectedValue={savingsDuration}
                       onChange={handleDurationChange}
                       className="mb-4"
-                    />
+                    /> */}
 
                     <div className="py-4">
                       <p className="text-[12px] font-semibold text-[#CACACA]">
