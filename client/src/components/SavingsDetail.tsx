@@ -1,12 +1,12 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import VaultCard from "./VaultCard";
 import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
-import ClaimCard from "./ClaimCard";
+import ClaimCard from "./Cards/ClaimCard";
 import { AssetTabs } from "./Asset-tabs";
 import { Badge } from "./ui/badge";
+import SavingsCard from "./Cards/SavingsCard";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ export default function SavingsDetail() {
         </div>
 
         <div className="flex gap-2 pr-4 pb-2">
-          <VaultCard
+          <SavingsCard
             title="Savings balance"
             value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}
             unit="USD"

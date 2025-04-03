@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ReactNode } from "react";
-import SavingOption from "./Modals/SavingOption";
+import SavingOption from "../Modals/SavingOption";
 import { useActiveAccount } from "thirdweb/react";
 
 const VaultCard = ({

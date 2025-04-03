@@ -1,5 +1,5 @@
-import Card from "@/components/Card";
-import CoverageRewardCard from "@/components/CoverageRewardCard";
+import Card from "@/components/Cards/Card";
+import CoverageRewardCard from "@/components/Cards/CoverageRewardCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MyRewards = () => {
