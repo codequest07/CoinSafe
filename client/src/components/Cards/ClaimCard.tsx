@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ClaimAssets from "./Modals/ClaimAssets";
+import ClaimAssets from "../Modals/ClaimAssets";
 
 const ClaimCard = ({
   title,

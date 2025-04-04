@@ -1,4 +1,7 @@
-import React, { useEffect } from "react";
+"use client";
+
+import type React from "react";
+import { useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface SuccessfulTxModalProps {
@@ -11,7 +14,7 @@ export interface SuccessfulTxModalProps {
     frequency?: string;
     savingGoal?: number;
     poolName?: string;
-    subText?: string
+    subText?: string;
   };
 }
 
@@ -23,7 +26,6 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
   token,
   additionalDetails,
 }) => {
-
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
@@ -33,6 +35,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
       return () => clearTimeout(timer); // Cleanup timer on unmount
     }
   }, [isOpen, onClose]);
+
   // Generate transaction description based on type
   const getTransactionDescription = () => {
     switch (transactionType) {
@@ -61,13 +64,12 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
       case "save":
         return (
           <>
-            You saved
+            You saved{" "}
             {
               <span className="text-[#20FFAF] font-semibold">
                 {amount} {token}
               </span>
             }{" "}
-            $
             {additionalDetails?.poolName
               ? `to ${additionalDetails.poolName}`
               : ""}
@@ -92,7 +94,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
       default:
         return (
           <>
-            Transaction of
+            Transaction of{" "}
             {
               <span className="text-[#20FFAF] font-semibold">
                 {amount} {token}
@@ -122,14 +124,20 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[360px] sm:max-w-[410px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg" noX={true}>
+      <DialogContent
+        className="max-w-[360px] sm:max-w-[410px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg"
+        noX={true}>
         <DialogTitle className="text-center">
           {getTransactionTitle()}
         </DialogTitle>
 
         <div className="flex flex-col items-center space-y-6">
           {/* Logo */}
-          <img src="/assets/empty-wallet-tick.png" className="w-24 h-24" />
+          <img
+            src="/assets/empty-wallet-tick.png"
+            alt="Success"
+            className="w-24 h-24"
+          />
 
           {/* Description */}
           <p className="text-center text-lg">{getTransactionDescription()}</p>
@@ -140,7 +148,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             </div>
           )}
         </div>
-        <div className="text-center text-sm text-[#B5B5B5]">{additionalDetails?.subText}</div>
+        <div className="text-center text-sm text-[#B5B5B5]">
+          {additionalDetails?.subText}
+        </div>
       </DialogContent>
     </Dialog>
   );

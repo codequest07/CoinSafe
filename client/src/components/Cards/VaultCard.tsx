@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ReactNode } from "react";
-import SavingOption from "./Modals/SavingOption";
+import SavingOption from "../Modals/SavingOption";
 import { useActiveAccount } from "thirdweb/react";
 
 const VaultCard = ({
@@ -67,8 +67,7 @@ const VaultCard = ({
             </button> */}
             <button
               onClick={openFirstModal}
-              className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
-            >
+              className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
               Save
             </button>
           </div>

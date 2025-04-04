@@ -1,47 +1,69 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
+import mongoose from "mongoose";
+import { ConnectOptions } from "mongoose";
+import dotenv from "dotenv";
+
+// Routes
 import AiRouter from "./Routes/AiRouter";
 import CoinGeckoApiRouter from "./Routes/CoinGeckoApiRouter";
 import BaseRouter from "./Routes/BaseRouter";
-import mongoose from "mongoose";
-import { ConnectOptions } from "mongoose";
 import WaitlistRouter from "./Routes/WaitlistRouter";
-import dotenv from "dotenv";
 import faucetRouter from "./Routes/FaucetClaimRoute";
+
+// Models and Services
+import { TransactionModel } from "./Models/TransactionModel";
+import { AnthropicService } from "./services/AnthropicService";
+import { SavingsPlanController } from "./controllers/SavingsPlanController";
+import { savingsPlanRoutes } from "./Routes/SavingsAiRoutes";
+
 dotenv.config();
 const app = express();
-app.use(express.json());
 const port = process.env.PORT || 1234;
 
+// Middleware
 app.use(cors());
+app.use(express.json());
 
+// API Keys
+const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "";
+const anthropicApiKey = process.env.ANTHROPIC_API_KEY || "";
+
+// Root route
 app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to CoinSafe!");
 });
 
-app.use(AiRouter);
+// Initialize services
+const transactionModel = new TransactionModel(etherscanApiKey);
+const anthropicService = new AnthropicService(anthropicApiKey);
+const savingsPlanController = new SavingsPlanController(
+  transactionModel,
+  anthropicService
+);
 
+// Mount routes
 app.use("/", BaseRouter);
-
+app.use("/api/ai", AiRouter);
+app.use("/api/ai/", savingsPlanRoutes(savingsPlanController));
 app.use("/api/waitlist", WaitlistRouter);
-
 app.use("/faucet", faucetRouter);
+app.use("/api/coingecko", CoinGeckoApiRouter);
 
-app.use(CoinGeckoApiRouter);
-const mongodb =
+// MongoDB Connection
+const mongodbUri =
   process.env.MONGO_URI ||
   "mongodb+srv://agbakwuruoluchicoinsafe:SDYRnmD6FrVp09fo@cluster0.g6csr.mongodb.net";
+
 mongoose
-  .connect(mongodb, {
+  .connect(mongodbUri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   } as ConnectOptions)
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error.message);
-  });
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
+// Start server
 app.listen(port, () => {
-  console.log(`My Server is running on port ${port}.... keep off!`);
+  console.log(`Server running on port ${port}`);
 });
