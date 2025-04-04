@@ -316,7 +316,7 @@ export default function SaveAssetsCard() {
   };
 
   return (
-    <div className="flex justify-center min-h-screen bg-[#010104] p-4">
+    <div className="flex justify-center min-h-fit bg-[#010104] p-4">
       <div className="w-full max-w-[600px] rounded-xl border-[1px] border-[#FFFFFF21] bg-[#1D1D1D73] p-6 text-white">
         {/* Header */}
         <div className="flex items-center mb-6">
