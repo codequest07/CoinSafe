@@ -26,7 +26,7 @@ const Sidebar = () => {
     } else {
       setOpenConnectModal(false);
     }
-  }, [isConnected, account]);
+  }, [isConnected]);
 
   // Custom function to determine if a link should be active
   const isLinkActive = (path: string) => {

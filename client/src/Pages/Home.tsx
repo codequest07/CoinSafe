@@ -5,22 +5,13 @@ import ScheduledSavings from "@/components/ScheduledSavingsCard";
 import StatsCards from "@/components/stats-cards";
 import { TourGuide } from "@/components/TourGuide";
 import TrackingChart from "@/components/TrackingChart";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
 
 const Home = () => {
   const account = useActiveAccount();
   const isConnected = !!account?.address;
-  const address = account?.address;
   const [openConnectModal, setOpenConnectModal] = useState(false);
-
-  useEffect(() => {
-    if (!isConnected || !address) {
-      setOpenConnectModal(true);
-    } else {
-      setOpenConnectModal(false);
-    }
-  }, [isConnected, address]);
 
   const tourSteps = [
     {
