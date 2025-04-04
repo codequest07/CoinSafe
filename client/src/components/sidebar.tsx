@@ -25,7 +25,7 @@ const Sidebar = () => {
       } else {
         setOpenConnectModal(false);
       }
-    }, [isConnected, account]);
+    }, [isConnected]);
 
   return (
     <main>
