@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ReactNode } from "react";
-import SavingOption from "../Modals/SavingOption";
+
 import { useActiveAccount } from "thirdweb/react";
 import TopUpModal from "../Modals/Top-up-modal";
 
@@ -21,12 +21,8 @@ const SavingsCard = ({
   emphasize?: string;
   text?: ReactNode;
 }) => {
-  const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
-  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
-
-  const openFirstModal = () => setIsFirstModalOpen(true);
 
   const [showModal, setShowModal] = useState(false);
   const [lastTopUp, setLastTopUp] = useState<{

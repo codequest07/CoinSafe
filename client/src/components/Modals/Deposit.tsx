@@ -5,14 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { LoaderCircle } from "lucide-react";
@@ -20,12 +13,7 @@ import { toast } from "@/hooks/use-toast";
 // import Deposited from "./Deposited";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
 import { useActiveAccount } from "thirdweb/react";
-import { getContract } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
-import { getBalance } from "thirdweb/extensions/erc20";
-import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "./SuccessfulTxModal";
-import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 import ApproveTxModal from "./ApproveTxModal";
 import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
@@ -45,15 +33,15 @@ export default function Deposit({
   const smartAccount = useActiveAccount();
   const address = smartAccount?.address;
 
-  const [amount, setAmount] = useState<number>();
-  const [token, setToken] = useState("");
-  const [tokenPrice, setTokenPrice] = useState("0.00");
+  const [amount] = useState<number>();
+  const [token] = useState("");
+  // Removed unused tokenPrice state
 
   const [selectedTokenBalance, _setSelectedTokenBalance] = useState(0);
 
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [, setDecimals] = useState(1);
-  const [validationErrors, setValidationErrors] = useState<{
+  const [validationErrors] = useState<{
     amount?: string;
     token?: string;
     duration?: string;
@@ -93,39 +81,9 @@ export default function Deposit({
     toast,
   });
 
-  async function getTokenPrice(token: string, amount: number | undefined) {
-    if (!token || !amount) return "0.00";
+  // Removed unused getTokenPrice function
 
-    try {
-      switch (token) {
-        case tokens.safu: {
-          const safuPrice = await getSafuToUsd(amount);
-          return safuPrice.toFixed(2);
-        }
-        case tokens.lsk: {
-          const lskPrice = await getLskToUsd(amount);
-          return lskPrice.toFixed(2);
-        }
-        case tokens.usdt: {
-          const usdtPrice = await getUsdtToUsd(amount);
-          return usdtPrice.toFixed(2);
-        }
-        default:
-          return "0.00";
-      }
-    } catch (error) {
-      console.error("Error getting token price:", error);
-      return "0.00";
-    }
-  }
-
-  useEffect(() => {
-    const updatePrice = async () => {
-      const price: string = await getTokenPrice(token, amount);
-      setTokenPrice(price);
-    };
-    updatePrice();
-  }, [token, amount]);
+  // Removed useEffect related to tokenPrice as it is no longer needed
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
@@ -170,7 +128,7 @@ export default function Deposit({
           <>
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-[300] text-gray-300">
-                Onchain balance:{" "}
+                Onchain balance: {" "}
                 <span className="text-gray-400">
                   {selectedTokenBalance}{" "}
                   {saveState.token == tokens.safu
@@ -189,7 +147,7 @@ export default function Deposit({
                     amount: selectedTokenBalance,
                   }))
                 }>
-                Max
+                Save all
               </Button>
             </div>
           </>

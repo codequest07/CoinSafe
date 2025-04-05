@@ -12,12 +12,12 @@ interface TopUpModalProps {
 }
 
 export default function TopUpModal({ onClose, onTopUp }: TopUpModalProps) {
-  const [amount, setAmount] = useState("0.00");
-  const [currency, setCurrency] = useState("LSK");
+  const [amount] = useState("0.00");
+  const [currency] = useState("LSK");
   const [selectedTokenBalance, _setSelectedTokenBalance] = useState(0);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [, setDecimals] = useState(1);
-  const [validationErrors, setValidationErrors] = useState<{
+  const [validationErrors] = useState<{
     amount?: string;
     token?: string;
     duration?: string;

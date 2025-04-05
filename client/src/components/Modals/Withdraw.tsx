@@ -15,7 +15,7 @@ import { useWithdrawAsset } from "@/hooks/useWithdrawAsset";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
-import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+// import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
@@ -32,16 +32,16 @@ export default function Withdraw({
   const account = useActiveAccount();
   const address = account?.address;
 
-  const { AvailableBalance } = useBalances(address as string);
-  const [amount, setAmount] = useState<number>();
-  const [token, setToken] = useState("");
-  const [tokenPrice, setTokenPrice] = useState("0.00");
+  useBalances(address as string); // Call useBalances without destructuring
+  const [amount] = useState<number>();
+  const [token] = useState("");
+  // Removed unused tokenPrice state variable
 
   const [selectedTokenBalance, _setSelectedTokenBalance] = useState(0);
 
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [, setDecimals] = useState(1);
-  const [validationErrors, setValidationErrors] = useState<{
+  const [validationErrors] = useState<{
     amount?: string;
     token?: string;
     duration?: string;
@@ -87,38 +87,10 @@ export default function Withdraw({
     setSaveState((prevState) => ({ ...prevState, token: value }));
   };
 
-  async function getTokenPrice(token: string, amount: number | undefined) {
-    if (!token || !amount) return "0.00";
-
-    try {
-      switch (token) {
-        case tokens.safu: {
-          const safuPrice = await getSafuToUsd(amount);
-          return safuPrice.toFixed(2);
-        }
-        case tokens.lsk: {
-          const lskPrice = await getLskToUsd(amount);
-          return lskPrice.toFixed(2);
-        }
-        case tokens.usdt: {
-          const usdtPrice = await getUsdtToUsd(amount);
-          return usdtPrice.toFixed(2);
-        }
-        default:
-          return "0.00";
-      }
-    } catch (error) {
-      console.error("Error getting token price:", error);
-      return "0.00";
-    }
-  }
+  // Removed unused getTokenPrice function
 
   useEffect(() => {
-    const updatePrice = async () => {
-      const price: string = await getTokenPrice(token, amount);
-      setTokenPrice(price);
-    };
-    updatePrice();
+    // Removed unused updatePrice logic
   }, [token, amount]);
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,7 +136,7 @@ export default function Withdraw({
               </div>
               <Button
                 className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-[#79E7BA] cursor-pointer"
-                // onClick={() => setAmount(selectedTokenBalance)}
+                // onClick={() => setSaveState((prev) => ({ ...prev, amount: selectedTokenBalance }))}
                 onClick={() =>
                   setSaveState((prev) => ({
                     ...prev,
