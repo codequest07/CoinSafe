@@ -7,8 +7,8 @@ export function AssetTabs() {
   const [activeTab, setActiveTab] = useState<"assets" | "savings">("assets");
 
   return (
-    <div className="w-full">
-      <div className="flex border-b border-[#FFFFFF21] bg-black text-white">
+    <div className="w-full max-w-[98%] mx-auto">
+      <div className="flex  max-w-[100%] mx-auto border-b border-[#FFFFFF21] bg-black text-white">
         <button
           onClick={() => setActiveTab("assets")}
           className={cn(
