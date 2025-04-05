@@ -1,41 +1,30 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {  useState } from "react";
+import { useEffect, useState } from "react";
+import { tokens, CoinsafeDiamondContract } from "@/lib/contract";
+// import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
-import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
-import { LoaderCircle } from "lucide-react";
+import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-// import Deposited from "./Deposited";
-import { useDepositAsset } from "@/hooks/useDepositAsset";
+import { useWithdrawAsset } from "@/hooks/useWithdrawAsset";
+import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
-import SuccessfulTxModal from "./SuccessfulTxModal";
-import ApproveTxModal from "./ApproveTxModal";
+// import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-// import { tokens } from "@/lib/contract";
+import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
+import { useNavigate } from "react-router-dom";
 
-export default function Deposit({
-  isDepositModalOpen,
-  setIsDepositModalOpen,
-}: {
-  isDepositModalOpen: boolean;
-  setIsDepositModalOpen: (open: boolean) => void;
-  onBack: () => void;
-}) {
+export default function WithdrawCard() {
+  const navigate = useNavigate();
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
-  const [approveTxModalOpen, setApproveTxModalOpen] = useState(false);
-  const smartAccount = useActiveAccount();
-  const address = smartAccount?.address;
+  const account = useActiveAccount();
+  const address = account?.address;
 
+  useBalances(address as string); // Call useBalances without destructuring
   const [amount] = useState<number>();
   const [token] = useState("");
-  // Removed unused tokenPrice state
+  // Removed unused tokenPrice state variable
 
   const [selectedTokenBalance, _setSelectedTokenBalance] = useState(0);
 
@@ -50,27 +39,20 @@ export default function Deposit({
   }>({});
 
   const openThirdModal = () => {
+    console.log("details", token, amount);
+
     setIsThirdModalOpen(true);
-    setIsDepositModalOpen(false);
   };
 
-  const promptApproveModal = () => {
-    setApproveTxModalOpen(true);
-  };
-
-  const { depositAsset, isLoading } = useDepositAsset({
+  const { withdrawAsset, isLoading } = useWithdrawAsset({
     address: address as `0x${string}`,
-    account: smartAccount,
+    account,
     token: token as `0x${string}`,
     amount,
-    // coinSafeAddress: CoinSafeContract.address as `0x${string}`,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
     coinSafeAbi: fundingFacetAbi,
     onSuccess: () => {
       openThirdModal();
-    },
-    onApprove: () => {
-      promptApproveModal();
     },
     onError: (error) => {
       toast({
@@ -80,10 +62,6 @@ export default function Deposit({
     },
     toast,
   });
-
-  // Removed unused getTokenPrice function
-
-  // Removed useEffect related to tokenPrice as it is no longer needed
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
@@ -97,6 +75,12 @@ export default function Deposit({
     setSaveState((prevState) => ({ ...prevState, token: value }));
   };
 
+  // Removed unused getTokenPrice function
+
+  useEffect(() => {
+    // Removed unused updatePrice logic
+  }, [token, amount]);
+
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const _amount = Number(event.target.value);
     setSaveState((prevState) => ({
@@ -104,13 +88,16 @@ export default function Deposit({
       amount: _amount,
     }));
   };
-
   return (
-    <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
-      <DialogContent className="w-11/12 sm:max-w-[600px] border-0 text-white bg-[#1D1D1D73]">
-        <DialogTitle className="text-white flex items-center">
-          <p>Deposit assets</p>
-        </DialogTitle>
+    <main>
+      <div className="w-11/12 mx-auto sm:max-w-[600px] border-1 border-[#FFFFFF21] p-6 rounded-[14px] text-white bg-[#1D1D1D73]">
+        <div className="flex items-center gap-2 mb-6">
+          <button className="rounded-full" onClick={() => navigate(-1)}>
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="text-lg font-medium">Withdraw assets</h1>
+        </div>
+
         <div className="sm:p-8 text-gray-700">
           <div className="space-y-2">
             <AmountInput
@@ -128,7 +115,7 @@ export default function Deposit({
           <>
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-[300] text-gray-300">
-                Onchain balance: {" "}
+                Onchain balance:{" "}
                 <span className="text-gray-400">
                   {selectedTokenBalance}{" "}
                   {saveState.token == tokens.safu
@@ -140,30 +127,27 @@ export default function Deposit({
               </div>
               <Button
                 className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-[#79E7BA] cursor-pointer"
-                // onClick={() => setAmount(selectedTokenBalance)}
+                // onClick={() => setSaveState((prev) => ({ ...prev, amount: selectedTokenBalance }))}
                 onClick={() =>
                   setSaveState((prev) => ({
                     ...prev,
                     amount: selectedTokenBalance,
                   }))
                 }>
-                Save all
+                Max
               </Button>
             </div>
           </>
         </div>
-        <DialogFooter className="">
-          <div className="flex sm:space-x-4 justify-between mt-2">
-            <Button
-              onClick={() => setIsDepositModalOpen(false)}
-              className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-              type="submit">
-              Cancel
-            </Button>
-
+        <div>
+          <div className="flex sm:space-x-4 justify-end mt-2">
             <Button
               onClick={(e) => {
-                depositAsset(e);
+                withdrawAsset(e);
+
+                // if(isSuccess) {
+                //   openThirdModal();
+                // }
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
@@ -171,34 +155,24 @@ export default function Deposit({
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (
-                "Deposit assets"
+                "Withdraw assets"
               )}
             </Button>
           </div>
-        </DialogFooter>
-      </DialogContent>
+        </div>
+      </div>
       <SuccessfulTxModal
+        transactionType="withdraw"
         amount={amount || 0}
         token={
           token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
         }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
-        transactionType="deposit"
         additionalDetails={{
           subText: "Assets will be available in your wallet.",
         }}
       />
-
-      <ApproveTxModal
-        isOpen={approveTxModalOpen}
-        onClose={() => setApproveTxModalOpen(false)}
-        amount={amount || 0}
-        token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
-        }
-        text="To Deposit"
-      />
-    </Dialog>
+    </main>
   );
 }

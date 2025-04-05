@@ -6,6 +6,7 @@ import { getPercentage } from "@/lib/utils";
 import Withdraw from "./Modals/Withdraw";
 import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
+import { Link } from "react-router-dom";
 
 export default function WalletBalance() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -16,9 +17,8 @@ export default function WalletBalance() {
   const isConnected = !!account?.address;
   const address = account?.address;
 
-  const openDepositModal = () => setIsDepositModalOpen(true);
+
   const openFirstModal = () => setIsFirstModalOpen(true);
-  const openWithdrawModal = () => setIsWithdrawModalOpen(true);
 
   const { totalBalance, availableBalance } = useBalances(address as string);
 
@@ -29,15 +29,11 @@ export default function WalletBalance() {
         {/* Action Buttons */}
         {isConnected && (
           <div className="flex flex-row justify-center gap-3">
-            <Button
-              onClick={openWithdrawModal}
-              className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
-              Withdraw
+            <Button className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
+              <Link to={"/dashboard/withdraw-assets"}>Withdraw</Link>
             </Button>
-            <Button
-              onClick={openDepositModal}
-              className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
-              Deposit
+            <Button className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
+              <Link to={"/dashboard/deposit"}>Deposit</Link>
             </Button>
             <Button
               onClick={openFirstModal}
@@ -137,15 +133,11 @@ export default function WalletBalance() {
         {/* Action Buttons */}
         {isConnected && (
           <div className="flex flex-row space-x-4">
-            <Button
-              onClick={openWithdrawModal}
-              className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
-              Withdraw
+            <Button className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
+              <Link to={"/dashboard/withdraw-assets"}>Withdraw</Link>
             </Button>
-            <Button
-              onClick={openDepositModal}
-              className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
-              Deposit
+            <Button className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
+              <Link to={"/dashboard/deposit"}>Deposit</Link>
             </Button>
             <Button
               onClick={openFirstModal}
