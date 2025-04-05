@@ -27,7 +27,7 @@ const VaultCard = ({
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   return (
-    <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+    <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full max-w-[100%]">
       <div className="flex justify-between items-center pb-4">
         <div className="text-[#CACACA] font-light">{title}</div>
         <div>

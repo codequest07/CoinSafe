@@ -12,10 +12,12 @@ const Vault = () => {
   const { savingsBalance } = useBalances(address as string);
 
   return (
-    <div className="pr-4 w-full">
-      <SmarterSavingCard />
+    <div className="w-full px-2 sm:px-4 overflow-x-hidden">
+      <div className="max-w-full">
+        <SmarterSavingCard />
+      </div>
 
-      <div className="flex gap-2 pb-2 w-full">
+      <div className="flex flex-col sm:flex-row gap-2 pb-2 w-full max-w-[98%] mx-auto">
         <VaultCard
           title="Vault balance"
           value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}
@@ -34,7 +36,10 @@ const Vault = () => {
           text="sum of all your claimable assets"
         /> */}
       </div>
-      <SavingsCards />
+
+      <div className="max-w-full">
+        <SavingsCards />
+      </div>
       {/* <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-4">
         <CurrencyBreakdown />
       </div> */}
@@ -43,7 +48,7 @@ const Vault = () => {
         <SavingsPerformance />
       </div> */}
 
-      <div className="py-2">
+      <div className="py-2 max-w-[98%] ">
         <AssetTabs />
       </div>
 
