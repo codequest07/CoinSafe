@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ReactNode } from "react";
 import SavingOption from "../Modals/SavingOption";
 import { useActiveAccount } from "thirdweb/react";
+import TopUpModal from "../Modals/Top-up-modal";
 
 const SavingsCard = ({
   title,
@@ -26,6 +27,19 @@ const SavingsCard = ({
   const isConnected = !!account?.address;
 
   const openFirstModal = () => setIsFirstModalOpen(true);
+
+  const [showModal, setShowModal] = useState(false);
+  const [lastTopUp, setLastTopUp] = useState<{
+    amount: number;
+    currency: string;
+  } | null>(null);
+
+  const handleTopUp = (amount: number, currency: string) => {
+    setLastTopUp({ amount, currency });
+    setShowModal(false);
+    // In a real app, you would call an API to process the top-up
+    console.log(`Topped up ${amount} ${currency}`);
+  };
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
       <div className="flex justify-between items-center pb-4">
@@ -66,19 +80,26 @@ const SavingsCard = ({
               Unlock
             </button>
             <button
-              onClick={openFirstModal}
+              onClick={() => setShowModal(true)}
               className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
               Top up
             </button>
           </div>
         )}
       </div>
-      <SavingOption
-        isFirstModalOpen={isFirstModalOpen}
-        setIsFirstModalOpen={setIsFirstModalOpen}
-        isSecondModalOpen={isSecondModalOpen}
-        setIsSecondModalOpen={setIsSecondModalOpen}
-      />
+
+      {lastTopUp && (
+        <div className="mt-4 text-white">
+          Last top up:{" "}
+          <span className="font-bold">
+            {lastTopUp.amount} {lastTopUp.currency}
+          </span>
+        </div>
+      )}
+
+      {showModal && (
+        <TopUpModal onClose={() => setShowModal(false)} onTopUp={handleTopUp} />
+      )}
     </div>
   );
 };
