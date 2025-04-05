@@ -37,6 +37,7 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { useNavigate } from "react-router-dom";
 
 interface SavingsTarget {
   id: string | number;
@@ -49,6 +50,7 @@ interface SavingsTarget {
 // ];
 
 export default function SaveAssetsCard() {
+  const navigate = useNavigate();
   const [saveType, setSaveType] = useState<"one-time" | "auto">("one-time");
   //   const [amount, setAmount] = useState("0.00");
   //   const [showDropdown, setShowDropdown] = useState(false);
@@ -319,8 +321,8 @@ export default function SaveAssetsCard() {
     <div className="flex justify-center min-h-fit bg-[#010104] p-4">
       <div className="w-full max-w-[600px] rounded-xl border-[1px] border-[#FFFFFF21] bg-[#1D1D1D73] p-6 text-white">
         {/* Header */}
-        <div className="flex items-center mb-6">
-          <button className="mr-2">
+        <div className="flex items-center gap-2 mb-6">
+          <button className="rounded-full" onClick={() => navigate(-1)}>
             <ArrowLeft size={20} />
           </button>
           <h1 className="text-lg font-medium">Save assets</h1>
@@ -335,8 +337,7 @@ export default function SaveAssetsCard() {
               saveType === "one-time"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             One-time save
           </button>
           <button
@@ -346,8 +347,7 @@ export default function SaveAssetsCard() {
               saveType === "auto"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             Autosave
           </button>
         </div>
@@ -410,8 +410,7 @@ export default function SaveAssetsCard() {
                     ...prev,
                     amount: selectedTokenBalance,
                   }))
-                }
-              >
+                }>
                 Save all
               </button>
             </div>
@@ -489,8 +488,7 @@ export default function SaveAssetsCard() {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     {/* }`}
                             > */}
                     <div>
@@ -522,8 +520,7 @@ export default function SaveAssetsCard() {
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     {/* }`}
                             > */}
                     <div>
@@ -614,8 +611,7 @@ export default function SaveAssetsCard() {
                             ...prev,
                             amount: selectedTokenBalance,
                           }))
-                        }
-                      >
+                        }>
                         {/* }
                                   > */}
                         Max
@@ -719,8 +715,7 @@ export default function SaveAssetsCard() {
                   onClick={handleSaveAsset}
                   className="text-black px-8 rounded-[2rem]"
                   variant="outline"
-                  disabled={isLoading || autoSavingsLoading}
-                >
+                  disabled={isLoading || autoSavingsLoading}>
                   {isLoading || autoSavingsLoading ? (
                     <LoaderCircle className="animate-spin" />
                   ) : (
@@ -769,8 +764,7 @@ export default function SaveAssetsCard() {
 
       <Dialog
         open={isCreateTargetModalOpen}
-        onOpenChange={setIsCreateTargetModalOpen}
-      >
+        onOpenChange={setIsCreateTargetModalOpen}>
         <DialogContent className="bg-[#17171C] text-[#F1F1F1] border-[#FFFFFF21]">
           <DialogHeader>
             <DialogTitle>Create Custom Target</DialogTitle>
@@ -808,14 +802,12 @@ export default function SaveAssetsCard() {
               <Button
                 variant="outline"
                 onClick={() => setIsCreateTargetModalOpen(false)}
-                className="bg-[#FFFFFF2B] border-[#FFFFFF2B] rounded-[100px] text-white"
-              >
+                className="bg-[#FFFFFF2B] border-[#FFFFFF2B] rounded-[100px] text-white">
                 Cancel
               </Button>
               <Button
                 onClick={handleCreateTarget}
-                className="rounded-[100px] bg-white text-[#010104] hover:text-white"
-              >
+                className="rounded-[100px] bg-white text-[#010104] hover:text-white">
                 Create Target
               </Button>
             </div>

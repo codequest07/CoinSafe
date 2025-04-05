@@ -9,6 +9,7 @@ import { useBalances } from "@/hooks/useBalances";
 import { Skeleton } from "./ui/skeleton";
 import Withdraw from "./Modals/Withdraw";
 import { useActiveAccount } from "thirdweb/react";
+import { Link } from "react-router-dom";
 
 const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -28,8 +29,6 @@ const TrackingChart = () => {
   } = useBalances(address as string);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
-  const openDepositModal = () => setIsDepositModalOpen(true);
-  const openWithdrawModal = () => setIsWithdrawModalOpen(true);
 
   return (
     <div className="w-full border-[1px] border-[#FFFFFF17] p-2 sm:p-4 rounded-[12px] bg-[#0A0A0A]">
@@ -38,22 +37,15 @@ const TrackingChart = () => {
         <div className="flex justify-center sm:justify-end items-center pb-3 text-white gap-2 sm:gap-3">
           {isConnected && (
             <div className="flex items-center gap-2 my-2 sm:my-4 w-full sm:w-auto">
-              <Button
-                onClick={openWithdrawModal}
-                className="flex-1 sm:flex-none bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base"
-              >
-                Withdraw
+              <Button className="flex-1 sm:flex-none bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base">
+                <Link to={"/dashboard/withdraw-assets"}>Withdraw</Link>
               </Button>
-              <Button
-                onClick={openDepositModal}
-                className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-sm sm:text-base cursor-pointer"
-              >
-                Deposit
+              <Button className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-sm sm:text-base cursor-pointer">
+                <Link to={"/dashboard/deposit"}>Deposit</Link>
               </Button>
               <Button
                 onClick={openFirstModal}
-                className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm sm:text-base"
-              >
+                className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm sm:text-base">
                 Save
               </Button>
             </div>
@@ -185,9 +177,12 @@ function BalanceCard({
   return (
     <div
       className={`${className} flex flex-col justify-center ${
-        alignRight ? "items-end pr-12" : alignCenter ? "items-center" : "items-start"
-      }`}
-    >
+        alignRight
+          ? "items-end pr-12"
+          : alignCenter
+          ? "items-center"
+          : "items-start"
+      }`}>
       <div>
         <div className="text-[#CACACA] font-light text-sm pb-2">{title}</div>
         <div className="flex items-center">

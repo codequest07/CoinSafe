@@ -13,6 +13,8 @@ import { Toaster } from "./components/ui/toaster";
 import Faucet from "./Pages/Faucet";
 import SavingsDetail from "./components/SavingsDetail";
 import SaveAssets from "./Pages/SaveAssets";
+import Deposit from "./Pages/Deposit";
+import Withdraw from "./Pages/Withdraw";
 // import { useRecoilState } from "recoil";
 // import { availableBalanceState, savingsBalanceState, totalBalanceState } from "./store/atoms/save";
 // import { useContractEvents } from "./hooks/useWatchEvents";
@@ -56,6 +58,8 @@ const App = () => {
           <Route path="/dashboard/SaveSense" element={<SaveSense />} />
           {/* Test */}
           <Route path="/dashboard/save-assets" element={<SaveAssets />} />
+          <Route path="/dashboard/deposit" element={<Deposit />} />
+          <Route path="/dashboard/withdraw-assets" element={<Withdraw />} />
         </Route>
       </Routes>
       <Toaster />
