@@ -14,12 +14,11 @@ const ConnectModal = ({
   setIsConnectModalOpen: (open: boolean) => void;
 }) => {
   const { connect, isConnecting } = useConnectModal();
-  const [localIsConnecting, setLocalIsConnecting] = useState(false); // Local state for connection
+  const [localIsConnecting, setLocalIsConnecting] = useState(false);
 
-  // Function to handle wallet connection
   const handleConnect = async () => {
     try {
-      setLocalIsConnecting(true); // Start local connection state
+      setLocalIsConnecting(true);
       await connect({
         client,
         wallets,
@@ -27,24 +26,22 @@ const ConnectModal = ({
           colors: { accentText: "hsl(144, 100%, 39%)" },
         }),
         size: "compact",
-      }); // Opens Thirdweb's wallet selection modal
-      // setIsConnectModalOpen(false); // Close modal after connection starts
+      });
     } catch (error) {
       console.error("Wallet connection failed:", error);
-      setLocalIsConnecting(false); // Reset on error
+      setLocalIsConnecting(false);
     }
   };
 
   // Manage pointer-events on body
   useEffect(() => {
-    const shouldDisablePointerEvents = isConnecting || localIsConnecting;    
+    const shouldDisablePointerEvents = isConnecting || localIsConnecting;
     if (shouldDisablePointerEvents) {
       document.body.style.pointerEvents = "auto";
     } else {
       document.body.style.pointerEvents = "auto";
     }
 
-    // Cleanup to reset pointer-events
     return () => {
       document.body.style.pointerEvents = "auto";
     };
@@ -53,7 +50,7 @@ const ConnectModal = ({
   // Reset localIsConnecting when modal closes and connection is complete
   useEffect(() => {
     if (!isConnectModalOpen && !isConnecting) {
-      setLocalIsConnecting(false); // Reset local state when both modals are closed
+      setLocalIsConnecting(false);
     }
   }, [isConnectModalOpen, isConnecting]);
 
@@ -73,14 +70,15 @@ const ConnectModal = ({
           <Button
             className="rounded-full border-none outline-none font-light py-2 px-10 text-sm bg-[#FFFFFF2B]/20"
             onClick={() => setIsConnectModalOpen(false)}
-            disabled={isConnecting || localIsConnecting} // Use both states
+            disabled={isConnecting || localIsConnecting}
           >
             Close
           </Button>
           <Button
-            className="rounded-full border-none outline-none font-light py-2 px-10 text-sm bg-[#FFFFFF2B]/20"
+            className="rounded-full border-none outline-none text-black font-light py-2 px-10 text-sm"
+            variant="outline"
             onClick={handleConnect}
-            disabled={isConnecting || localIsConnecting} // Use both states
+            disabled={isConnecting || localIsConnecting}
           >
             {isConnecting || localIsConnecting
               ? "Connecting..."

@@ -1,6 +1,6 @@
 import { ConnectButton } from "thirdweb/react";
 import { darkTheme } from "thirdweb/react";
-import { client } from "@/lib/config";
+import { client, liskSepolia } from "@/lib/config";
 import { wallets } from "@/lib/wallets";
 
 export default function ThirdwebConnectButton() {
@@ -8,6 +8,7 @@ export default function ThirdwebConnectButton() {
     <ConnectButton
       client={client}
       wallets={wallets}
+      chain={liskSepolia}
       theme={darkTheme({
         colors: { accentText: "hsl(144, 100%, 39%)" },
       })}
