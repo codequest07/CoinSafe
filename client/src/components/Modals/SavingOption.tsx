@@ -1,4 +1,7 @@
-import React, { useEffect, useRef } from "react";
+"use client";
+
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,8 +10,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { RadioGroup } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import SaveAsset from "./SaveAsset";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
@@ -31,6 +32,10 @@ export default function SavingOption({
   tab,
 }: SavingOptionProps) {
   const [saveState, setSaveState] = useRecoilState(saveAtom);
+  // Map the saveState.typeName to our selectedOption state for the UI
+  const [selectedOption, setSelectedOption] = useState<
+    "manual" | "personalized-ai"
+  >((saveState.typeName as "manual" | "personalized-ai") || "manual");
 
   const navigate = useNavigate();
 
@@ -62,10 +67,12 @@ export default function SavingOption({
     navigate("/dashboard/save-assets");
   };
 
-  const handleChange = (event: any) => {
+  // Update the Recoil state when the UI selection changes
+  const handleOptionSelect = (option: "manual" | "personalized-ai") => {
+    setSelectedOption(option);
     setSaveState((prevState) => ({
       ...prevState,
-      typeName: event.target.value,
+      typeName: option,
     }));
   };
 
@@ -79,67 +86,80 @@ export default function SavingOption({
     <Dialog open={isFirstModalOpen} onOpenChange={setIsFirstModalOpen}>
       <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C]">
         <DialogHeader>
-          <DialogTitle className="text-white">
+          <DialogTitle className="text-white font-[500]">
             How would you like to save?
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <RadioGroup defaultValue="manual" className="flex flex-col gap-2">
-            <Label
-              htmlFor="manual"
-              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-white"
-            >
-              <input
-                type="radio"
-                id="manual"
-                name="savingOption"
-                value="manual"
-                onChange={handleChange}
-                className="peer appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
-              />
-              <div className="flex-1 ml-3">
-                <div className="font-medium mb-1">Manual Savings</div>
-                <p className="text-sm font-[400] text-muted-foreground">
-                  You have all the control
-                </p>
+
+        <div className="space-y-4">
+          <div
+            className={`p-6 rounded-xl cursor-pointer ${
+              selectedOption === "manual"
+                ? "bg-[#3F3F3F99] border border-[#FFFFFF29]"
+                : "bg-[#272727B2]"
+            }`}
+            onClick={() => handleOptionSelect("manual")}>
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                  selectedOption === "manual"
+                    ? "border-[#79E7BA]"
+                    : "border-[#FFFFFF3D]"
+                }`}>
+                {selectedOption === "manual" && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#79E7BA]"></div>
+                )}
               </div>
-            </Label>
-            <Label
-              htmlFor="personalized"
-              className="flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 [&:has(input:checked)]:border [&:has(input:checked)]:border-[#FFFFFF29] [&:has(input:checked)]:bg-[#1E1E1E99] [&:has(input:checked)]:text-primary-foreground"
-            >
-              <input
-                type="radio"
-                id="personalized-ai"
-                name="savingOption"
-                value="personalized-ai"
-                onChange={handleChange}
-                className="peer appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
-              />
-              <div className="flex-1 ml-3">
-                <div className="font-medium mb-1">Personalized Savings</div>
-                <p className="text-sm font-[400] text-white">
-                  We use a trustless AI to access your past activities and pick
-                  the best saving pattern for you
-                </p>
+              <h3 className="text-[#FFFFFF] text-[16px] font-medium">
+                Manual savings
+              </h3>
+            </div>
+            <p className="text-[#C7C7D1] text-[13px] mt-2 ml-9">
+              Manage your savings on your term
+            </p>
+          </div>
+
+          <div
+            className={`p-6 rounded-xl cursor-pointer ${
+              selectedOption === "personalized-ai"
+                ? "bg-[#3F3F3F99] border border-[#FFFFFF29]"
+                : "bg-[#272727B2]"
+            }`}
+            onClick={() => handleOptionSelect("personalized-ai")}>
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                  selectedOption === "personalized-ai"
+                    ? "border-[#79E7BA]"
+                    : "border-[#FFFFFF3D]"
+                }`}>
+                {selectedOption === "personalized-ai" && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#79E7BA]"></div>
+                )}
               </div>
-            </Label>
-          </RadioGroup>
+              <h3 className="text-[#FFFFFF] text-[16px] font-medium">
+                Personalized savings
+              </h3>
+            </div>
+            <p className="text-[#C7C7D1] text-[13px] mt-2 ml-9">
+              We use a trustless AI to analyze your past activities and choose
+              the best savings pattern for you
+            </p>
+          </div>
         </div>
+
         <DialogFooter>
           <div className="w-full flex items-center justify-between">
             <Button
               className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] px-8 rounded-[2rem]"
               type="button"
-              onClick={() => setIsFirstModalOpen(false)}
-            >
+              onClick={() => setIsFirstModalOpen(false)}>
               Cancel
             </Button>
             <Button
               className="bg-white hover:bg-white px-8 text-black rounded-[2rem]"
               type="button"
-              onClick={handleSaveAssetOption}
-            >
+              onClick={handleSaveAssetOption}>
               Proceed
             </Button>
           </div>
