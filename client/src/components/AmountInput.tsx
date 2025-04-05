@@ -55,11 +55,12 @@ const AmountInput = ({
           <div>
             <input
               type="number"
-              value={amount}
+              value={amount === 0 ? "" : amount}
               onChange={handleAmountChange}
               ref={inputRef}
               onFocus={handleFocus}
-              className="bg-transparent text-base outline-none w-full"
+              placeholder="0.00"
+              className="bg-transparent text-[#B5B5B5] text-base outline-none w-full"
             />
             {/* <div className="text-xs text-gray-300">≈ 400.58</div> */}
           </div>
@@ -104,64 +105,3 @@ const AmountInput = ({
 };
 
 export default AmountInput;
-
-{
-  /* <div className="space-y-2 pb-6 border-b-[1px] border-b-[#FFFFFF21]"> */
-}
-
-// <div className="flex flex-row-reverse justify-between items-center py-7 px-4 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
-//   <div className="">
-//     <div className="ml-4">
-//       {/* select input was here */}
-//       {validationErrors.token && (
-//         <p className="text-red-500 text-sm mt-1">
-//           {validationErrors.token}
-//         </p>
-//       )}
-//     </div>
-//   </div>
-//   <div className="flex flex-col items-center">
-//     <input
-//       type="number"
-//       value={saveState.amount}
-//       onChange={handleAmountChange}
-//       className="text-2xl text-[#B5B5B5] font-medium bg-transparent text-left w-full outline-none"
-//       placeholder="Enter amount"
-//     />
-//   </div>
-// </div>
-
-{
-  /* wallet balance section */
-}
-{
-  /* <div className="flex justify-between text-sm">
-                  <div className="text-sm font-[300] text-gray-300">
-                    Wallet balance:{" "}
-                    <span className="text-gray-400">
-                      {selectedTokenBalance}{" "}
-                      {saveState.token == tokens.safu
-                        ? "SAFU"
-                        : saveState.token === tokens.lsk
-                        ? "LSK"
-                        : "USDT"}
-                    </span>
-                  </div>
-                  <Button
-                    onClick={() =>
-                      setSaveState((prev) => ({
-                        ...prev,
-                        amount: selectedTokenBalance,
-                      }))
-                    }
-                    variant="link"
-                    className="h-auto p-0 text-[#4FFFB0] hover:text-[#4FFFB0]/90"
-                  >
-
-                    Save all
-                  </Button>
-                </div> */
-}
-{
-  /* </div> */
-}
