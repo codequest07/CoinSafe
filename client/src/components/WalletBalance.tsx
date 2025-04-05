@@ -17,9 +17,8 @@ export default function WalletBalance() {
   const isConnected = !!account?.address;
   const address = account?.address;
 
-  const openDepositModal = () => setIsDepositModalOpen(true);
+
   const openFirstModal = () => setIsFirstModalOpen(true);
-  const openWithdrawModal = () => setIsWithdrawModalOpen(true);
 
   const { totalBalance, availableBalance } = useBalances(address as string);
 
@@ -33,9 +32,7 @@ export default function WalletBalance() {
             <Button className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
               <Link to={"/dashboard/withdraw-assets"}>Withdraw</Link>
             </Button>
-            <Button
-              onClick={openDepositModal}
-              className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
+            <Button className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
               <Link to={"/dashboard/deposit"}>Deposit</Link>
             </Button>
             <Button
