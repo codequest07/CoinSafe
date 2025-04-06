@@ -17,7 +17,6 @@ export default function WalletBalance() {
   const isConnected = !!account?.address;
   const address = account?.address;
 
-
   const openFirstModal = () => setIsFirstModalOpen(true);
 
   const { totalBalance, availableBalance } = useBalances(address as string);
@@ -37,7 +36,8 @@ export default function WalletBalance() {
             </Button>
             <Button
               onClick={openFirstModal}
-              className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-full text-sm flex-1">
+              className="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-full text-sm flex-1"
+            >
               Save
             </Button>
           </div>
@@ -141,7 +141,8 @@ export default function WalletBalance() {
             </Button>
             <Button
               onClick={openFirstModal}
-              className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-black px-6 py-2 rounded-full">
+              className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-black px-6 py-2 rounded-full"
+            >
               Save
             </Button>
           </div>

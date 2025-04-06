@@ -1,4 +1,4 @@
-import DepositCard from "@/components/Cards/Deposit";
+import DepositCard from "@/components/Cards/DepositCard";
 
 const Deposit = () => {
   return (

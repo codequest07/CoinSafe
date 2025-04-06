@@ -45,7 +45,8 @@ const TrackingChart = () => {
               </Button>
               <Button
                 onClick={openFirstModal}
-                className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm sm:text-base">
+                className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm sm:text-base"
+              >
                 Save
               </Button>
             </div>
@@ -182,7 +183,8 @@ function BalanceCard({
           : alignCenter
           ? "items-center"
           : "items-start"
-      }`}>
+      }`}
+    >
       <div>
         <div className="text-[#CACACA] font-light text-sm pb-2">{title}</div>
         <div className="flex items-center">

@@ -58,13 +58,11 @@ export default function ScheduledSavings() {
           {isLoading ? (
             <Loader2 className="w-12 h-12 animate-spin" />
           ) : error ? (
-            <span className="text-red-500">
-              An unexpected error occured..
-            </span>
+            <span className="text-red-500">An unexpected error occured..</span>
           ) : (
             <div className="flex py-20 flex-col gap-6 items-center text-center justify-center">
               <div className="mb-4 rounded-full">
-                <MemoStory className="w-20 h-20"/>
+                <MemoStory className="w-20 h-20" />
               </div>
               <p className="text-sm">
                 This space is yours to litter with scheduled savings as you wish
@@ -82,7 +80,6 @@ export default function ScheduledSavings() {
                 >
                   Save
                 </Button>
-
               </div>
               {/* SavingOption Modal */}
               <SavingOption
