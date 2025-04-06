@@ -1,170 +1,176 @@
-// import { useState } from "react";
+"use client";
+
 import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-// import MemoClipboard from "@/icons/Clipboard";
 import { FaucetData } from "@/lib/data";
-import { FaucetContract } from "@/lib/contract";
-import { useAccount, useWriteContract } from "wagmi";
-import { waitForTransactionReceipt } from "@wagmi/core";
-import { config } from "@/lib/config";
-import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import CustomConnectButton from "@/components/custom-connect-button";
+import ThirdwebConnectButton from "@/components/ThirdwebConnectButton";
+import { useActiveAccount } from "thirdweb/react";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
+import MemoClipboard from "@/icons/Clipboard";
 
 export default function Faucet() {
-  const { isConnected } = useAccount();
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
   const navigate = useNavigate();
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
 
-  //Read contract data
-  // const faucetBalance = useReadContract({
-  //   abi: FaucetContract.abi.abi,
-  //   address: FaucetContract.address as `0x${string}`,
-  //   functionName: "getContractBalance",
-  // });
+  const handleClaim = async () => {
+    // Use manually entered address if available, otherwise use connected wallet
+    const addressToUse = walletAddress.trim() || account?.address || "";
 
-  // Write to contract
-  const {
-    data: hash,
-    error,
-    isError,
-    isPending,
-    isSuccess,
-    writeContractAsync,
-  } = useWriteContract();
-
-  async function handleClaim() {
-    const claimTnx = await writeContractAsync({
-      address: FaucetContract.address as `0x${string}`,
-      abi: FaucetContract.abi.abi,
-      functionName: "claim",
-    });
-    // console.log(claimTnx);
-
-    if (claimTnx) {
-      const transactionReceipt = await waitForTransactionReceipt(config, {
-        hash: claimTnx,
+    if (!addressToUse) {
+      setMessage({
+        type: "error",
+        text: "❌ Error: Please enter a wallet address or connect your wallet",
       });
-
-      console.log(transactionReceipt);
+      return;
     }
-  }
 
-  const getShortErrorMessage = (message: string) => {
-    const maxLength = 60;
-    return message.length > maxLength
-      ? `${message.substring(0, maxLength)}...`
-      : message;
+    try {
+      setIsLoading(true);
+
+      const response = await fetch(
+        "https://coinsafe-0q0m.onrender.com/faucet/claim",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address: addressToUse }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle specific error cases
+        if (data.error?.includes("Claim too soon")) {
+          const match = data.error.match(/\w{3} \w{3} \d{2} \d{4} .* GMT.*/);
+          if (match) {
+            const nextClaimTime = new Date(match[0]);
+            const formattedTime = nextClaimTime.toLocaleString();
+            throw new Error(`⏳ You can claim again at: ${formattedTime}`);
+          }
+        }
+        throw new Error(data.error || "Faucet claim failed");
+      }
+
+      // Show success message in UI
+      setMessage({
+        type: "success",
+        text: `✅ Success! You received ${data.amount} SAFU!`,
+      });
+    } catch (error: any) {
+      setMessage({ type: "error", text: `❌ Error: ${error.message}` });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoBack = () => {
     navigate(-1);
   };
+
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setWalletAddress(text);
+    } catch (err) {
+      console.error("Failed to paste:", err);
+    }
+  };
+
   return (
-    <main>
+    <div>
       <Navbar />
-      <div className="min-h-fit  bg-[#13131373] text-white p-8 mt-20">
-        <Card className="w-full sm:max-w-xl border-[#FFFFFF17] sm:mx-auto bg-[#13131373] text-white">
-          <CardHeader>
+      <div className="sm:min-h-fit  bg-[#13131373] text-white p-8 mt-20">
+        {/* Main Faucet Card */}
+        <Card className="w-full max-w-xl mx-auto border border-[#1E1E24] bg-[#0D0D0F] text-white">
+          <CardHeader className="pb-2">
             <button
               onClick={handleGoBack}
-              className="inline-flex items-center text-sm text-white hover:text-white mb-3"
-            >
+              className="inline-flex items-center text-sm text-[#CACACA] hover:text-white mb-3">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to app
             </button>
-            <CardTitle className="text-2xl font-[400]">Claim faucet</CardTitle>
+            <CardTitle className="text-2xl font-normal text-[#CACACA]">
+              Claim faucet
+            </CardTitle>
+            <p className="text-sm text-[#CACACA] mt-1">
+              Enter your EVM wallet address to claim SAFU testnet tokens
+            </p>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-center mb-5">
-              Connect your EVM wallet to claim SAFU testnet tokens
-            </p>
             <div className="space-y-6">
               <div>
-                {/* <label htmlFor="evmAddress" className="text-sm font-medium">
+                <label
+                  htmlFor="evmAddress"
+                  className="text-sm font-medium text-[#CACACA]">
                   EVM address
-                </label> */}
-
-                <div className="sm:max-w-xl my-4">
-                  {isError && (
-                    <div className="bg-[#FF484B24] p-3 rounded-[2rem]">
-                      <p className="text-[#FF484B] text-xs break-words">
-                        {getShortErrorMessage(
-                          (error?.message?.includes("ClaimTooSoon")
-                            ? "You can only claim once every 24 hours! Try again tomorrow"
-                            : error?.message) ||
-                            "Too many tries, try again later"
-                        )}
-                      </p>
-                    </div>
-                  )}
-                  {isSuccess && (
-                    <div className=" bg-[#48FF9124] p-3 rounded-[2rem]">
-                      <p className="text-[#48FF91] text-xs break-words">
-                        Faucet claim is successful! View on explorer{" "}
-                        <a
-                          href={`https://sepolia-blockscout.lisk.com/tx/${hash}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          {`${hash.slice(0, 6)}...${hash.slice(-4)}`}
-                        </a>
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {/* <div className="mt-1 relative">
+                </label>
+                <div className="relative mt-1">
                   <Input
                     id="evmAddress"
-                    type="text"
-                    value={evmAddress}
-                    onChange={(e) => setEvmAddress(e.target.value)}
-                    className="w-full py-5 bg-[#13131373] text-white border-zinc-700"
+                    value={walletAddress}
+                    onChange={(e) => setWalletAddress(e.target.value)}
+                    // placeholder="Enter your wallet address"
+                    className="w-full  border-[#FFFFFF3D] rounded-md text-white pr-10"
                   />
-                  <Button
-                    className="absolute bg-transparent hidden  hover:bg-transparent  sm:flex space-x-[2px] right-2 top-1/2 transform -translate-y-1/2 text-zinc-400"
-                    onClick={() =>
-                      navigator.clipboard.readText().then(setEvmAddress)
-                    }>
-                    <MemoClipboard className="w-5 h-5" />
-                    <p>Paste</p>
-                  </Button>
-                </div> */}
+                  <button
+                    className="absolute bg-[#3F3F3F99] p-1 rounded-[4px] flex items-center gap-1 right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white text-xs"
+                    onClick={handlePaste}>
+                    <MemoClipboard className="w-4 h-4" />
+                    Paste
+                  </button>
+                </div>
+
+                {message.text && (
+                  <div
+                    className={`p-3 rounded-md my-3 text-center ${
+                      message.type === "error"
+                        ? "bg-[#FF484B24] text-[#FF484B]"
+                        : "bg-[#48FF9124] text-[#48FF91]"
+                    }`}>
+                    <p className="text-xs break-words">{message.text}</p>
+                  </div>
+                )}
               </div>
-              <div className="sm:flex space-x-4 sm:justify-center w-full">
+              <div className="flex space-x-2 sm:space-x-4 justify-end w-full">
                 <div className="">
                   <AddTokenToMetaMask />
                 </div>
                 {!isConnected ? (
-                  <CustomConnectButton />
+                  <ThirdwebConnectButton />
                 ) : (
                   <Button
                     className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
-                    onClick={() => handleClaim()}
-                    disabled={isPending}
-                  >
-                    {isPending ? "Pending" : "Claim faucet"}
+                    onClick={handleClaim}
+                    disabled={isLoading}>
+                    {isLoading ? "Processing..." : "Claim faucet"}
                   </Button>
                 )}
               </div>
             </div>
           </CardContent>
         </Card>
-        <div className="mt-6">
-          <h2 className="text-base font-[400] mb-3 sm:ml-96">
+
+        {/* Other Test Tokens Section */}
+        <div className="mt-6 ">
+          <h2 className="text-base font-[400] mb-3 sm:ml-[443px]">
             Claim other test tokens
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-xl h-56 mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl sm:h-56 mx-auto">
             {FaucetData.map((items, index) => (
               <Card
                 key={index}
-                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full"
-              >
+                className="bg-[#13131373] border-[#FFFFFF17] text-white w-full">
                 <CardHeader className="p-3 pb-0">
                   <CardTitle className="text-sm mt-3">{items.title}</CardTitle>
                 </CardHeader>
@@ -173,8 +179,7 @@ export default function Faucet() {
                   <Link
                     to={items.link}
                     target="_blank"
-                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline"
-                  >
+                    className="block w-full mt-4 text-xs text-[#79E7BA] hover:underline">
                     {items.btnTitle}
                   </Link>
                 </CardContent>
@@ -184,6 +189,6 @@ export default function Faucet() {
         </div>
       </div>
       <Footer />
-    </main>
+    </div>
   );
 }

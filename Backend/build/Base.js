@@ -19,7 +19,7 @@ function getFilteredTransactions(address, apiKey) {
         const url = `https://api-sepolia.basescan.org/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10000&sort=asc&apikey=${apiKey}`;
         try {
             const response = yield axios_1.default.get(url);
-            console.log('Full API response:', response.data);
+            // console.log('Full API response:', response.data);
             if (response.data.status !== '1' && response.data.status !== 1) {
                 console.error('API Error:', response.data.message);
                 throw new Error(`API Error: ${response.data.message}`);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ClaimAssets from "./Modals/ClaimAssets";
+import ClaimAssets from "../Modals/ClaimAssets";
 
 const ClaimCard = ({
   title,
@@ -19,7 +19,7 @@ const ClaimCard = ({
   text: string;
 }) => {
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-  // const openclaimModal = () => setIsClaimModalOpen(true);
+  const openclaimModal = () => setIsClaimModalOpen(true);
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
       <div className="flex justify-between items-center pb-4">
@@ -55,11 +55,11 @@ const ClaimCard = ({
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          {/* <button
+          <button
             onClick={openclaimModal}
-            className="rounded-[100px] px-8 py-[8px] bg-[#1E1E1E99] h-[40px] text-sm text-[#F1F1F1]">
+            className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
             Claim all
-          </button> */}
+          </button>
           {/* <button className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">Save</button> */}
         </div>
       </div>

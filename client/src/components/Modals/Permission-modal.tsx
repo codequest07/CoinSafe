@@ -15,11 +15,11 @@ export function PermissionModal({
 }: PermissionModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] bg-[#17171C] border-none text-white p-0">
+      <DialogContent className="max-w-[390px] sm:max-w-[425px] border-1 border-[#FFFFFF21] text-white bg-[#17171C] p-0">
         <div className="p-6">
           <h2 className="text-xl font-[400] mb-8">Approve access</h2>
 
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center my-8">
             <img src="/assets/coinsafe-logo.png" alt="Coinsafe" />
           </div>
 
@@ -27,7 +27,7 @@ export function PermissionModal({
             We need your permission!
           </h3>
 
-          <p className="text-[#B5B5B5] text-sm mb-8">
+          <p className="text-[#B5B5B5] text-center text-sm mb-8">
             You&apos;ll need to review and agree to our Terms and Conditions in
             a Smart contract. This will allow our AI, SaveSense access to your
             wallet activity, and provide a personalized savings plan, just for
@@ -37,12 +37,12 @@ export function PermissionModal({
           <div className="flex gap-4 justify-center">
             <button
               onClick={onReject}
-              className="px-6 py-2 rounded-full bg-[#2C2C2C] hover:bg-[#3C3C3C] transition-colors">
+              className="px-6 py-2 text-sm font-medium rounded-full bg-[#2C2C2C] hover:bg-[#3C3C3C] transition-colors">
               Reject
             </button>
             <button
               onClick={onApprove}
-              className="px-6 py-2 rounded-full bg-white text-black hover:bg-gray-100 transition-colors">
+              className="px-6 py-2 text-sm font-medium rounded-full bg-white text-black hover:bg-gray-100 transition-colors">
               Approve
             </button>
           </div>

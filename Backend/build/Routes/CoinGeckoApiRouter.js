@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const CoinGeckoApiController_1 = require("../controllers/CoinGeckoApiController");
 const CoinGeckoApiRouter = express_1.default.Router();
-CoinGeckoApiRouter.get("/api-cg/:ids", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const ids = req.params.ids;
-    const result = yield (0, CoinGeckoApiController_1.main)(ids);
+CoinGeckoApiRouter.get("/api-cg/:tokenId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const tokenId = req.params.tokenId;
+    const result = yield (0, CoinGeckoApiController_1.main)(tokenId);
     res.json(result);
 }));
 exports.default = CoinGeckoApiRouter;

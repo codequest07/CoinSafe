@@ -1,74 +1,130 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { NavLinks } from "@/lib/data";
 import MemoLogo from "@/icons/Logo";
 import SmileFace from "./Smile";
 import ExtensionCard from "./Cards/ExtensionCard";
 import ClaimBtn from "./ClaimBtn";
 
+const getRandomMessage = () => {
+  const messages = [
+    "Why haven't you saved today? Don't miss out!",
+    "Saving is the key to greatness! Start now.",
+    "Don't let today pass without saving!",
+    "Secure your future, one save at a time.",
+    "What are you waiting for? Save something!",
+    "Every little bit counts. Start saving today!",
+    "Take a step toward your goals—save today!",
+  ];
+  return messages[Math.floor(Math.random() * messages.length)];
+};
+
 const DashHeader = () => {
+  const location = useLocation();
+  const [randomMessage, setRandomMessage] = useState("");
+
+  // Get current route name - only the last segment
+  const getCurrentRouteName = () => {
+    const path = location.pathname;
+
+    // Return Dashboard for root path
+    if (path === "/") return "Dashboard";
+
+    // Split the path by '/' and get the last non-empty segment
+    const segments = path.split("/").filter((segment) => segment !== "");
+    const lastSegment = segments[segments.length - 1];
+
+    // Capitalize the first letter
+    return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
+  };
+
+  useEffect(() => {
+    // Generate a new random message when the component mounts
+    setRandomMessage(getRandomMessage());
+  }, []);
+
   return (
     <main>
-      <header className="flex  justify-end h-14 items-center  shadow-xl gap-4 border-b border-b-[#000000] lg:h-[70px]">
-        <Sheet>
-          <SheetContent side="left" className="flex flex-col bg-[#13131373]">
-            <nav className="grid gap-2 text-lg font-medium">
-              <Link to="/" className="flex items-center gap-2 font-semibold">
-                <MemoLogo className="w-32 h-32" />
-              </Link>
+      <header className="flex items-center h-14 shadow-xl border-b border-b-[#000000] lg:h-[70px] w-full bg-black text-white">
+        {/* Mobile View */}
+        <div className="w-full flex items-center justify-between md:hidden md:px-4">
+          {/* Logo for mobile */}
+          <Link to="/" className="flex items-center">
+            <MemoLogo className="w-24 h-8" />
+            <span className="text-xs bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded ml-1">
+              Beta
+            </span>
+          </Link>
 
-              {NavLinks.map((link) => (
-                <NavLink
-                  key={link.label}
-                  to={link.to}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3  text-[#FFFFFF] bg-[#FFFBF833]   transition-all hover:text-primary"
-                      : "flex items-center gap-3 font-[400] rounded-lg  px-3 py-2  text-[#FFFFFF]  transition-all hover:text-primary"
-                  }>
-                  <link.icon className="w-5 h-5" />
-                  {link.label}
-                </NavLink>
-              ))}
-            </nav>
-            <div className="mt-auto">
-              <ExtensionCard />
+          {/* Mobile Menu Button */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-white">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+
+            {/* Mobile Navigation Sidebar */}
+            <SheetContent
+              side="right"
+              className="flex flex-col bg-[#13131373] border-r border-r-[#333333]">
+              <nav className="grid gap-2 text-lg font-medium">
+                <Link to="/" className="flex items-center gap-2 font-semibold">
+                  <MemoLogo className="w-32 h-10" />
+                </Link>
+
+                {NavLinks.map((link) => (
+                  <NavLink
+                    key={link.label}
+                    to={link.to}
+                    className={({ isActive }) =>
+                      isActive
+                        ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
+                        : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
+                    }>
+                    <link.icon className="w-5 h-5" />
+                    {link.label}
+                  </NavLink>
+                ))}
+              </nav>
+              <div className="mt-auto">
+                <ExtensionCard />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        {/* Desktop View */}
+        <div className="w-full hidden md:block rounded-0 md:p-3 ">
+          <div className="flex items-start justify-between text-white p-1">
+            <div className="sm:flex flex-col space-y-2 hidden items-start">
+              {/* Current Route Name and Badge */}
+              <div className="flex space-x-2 items-center">
+                <span className="text-sm text-[#F1F1F1]">
+                  {getCurrentRouteName()}
+                </span>
+                <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
+                  1000 days 🔥
+                </span>
+              </div>
+              {/* Message */}
+              <div className="ml-0 text-sm">
+                <span>{randomMessage}</span>
+              </div>
             </div>
-          </SheetContent>
-          <SheetTrigger asChild className="mx-3">
-            <Button
-              variant="outline"
-              size="icon"
-              className="shrink-0   md:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle navigation menu</span>
-            </Button>
-          </SheetTrigger>
-          <div className="w-full rounded-0 p-3 ">
-            <div className="flex items-start justify-between text-white p-1">
-              <div className="sm:flex flex-col space-y-2 hidden items-start">
-                {/* Username and days badge */}
-                <div className="flex space-x-2 items-center">
-                  <span className="text-sm text-gray-400">u/jumpingjack</span>
-                  <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
-                    1000 days 🔥
-                  </span>
-                </div>
-                {/* Message */}
-                <div className="ml-0 text-sm">
-                  <span>Why haven't you saved today? Ehn fine girl?</span>
-                </div>
-              </div>
-              <div className="flex items-center sm:space-x-3">
-                <ClaimBtn />
-                {/* Icons for connected wallets */}
-                <SmileFace />
-              </div>
+            <div className="flex items-center sm:space-x-3">
+              <ClaimBtn />
+              {/* Icons for connected wallets */}
+              <SmileFace />
             </div>
           </div>
-        </Sheet>
+        </div>
       </header>
     </main>
   );

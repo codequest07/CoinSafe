@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 
 import "@rainbow-me/rainbowkit/styles.css";
+import { ThirdwebProvider } from "thirdweb/react";
 import {
   darkTheme,
   // getDefaultConfig,
@@ -24,6 +25,7 @@ import { WagmiProvider } from "wagmi";
 // } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { config } from "./lib/config.ts";
+import { ApprovalProvider } from "./contexts/ApprovalContext.tsx";
 
 const queryClient = new QueryClient();
 
@@ -41,7 +43,11 @@ createRoot(document.getElementById("root")!).render(
             })}
           >
             <RecoilRoot>
-              <App />
+              <ApprovalProvider>
+                <ThirdwebProvider>
+                  <App />
+                </ThirdwebProvider>
+              </ApprovalProvider>
             </RecoilRoot>
           </RainbowKitProvider>
         </QueryClientProvider>

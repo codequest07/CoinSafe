@@ -1,6 +1,6 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-export default function CustomConnectButton() {
+export default function ThirdwebConnectButton() {
   return (
     <ConnectButton.Custom>
       {({
@@ -28,7 +28,8 @@ export default function CustomConnectButton() {
             <button
               onClick={openConnectModal}
               type="button"
-              className="text-[#131313B2] bg-white py-2 px-5 rounded-full text-sm">
+              className="text-[#131313B2] bg-white py-2 px-5 rounded-full text-sm"
+            >
               Connect Wallet
             </button>
           );
@@ -53,7 +54,8 @@ export default function CustomConnectButton() {
               border: "none",
               cursor: "pointer",
             }}
-            className="bg-[#131313B2] space-x-2 text-white py-2 px-5 rounded-[2rem]">
+            className="bg-[#131313B2] space-x-2 text-white py-2 px-5 rounded-[2rem]"
+          >
             <p>
               {" "}
               {account.address.slice(0, 6)}...{account.address.slice(-4)}

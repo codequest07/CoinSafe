@@ -180,3 +180,22 @@ export const getOne = async (
     res.status(500).json({ message: "Server error. Please try again later" });
   }
 };
+
+export const getWaitlistCount = async (req: Request, res: Response) => {
+  try {
+    console.log("Attempting to count waitlist entries..."); // Debug log
+    const count = await Waitlist.countDocuments();
+    console.log(`Found ${count} entries`); // Debug log
+    res.status(200).json({
+      success: true,
+      count,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Database count error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};

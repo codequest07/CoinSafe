@@ -4,9 +4,9 @@ import { main } from "../controllers/CoinGeckoApiController";
 
 const CoinGeckoApiRouter = express.Router();
 
-CoinGeckoApiRouter.get("/api-cg/:ids", async (req, res) => {
-  const ids = req.params.ids;
-  const result = await main(ids);
+CoinGeckoApiRouter.get("/api-cg/:tokenId", async (req, res) => {
+  const tokenId = req.params.tokenId;
+  const result = await main(tokenId);
   
   res.json(result);
 });

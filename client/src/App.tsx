@@ -11,8 +11,34 @@ import Extension from "./Pages/Extension";
 import SaveSense from "./Pages/SaveSense";
 import { Toaster } from "./components/ui/toaster";
 import Faucet from "./Pages/Faucet";
+import SavingsDetail from "./components/SavingsDetail";
+import SaveAssets from "./Pages/SaveAssets";
+import Deposit from "./Pages/Deposit";
+import Withdraw from "./Pages/Withdraw";
+// import { useRecoilState } from "recoil";
+// import { availableBalanceState, savingsBalanceState, totalBalanceState } from "./store/atoms/save";
+// import { useContractEvents } from "./hooks/useWatchEvents";
 
 const App = () => {
+  // const [, setAvailableBalance] = useRecoilState(availableBalanceState);
+  // const [, setSavingsBalance] = useRecoilState(savingsBalanceState);
+  // const [, setTotalBalance] = useRecoilState(totalBalanceState);
+
+  // useContractEvents({
+  //   onDeposit: (amountInUsd) => {
+  //     setAvailableBalance((prev) => prev + amountInUsd);
+  //     setTotalBalance((prev) => prev + amountInUsd);
+  //   },
+  //   onWithdraw: (amountInUsd) => {
+  //     setAvailableBalance((prev) => prev - amountInUsd);
+  //     setTotalBalance((prev) => prev - amountInUsd);
+  //   },
+  //   onSave: (amountInUsd) => {
+  //     setAvailableBalance((prev) => prev - amountInUsd);
+  //     setSavingsBalance((prev) => prev + amountInUsd);
+  //   },
+  // });
+
   return (
     <div className="bg-[#010104]">
       <Routes>
@@ -25,10 +51,15 @@ const App = () => {
           <Route path="/dashboard/" element={<Home />} />
           <Route path="/dashboard/wallet" element={<Portfolio />} />
           <Route path="/dashboard/vault" element={<Vault />} />
+          <Route path="/dashboard/vault/:id" element={<SavingsDetail />} />
           <Route path="/dashboard/staking" element={<Staking />} />
           <Route path="/dashboard/rewards" element={<Rewards />} />
           <Route path="/dashboard/rewards/my-rewards" element={<MyRewards />} />
           <Route path="/dashboard/SaveSense" element={<SaveSense />} />
+          {/* Test */}
+          <Route path="/dashboard/save-assets" element={<SaveAssets />} />
+          <Route path="/dashboard/deposit" element={<Deposit />} />
+          <Route path="/dashboard/withdraw-assets" element={<Withdraw />} />
         </Route>
       </Routes>
       <Toaster />

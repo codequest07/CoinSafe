@@ -78,7 +78,7 @@ export default function Loading({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[500px] p-6 border-[#FFFFFF17] bg-black text-white rounded-lg shadow-lg">
+      <DialogContent className="max-w-[500px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg">
         <div className="h-[200px] rounded-2xl p-8 flex flex-col items-center justify-center">
           <div className="flex items-center justify-center mb-6">
             {/* <MemoLogo2 className="w-80 h-20 text-[#20FFAF]" /> */}
