@@ -28,3 +28,6 @@ client/.DS_Store
 *.sln
 *.sw?
 client/.env
+
+.wake
+.vscode
