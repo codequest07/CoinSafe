@@ -37,12 +37,16 @@ const TrackingChart = () => {
         <div className="flex justify-center sm:justify-end items-center pb-3 text-white gap-2 sm:gap-3">
           {isConnected && (
             <div className="flex items-center gap-2 my-2 sm:my-4 w-full sm:w-auto">
-              <Button className="flex-1 sm:flex-none bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base">
-                <Link to={"/dashboard/withdraw-assets"}>Withdraw</Link>
-              </Button>
-              <Button className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-sm sm:text-base cursor-pointer">
-                <Link to={"/dashboard/deposit"}>Deposit</Link>
-              </Button>
+              <Link to={"/dashboard/withdraw-assets"}>
+                <Button className="flex-1 sm:flex-none bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base">
+                  Withdraw
+                </Button>
+              </Link>
+              <Link to={"/dashboard/deposit"}>
+                <Button className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-sm sm:text-base cursor-pointer">
+                  Deposit
+                </Button>
+              </Link>
               <Button
                 onClick={openFirstModal}
                 className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm sm:text-base"

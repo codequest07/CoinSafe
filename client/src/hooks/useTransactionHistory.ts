@@ -4,7 +4,7 @@ import { getContract } from "thirdweb";
 import { liskSepolia } from "@/lib/config";
 import { client } from "@/lib/config";
 import { useReadContract } from "thirdweb/react";
-import { CoinsafeDiamondContract, diamondContractAbi, facetAbis } from "@/lib/contract";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { Abi } from "viem";
 
@@ -50,8 +50,6 @@ export function useTransactionHistory({
   const [currentLimit] = useState(limit);
   const account = useActiveAccount();
   const address = account?.address;
-
-  console.log("Diamond Contract Composite Abi", diamondContractAbi);
 
   // Read contract using wagmi's useReadContract hook
   // const {

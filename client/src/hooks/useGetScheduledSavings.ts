@@ -3,7 +3,7 @@ import { getContract } from "thirdweb";
 import { liskSepolia } from "@/lib/config";
 import { client } from "@/lib/config";
 import { useReadContract } from "thirdweb/react";
-import { CoinsafeDiamondContract, diamondContractAbi, tokens } from "@/lib/contract";
+import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { formatUnits } from "viem";
 import { getSafuToUsd } from "@/lib";
 import { useActiveAccount } from "thirdweb/react";
@@ -54,7 +54,6 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
     client,
     address: CoinsafeDiamondContract.address,
     chain: liskSepolia,
-    abi: diamondContractAbi,
   });
 
   const { data: result, isLoading } = useReadContract({

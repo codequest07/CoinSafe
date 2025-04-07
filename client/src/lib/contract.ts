@@ -2,11 +2,7 @@ import faucetAbi from "../abi/faucet.json";
 import coinSafeAbi from "../abi/coinsafe.json";
 import balanceFacetAbi from '../abi/BalanceFacet.json';
 import savingsFacetAbi from '../abi/SavingsFacet.json';
-import funcdingFacetAbi from '../abi/FundingFacet.json';
-
-import { getContract } from "thirdweb";
-import { client, liskSepolia } from "./config";
-import { resolveCompositeAbi } from "thirdweb/contract";
+import fundingFacetAbi from '../abi/FundingFacet.json';
 
 export const tokens = {
   // usdt: "0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909",
@@ -27,15 +23,6 @@ export const CoinsafeDiamondContract = {
   address: "0xda6cf4d86ac271686ace56c554acad7bc6940667"
 }
 
-const diamondContract = getContract({
-  client,
-  address: CoinsafeDiamondContract.address,
-  chain: liskSepolia,
-});
-
-export const diamondContractAbi = await resolveCompositeAbi(diamondContract);
-console.log("Diamond Contract Composite Abi", diamondContractAbi);
-
 export const FaucetContract = {
   address: "0x6245DF66b74b56D803730d48BF1bF16EEBBBD881",
   abi: faucetAbi,
@@ -43,6 +30,6 @@ export const FaucetContract = {
 
 export const facetAbis = {
   balanceFacet: balanceFacetAbi,
-  fundingFacet: funcdingFacetAbi,
+  fundingFacet: fundingFacetAbi,
   savingsFacet: savingsFacetAbi,
 }

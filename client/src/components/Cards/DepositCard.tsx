@@ -146,7 +146,7 @@ export default function DepositCard() {
                 <input
                   type="number"
                   value={amount}
-                  onChange={(e: any) => setAmount(e.target.value)}
+                  onChange={(e: any) => setAmount(Number(e.target.value))}
                   className="text-2xl font-medium bg-transparent text-white w-16 sm:w-full outline-none"
                   placeholder="0"
                 />
