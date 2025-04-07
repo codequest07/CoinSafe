@@ -63,6 +63,8 @@ contract Savings is ReentrancyGuard {
         uint256 amount;
         uint256 frequency;
         uint256 duration;
+        uint256 startTime;
+        uint256 unlockTime;
         uint256 lastSavingTimestamp;
         uint256 nextSavingTimestamp;
     }
@@ -100,8 +102,8 @@ contract Savings is ReentrancyGuard {
     mapping(address => Transaction[]) public userTransactions;
 
     mapping(address => mapping(address => uint256)) private userTokenBalances;
-    mapping(address => mapping(uint256 => Safe)) private userSavings;
-    mapping(address => uint256) private userSavingsCount;
+    mapping(address => mapping(uint256 => Safe)) private userSavings; // user => id => safe 
+    mapping(address => uint256) private userSavingsCount; // user => count - remember to update this in different savings actions function
 
     mapping(TokenType => address) public acceptedTokensAddresses;
     mapping(address => bool) public acceptedTokens;
@@ -112,6 +114,10 @@ contract Savings is ReentrancyGuard {
     mapping(address => bool) public userAutomatedPlanExists;
 
     mapping(address => mapping(address => bool)) public isTokenAutoSaved;
+
+    // Fee configuration
+    uint256 public automatedSavingsFeePercentage; // Fee in basis points (e.g., 50 = 0.5%)
+    address public feeCollector; // Address that collects the fees
 
     // Events
     event DepositSuccessful(
@@ -175,6 +181,9 @@ contract Savings is ReentrancyGuard {
 
     event BatchAutomatedSavingsExecuted(uint256 executedCount, uint256 skippedCount);
 
+    event AutomatedSavingsFeeCharged(address indexed user, address indexed token, uint256 fee);
+    event FeeConfigurationUpdated(uint256 newFeePercentage, address newFeeCollector);
+
     /**
      * @dev Constructor function to initialize the contract with accepted token addresses
      * @param _erc20TokenAddress The address of the ERC20 token
@@ -184,7 +193,9 @@ contract Savings is ReentrancyGuard {
     constructor(
         address _erc20TokenAddress,
         address _liskTokenAddress,
-        address _safuTokenAddress
+        address _safuTokenAddress,
+        uint256 _initialFeePercentage,
+        address _feeCollector
     ) {
         owner = msg.sender;
 
@@ -203,6 +214,9 @@ contract Savings is ReentrancyGuard {
         acceptedTokens[_safuTokenAddress] = true;
 
         acceptedTokenCount += 3;
+
+        automatedSavingsFeePercentage = _initialFeePercentage;
+        feeCollector = _feeCollector;
     }
 
     modifier onlyOwner() {
@@ -342,9 +356,25 @@ contract Savings is ReentrancyGuard {
             amount: _amount,
             frequency: _frequency,
             duration: _duration,
-            lastSavingTimestamp: block.timestamp,
+            startTime: block.timestamp,
+            unlockTime: block.timestamp + _duration,
+            lastSavingTimestamp: 0,
             nextSavingTimestamp: block.timestamp + _frequency
         });
+
+        // Create a new safe for the automated savings plan
+        uint256 savingsIndex = userSavingsCount[msg.sender];
+        userSavings[msg.sender][savingsIndex] = Safe({
+            typeOfSafe: "Automated",
+            id: savingsIndex,
+            token: _token,
+            amount: 0, // Will be updated in the calling function
+            duration: _duration,
+            startTime: block.timestamp,
+            unlockTime: block.timestamp + _duration
+        });
+
+        userSavingsCount[msg.sender]++;
 
         userAutomatedPlanExists[msg.sender] = true;
         userAutomatedSavingsPerToken[msg.sender][_token] = true;
@@ -368,6 +398,11 @@ contract Savings is ReentrancyGuard {
         for (uint256 i = 0; i < automatedSavingsUsers.length; i++) {
             address user = automatedSavingsUsers[i];
             AutomatedSavingsPlan storage plan = automatedSavingsPlans[user];
+
+            if (userTokenBalances[user][plan.token] < plan.amount) {
+                skippedCount++;
+                continue;
+            }
 
             // Check if the plan is due and still active
             if (
@@ -428,13 +463,39 @@ contract Savings is ReentrancyGuard {
         }
     }
 
+    /**
+     * @dev Calculates and charges fee for automated savings execution
+     * @param _user The user being charged
+     * @param _token The token being used
+     * @param _amount The amount being saved
+     * @return netAmount The amount after fee deduction
+     */
+    function calculateAndChargeFee(
+        address _user,
+        address _token,
+        uint256 _amount
+    ) internal returns (uint256 netAmount) {
+        // Calculate fee (using basis points)
+        uint256 fee = (_amount * automatedSavingsFeePercentage) / 10000;
+        netAmount = _amount - fee;
+
+        if (fee > 0) {
+            // Transfer fee to fee collector
+            userTokenBalances[feeCollector][_token] += fee;
+            
+            emit AutomatedSavingsFeeCharged(_user, _token, fee);
+        }
+
+        return netAmount;
+    }
+
     // ===================================== EXECUTE AUTOMATED SAVINGS =====================================
 
     /**
      * @notice Executes automated savings for a user
      * @param _user The address of the user
      * @dev This function is designed to be called internally or by trusted external contracts
-     */
+    */
     function executeAutomatedSaving(address _user) external {
         AutomatedSavingsPlan storage plan = automatedSavingsPlans[_user];
 
@@ -443,7 +504,7 @@ contract Savings is ReentrancyGuard {
         if (block.timestamp < plan.lastSavingTimestamp + plan.frequency) return;
 
         // Check if plan has exceeded its duration
-        if (block.timestamp > plan.lastSavingTimestamp + plan.duration) {
+        if (block.timestamp > plan.unlockTime) {
             // Clean up the plan
             userAutomatedPlanExists[_user] = false;
             userAutomatedSavingsPerToken[_user][plan.token] = false;
@@ -455,35 +516,47 @@ contract Savings is ReentrancyGuard {
         // Check if user has sufficient balance
         if (userTokenBalances[_user][plan.token] < plan.amount) return;
 
-        // Update user's token balance
+        // Deduct total amount including fee from user's balance
         userTokenBalances[_user][plan.token] -= plan.amount;
 
+        // Calculate net amount after fee
+        uint256 netAmount = calculateAndChargeFee(_user, plan.token, plan.amount);
+
         // Find or create a new savings slot
-        uint256 savingsIndex = findOrCreateAutomatedSavingsSafe(
+        uint256 savingsIndex = findAutomatedSavingsSafe(
             _user,
             plan.token
         );
 
-        // Update the safe
-        userSavings[_user][savingsIndex].amount += plan.amount;
-        userSavings[_user][savingsIndex].startTime = block.timestamp;
+        // Save the net amount (after fee)
+        userSavings[_user][savingsIndex].amount += netAmount;
 
         // Update plan timestamps
         plan.lastSavingTimestamp = block.timestamp;
         plan.nextSavingTimestamp = block.timestamp + plan.frequency;
 
         // Update total amount saved
-        totalAmountSaved[_user][plan.token] += plan.amount;
+        totalAmountSaved[_user][plan.token] += netAmount;
 
-        addTransaction("auto save", plan.token, plan.amount);
+        addTransaction("auto save", plan.token, netAmount);
 
         emit AutomatedSavingExecuted(_user, plan.token, plan.amount);
     }
 
-    // Optional: Add a function to remove a user from automated savings if their plan expires or is cancelled
-    function removeFromAutomatedSavings(address _user) internal {
+    // Helper function to remove a user from automated savings if their plan expires or is cancelled
+    function removeFromAutomatedSavings(address _user) public {
+
+        AutomatedSavingsPlan storage plan = automatedSavingsPlans[_user];
+
         if (isInAutomatedSavingsArray[_user]) {
             // Find and remove the user from the array
+            userAutomatedPlanExists[_user] = false;
+            userAutomatedSavingsPerToken[_user][plan.token] = false;
+            // removeFromAutomatedSavings(_user);
+            delete automatedSavingsPlans[_user];
+
+            //  ***///---- TODO: Check if this is necessary
+
             for (uint256 i = 0; i < automatedSavingsUsers.length; i++) {
                 if (automatedSavingsUsers[i] == _user) {
                     // Replace with the last element and then remove the last element
@@ -502,10 +575,10 @@ contract Savings is ReentrancyGuard {
      * @param _token The token address
      * @return The index of the safe
      */
-    function findOrCreateAutomatedSavingsSafe(
+    function findAutomatedSavingsSafe(
         address _user,
         address _token
-    ) internal returns (uint256) {
+    ) internal view returns (uint256) {
         // First, try to find an existing automated savings safe for the token
         for (uint256 i = 0; i < userSavingsCount[_user]; i++) {
             if (
@@ -516,21 +589,7 @@ contract Savings is ReentrancyGuard {
                 return i;
             }
         }
-
-        // If no existing safe found, create a new one
-        uint256 savingsIndex = userSavingsCount[_user];
-        userSavings[_user][savingsIndex] = Safe({
-            typeOfSafe: "Automated",
-            id: savingsIndex,
-            token: _token,
-            amount: 0, // Will be updated in the calling function
-            duration: 0,
-            startTime: block.timestamp,
-            unlockTime: 0
-        });
-        userSavingsCount[_user]++;
-
-        return savingsIndex;
+        revert();
     }
 
 
@@ -567,8 +626,19 @@ contract Savings is ReentrancyGuard {
     }
 
 
-
-
+    // Admin functions to manage fees
+    function updateFeeConfiguration(uint256 _newFeePercentage, address _newFeeCollector) 
+        external 
+        onlyOwner 
+    {
+        require(_newFeePercentage <= 1000, "Fee percentage too high"); // Max 10%
+        require(_newFeeCollector != address(0), "Invalid fee collector address");
+        
+        automatedSavingsFeePercentage = _newFeePercentage;
+        feeCollector = _newFeeCollector;
+        
+        emit FeeConfigurationUpdated(_newFeePercentage, _newFeeCollector);
+    }
 
 
 
@@ -593,6 +663,7 @@ contract Savings is ReentrancyGuard {
         uint256 _savingsIndex,
         bool _acceptEarlyWithdrawalFee
     ) external nonReentrant {
+        
         Safe storage userSafe = userSavings[msg.sender][_savingsIndex];
 
         if (userSafe.amount == 0) revert InvalidWithdrawal();
