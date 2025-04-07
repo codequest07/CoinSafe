@@ -1,5 +1,8 @@
 import faucetAbi from "../abi/faucet.json";
 import coinSafeAbi from "../abi/coinsafe.json";
+import balanceFacetAbi from '../abi/BalanceFacet.json';
+import savingsFacetAbi from '../abi/SavingsFacet.json';
+import fundingFacetAbi from '../abi/FundingFacet.json';
 
 export const tokens = {
   // usdt: "0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909",
@@ -24,3 +27,9 @@ export const FaucetContract = {
   address: "0x6245DF66b74b56D803730d48BF1bF16EEBBBD881",
   abi: faucetAbi,
 };
+
+export const facetAbis = {
+  balanceFacet: balanceFacetAbi,
+  fundingFacet: fundingFacetAbi,
+  savingsFacet: savingsFacetAbi,
+}

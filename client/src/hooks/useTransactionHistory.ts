@@ -4,8 +4,9 @@ import { getContract } from "thirdweb";
 import { liskSepolia } from "@/lib/config";
 import { client } from "@/lib/config";
 import { useReadContract } from "thirdweb/react";
-import { CoinsafeDiamondContract } from "@/lib/contract";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
+import { Abi } from "viem";
 
 // Types for the transaction history
 export interface Transaction {
@@ -80,6 +81,7 @@ export function useTransactionHistory({
     client,
     address: CoinsafeDiamondContract.address,
     chain: liskSepolia,
+    abi: facetAbis.savingsFacet as unknown as Abi,
   });
 
   const {

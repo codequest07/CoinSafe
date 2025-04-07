@@ -11,30 +11,35 @@ import {
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
 import { formatEther } from "viem";
-// import { CoinSafeContract, CoinsafeDiamondContract } from "@/lib/contract";
+// import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-// import { readContract } from "@wagmi/core";
-// import { config } from "@/lib/config";
 import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import { Check, X } from "lucide-react";
 import { getSafuToUsd } from "@/lib";
+// import { getContract, readContract } from "thirdweb";
+// import { client, liskSepolia } from "@/lib/config";
 
 // async function checkIsTokenAutoSaved(
 //   userAddress: `0x${string}`,
 //   tokenAddress: string
 // ) {
-//   const result = await readContract(config, {
-//     abi: CoinSafeContract.abi.abi,
-//     address: CoinsafeDiamondContract.address as `0x${string}`,
-//     functionName: "isTokenAutoSaved",
-//     args: [userAddress, tokenAddress],
+//   const contract = getContract({
+//     client,
+//     address: CoinsafeDiamondContract.address,
+//     chain: liskSepolia,
 //   });
-//   return result;
+
+//   const balance = await readContract({
+//     contract: contract,
+//     method: "function isTokenAutoSaved(address _userAddress, address _tokenAddress) view returns (uint256)",
+//     params: [userAddress, tokenAddress],
+//   });
+//   return balance;
 // }
 
 export default function AssetTable() {
@@ -102,7 +107,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
   );
 
   useEffect(() => {
-    console.log("Assets in the assets table sub component", assets);
+    // console.log("Assets in the assets table sub component", assets);
     const tokenData = {
       "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
         symbol: "SAFU",
