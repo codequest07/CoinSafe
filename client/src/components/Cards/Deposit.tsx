@@ -96,7 +96,7 @@ export default function DepositCard() {
 
   return (
     <main>
-      <div className="mx-auto sm:max-w-[600px] w-full  border-0 p-6 rounded-[12px] text-white bg-[#1D1D1D73]">
+      <div className="mx-auto sm:max-w-[600px] w-full  border border-[#FFFFFF21] p-6 rounded-[12px] text-white bg-[#1D1D1D73]">
         {/* Header */}
         <div className="flex items-center gap-2 mb-6">
           <button className="rounded-full" onClick={() => navigate(-1)}>
