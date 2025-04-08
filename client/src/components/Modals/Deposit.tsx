@@ -127,7 +127,7 @@ export default function Deposit({
 
         const tokenBalance = await getBalance({ contract, address: address! });
 
-        console.log("tokenBalance:: ", tokenBalance);
+        // console.log("tokenBalance:: ", tokenBalance);
         setSelectedTokenBalance(Number(tokenBalance.displayValue));
       } catch (error) {
         console.error(error);
@@ -146,7 +146,7 @@ export default function Deposit({
         <DialogTitle className="text-white flex items-center">
           <p>Deposit Assets</p>
         </DialogTitle>
-        <div className="sm:p-8 text-gray-700" >
+        <div className="py-4 text-gray-700">
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Amount</label>
             <div className="flex items-center justify-between p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
@@ -154,7 +154,7 @@ export default function Deposit({
                 <input
                   type="number"
                   value={amount}
-                  onChange={(e: any) => setAmount(Number(e.target.value))}
+                  onChange={(e: any) => setAmount(e.target.value)}
                   className="text-2xl font-medium bg-transparent text-white w-16 sm:w-full outline-none"
                   placeholder="0"
                 />

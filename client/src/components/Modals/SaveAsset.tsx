@@ -294,6 +294,8 @@ export default function SaveAsset({
       const tokensData = AvailableBalance;
       if (!tokensData) return;
 
+      console.log("Tokens Data: ", tokensData);
+
       const tokenBalance =
         tokensData[0]
           .map((address: string, index: number) => ({
@@ -306,6 +308,7 @@ export default function SaveAsset({
           )?.balance || 0n;
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+      console.log("token Balance: ", tokenBalance);
     }
   }, [saveState.token, address, AvailableBalance]);
 

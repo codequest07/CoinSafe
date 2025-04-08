@@ -133,7 +133,7 @@ export default function Withdraw({
         <DialogTitle className="text-white flex items-center space-x-3">
           <p>Withdraw Assets</p>
         </DialogTitle>
-        <div className="sm:p-8 text-gray-700">
+        <div className="py-4 text-gray-700">
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Amount</label>
             <div className="flex items-center justify-between p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
