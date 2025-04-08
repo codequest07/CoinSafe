@@ -47,7 +47,7 @@ app.use("/", BaseRouter);
 app.use("/api/ai", AiRouter);
 app.use("/api/ai/", savingsPlanRoutes(savingsPlanController));
 app.use("/api/waitlist", WaitlistRouter);
-app.use("/faucet", faucetRouter);
+app.use("/api/faucet", faucetRouter);
 app.use("/api/coingecko", CoinGeckoApiRouter);
 
 // MongoDB Connection
