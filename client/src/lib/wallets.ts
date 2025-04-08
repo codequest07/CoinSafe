@@ -22,7 +22,7 @@ export const wallets = [
   createWallet("io.rabby"),
   createWallet("io.zerion.wallet"),
   createWallet("com.trustwallet.app"),
-  createWallet("com.binance.wallet"),
+  // createWallet("com.binance.wallet"),
   createWallet("org.uniswap"),
   createWallet("com.okex.wallet"),
   createWallet("com.bitget.web3"),
