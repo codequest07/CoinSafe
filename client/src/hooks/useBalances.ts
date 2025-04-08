@@ -4,7 +4,7 @@ import {
   savingsBalanceState,
   totalBalanceState,
 } from "../store/atoms/save";
-import { CoinsafeDiamondContract } from "@/lib/contract";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useEffect, useState } from "react";
 import { getValidNumberValue } from "@/lib/utils";
 import { convertTokenAmountToUsd } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { getContract } from "thirdweb";
 import { liskSepolia } from "@/lib/config";
 import { client } from "@/lib/config";
 import { useReadContract } from "thirdweb/react";
+import { Abi } from "viem";
 
 export const useBalances = (address: string) => {
   const [availableBalance, setAvailableBalance] = useRecoilState(
@@ -25,6 +26,7 @@ export const useBalances = (address: string) => {
     client,
     address: CoinsafeDiamondContract.address,
     chain: liskSepolia,
+    abi: facetAbis.fundingFacet as unknown as Abi,
   });
 
   const { data: TotalBalance, isLoading: userBalanceLoading } = useReadContract(
@@ -49,6 +51,7 @@ export const useBalances = (address: string) => {
       method:
         "function getUserSavings(address _user) external view returns (LibDiamond.Safe[] memory)",
       params: [address],
+      
     });
 
   const { data: AvailableBalance, isLoading: availableBalanceLoading } =

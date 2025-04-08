@@ -1,9 +1,3 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -15,7 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
-import { LoaderCircle } from "lucide-react";
+import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
 import { useActiveAccount } from "thirdweb/react";
@@ -23,18 +17,13 @@ import { getContract } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { getBalance } from "thirdweb/extensions/erc20";
 import MemoRipple from "@/icons/Ripple";
-import SuccessfulTxModal from "./SuccessfulTxModal";
+import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
-import ApproveTxModal from "./ApproveTxModal";
+import ApproveTxModal from "../Modals/ApproveTxModal";
+import { useNavigate } from "react-router-dom";
 
-export default function Deposit({
-  isDepositModalOpen,
-  setIsDepositModalOpen,
-}: {
-  isDepositModalOpen: boolean;
-  setIsDepositModalOpen: (open: boolean) => void;
-  onBack: () => void;
-}) {
+export default function DepositCard() {
+  const navigate = useNavigate();
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const [approveTxModalOpen, setApproveTxModalOpen] = useState(false);
   const smartAccount = useActiveAccount();
@@ -47,7 +36,6 @@ export default function Deposit({
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
-    setIsDepositModalOpen(false);
   };
 
   const promptApproveModal = () => {
@@ -141,12 +129,16 @@ export default function Deposit({
   }, [token, address]);
 
   return (
-    <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
-      <DialogContent className="w-11/12 sm:max-w-[600px] border-0 text-white bg-[#17171C]">
-        <DialogTitle className="text-white flex items-center">
-          <p>Deposit Assets</p>
-        </DialogTitle>
-        <div className="sm:p-8 text-gray-700" >
+    <main>
+      <div className="w-11/12 mx-auto sm:max-w-[600px] border-0 p-6 rounded-[12px] text-white bg-[#1D1D1D73]">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-6">
+          <button className="rounded-full" onClick={() => navigate(-1)}>
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="text-lg font-medium">Deposit Assets</h1>
+        </div>
+        <div className="py-4 text-gray-700">
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Amount</label>
             <div className="flex items-center justify-between p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
@@ -158,7 +150,9 @@ export default function Deposit({
                   className="text-2xl font-medium bg-transparent text-white w-16 sm:w-full outline-none"
                   placeholder="0"
                 />
-                <div className="text-sm text-left text-gray-400 mt-1">≈ ${tokenPrice}</div>
+                <div className="text-sm text-left text-gray-400 mt-1">
+                  ≈ ${tokenPrice}
+                </div>
               </div>
               <div className="sm:ml-4">
                 <Select onValueChange={handleTokenSelect} value={token}>
@@ -180,7 +174,6 @@ export default function Deposit({
                 </Select>
               </div>
             </div>
-
           </div>
 
           {/* Wallet Balance Section */}
@@ -213,33 +206,23 @@ export default function Deposit({
             </>
           )}
         </div>
-        <DialogFooter className="">
-          <div className="flex sm:space-x-4 justify-between mt-2">
-            <Button
-              onClick={() => setIsDepositModalOpen(false)}
-              className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-              type="submit"
-            >
-              Cancel
-            </Button>
-
-            <Button
-              onClick={(e) => {
-                depositAsset(e);
-              }}
-              className="text-black px-8 rounded-[2rem]"
-              variant="outline"
-              disabled={isLoading || (amount || 0) > selectedTokenBalance}
-            >
-              {isLoading ? (
-                <LoaderCircle className="animate-spin" />
-              ) : (
-                "Deposit assets"
-              )}
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
+        <div className="flex items-center justify-end mt-5">
+          <Button
+            onClick={(e) => {
+              depositAsset(e);
+            }}
+            className="text-black px-8 rounded-[2rem]"
+            variant="outline"
+            disabled={isLoading || (amount || 0) > selectedTokenBalance}
+          >
+            {isLoading ? (
+              <LoaderCircle className="animate-spin" />
+            ) : (
+              "Deposit assets"
+            )}
+          </Button>
+        </div>
+      </div>
       <SuccessfulTxModal
         amount={amount || 0}
         token={
@@ -262,6 +245,6 @@ export default function Deposit({
         }
         text="To Deposit"
       />
-    </Dialog>
+    </main>
   );
 }
