@@ -568,4 +568,10 @@ export const FaucetData = [
     link: "https://sepolia-bridge.lisk.com/bridge/lisk-sepolia-testnet",
     btnTitle: "Bridge faucet",
   },
+  {
+    title: "USDT lisk",
+    due: " USDT Lisk ",
+    link: "https://faucet.huostarter.io/",
+    btnTitle: "USDT faucet",
+  },
 ];
