@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
-// import { useBalances } from "@/hooks/useBalances";
+import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import { liskSepolia } from "@/lib/config";
@@ -38,6 +38,7 @@ import {
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { useNavigate } from "react-router-dom";
+import { formatUnits } from "viem";
 
 interface SavingsTarget {
   id: string | number;
@@ -58,7 +59,7 @@ export default function SaveAssetsCard() {
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const smartAccount = useActiveAccount();
   const address = smartAccount?.address;
-  //   const { AvailableBalance } = useBalances(address as string);
+  const { AvailableBalance } = useBalances(address as string);
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(
@@ -77,7 +78,7 @@ export default function SaveAssetsCard() {
 
   const [, setDecimals] = useState(1);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
-  const [selectedTokenBalance, _setSelectedTokenBalance] = useState(0);
+  const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
 
   //   Duration state
   const [savingsDuration, setSavingsDuration] = useState(30);
@@ -316,6 +317,30 @@ export default function SaveAssetsCard() {
 
     saveAsset(event);
   };
+
+  
+    useEffect(() => {
+      if (address && saveState.token && AvailableBalance) {
+        const tokensData = AvailableBalance;
+        if (!tokensData) return;
+  
+        console.log("Tokens Data: ", tokensData);
+  
+        const tokenBalance =
+          tokensData[0]
+            .map((address: string, index: number) => ({
+              address,
+              balance: tokensData[1][index],
+            }))
+            .find(
+              (item: any) =>
+                item.address.toLowerCase() === saveState.token.toLowerCase()
+            )?.balance || 0n;
+  
+        setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+        console.log("token Balance: ", tokenBalance);
+      }
+    }, [saveState.token, address, AvailableBalance]);
 
   return (
     <div className="flex justify-center min-h-fit bg-[#010104] p-4">
