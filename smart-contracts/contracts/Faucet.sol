@@ -16,8 +16,8 @@ contract TokenFaucet {
     IERC20 public usdToken;
 
     uint256 public safuClaimAmount = 70 * 10**18;
-    uint256 public lskClaimAmount = 20 * 10**18;
-    uint256 public usdClaimAmount = 40 * 10**18;
+    uint256 public lskClaimAmount = 5 * 10**18;
+    uint256 public usdClaimAmount = 30 * 10**18;
     uint256 public constant CLAIM_INTERVAL = 24 hours;
     
     address owner;
@@ -72,7 +72,7 @@ contract TokenFaucet {
      *  - The claim interval has not passed since the last claim
      *  - The faucet doesn't have enough balance to fulfill the claim
      */
-    function claim(address _to) external onlyTrustedRelayer {
+    function drip(address _to) external onlyTrustedRelayer {
         if (msg.sender == address(0)) revert ZeroAddress();
 
         uint256 nextClaimTime = lastClaimTime[_to] + CLAIM_INTERVAL;
