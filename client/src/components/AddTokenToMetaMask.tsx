@@ -1,8 +1,27 @@
-import { tokens } from "@/lib/contract";
 import { Button } from "./ui/button";
 import MemoMmIcon from "@/icons/MmIcon";
 import { useState } from "react";
 
+export const tokens = [
+  {
+    address: "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a",
+    symbol: "SAFU",
+    decimals: 18,
+    image: "https://your-image-url.com/safu-logo.png",
+  },
+  {
+    address: "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda",
+    symbol: "USD",
+    decimals: 18,
+    image: "https://your-image-url.com/usd-logo.png",
+  },
+  {
+    address: "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D",
+    symbol: "LSK",
+    decimals: 18,
+    image: "https://your-image-url.com/lsk-logo.png",
+  },
+];
 const AddTokenToMetaMask = () => {
   // const [isAdding, setIsAdding] = useState(false);
   const [status, setStatus] = useState("");
@@ -29,7 +48,7 @@ const AddTokenToMetaMask = () => {
               },
             },
           });
-          console.log(`${token.symbol} token added to MetaMask`);
+          // console.log(`${token.symbol} token added to MetaMask`);
         } catch (error) {
           console.error(`Failed to add ${token.symbol} token:`, error);
         }
