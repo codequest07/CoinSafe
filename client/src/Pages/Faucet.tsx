@@ -39,11 +39,11 @@ export default function Faucet() {
       setIsLoading(true);
 
       const response = await fetch(
-        "https://coinsafe-0q0m.onrender.com/faucet/claim",
+        "https://coinsafe-0q0m.onrender.com/api/faucet/claim",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address: addressToUse }),
+          body: JSON.stringify({ userAddress: addressToUse }),
         }
       );
 
@@ -51,21 +51,18 @@ export default function Faucet() {
 
       if (!response.ok) {
         // Handle specific error cases
-        if (data.error?.includes("Claim too soon")) {
-          const match = data.error.match(/\w{3} \w{3} \d{2} \d{4} .* GMT.*/);
-          if (match) {
-            const nextClaimTime = new Date(match[0]);
-            const formattedTime = nextClaimTime.toLocaleString();
-            throw new Error(`⏳ You can claim again at: ${formattedTime}`);
-          }
+        if (data.error === "Claim too soon" && data.nextClaimTime) {
+          const nextClaimTime = new Date(data.nextClaimTime);
+          const formattedTime = nextClaimTime.toLocaleString();
+          throw new Error(`⏳ You can claim again at: ${formattedTime}`);
         }
         throw new Error(data.error || "Faucet claim failed");
       }
 
-      // Show success message in UI
+      // Show success message with transaction hash
       setMessage({
         type: "success",
-        text: `✅ Success! You received ${data.amount} SAFU!`,
+        text: `✅ Success! Transaction hash: ${data.txHash}`,
       });
     } catch (error: any) {
       setMessage({ type: "error", text: `❌ Error: ${error.message}` });
@@ -108,7 +105,17 @@ export default function Faucet() {
             </p>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-2">
+              {message.text && (
+                <div
+                  className={`p-3 rounded-[2rem] my-3 text-center ${
+                    message.type === "error"
+                      ? "bg-[#FF484B24] text-[#FF484B]"
+                      : "bg-[#48FF9124] text-[#48FF91]"
+                  }`}>
+                  <p className="text-xs break-words">{message.text}</p>
+                </div>
+              )}
               <div>
                 <label
                   htmlFor="evmAddress"
@@ -121,7 +128,7 @@ export default function Faucet() {
                     value={walletAddress}
                     onChange={(e) => setWalletAddress(e.target.value)}
                     // placeholder="Enter your wallet address"
-                    className="w-full  border-[#FFFFFF3D] rounded-md text-white pr-10"
+                    className="w-full  border-[#FFFFFF3D] rounded-md text-white pr-10 mb-5"
                   />
                   <button
                     className="absolute bg-[#3F3F3F99] p-1 rounded-[4px] flex items-center gap-1 right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white text-xs"
@@ -130,19 +137,8 @@ export default function Faucet() {
                     Paste
                   </button>
                 </div>
-
-                {message.text && (
-                  <div
-                    className={`p-3 rounded-md my-3 text-center ${
-                      message.type === "error"
-                        ? "bg-[#FF484B24] text-[#FF484B]"
-                        : "bg-[#48FF9124] text-[#48FF91]"
-                    }`}>
-                    <p className="text-xs break-words">{message.text}</p>
-                  </div>
-                )}
               </div>
-              <div className="flex space-x-2 sm:space-x-4 justify-end w-full">
+              <div className="flex space-x-2  sm:space-x-4 justify-end w-full">
                 <div className="">
                   <AddTokenToMetaMask />
                 </div>

@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 /**
  * @title Savings
  * @dev A contract for managing various savings plans including automated savings using Gelato
-*/
+ */
 
 contract Savings is ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -91,23 +91,19 @@ contract Savings is ReentrancyGuard {
 
     address[] public automatedSavingsUsers;
 
-    // Fee configuration
-    uint256 public automatedSavingsFeePercentage; // Fee in basis points (e.g., 50 = 0.5%)
-    address public feeCollector; // Address that collects the fees
-
     mapping(address => bool) public isInAutomatedSavingsArray;
 
     // Modification to track automated savings per user per token
     mapping(address => mapping(address => bool))
-        public userAutomatedPlanPerTokenExists;
+        public userAutomatedSavingsPerToken;
 
     mapping(address => mapping(address => uint256)) public totalAmountSaved; // user => token => amountSaved
 
     mapping(address => Transaction[]) public userTransactions;
 
     mapping(address => mapping(address => uint256)) private userTokenBalances;
-    mapping(address => mapping(uint256 => Safe)) private userSavings;
-    mapping(address => uint256) private userSavingsCount;
+    mapping(address => mapping(uint256 => Safe)) private userSavings; // user => id => safe 
+    mapping(address => uint256) private userSavingsCount; // user => count - remember to update this in different savings actions function
 
     mapping(TokenType => address) public acceptedTokensAddresses;
     mapping(address => bool) public acceptedTokens;
@@ -118,6 +114,10 @@ contract Savings is ReentrancyGuard {
     mapping(address => bool) public userAutomatedPlanExists;
 
     mapping(address => mapping(address => bool)) public isTokenAutoSaved;
+
+    // Fee configuration
+    uint256 public automatedSavingsFeePercentage; // Fee in basis points (e.g., 50 = 0.5%)
+    address public feeCollector; // Address that collects the fees
 
     // Events
     event DepositSuccessful(
@@ -179,20 +179,10 @@ contract Savings is ReentrancyGuard {
         TxStatus status
     );
 
-    event BatchAutomatedSavingsExecuted(
-        uint256 executedCount,
-        uint256 skippedCount
-    );
+    event BatchAutomatedSavingsExecuted(uint256 executedCount, uint256 skippedCount);
 
-    event AutomatedSavingsFeeCharged(
-        address indexed user,
-        address indexed token,
-        uint256 fee
-    );
-    event FeeConfigurationUpdated(
-        uint256 newFeePercentage,
-        address newFeeCollector
-    );
+    event AutomatedSavingsFeeCharged(address indexed user, address indexed token, uint256 fee);
+    event FeeConfigurationUpdated(uint256 newFeePercentage, address newFeeCollector);
 
     /**
      * @dev Constructor function to initialize the contract with accepted token addresses
@@ -354,8 +344,12 @@ contract Savings is ReentrancyGuard {
         if (_frequency > 365 days) revert InvalidInput();
 
         // Check if user already has an automated savings plan for this specific token
-        if (userAutomatedPlanPerTokenExists[msg.sender][_token])
+        if (userAutomatedSavingsPerToken[msg.sender][_token])
             revert("Automated savings plan already exists for this token");
+
+        // Check if user has reached maximum number of automated savings plans
+        if (userAutomatedPlanExists[msg.sender])
+            revert("User already has an automated savings plan");
 
         automatedSavingsPlans[msg.sender] = AutomatedSavingsPlan({
             token: _token,
@@ -382,7 +376,8 @@ contract Savings is ReentrancyGuard {
 
         userSavingsCount[msg.sender]++;
 
-        userAutomatedPlanPerTokenExists[msg.sender][_token] = true;
+        userAutomatedPlanExists[msg.sender] = true;
+        userAutomatedSavingsPerToken[msg.sender][_token] = true;
         isTokenAutoSaved[msg.sender][_token] = true;
 
         // Add user to the automated savings users array if not already present
@@ -393,7 +388,6 @@ contract Savings is ReentrancyGuard {
 
         emit AutomatedPlanCreated(msg.sender, _token, _amount, _frequency);
     }
-
 
     // ======================================= GET AND EXECUTE AUTOMATED SAVINGS PLANS DUE =======================================
 
@@ -425,6 +419,75 @@ contract Savings is ReentrancyGuard {
         emit BatchAutomatedSavingsExecuted(dueCount, skippedCount);
     }
 
+    // ======================================= EXECUTE SPEND AND SAVE =======================================
+
+    /**
+     * @notice Executes the spend and save functionality by saving a percentage of the spent amount
+     * @param _token The address of the token for spend and save
+     * @param _amount The amount spent, from which a percentage will be saved
+     * @dev This function calculates the amount to save based on the spend percentage set in the user's plan, deposits the required funds from the external wallet to the pool and then saves the funds to the user's savings.
+     */
+    // TODO: ADD ERROR HANDLER TO THROW IF USER HASNT SET UP A SPEND AND SAVE PLAN BEFORE CALLING THIS FUNCTION
+    function spendAndSave(
+        address _token,
+        uint256 _amount
+    ) external nonReentrant {
+        if (msg.sender == address(0)) revert AddressZeroDetected();
+        if (_amount == 0) revert ZeroValueNotAllowed();
+        if (!acceptedTokens[_token]) revert InvalidTokenAddress();
+
+        SpendAndSavePlan storage plan = userSpendAndSavePlan[msg.sender];
+        if (plan.token != _token) revert InvalidTokenAddress();
+
+        uint256 amountToSave = (_amount * plan.percentage) / 100;
+        if (amountToSave > 0) {
+            depositToPool(amountToSave, _token);
+
+            uint256 savingsIndex = userSavingsCount[msg.sender];
+            userSavings[msg.sender][savingsIndex] = Safe({
+                typeOfSafe: "SpendAndSave",
+                id: savingsIndex,
+                token: _token,
+                amount: amountToSave,
+                duration: plan.duration,
+                startTime: block.timestamp,
+                unlockTime: block.timestamp + plan.duration
+            });
+            userSavingsCount[msg.sender]++;
+
+            totalAmountSaved[msg.sender][_token] += amountToSave;
+
+            addTransaction("spend and save", _token, _amount);
+
+            emit SpendAndSave(msg.sender, _token, amountToSave);
+        }
+    }
+
+    /**
+     * @dev Calculates and charges fee for automated savings execution
+     * @param _user The user being charged
+     * @param _token The token being used
+     * @param _amount The amount being saved
+     * @return netAmount The amount after fee deduction
+     */
+    function calculateAndChargeFee(
+        address _user,
+        address _token,
+        uint256 _amount
+    ) internal returns (uint256 netAmount) {
+        // Calculate fee (using basis points)
+        uint256 fee = (_amount * automatedSavingsFeePercentage) / 10000;
+        netAmount = _amount - fee;
+
+        if (fee > 0) {
+            // Transfer fee to fee collector
+            userTokenBalances[feeCollector][_token] += fee;
+            
+            emit AutomatedSavingsFeeCharged(_user, _token, fee);
+        }
+
+        return netAmount;
+    }
 
     // ===================================== EXECUTE AUTOMATED SAVINGS =====================================
 
@@ -444,7 +507,7 @@ contract Savings is ReentrancyGuard {
         if (block.timestamp > plan.unlockTime) {
             // Clean up the plan
             userAutomatedPlanExists[_user] = false;
-            userAutomatedPlanPerTokenExists[_user][plan.token] = false;
+            userAutomatedSavingsPerToken[_user][plan.token] = false;
             removeFromAutomatedSavings(_user);
             delete automatedSavingsPlans[_user];
             return;
@@ -480,7 +543,6 @@ contract Savings is ReentrancyGuard {
         emit AutomatedSavingExecuted(_user, plan.token, plan.amount);
     }
 
-
     // Helper function to remove a user from automated savings if their plan expires or is cancelled
     function removeFromAutomatedSavings(address _user) public {
 
@@ -489,7 +551,7 @@ contract Savings is ReentrancyGuard {
         if (isInAutomatedSavingsArray[_user]) {
             // Find and remove the user from the array
             userAutomatedPlanExists[_user] = false;
-            userAutomatedPlanPerTokenExists[_user][plan.token] = false;
+            userAutomatedSavingsPerToken[_user][plan.token] = false;
             // removeFromAutomatedSavings(_user);
             delete automatedSavingsPlans[_user];
 
@@ -579,79 +641,12 @@ contract Savings is ReentrancyGuard {
     }
 
 
-    /**
-     * @dev Calculates and charges fee for automated savings execution
-     * @param _user The user being charged
-     * @param _token The token being used
-     * @param _amount The amount being saved
-     * @return netAmount The amount after fee deduction
-     */
-    function calculateAndChargeFee(
-        address _user,
-        address _token,
-        uint256 _amount
-    ) internal returns (uint256 netAmount) {
-        // Calculate fee (using basis points)
-        uint256 fee = (_amount * automatedSavingsFeePercentage) / 10000;
-        netAmount = _amount - fee;
-
-        if (fee > 0) {
-            // Transfer fee to fee collector
-            userTokenBalances[feeCollector][_token] += fee;
-            
-            emit AutomatedSavingsFeeCharged(_user, _token, fee);
-        }
-
-        return netAmount;
-    }
 
 
 
 
 
-    // ======================================= EXECUTE SPEND AND SAVE =======================================
 
-    /**
-     * @notice Executes the spend and save functionality by saving a percentage of the spent amount
-     * @param _token The address of the token for spend and save
-     * @param _amount The amount spent, from which a percentage will be saved
-     * @dev This function calculates the amount to save based on the spend percentage set in the user's plan, deposits the required funds from the external wallet to the pool and then saves the funds to the user's savings.
-     */
-    // TODO: ADD ERROR HANDLER TO THROW IF USER HASNT SET UP A SPEND AND SAVE PLAN BEFORE CALLING THIS FUNCTION
-    function spendAndSave(
-        address _token,
-        uint256 _amount
-    ) external nonReentrant {
-        if (msg.sender == address(0)) revert AddressZeroDetected();
-        if (_amount == 0) revert ZeroValueNotAllowed();
-        if (!acceptedTokens[_token]) revert InvalidTokenAddress();
-
-        SpendAndSavePlan storage plan = userSpendAndSavePlan[msg.sender];
-        if (plan.token != _token) revert InvalidTokenAddress();
-
-        uint256 amountToSave = (_amount * plan.percentage) / 100;
-        if (amountToSave > 0) {
-            depositToPool(amountToSave, _token);
-
-            uint256 savingsIndex = userSavingsCount[msg.sender];
-            userSavings[msg.sender][savingsIndex] = Safe({
-                typeOfSafe: "SpendAndSave",
-                id: savingsIndex,
-                token: _token,
-                amount: amountToSave,
-                duration: plan.duration,
-                startTime: block.timestamp,
-                unlockTime: block.timestamp + plan.duration
-            });
-            userSavingsCount[msg.sender]++;
-
-            totalAmountSaved[msg.sender][_token] += amountToSave;
-
-            addTransaction("spend and save", _token, _amount);
-
-            emit SpendAndSave(msg.sender, _token, amountToSave);
-        }
-    }
 
 
     // ======================================= UNLOCK SAVING ===========================================
@@ -668,6 +663,7 @@ contract Savings is ReentrancyGuard {
         uint256 _savingsIndex,
         bool _acceptEarlyWithdrawalFee
     ) external nonReentrant {
+        
         Safe storage userSafe = userSavings[msg.sender][_savingsIndex];
 
         if (userSafe.amount == 0) revert InvalidWithdrawal();

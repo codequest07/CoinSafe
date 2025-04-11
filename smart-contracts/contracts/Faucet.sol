@@ -2,21 +2,36 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title TokenFaucet
  * @dev A contract for distributing tokens to users at regular intervals.
  */
 contract TokenFaucet {
-    IERC20 public token;
-    uint256 public constant CLAIM_AMOUNT = 70 * 10**18; // 70 tokens with 18 decimals
+    using SafeERC20 for IERC20;
+
+    IERC20 public safuToken;
+    IERC20 public lskToken;
+    IERC20 public usdToken;
+
+    uint256 public safuClaimAmount = 70 * 10**18;
+    uint256 public lskClaimAmount = 5 * 10**18;
+    uint256 public usdClaimAmount = 30 * 10**18;
     uint256 public constant CLAIM_INTERVAL = 24 hours;
+    
     address owner;
+    address trustedRelayer;
 
     mapping(address => uint256) public lastClaimTime;
 
+    struct TokenConfig {
+        IERC20 token;
+        uint256 claimAmount;
+    }
+
     /* Events */
-    event TokensClaimed(address indexed user, uint256 amount);
+    event TokensClaimed(address indexed user);
 
     /* Custom Errors */
     error ZeroAddress();
@@ -25,16 +40,28 @@ contract TokenFaucet {
 
     /**
      * @dev Initializes the contract, setting the token to be distributed.
-     * @param _tokenAddress The address of the ERC20 token to be distributed.
+     * @param _safuTokenAddress The address of the ERC20 token to be distributed.
     */
-    constructor(address _tokenAddress) {
-        if (_tokenAddress == address(0)) revert ZeroAddress();
-        token = IERC20(_tokenAddress);
+    constructor(address _safuTokenAddress, address _usdTokenAddress, address _lskTokenAddress, address _trustedRelayer) {
+        if (_safuTokenAddress == address(0)) revert ZeroAddress();
+        if (_usdTokenAddress == address(0)) revert ZeroAddress();
+        if (_lskTokenAddress == address(0)) revert ZeroAddress();
+
+        safuToken = IERC20(_safuTokenAddress);
+        lskToken = IERC20(_lskTokenAddress);
+        usdToken = IERC20(_usdTokenAddress);
+
         owner = msg.sender;
+        trustedRelayer = _trustedRelayer;
     }
 
     modifier onlyOwner {
         require(msg.sender == owner);
+        _;
+    }
+
+    modifier onlyTrustedRelayer {
+        require(msg.sender == trustedRelayer);
         _;
     }
 
@@ -45,24 +72,29 @@ contract TokenFaucet {
      *  - The claim interval has not passed since the last claim
      *  - The faucet doesn't have enough balance to fulfill the claim
      */
-    function claim() external {
+    function drip(address _to) external onlyTrustedRelayer {
         if (msg.sender == address(0)) revert ZeroAddress();
 
-        uint256 nextClaimTime = lastClaimTime[msg.sender] + CLAIM_INTERVAL;
+        uint256 nextClaimTime = lastClaimTime[_to] + CLAIM_INTERVAL;
         if (block.timestamp < nextClaimTime) {
             revert ClaimTooSoon(nextClaimTime - block.timestamp);
         }
 
-        uint256 faucetBalance = token.balanceOf(address(this));
-        if (faucetBalance < CLAIM_AMOUNT) {
-            revert InsufficientFaucetBalance(faucetBalance, CLAIM_AMOUNT);
+        TokenConfig[3] memory tokens = [
+            TokenConfig(safuToken, safuClaimAmount),
+            TokenConfig(usdToken, usdClaimAmount),
+            TokenConfig(lskToken, lskClaimAmount)
+        ];
+
+        for (uint i = 0; i < tokens.length; i++) {
+            uint256 faucetBalance = tokens[i].token.balanceOf(address(this));
+            if (faucetBalance >= tokens[i].claimAmount) {
+                tokens[i].token.safeTransfer(_to, tokens[i].claimAmount);
+            }
         }
 
-        lastClaimTime[msg.sender] = block.timestamp;
-
-        require(token.transfer(msg.sender, CLAIM_AMOUNT), "Token transfer failed");
-
-        emit TokensClaimed(msg.sender, CLAIM_AMOUNT);
+        lastClaimTime[_to] = block.timestamp;
+        emit TokensClaimed(_to);
     }
 
     /**
@@ -77,22 +109,52 @@ contract TokenFaucet {
     /**
      * @dev Allows the contract owner to withdraw all remaining tokens from the contract.
      * @param _to The address to send the remaining tokens to.
+     * @param _token The address of the token to withdraw.
      * @notice This function will revert if:
      *  - The `to` address is the zero address
      *  - The token transfer fails
      */
-    function withdrawRemainingTokens(address _to) external onlyOwner {
+    function withdrawRemainingTokens(address _to, address _token) external onlyOwner {
         if (_to == address(0)) revert ZeroAddress();
+        if (_token == address(0)) revert ZeroAddress();
 
-        uint256 balance = token.balanceOf(address(this));
-        require(token.transfer(_to, balance), "Token transfer failed");
+        // Check which token to withdraw
+        IERC20 tokenToWithdraw;
+        if (_token == address(safuToken)) {
+            tokenToWithdraw = safuToken;
+        } else if (_token == address(usdToken)) {
+            tokenToWithdraw = usdToken;
+        } else if (_token == address(lskToken)) {
+            tokenToWithdraw = lskToken;
+        } else {
+            revert("Invalid token address");
+        }
+
+        uint256 balance = tokenToWithdraw.balanceOf(address(this));
+        if (balance > 0) {
+            tokenToWithdraw.safeTransfer(_to, balance);
+        }
     }
 
-    function getContractBalance() external view returns (uint256) {
-        return token.balanceOf(address(this));
+    function getContractBalances() external view returns (uint256, uint256, uint256) {
+        return (
+            safuToken.balanceOf(address(this)),
+            usdToken.balanceOf(address(this)),
+            lskToken.balanceOf(address(this))
+        );
     }
 
     function getUserBalance() external view onlyOwner returns (uint256) {
-        return token.balanceOf(msg.sender);
+        return safuToken.balanceOf(msg.sender);
+    }
+
+    function updateClaimAmounts(
+        uint256 _newSafuAmount,
+        uint256 _newUsdAmount, 
+        uint256 _newLskAmount
+    ) external onlyOwner {
+        safuClaimAmount = _newSafuAmount * 10**18;
+        usdClaimAmount = _newUsdAmount * 10**18;
+        lskClaimAmount = _newLskAmount * 10**18;
     }
 }
