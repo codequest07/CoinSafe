@@ -59,7 +59,7 @@ export default function SaveAssetsCard() {
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const smartAccount = useActiveAccount();
   const address = smartAccount?.address;
-  const { AvailableBalance } = useBalances(address as string);
+  const { AvailableBalance, supportedTokens } = useBalances(address as string);
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(
@@ -380,6 +380,7 @@ export default function SaveAssetsCard() {
               tokens={tokens}
               selectedTokenBalance={selectedTokenBalance}
               validationErrors={validationErrors}
+              supportedTokens={supportedTokens}
             />
             {/* <div className="mb-1">
           <label className="text-sm text-gray-300">Amount</label>
@@ -598,6 +599,7 @@ export default function SaveAssetsCard() {
                     tokens={tokens}
                     selectedTokenBalance={selectedTokenBalance}
                     validationErrors={validationErrors}
+                    supportedTokens={supportedTokens}
                   />
 
                   {/* Wallet balance */}

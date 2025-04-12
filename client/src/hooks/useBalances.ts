@@ -197,5 +197,6 @@ export const useBalances = (address: string) => {
     TotalBalance: tokenBalanceMap.total,
     SavedBalance: tokenBalanceMap.savings,
     loading,
+    supportedTokens,
   };
 };

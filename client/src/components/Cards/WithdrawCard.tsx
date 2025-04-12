@@ -20,6 +20,7 @@ import { useActiveAccount } from "thirdweb/react";
 import MemoRipple from "@/icons/Ripple";
 import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 import { useNavigate } from "react-router-dom";
+import { tokenData } from "@/lib/utils";
 
 export default function WithdrawCard() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export default function WithdrawCard() {
   const [token, setToken] = useState("");
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const { AvailableBalance } = useBalances(address as string);
+  const { AvailableBalance, supportedTokens } = useBalances(address as string);
 
   const openThirdModal = () => {
     console.log("details", token, amount);
@@ -101,7 +102,7 @@ export default function WithdrawCard() {
       const tokensData = AvailableBalance;
       if (!tokensData) return;
 
-      const tokenBalance = AvailableBalance[token] as bigint || 0n;
+      const tokenBalance = (AvailableBalance[token] as bigint) || 0n;
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
     }
@@ -141,13 +142,11 @@ export default function WithdrawCard() {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={tokens.safu}>SAFU</SelectItem>
-                    <SelectItem value={tokens.usdt}>
-                      <div className="flex items-center space-x-2">
-                        <p>USDT</p>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value={tokens.lsk}>LSK</SelectItem>
+                    {supportedTokens.map((token) => (
+                      <SelectItem value={token}>
+                        {tokenData[token]?.symbol}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

@@ -7,6 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { tokenData } from "@/lib/utils";
+import MemoRipple from "@/icons/Ripple";
 
 interface ISaveState {
   target: string;
@@ -26,6 +28,7 @@ interface IAmountInput {
   selectedTokenBalance: any;
   tokens: any;
   validationErrors: any;
+  supportedTokens: string[];
 }
 
 const AmountInput = ({
@@ -34,8 +37,8 @@ const AmountInput = ({
   handleAmountChange,
   saveState,
   selectedTokenBalance,
-  tokens,
   validationErrors,
+  supportedTokens,
 }: IAmountInput) => {
   // number input stuff
   const inputRef = useRef<HTMLInputElement>(null);
@@ -68,20 +71,12 @@ const AmountInput = ({
             <Select onValueChange={handleTokenSelect} value={saveState.token}>
               <SelectTrigger className="w-[140px] bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                 <div className="flex items-center">
-                  {/* <MemoRipple className="mr-2" /> */}
+                  <MemoRipple className="mr-2" />
                   <SelectValue placeholder="Select Token" />
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={tokens.usdt}>
-                  <div className="flex items-center space-x-2">
-                    <p>USDT</p>
-                  </div>
-                </SelectItem>
-                <SelectItem value={tokens.lsk}>LSK</SelectItem>
-                {/* 0xe4923e889a875eae8c164ac1592b57b5684ed90e - new from Ite */}
-                {/* 0xcf300d5a3d0fc71865a7c92bbc11d6b79c4d1480 - current */}
-                <SelectItem value={tokens.safu}>SAFU</SelectItem>
+                {supportedTokens.map(token => <SelectItem value={token}>{tokenData[token]?.symbol}</SelectItem>)}
               </SelectContent>
             </Select>
             {validationErrors.token && (

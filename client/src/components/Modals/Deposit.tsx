@@ -26,6 +26,8 @@ import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 import ApproveTxModal from "./ApproveTxModal";
+import { tokenData } from "@/lib/utils";
+import { useBalances } from "@/hooks/useBalances";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -44,6 +46,7 @@ export default function Deposit({
   const [token, setToken] = useState("");
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
+  const { supportedTokens } = useBalances(address as string);
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -169,13 +172,7 @@ export default function Deposit({
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={tokens.safu}>SAFU</SelectItem>
-                    <SelectItem value={tokens.usdt}>
-                      <div className="flex items-center space-x-2">
-                        <p>USDT</p>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value={tokens.lsk}>LSK</SelectItem>
+                    {supportedTokens.map(token => <SelectItem value={token}>{tokenData[token]?.symbol}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
