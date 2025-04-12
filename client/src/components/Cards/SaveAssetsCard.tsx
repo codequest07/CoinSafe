@@ -22,7 +22,7 @@ import {
 import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
-import savingsFacetAbi from "../../abi/SavingsFacet.json";
+import savingsFacetAbi from "../../abi/AutomatedSavingsFacet.json";
 import { liskSepolia } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
@@ -59,7 +59,7 @@ export default function SaveAssetsCard() {
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const smartAccount = useActiveAccount();
   const address = smartAccount?.address;
-  const { AvailableBalance } = useBalances(address as string);
+  const { AvailableBalance, supportedTokens } = useBalances(address as string);
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(
@@ -318,29 +318,19 @@ export default function SaveAssetsCard() {
     saveAsset(event);
   };
 
-  
-    useEffect(() => {
-      if (address && saveState.token && AvailableBalance) {
-        const tokensData = AvailableBalance;
-        if (!tokensData) return;
-  
-        console.log("Tokens Data: ", tokensData);
-  
-        const tokenBalance =
-          tokensData[0]
-            .map((address: string, index: number) => ({
-              address,
-              balance: tokensData[1][index],
-            }))
-            .find(
-              (item: any) =>
-                item.address.toLowerCase() === saveState.token.toLowerCase()
-            )?.balance || 0n;
-  
-        setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
-        console.log("token Balance: ", tokenBalance);
-      }
-    }, [saveState.token, address, AvailableBalance]);
+  useEffect(() => {
+    if (address && saveState.token && AvailableBalance) {
+      const tokensData = AvailableBalance;
+      if (!tokensData) return;
+
+      console.log("Tokens Data: ", tokensData);
+
+      const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
+
+      setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+      console.log("token Balance: ", tokenBalance);
+    }
+  }, [saveState.token, address, AvailableBalance]);
 
   return (
     <div className="flex justify-center min-h-fit bg-[#010104] p-4">
@@ -362,7 +352,8 @@ export default function SaveAssetsCard() {
               saveType === "one-time"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}>
+            )}
+          >
             One-time save
           </button>
           <button
@@ -372,7 +363,8 @@ export default function SaveAssetsCard() {
               saveType === "auto"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}>
+            )}
+          >
             Autosave
           </button>
         </div>
@@ -388,6 +380,7 @@ export default function SaveAssetsCard() {
               tokens={tokens}
               selectedTokenBalance={selectedTokenBalance}
               validationErrors={validationErrors}
+              supportedTokens={supportedTokens}
             />
             {/* <div className="mb-1">
           <label className="text-sm text-gray-300">Amount</label>
@@ -435,7 +428,8 @@ export default function SaveAssetsCard() {
                     ...prev,
                     amount: selectedTokenBalance,
                   }))
-                }>
+                }
+              >
                 Save all
               </button>
             </div>
@@ -513,7 +507,8 @@ export default function SaveAssetsCard() {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}>
+                    }`}
+                  >
                     {/* }`}
                             > */}
                     <div>
@@ -545,7 +540,8 @@ export default function SaveAssetsCard() {
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}>
+                    }`}
+                  >
                     {/* }`}
                             > */}
                     <div>
@@ -603,6 +599,7 @@ export default function SaveAssetsCard() {
                     tokens={tokens}
                     selectedTokenBalance={selectedTokenBalance}
                     validationErrors={validationErrors}
+                    supportedTokens={supportedTokens}
                   />
 
                   {/* Wallet balance */}
@@ -636,7 +633,8 @@ export default function SaveAssetsCard() {
                             ...prev,
                             amount: selectedTokenBalance,
                           }))
-                        }>
+                        }
+                      >
                         {/* }
                                   > */}
                         Max
@@ -740,7 +738,8 @@ export default function SaveAssetsCard() {
                   onClick={handleSaveAsset}
                   className="text-black px-8 rounded-[2rem]"
                   variant="outline"
-                  disabled={isLoading || autoSavingsLoading}>
+                  disabled={isLoading || autoSavingsLoading}
+                >
                   {isLoading || autoSavingsLoading ? (
                     <LoaderCircle className="animate-spin" />
                   ) : (
@@ -789,7 +788,8 @@ export default function SaveAssetsCard() {
 
       <Dialog
         open={isCreateTargetModalOpen}
-        onOpenChange={setIsCreateTargetModalOpen}>
+        onOpenChange={setIsCreateTargetModalOpen}
+      >
         <DialogContent className="bg-[#17171C] text-[#F1F1F1] border-[#FFFFFF21]">
           <DialogHeader>
             <DialogTitle>Create Custom Target</DialogTitle>
@@ -827,12 +827,14 @@ export default function SaveAssetsCard() {
               <Button
                 variant="outline"
                 onClick={() => setIsCreateTargetModalOpen(false)}
-                className="bg-[#FFFFFF2B] border-[#FFFFFF2B] rounded-[100px] text-white">
+                className="bg-[#FFFFFF2B] border-[#FFFFFF2B] rounded-[100px] text-white"
+              >
                 Cancel
               </Button>
               <Button
                 onClick={handleCreateTarget}
-                className="rounded-[100px] bg-white text-[#010104] hover:text-white">
+                className="rounded-[100px] bg-white text-[#010104] hover:text-white"
+              >
                 Create Target
               </Button>
             </div>

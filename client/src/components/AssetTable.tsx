@@ -18,65 +18,72 @@ import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { useBalances } from "@/hooks/useBalances";
-import { useActiveAccount } from "thirdweb/react";
 import { Check, X } from "lucide-react";
 import { getSafuToUsd } from "@/lib";
-// import { getContract, readContract } from "thirdweb";
-// import { client, liskSepolia } from "@/lib/config";
+import { getContract, readContract } from "thirdweb";
+import { client, liskSepolia } from "@/lib/config";
+import { CoinsafeDiamondContract } from "@/lib/contract";
+import { useActiveAccount } from "thirdweb/react";
+import { tokenData } from "@/lib/utils";
 
-// async function checkIsTokenAutoSaved(
-//   userAddress: `0x${string}`,
-//   tokenAddress: string
-// ) {
-//   const contract = getContract({
-//     client,
-//     address: CoinsafeDiamondContract.address,
-//     chain: liskSepolia,
-//   });
+async function checkIsTokenAutoSaved(
+  userAddress: `0x${string}`,
+  tokenAddress: string
+) {
+  const contract = getContract({
+    client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskSepolia,
+  });
 
-//   const balance = await readContract({
-//     contract: contract,
-//     method: "function isTokenAutoSaved(address _userAddress, address _tokenAddress) view returns (uint256)",
-//     params: [userAddress, tokenAddress],
-//   });
-//   return balance;
-// }
+  const balance = await readContract({
+    contract: contract,
+    method:
+      "function isAutosaveEnabledForToken(address _user, address _token) external view returns (bool)",
+    params: [userAddress, tokenAddress],
+  });
+  return balance;
+}
 
 export default function AssetTable() {
-  const [allAssetData, setAllAssetData] = useState([]);
+  const [allAssetData, setAllAssetData] = useState<
+    { token: string; balance: string; saved: string; available: string }[]
+  >([]);
   const account = useActiveAccount();
   const address = account?.address;
 
-  const {
-    AvailableBalance: LiquidTokenBalances,
-    TotalBalance: AllTokenBalances,
-  } = useBalances(address as string);
+  const { AvailableBalance, TotalBalance, SavedBalance } = useBalances(
+    address as string
+  );
 
-  const allAssets: any = useMemo(
-    () => AllTokenBalances || [],
-    [AllTokenBalances]
+  const availableTokenBalances = useMemo(
+    () => AvailableBalance,
+    [AvailableBalance]
   );
-  const liquidAssets: any = useMemo(
-    () => LiquidTokenBalances || [],
-    [LiquidTokenBalances]
-  );
+  const totalTokenBalances = useMemo(() => TotalBalance, [TotalBalance]);
+  const savedTokenBalances = useMemo(() => SavedBalance, [SavedBalance]);
 
   useEffect(() => {
-    if (allAssets.length === 0) return;
-    // Map through the 2D array to create objects
-    const allAssetsRes = allAssets[0]?.map(
-      (key: any, index: string | number) => {
-        return {
-          token: key,
-          balance: formatEther(allAssets[1][index]),
-          saved: formatEther(
-            BigInt(allAssets[1][index] - liquidAssets[1][index])
-          ),
-        };
-      }
-    );
+    if (!totalTokenBalances) return;
+
+    const tokens = Object.keys(totalTokenBalances || {});
+    if (tokens.length === 0) return;
+
+    const allAssetsRes = tokens.map((token) => {
+      return {
+        token,
+        balance: formatEther(
+          BigInt((totalTokenBalances[token] as bigint) || 0)
+        ),
+        saved: formatEther(BigInt((savedTokenBalances[token] as bigint) || 0)),
+        available: formatEther(
+          BigInt((availableTokenBalances[token] as bigint) || 0)
+        ),
+      };
+    });
+
     setAllAssetData(allAssetsRes);
-  }, [allAssets, liquidAssets]);
+  }, [availableTokenBalances, totalTokenBalances, savedTokenBalances]);
 
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
@@ -107,14 +114,9 @@ function AssetTableContent({ assets }: { assets: any[] }) {
   );
 
   useEffect(() => {
-    // console.log("Assets in the assets table sub component", assets);
-    const tokenData = {
-      "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
-        symbol: "SAFU",
-        chain: "Lisk",
-        color: "bg-[#22c55e]",
-      },
-    } as any;
+    if (!assets || !address) return;
+    console.log("Assets in the assets table sub component", assets);
+    
 
     async function updateAssets(assets: any[]) {
       try {
@@ -125,15 +127,14 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             saved: asset.saved,
             balance_usd: await getSafuToUsd(Number(asset.balance)),
             saved_usd: await getSafuToUsd(Number(asset.saved)),
-            autosaved: true,
-            // await checkIsTokenAutoSaved(
-            //   address! as `0x${string}`,
-            //   asset.token
-            // ),
+            autosaved: await checkIsTokenAutoSaved(
+              address! as `0x${string}`,
+              asset.token
+            ),
             tokenInfo: tokenData[asset.token] || {
-              symbol: "SAFU",
+              symbol: "Unknown",
               name: "Lisk",
-              color: "bg-[#22c55e]",
+              color: "bg-[#440]",
             },
           }))
         );
@@ -206,12 +207,21 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             {updatedAssets.map((asset: any, index: number) => (
               <TableRow key={index} className="border-b border-[#1D1D1D]">
                 <TableCell className="py-4 px-4">
+                  {/* THIS LINK BELOW IS GOING TO BE USEFUL FOR FETCHING TOKEN ICON INFO */}
+                  {/* https://portal.thirdweb.com/references/typescript/v5/TokenIcon */}
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-8 h-8 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
                     >
                       {asset.tokenInfo.symbol?.charAt(0)}
                     </div>
+                    {/* <TokenProvider
+                      address={asset.token}
+                      chain={liskSepolia}
+                      client={client}
+                    >
+                      <TokenIcon loadingComponent={<p>..</p>}/>
+                    </TokenProvider> */}
                     <div className="flex flex-col">
                       <p className="font-medium text-white">
                         {asset.tokenInfo.symbol}

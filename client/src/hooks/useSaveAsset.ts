@@ -118,7 +118,7 @@ export const useSaveAsset = ({
       // console.log("Data from save contract:", transactionResult);
       // return transactionResult;
     } catch (error) {
-      console.error("Error writing data to contract:");
+      console.error("Error writing data to contract:", error);
       toast({
         title: "Error writing data to contract",
         variant: "destructive"

@@ -20,9 +20,11 @@ const TrackingChart = () => {
   const isConnected = !!account?.address;
   const address = account?.address;
   const {
-    userBalanceLoading,
-    savingsBalanceLoading,
-    availableBalanceLoading,
+    loading: {
+      total: userBalanceLoading,
+      savings: savingsBalanceLoading,
+      available: availableBalanceLoading
+    },
     totalBalance,
     savingsBalance,
     availableBalance,

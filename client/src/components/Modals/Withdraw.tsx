@@ -25,6 +25,7 @@ import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
 import MemoRipple from "@/icons/Ripple";
 import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+import { tokenData } from "@/lib/utils";
 
 export default function Withdraw({
   isWithdrawModalOpen,
@@ -42,10 +43,10 @@ export default function Withdraw({
   const [token, setToken] = useState("");
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const { AvailableBalance } = useBalances(address as string);
+  const { AvailableBalance, supportedTokens } = useBalances(address as string);
 
   const openThirdModal = () => {
-    console.log("details", token, amount);
+    // console.log("details", token, amount);
 
     setIsThirdModalOpen(true);
     setIsWithdrawModalOpen(false);
@@ -113,15 +114,7 @@ export default function Withdraw({
       const tokensData = AvailableBalance;
       if (!tokensData) return;
 
-      const tokenBalance =
-        tokensData[0]
-          .map((address: string, index: number) => ({
-            address,
-            balance: tokensData[1][index],
-          }))
-          .find(
-            (item: any) => item.address.toLowerCase() === token.toLowerCase()
-          )?.balance || 0n;
+      const tokenBalance = AvailableBalance[token] as bigint || 0n;
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
     }
@@ -158,13 +151,7 @@ export default function Withdraw({
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={tokens.safu}>SAFU</SelectItem>
-                    <SelectItem value={tokens.usdt}>
-                      <div className="flex items-center space-x-2">
-                        <p>USDT</p>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value={tokens.lsk}>LSK</SelectItem>
+                    {supportedTokens.map(token => <SelectItem value={token}>{tokenData[token]?.symbol}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -184,11 +171,7 @@ export default function Withdraw({
                   Available balance:{" "}
                   <span className="text-gray-400">
                     {selectedTokenBalance}{" "}
-                    {token == tokens.safu
-                      ? "SAFU"
-                      : token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
+                    {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button
@@ -235,7 +218,7 @@ export default function Withdraw({
         transactionType="withdraw"
         amount={amount || 0}
         token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+          tokenData[token]?.symbol
         }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}

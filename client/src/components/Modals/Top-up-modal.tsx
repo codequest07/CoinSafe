@@ -6,6 +6,9 @@ import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { tokens } from "@/lib/contract";
 import AmountInput from "../AmountInput";
+import { tokenData } from "@/lib/utils";
+import { useBalances } from "@/hooks/useBalances";
+import { useActiveAccount } from "thirdweb/react";
 interface TopUpModalProps {
   onClose: () => void;
   onTopUp: (amount: number, currency: string) => void;
@@ -24,6 +27,10 @@ export default function TopUpModal({ onClose, onTopUp }: TopUpModalProps) {
     transactionPercentage?: string;
     frequency?: string;
   }>({});
+  const smartAccount = useActiveAccount();
+  const address = smartAccount?.address;
+
+  const { supportedTokens } = useBalances(address as string);
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
@@ -55,7 +62,8 @@ export default function TopUpModal({ onClose, onTopUp }: TopUpModalProps) {
           <h2 className="text-white text-[20px] font-medium">Top up savings</h2>
           <button
             onClick={onClose}
-            className="rounded-full p-2  bg-[#FFFFFF] transition-colors">
+            className="rounded-full p-2  bg-[#FFFFFF] transition-colors"
+          >
             <X className="h-5 w-5 text-black" />
           </button>
         </div>
@@ -81,6 +89,7 @@ export default function TopUpModal({ onClose, onTopUp }: TopUpModalProps) {
           tokens={tokens}
           selectedTokenBalance={selectedTokenBalance}
           validationErrors={validationErrors}
+          supportedTokens={supportedTokens}
         />
 
         {/* Wallet balance */}
@@ -90,11 +99,7 @@ export default function TopUpModal({ onClose, onTopUp }: TopUpModalProps) {
               Wallet balance:{" "}
               <span className="text-gray-400">
                 {selectedTokenBalance}{" "}
-                {saveState.token == tokens.safu
-                  ? "SAFU"
-                  : saveState.token === tokens.lsk
-                  ? "LSK"
-                  : "USDT"}
+                {tokenData[saveState.token]?.symbol}
               </span>
             </div>
             <Button
@@ -105,7 +110,8 @@ export default function TopUpModal({ onClose, onTopUp }: TopUpModalProps) {
                   ...prev,
                   amount: selectedTokenBalance,
                 }))
-              }>
+              }
+            >
               Save all
             </Button>
           </div>
@@ -114,12 +120,14 @@ export default function TopUpModal({ onClose, onTopUp }: TopUpModalProps) {
         <div className="flex justify-between my-5">
           <Button
             onClick={onClose}
-            className="px-8 py-3 rounded-full bg-[#2A2A2A] text-white font-medium hover:bg-[#333333] border-0">
+            className="px-8 py-3 rounded-full bg-[#2A2A2A] text-white font-medium hover:bg-[#333333] border-0"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleTopUp}
-            className="px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-gray-200 border-0">
+            className="px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-gray-200 border-0"
+          >
             Top up
           </Button>
         </div>

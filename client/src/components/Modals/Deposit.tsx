@@ -26,6 +26,8 @@ import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 import ApproveTxModal from "./ApproveTxModal";
+import { tokenData } from "@/lib/utils";
+import { useBalances } from "@/hooks/useBalances";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -44,6 +46,7 @@ export default function Deposit({
   const [token, setToken] = useState("");
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
+  const { supportedTokens } = useBalances(address as string);
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -158,7 +161,9 @@ export default function Deposit({
                   className="text-2xl font-medium bg-transparent text-white w-16 sm:w-full outline-none"
                   placeholder="0"
                 />
-                <div className="text-sm text-left text-gray-400 mt-1">≈ ${tokenPrice}</div>
+                <div className="text-sm text-left text-gray-400 mt-1">
+                  ≈ ${tokenPrice}
+                </div>
               </div>
               <div className="sm:ml-4">
                 <Select onValueChange={handleTokenSelect} value={token}>
@@ -169,18 +174,15 @@ export default function Deposit({
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={tokens.safu}>SAFU</SelectItem>
-                    <SelectItem value={tokens.usdt}>
-                      <div className="flex items-center space-x-2">
-                        <p>USDT</p>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value={tokens.lsk}>LSK</SelectItem>
+                    {supportedTokens.map((token) => (
+                      <SelectItem value={token}>
+                        {tokenData[token]?.symbol}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
           </div>
 
           {/* Wallet Balance Section */}
@@ -195,12 +197,7 @@ export default function Deposit({
                 <div className="text-sm font-[300] text-gray-300">
                   Wallet balance:{" "}
                   <span className="text-gray-400">
-                    {selectedTokenBalance}{" "}
-                    {token == tokens.safu
-                      ? "SAFU"
-                      : token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
+                    {selectedTokenBalance} {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button
@@ -242,9 +239,7 @@ export default function Deposit({
       </DialogContent>
       <SuccessfulTxModal
         amount={amount || 0}
-        token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
-        }
+        token={tokenData[token]?.symbol}
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
         transactionType="deposit"
@@ -257,9 +252,7 @@ export default function Deposit({
         isOpen={approveTxModalOpen}
         onClose={() => setApproveTxModalOpen(false)}
         amount={amount || 0}
-        token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
-        }
+        token={tokenData[token]?.symbol}
         text="To Deposit"
       />
     </Dialog>

@@ -3,7 +3,7 @@ import { useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+// import { Loader2 } from "lucide-react";
 import Deposit from "./Modals/Deposit";
 import MemoStory from "@/icons/Story";
 
@@ -11,7 +11,7 @@ export default function ScheduledSavings() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const { scheduledSavings, isLoading, error } = useGetScheduledSavings();
+  const { scheduledSavings, error } = useGetScheduledSavings();
 
   const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
@@ -55,9 +55,11 @@ export default function ScheduledSavings() {
         ))
       ) : (
         <div className="flex flex-col items-center mt-3 justify-center gap-3">
-          {isLoading ? (
+          {/* Commented this for later review */}
+          {/* isLoading ? (
             <Loader2 className="w-12 h-12 animate-spin" />
-          ) : error ? (
+          ) :  */}
+          {error ? (
             <span className="text-red-500">An unexpected error occured..</span>
           ) : (
             <div className="flex py-20 flex-col gap-6 items-center text-center justify-center">

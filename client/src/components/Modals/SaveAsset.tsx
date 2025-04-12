@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
-// import MemoRipple from "@/icons/Ripple";
+import MemoRipple from "@/icons/Ripple";
 // import MemoCalenderIcon from "@/icons/CalenderIcon";
 // import { Calendar } from "@/components/ui/calendar"; // Line 20: Added Shadcn Calendar
 // import {
@@ -31,7 +31,7 @@ import { liskSepolia } from "viem/chains";
 
 import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 // import coinSafeAbi from "../../abi/coinsafe.json";
-import savingsFacetAbi from "../../abi/SavingsFacet.json";
+import savingsFacetAbi from "../../abi/AutomatedSavingsFacet.json";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 // import { config } from "@/lib/config";
@@ -46,6 +46,7 @@ import { formatUnits } from "viem";
 import { SavingsTargetSelect } from "../SavingsTarget";
 // import { DurationSelector } from "../DurationSelector";
 import { useActiveAccount } from "thirdweb/react";
+import { tokenData } from "@/lib/utils";
 // import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 
 interface SavingsTarget {
@@ -84,7 +85,7 @@ export default function SaveAsset({
 
   // const [token, setToken] = useState("");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const { AvailableBalance } = useBalances(address as string);
+  const { AvailableBalance, supportedTokens } = useBalances(address as string);
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(
@@ -112,7 +113,7 @@ export default function SaveAsset({
   //   { value: 120, label: "120 days" },
   // ];
 
-  const [savingsDuration, _] = useState(30);
+  const [savingsDuration] = useState(30);
   const [endDate, setEndDate] = useState("");
 
   const calculateEndDate = (days: number) => {
@@ -296,16 +297,7 @@ export default function SaveAsset({
 
       console.log("Tokens Data: ", tokensData);
 
-      const tokenBalance =
-        tokensData[0]
-          .map((address: string, index: number) => ({
-            address,
-            balance: tokensData[1][index],
-          }))
-          .find(
-            (item: any) =>
-              item.address.toLowerCase() === saveState.token.toLowerCase()
-          )?.balance || 0n;
+      const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
       console.log("token Balance: ", tokenBalance);
@@ -360,15 +352,11 @@ export default function SaveAsset({
                           </div>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={tokens.usdt}>
-                            <div className="flex items-center space-x-2">
-                              <p>USDT</p>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value={tokens.lsk}>LSK</SelectItem>
-                          {/* 0xe4923e889a875eae8c164ac1592b57b5684ed90e - new from Ite */}
-                          {/* 0xcf300d5a3d0fc71865a7c92bbc11d6b79c4d1480 - current */}
-                          <SelectItem value={tokens.safu}>SAFU</SelectItem>
+                          {supportedTokens.map((token) => (
+                            <SelectItem value={token}>
+                              {tokenData[token]?.symbol}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       {validationErrors.token && (
@@ -649,18 +637,16 @@ export default function SaveAsset({
                       >
                         <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                           <div className="flex items-center">
-                            {/* <MemoRipple className="mr-2" /> */}
+                            <MemoRipple className="mr-2" />
                             <SelectValue placeholder="Select Token" />
                           </div>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={tokens.usdt}>
-                            <div className="flex items-center space-x-2">
-                              <p>USDT</p>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value={tokens.lsk}>LSK</SelectItem>
-                          <SelectItem value={tokens.safu}>SAFU</SelectItem>
+                          {supportedTokens.map((token) => (
+                            <SelectItem value={token}>
+                              {tokenData[token]?.symbol}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       {validationErrors.token && (

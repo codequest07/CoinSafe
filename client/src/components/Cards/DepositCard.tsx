@@ -21,6 +21,8 @@ import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 import ApproveTxModal from "../Modals/ApproveTxModal";
 import { useNavigate } from "react-router-dom";
+import { useBalances } from "@/hooks/useBalances";
+import { tokenData } from "@/lib/utils";
 
 export default function DepositCard() {
   const navigate = useNavigate();
@@ -33,6 +35,7 @@ export default function DepositCard() {
   const [token, setToken] = useState("");
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
+  const { supportedTokens } = useBalances(address as string);
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -161,13 +164,7 @@ export default function DepositCard() {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={tokens.safu}>SAFU</SelectItem>
-                    <SelectItem value={tokens.usdt}>
-                      <div className="flex items-center space-x-2">
-                        <p>USDT</p>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value={tokens.lsk}>LSK</SelectItem>
+                    {supportedTokens.map(token => <SelectItem value={token}>{tokenData[token]?.symbol}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

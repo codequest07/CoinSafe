@@ -124,7 +124,7 @@ export const useDepositAsset = ({
               params: [amountWithDecimals, token as `0x${string}`],
             });
 
-            await sendAndConfirmTransaction({
+          await sendAndConfirmTransaction({
               transaction: depositTx,
               account,
             });

@@ -14,6 +14,8 @@ import { saveAtom } from "@/store/atoms/save";
 import ApproveTxModal from "../Modals/ApproveTxModal";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import { useNavigate } from "react-router-dom";
+import { useBalances } from "@/hooks/useBalances";
+import { tokenData } from "@/lib/utils";
 // import { tokens } from "@/lib/contract";
 
 export default function DepositCard() {
@@ -25,6 +27,7 @@ export default function DepositCard() {
 
   const [amount] = useState<number>();
   const [token] = useState("");
+  const { supportedTokens } = useBalances(address as string);
   // Removed unused tokenPrice state
 
   const [selectedTokenBalance, _setSelectedTokenBalance] = useState(0);
@@ -115,6 +118,7 @@ export default function DepositCard() {
               tokens={tokens}
               selectedTokenBalance={selectedTokenBalance}
               validationErrors={validationErrors}
+              supportedTokens={supportedTokens}
             />
           </div>
 
@@ -125,11 +129,7 @@ export default function DepositCard() {
                 Onchain balance:{" "}
                 <span className="text-gray-400">
                   {selectedTokenBalance}{" "}
-                  {saveState.token == tokens.safu
-                    ? "SAFU"
-                    : saveState.token === tokens.lsk
-                    ? "LSK"
-                    : "USDT"}
+                  {tokenData[token]?.symbol}
                 </span>
               </div>
               <Button
@@ -167,7 +167,7 @@ export default function DepositCard() {
       <SuccessfulTxModal
         amount={amount || 0}
         token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+          tokenData[token]?.symbol
         }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
@@ -182,7 +182,7 @@ export default function DepositCard() {
         onClose={() => setApproveTxModalOpen(false)}
         amount={amount || 0}
         token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+          tokenData[token]?.symbol
         }
         text="To Deposit"
       />

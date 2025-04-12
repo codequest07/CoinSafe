@@ -44,17 +44,31 @@ export const convertTokenAmountToUsd = async (
 ): Promise<number> => {
   switch (token) {
     case tokens.usdt:
-      return await getUsdtToUsd(
-        Number(formatUnits(amount, 6))
-      );
+      return await getUsdtToUsd(Number(formatUnits(amount, 6)));
     case tokens.safu:
       return getSafuToUsd(Number(formatUnits(amount, 18)));
     case tokens.lsk:
-      return await getLskToUsd(
-        Number(formatUnits(amount, 18))
-      );
+      return await getLskToUsd(Number(formatUnits(amount, 18)));
     default:
       console.error("Unknown token address:", token);
       return 0;
   }
 };
+
+export const tokenData = {
+  "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
+    symbol: "SAFU",
+    chain: "Lisk",
+    color: "bg-[#22c55e]",
+  },
+  "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda": {
+    symbol: "USDT",
+    chain: "Lisk",
+    color: "bg-[#d54f]",
+  },
+  "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": {
+    symbol: "LSK",
+    chain: "Lisk",
+    color: "bg-[#55e]",
+  },
+} as any;

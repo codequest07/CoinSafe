@@ -8,10 +8,9 @@ import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useEffect, useState } from "react";
 import { getValidNumberValue } from "@/lib/utils";
 import { convertTokenAmountToUsd } from "@/lib/utils";
-import { getContract } from "thirdweb";
+import { getContract, readContract } from "thirdweb";
 import { liskSepolia } from "@/lib/config";
 import { client } from "@/lib/config";
-import { useReadContract } from "thirdweb/react";
 import { Abi } from "viem";
 
 export const useBalances = (address: string) => {
@@ -21,6 +20,21 @@ export const useBalances = (address: string) => {
   const [savingsBalance, setSavingsBalance] =
     useRecoilState(savingsBalanceState);
   const [totalBalance, setTotalBalance] = useRecoilState(totalBalanceState);
+  const [supportedTokens, setSupportedTokens] = useState<string[]>([]);
+  const [loading, setIsLoading] = useState({
+    available: false,
+    total: false,
+    savings: false,
+  });
+  const [balances, setBalances] = useState<{
+    available: unknown[];
+    total: unknown[];
+    savings: unknown[];
+  }>({
+    available: [],
+    total: [],
+    savings: [],
+  });
 
   const contract = getContract({
     client,
@@ -29,147 +43,160 @@ export const useBalances = (address: string) => {
     abi: facetAbis.fundingFacet as unknown as Abi,
   });
 
-  const { data: TotalBalance, isLoading: userBalanceLoading } = useReadContract(
-    {
-      contract,
-      method:
-        "function getUserBalances(address _user) external view returns (address[] memory, uint256[] memory)",
-      params: [address],
+  useEffect(() => {
+    if (!address) return;
+    async function fetchSupportedTokens() {
+      const fundingFacetContract = getContract({
+        client,
+        address: CoinsafeDiamondContract.address,
+        chain: liskSepolia,
+        abi: facetAbis.fundingFacet as unknown as Abi,
+      });
+      const supportedTokens = (await readContract({
+        contract: fundingFacetContract,
+        method:
+          "function getAcceptedTokenAddresses() external view returns (address[] memory)",
+        params: [],
+      })) as string[];
+
+      setSupportedTokens(supportedTokens);
     }
-  );
 
-  // Loading states
-  const [, setIsLoading] = useState({
-    available: false,
-    total: false,
-    savings: false,
-  });
-
-  const { data: SavingsBalances, isLoading: savingsBalanceLoading } =
-    useReadContract({
-      contract,
-      method:
-        "function getUserSavings(address _user) external view returns (LibDiamond.Safe[] memory)",
-      params: [address],
-      
-    });
-
-  const { data: AvailableBalance, isLoading: availableBalanceLoading } =
-    useReadContract({
-      contract,
-      method:
-        "function getAvailableBalances(address _user) external view returns (address[] memory, uint256[] memory)",
-      params: [address],
-    });
-
-  // Process available balances
-  const processAvailableBalances = async (data: any[]) => {
-    setIsLoading((prev) => ({ ...prev, available: true }));
-    try {
-      const tokenAddresses = data[0];
-      const tokenBalances = data[1];
-      let totalUsdValue = 0;
-
-      for (let i = 0; i < tokenAddresses.length; i++) {
-        const usdValue = await convertTokenAmountToUsd(
-          tokenAddresses[i],
-          tokenBalances[i]
-        );
-        totalUsdValue += getValidNumberValue(usdValue);
-      }
-
-      setAvailableBalance(totalUsdValue);
-    } catch (error) {
-      console.error("Error processing available balances:", error);
-    } finally {
-      setIsLoading((prev) => ({ ...prev, available: false }));
-    }
-  };
-
-  // Process total balances
-  const processTotalBalances = async (data: any[]) => {
-    setIsLoading((prev) => ({ ...prev, total: true }));
-    try {
-      const tokenAddresses = data[0];
-      const tokenBalances = data[1];
-      let totalUsdValue = 0;
-
-      for (let i = 0; i < tokenAddresses.length; i++) {
-        const usdValue = await convertTokenAmountToUsd(
-          tokenAddresses[i],
-          tokenBalances[i]
-        );
-        totalUsdValue += getValidNumberValue(usdValue);
-      }
-
-      setTotalBalance(totalUsdValue);
-    } catch (error) {
-      console.error("Error processing total balances:", error);
-    } finally {
-      setIsLoading((prev) => ({ ...prev, total: false }));
-    }
-  };
-
-  // Process savings balances
-  const processSavingsBalances = async (savingsData: any[]) => {
-    setIsLoading((prev) => ({ ...prev, savings: true }));
-    try {
-      let totalUsdValue = 0;
-
-      for (const plan of savingsData) {
-        const usdValue = await convertTokenAmountToUsd(plan.token, plan.amount);
-        totalUsdValue += getValidNumberValue(usdValue);
-      }
-
-      setSavingsBalance(totalUsdValue);
-    } catch (error) {
-      console.error("Error processing savings balances:", error);
-    } finally {
-      setIsLoading((prev) => ({ ...prev, savings: false }));
-    }
-  };
+    fetchSupportedTokens();
+  }, [address]);
 
   useEffect(() => {
-    async function processBalances() {
-      if (AvailableBalance && Array.isArray(AvailableBalance)) {
-        await processAvailableBalances(AvailableBalance);
-      }
+    if (!address || !supportedTokens) return;
 
-      if (TotalBalance && Array.isArray(TotalBalance)) {
-        await processTotalBalances(TotalBalance);
-      }
+    async function fetchBalances() {
+      try {
+        setIsLoading((prev) => ({
+          ...prev,
+          available: true,
+          total: true,
+          savings: true,
+        }));
 
-      if (SavingsBalances) {
-        await processSavingsBalances(SavingsBalances as any[]);
+        const totalCalls = supportedTokens.map((token) => ({
+          contract,
+          method:
+            "function getUserTotalBalance(address user, address token) external view returns (uint256)",
+          params: [address, token],
+        }));
+
+        const availableCalls = supportedTokens.map((token) => ({
+          contract,
+          method:
+            "function getUserAvailableBalance(address user, address token) external view returns (uint256)",
+          params: [address, token],
+        }));
+
+        const savedCalls = supportedTokens.map((token) => ({
+          contract,
+          method:
+            "function getUserSavedBalance(address user, address token) external view returns (uint256)",
+          params: [address, token],
+        }));
+
+        // Execute all calls concurrently
+        const [totalResults, availableResults, savedResults] =
+          await Promise.all([
+            Promise.all(totalCalls.map((call) => readContract(call))),
+            Promise.all(availableCalls.map((call) => readContract(call))),
+            Promise.all(savedCalls.map((call) => readContract(call))),
+          ]);
+
+        setBalances({
+          available: availableResults,
+          total: totalResults,
+          savings: savedResults,
+        });
+
+        let totalUsd = 0;
+        let availableUsd = 0;
+        let savedUsd = 0;
+
+        for (let i = 0; i < supportedTokens.length; i++) {
+          const token = supportedTokens[i];
+          const total = totalResults[i] || 0n;
+          const available = availableResults[i] || 0n;
+          const saved = savedResults[i] || 0n;
+
+          const totalUsdVal = await convertTokenAmountToUsd(
+            token,
+            BigInt(total as unknown as number)
+          );
+          const availableUsdVal = await convertTokenAmountToUsd(
+            token,
+            BigInt(available as unknown as number)
+          );
+          const savedUsdVal = await convertTokenAmountToUsd(
+            token,
+            BigInt(saved as unknown as number)
+          );
+
+          totalUsd += getValidNumberValue(totalUsdVal);
+          availableUsd += getValidNumberValue(availableUsdVal);
+          savedUsd += getValidNumberValue(savedUsdVal);
+        }
+
+        setTotalBalance(totalUsd);
+        setAvailableBalance(availableUsd);
+        setSavingsBalance(savedUsd);
+      } catch (err) {
+        console.error("Error fetching balances:", err);
+      } finally {
+        setIsLoading((prev) => ({
+          ...prev,
+          available: false,
+          total: false,
+          savings: false,
+        }));
       }
     }
 
-    processBalances();
-  }, [AvailableBalance, TotalBalance, SavingsBalances]);
+    fetchBalances();
+  }, [address, supportedTokens]);
 
-  // [AvailableBalance.data, TotalBalance.data, SavingsBalances.data]
+  // -------------------------------
+  // 🧠 Derived mapped balances
+  // -------------------------------
+  const [tokenBalanceMap, setTokenBalanceMap] = useState<{
+    available: Record<string, unknown>;
+    total: Record<string, unknown>;
+    savings: Record<string, unknown>;
+  }>({
+    available: {},
+    total: {},
+    savings: {},
+  });
 
-  // const isAnyLoading =
-  //   isLoading.available || isLoading.total || isLoading.savings;
-  // const isContractLoading =
-  //   AvailableBalance.isLoading ||
-  //   TotalBalance.isLoading ||
-  //   SavingsBalances.isLoading;
+  useEffect(() => {
+    const updatedTokenBalanceMap = supportedTokens.reduce(
+      (acc, token, index) => {
+        acc.available[token] = balances.available[index];
+        acc.total[token] = balances.total[index];
+        acc.savings[token] = balances.savings[index];
+        return acc;
+      },
+      {
+        available: {} as Record<string, unknown>,
+        total: {} as Record<string, unknown>,
+        savings: {} as Record<string, unknown>,
+      }
+    );
+
+    setTokenBalanceMap(updatedTokenBalanceMap);
+  }, [balances, supportedTokens]);
 
   return {
     availableBalance,
-    availableBalanceLoading,
     savingsBalance,
     totalBalance,
-    AvailableBalance,
-    TotalBalance,
-    userBalanceLoading,
-    SavingsBalances,
-    savingsBalanceLoading,
-    // isLoading: {
-    //   ...isLoading,
-    //   any: isAnyLoading,
-    //   contract: isContractLoading,
-    // },
+    AvailableBalance: tokenBalanceMap.available,
+    TotalBalance: tokenBalanceMap.total,
+    SavedBalance: tokenBalanceMap.savings,
+    loading,
+    supportedTokens,
   };
 };
