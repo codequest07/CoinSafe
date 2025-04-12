@@ -31,7 +31,7 @@ import { liskSepolia } from "viem/chains";
 
 import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 // import coinSafeAbi from "../../abi/coinsafe.json";
-import savingsFacetAbi from "../../abi/SavingsFacet.json";
+import savingsFacetAbi from "../../abi/AutomatedSavingsFacet.json";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 // import { config } from "@/lib/config";
@@ -112,7 +112,7 @@ export default function SaveAsset({
   //   { value: 120, label: "120 days" },
   // ];
 
-  const [savingsDuration, _] = useState(30);
+  const [savingsDuration] = useState(30);
   const [endDate, setEndDate] = useState("");
 
   const calculateEndDate = (days: number) => {
@@ -296,16 +296,7 @@ export default function SaveAsset({
 
       console.log("Tokens Data: ", tokensData);
 
-      const tokenBalance =
-        tokensData[0]
-          .map((address: string, index: number) => ({
-            address,
-            balance: tokensData[1][index],
-          }))
-          .find(
-            (item: any) =>
-              item.address.toLowerCase() === saveState.token.toLowerCase()
-          )?.balance || 0n;
+      const tokenBalance = AvailableBalance[saveState.token] as bigint || 0n;
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
       console.log("token Balance: ", tokenBalance);

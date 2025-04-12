@@ -1,6 +1,6 @@
 import { JsonRpcProvider } from "ethers";
 // export const base_uri_test = import.meta.env.DEV ? 'http://localhost:1234' : 'https://coinsafe-0q0m.onrender.com';
-export const base_uri = "https://coinsafe-0q0m.onrender.com";
+export const base_uri = "https://coinsafe-0q0m.onrender.com/api/coingecko";
 
 export const getLskToUsd = async (lsk: number) => {
   try {

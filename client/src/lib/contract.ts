@@ -1,7 +1,7 @@
 import faucetAbi from "../abi/faucet.json";
 import coinSafeAbi from "../abi/coinsafe.json";
 import balanceFacetAbi from "../abi/BalanceFacet.json";
-import savingsFacetAbi from "../abi/SavingsFacet.json";
+import automatedSavingsFacetAbi from "../abi/AutomatedSavingsFacet.json";
 import fundingFacetAbi from "../abi/FundingFacet.json";
 
 export const tokens = {
@@ -14,14 +14,15 @@ export const tokens = {
   // lsk: "0x7a9c712570bb9eb804631836cf333ba9a25fc77d"
 };
 
-
 export const CoinSafeContract = {
   address: "0x727b742EAd5540703b62C7f33312335dcFd83f5A",
   abi: coinSafeAbi,
 };
 
 export const CoinsafeDiamondContract = {
-  address: "0xda6cf4d86ac271686ace56c554acad7bc6940667",
+  address: "0x69B417f1937EF6fF93471a247D70a245B6216ca8",
+  // old diamond address
+  //address: "0xda6cf4d86ac271686ace56c554acad7bc6940667",
 };
 
 export const FaucetContract = {
@@ -32,5 +33,5 @@ export const FaucetContract = {
 export const facetAbis = {
   balanceFacet: balanceFacetAbi,
   fundingFacet: fundingFacetAbi,
-  savingsFacet: savingsFacetAbi,
+  automatedSavingsFacet: automatedSavingsFacetAbi,
 };

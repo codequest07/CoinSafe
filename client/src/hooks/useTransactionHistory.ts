@@ -1,17 +1,12 @@
-import { useCallback, useState } from "react";
-import { getContract } from "thirdweb";
-
-import { liskSepolia } from "@/lib/config";
-import { client } from "@/lib/config";
-import { useReadContract } from "thirdweb/react";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
-import { useActiveAccount } from "thirdweb/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
 
-// Types for the transaction history
+import { liskSepolia, client } from "@/lib/config";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { useActiveAccount } from "thirdweb/react";
+
 export interface Transaction {
-  // Add your transaction properties here based on your contract's Transaction struct
-  // Example:
   id: bigint;
   amount: bigint;
   timestamp: bigint;
@@ -19,8 +14,6 @@ export interface Transaction {
   token: string;
   user: string;
   status: number;
-
-  // ... other fields
 }
 
 interface TransactionHistoryParams {
@@ -48,66 +41,59 @@ export function useTransactionHistory({
 }: TransactionHistoryParams): TransactionHistoryReturn {
   const [currentOffset, setCurrentOffset] = useState(offset);
   const [currentLimit] = useState(limit);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
   const account = useActiveAccount();
   const address = account?.address;
 
-  // Read contract using wagmi's useReadContract hook
-  // const {
-  //   data: transactions,
-  //   isError,
-  //   error,
-  //   isLoading,
-  //   refetch,
-  // } = useReadContract({
-  //   address: contractAddress as `0x${string}`,
-  //   abi,
-  //   functionName: 'getTransactionHistory',
-  //   args: [BigInt(currentOffset), BigInt(currentLimit)],
-  //   query: {
-  //     enabled: Boolean(address), // Only fetch if user is connected
-  //   //   staleTime: 30_000, // Consider data stale after 30 seconds
-  //   //   cacheTime: 5 * 60_000, // Keep data in cache for 5 minutes
-  //   },
-  //   account: address,
-  // }) as {
-  //   data: Transaction[]
-  //   isError: boolean
-  //   error: Error | null
-  //   isLoading: boolean
-  //   refetch: () => void
-  // }
+  const contract = useMemo(() => {
+    return getContract({
+      client,
+      address: CoinsafeDiamondContract.address,
+      chain: liskSepolia,
+      abi: facetAbis.fundingFacet as Abi,
+    });
+  }, []); // <-- Only create once
 
-  const contract = getContract({
-    client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskSepolia,
-    abi: facetAbis.savingsFacet as unknown as Abi,
-  });
+  const fetchTransactions = useCallback(async () => {
+    if (!address) return;
 
-  const {
-    data: transactions,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useReadContract({
-    contract,
-    method:
-      "function getTransactionHistory(uint256 offset, uint256 limit) external view returns (LibDiamond.Transaction[] memory)",
-    params: [BigInt(currentOffset), BigInt(currentLimit)],
-    queryOptions: {
-      enabled: Boolean(address),
-    },
-    from: address,
-  }) as unknown as {
-    data: Transaction[];
-    isError: boolean;
-    error: Error | null;
-    isLoading: boolean;
-    refetch: () => void;
-  };
+    setIsLoading(true);
+    setIsError(false);
+    setError(null);
 
-  // Pagination handlers
+    try {
+      console.log('====================================');
+      console.log("trying to fetch transactions");
+      console.log('====================================');
+      const result = await readContract({
+        contract,
+        // @ts-expect-error type error
+        method: resolveMethod("getTransactionHistory"),
+        params: [address, BigInt(currentOffset), BigInt(currentLimit)],
+      });
+
+      console.log('====================================');
+      console.log('Transaction History:', result);
+      console.log('====================================');
+      setTransactions(result as Transaction[]);
+    } catch (err: any) {
+      console.error("Transaction fetch failed:", err);
+      setIsError(true);
+      setError(err);
+      setTransactions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [contract, address, currentOffset, currentLimit]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
+
   const fetchNextPage = useCallback(() => {
     setCurrentOffset((prev) => prev + currentLimit);
   }, [currentLimit]);
@@ -116,16 +102,15 @@ export function useTransactionHistory({
     setCurrentOffset((prev) => Math.max(0, prev - currentLimit));
   }, [currentLimit]);
 
-  // Determine if there are more pages
-  const hasMore = transactions && transactions.length === currentLimit;
+  const hasMore = transactions.length === currentLimit;
   const hasPrevious = currentOffset > 0;
 
   return {
-    transactions: transactions ?? [],
+    transactions,
     isLoading,
     isError,
     error,
-    refetch,
+    refetch: fetchTransactions,
     fetchNextPage,
     fetchPreviousPage,
     hasMore,

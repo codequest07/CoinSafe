@@ -1,27 +1,14 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
-// import { Calendar } from "@/components/ui/calendar";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuLabel,
-//   DropdownMenuSeparator,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
-// import MemoDropdownIcon from "@/icons/DropdownIcon";
-// import { TransactionHistoryData } from "@/lib/data";
-// import { Transaction } from "@/types";
-import { Badge } from "./ui/badge";
-// import MemoCalender from "@/icons/Calender";
+import { Badge } from "@/components/ui/badge";
 import {
-  Transaction,
+  type Transaction,
   useTransactionHistory,
 } from "@/hooks/useTransactionHistory";
-import { formatTimestamp } from "@/utils/formatTimestamp";
 import { formatEther } from "viem";
-import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { capitalize } from "@/utils/capitalize";
 import { Button } from "./ui/button";
 import MemoStory from "@/icons/Story";
@@ -29,32 +16,16 @@ import SavingOption from "./Modals/SavingOption";
 import Deposit from "./Modals/Deposit";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { useActiveAccount } from "thirdweb/react";
+// import { ChevronDown, ExternalLink } from "lucide-react";
+import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
+
 enum TxStatus {
   Completed = 0,
   Pending = 1,
   Failed = 2,
 }
 
-// const TxStatusMap = {
-//   0: 'Completed',
-//   1: 'Pending',
-//   2: 'Failed'
-// } as const;
-
-const TxStatusArray = ["Completed", "Pending", "Failed"];
-
-// function getStatusStyle(status: number): { color: string } {
-//   switch (status) {
-//     case TxStatus.Completed:
-//       return { color: "text-[#48FF91] bg-[#48FF911A]" };
-//     case TxStatus.Pending:
-//       return { color: "text-[#FFA448] bg-[#FFA3481A]" };
-//     case TxStatus.Failed:
-//       return { color: "text-[#FF484B] bg-[#FF484B1A]" };
-//     default:
-//       return { color: "text-gray-500" };
-//   }
-// }
+const TxStatusArray = ["Completed", "Processing", "Failed"];
 
 const getColorClass = (status: any) => {
   switch (status) {
@@ -70,8 +41,41 @@ const getColorClass = (status: any) => {
 };
 
 function getStatusText(status: number) {
-  return TxStatusArray[status]; // or TxStatusMap[status]
+  return TxStatusArray[status];
 }
+
+const formatDate = (timestamp: number) => {
+  const date = new Date(timestamp * 1000);
+  const day = date.getDate();
+  const month = date.toLocaleString("default", { month: "short" });
+  const year = date.getFullYear();
+
+  // Add ordinal suffix to day
+  const suffix =
+    day === 1 || day === 21 || day === 31
+      ? "st"
+      : day === 2 || day === 22
+      ? "nd"
+      : day === 3 || day === 23
+      ? "rd"
+      : "th";
+
+  return `${day}${suffix} ${month}, ${year}`;
+};
+
+const formatTime = (timestamp: number) => {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+};
+
+// const shortenAddress = (address: string) => {
+//   if (!address) return "";
+//   return `${address.slice(0, 6)}...${address.slice(-4)}`;
+// };
 
 const TransactionHistory = () => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
@@ -84,65 +88,46 @@ const TransactionHistory = () => {
   const openDepositModal = () => {
     setIsDepositModalOpen(true);
   };
-  // const [date, setDate] = React.useState<Date | undefined>(new Date());
-  // const [showCalendar, setShowCalendar] = React.useState(false); // State to toggle calendar visibility
 
-  // const handleCalendarToggle = () => {
-  //   setShowCalendar(!showCalendar);
-  // };
+  const { transactions } = useTransactionHistory({});
 
-  // const groupedTransactions = TransactionHistoryData.reduce<
-  //   Record<string, Transaction[]>
-  // >((acc, transaction) => {
-  //   if (!acc[transaction.date]) {
-  //     acc[transaction.date] = [];
-  //   }
-  //   acc[transaction.date].push(transaction);
-  //   return acc;
-  // }, {});
+  // Group transactions by date (using the date part only)
+  const groupTransactionsByDate = (transactions: Transaction[]) => {
+    if (!transactions || transactions.length === 0) return {};
 
-  const {
-    transactions,
-    isLoading,
-    isError,
-    error,
-    // refetch,
-    // fetchNextPage,
-    // fetchPreviousPage,
-    // hasMore,
-    // hasPrevious
-  } = useTransactionHistory({});
+    const grouped: Record<string, Transaction[]> = {};
+
+    transactions.forEach((transaction) => {
+      const date = new Date(Number(transaction.timestamp) * 1000);
+      const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+
+      grouped[dateKey].push(transaction);
+    });
+
+    return grouped;
+  };
+
+  const groupedTransactions = groupTransactionsByDate(transactions || []);
+
+  const [usdValues, setUsdValues] = useState<number[]>([]);
 
   useEffect(() => {
-    console.log("====================================");
-    console.log();
-    console.log("====================================");
-    console.log("loading", isLoading);
-    console.log("error?", isError);
-    console.log("error text", error);
-    console.log("transactions", transactions);
-    // refetch();
+    const fetchUsdValues = async () => {
+      if (!transactions) return;
+      const values = await Promise.all(
+        transactions.map((transaction) =>
+          convertTokenAmountToUsd(transaction.token, transaction.amount)
+        )
+      );
+      setUsdValues(values);
+    };
+
+    fetchUsdValues();
   }, [transactions]);
-
-  const groupedTransactions = transactions?.reduce<
-    Record<string, Transaction[]>
-  >((acc, transaction) => {
-    if (!acc[Number(transaction.timestamp)]) {
-      acc[Number(transaction.timestamp)] = [];
-    }
-    acc[Number(transaction.timestamp)].push(transaction);
-    return acc;
-  }, {});
-
-  //   struct Transaction {
-  //     uint256 id;
-  //     address user;
-  //     address token;
-  //     string typeOfTransaction;
-  //     uint256 amount;
-  //     uint256 timestamp;
-  //     TxStatus status;
-  // }
 
   if (!transactions || transactions.length === 0) {
     return (
@@ -151,10 +136,10 @@ const TransactionHistory = () => {
           <h2 className="text-lg font-semibold">Transaction History</h2>
         </div>
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="rounded-full  p-6">
+          <div className="rounded-full p-6">
             <MemoStory className="w-20 h-20" />
           </div>
-          <p className=" text-base max-w-[24rem] my-8">
+          <p className="text-base max-w-[24rem] my-8">
             {isConnected
               ? `This space is yours to litter with transaction histories, however
             you wish. Deposits, savings, withdrawals, we strongly advise you
@@ -172,7 +157,7 @@ const TransactionHistory = () => {
               <Button
                 onClick={openFirstModal}
                 variant="outline"
-                className="bg-white text-black rounded-[2rem]  hover:bg-gray-100"
+                className="bg-white text-black rounded-[2rem] hover:bg-gray-100"
               >
                 Save
               </Button>
@@ -200,197 +185,92 @@ const TransactionHistory = () => {
     <div>
       <Card className="bg-[#13131373] border-0 text-white p-5">
         <div className="flex sm:flex-row flex-col sm:space-y-0 space-y-3 justify-between sm:items-center mb-4">
-          <h2 className="text-lg font-semibold">Transaction History</h2>
-          <div className="flex space-x-4 items-center">
-            {/* <DropdownMenu>
-              <DropdownMenuTrigger className="text-sm bg-[#1E1E1E99] p-3 rounded-[2rem] flex space-x-2 items-center outline-none">
-                <div>All Networks</div>
-                <div>
-                  <MemoDropdownIcon />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
-                <DropdownMenuItem>Team</DropdownMenuItem>
-                <DropdownMenuItem>Subscription</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> */}
-            {/* Button to toggle the calendar */}
-            <div className="relative">
-              {/* <button
-                onClick={handleCalendarToggle}
-                className="text-sm px-4 py-3 bg-[#1E1E1E99] flex items-center space-x-2 rounded-[2rem]">
-                <p>This month</p>
-                <MemoCalender />
-              </button> */}
-
-              {/* Conditional rendering of the calendar */}
-              {/* <div className="absolute z-10 right-4">
-                {showCalendar && (
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    className="rounded-md bg-black mb-4"
-                  />
-                )}
-              </div> */}
-            </div>
-          </div>
+          <h2 className="text-lg font-semibold">Transaction history</h2>
+          {/* <div className="flex space-x-4 items-center">
+            <Button
+              variant="outline"
+              className="text-sm bg-[#1E1E1E99] p-3 rounded-[2rem] flex space-x-2 items-center border-none text-white hover:bg-[#2a2a2a] hover:text-white"
+            >
+              <span>This month</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </div> */}
         </div>
 
-        <Table>
-          <TableBody>
-            {Object.entries(groupedTransactions).map(([date, transactions]) => (
-              <React.Fragment key={date}>
-                {/* <TableRow>
-                  <TableCell colSpan={6} className="text-sm font-[300] py-2">
-                    {formatTimestamp(parseInt(date))}
-                  </TableCell>
-                </TableRow> */}
-                {transactions
-                  // .sort((a, b) => Number(a.timestamp) - Number(b.timestamp))
-                  .map((transaction: Transaction, index) => (
-                    <TableRow
-                      key={`${date}-${index}`}
-                      className="block sm:table-row"
-                    >
-                      {/* Transaction type is hidden on smaller screens */}
-                      <TableCell className="hidden sm:table-cell">
-                        {capitalize(transaction.typeOfTransaction)}
-                      </TableCell>
-                      {/* Amount and percentage */}
-                      <TableCell>
-                        <div className="flex flex-col sm:flex-row sm:space-x-2 items-start sm:items-center">
-                          <p>{formatEther(transaction.amount)}</p>
-                          {/* {transaction.icons && (
-                          <transaction.icons className="w-5 h-5 text-[#20FFAF]" />
-                        )} */}
-                        </div>
-                        {/* <div className="text-xs">{transaction.percentage}</div> */}
-                      </TableCell>
-                      {/* Hash, only visible on larger screens */}
-                      <TableCell className="hidden sm:table-cell">
-                        {/* <div className="flex cursor-pointer items-center space-x-3">
-                        {transaction.hash}
-                        {transaction.txnIcon && (
-                          <transaction.txnIcon className="w-4 h-4 ml-1" />
-                        )}
-                      </div> */}
-                      </TableCell>
-                      {/* Token and network information */}
-                      <TableCell className="block sm:table-cell">
-                        <div className="flex flex-col">
-                          <p className="text-sm font-[500]">
-                            {tokenSymbol[transaction.token]}
-                          </p>
-                          {/* <p className="text-xs">{transaction.network}</p> */}
-                        </div>
-                      </TableCell>
-                      {/* Date and time */}
-                      <TableCell className="text-right ">
-                        <div className="flex flex-col justify-center text-center sm:flex-row items-start sm:items-center sm:space-x-2">
-                          <p>
-                            {formatTimestamp(Number(transaction.timestamp))}
-                          </p>
-                          {/* <p>{transaction.time}</p> */}
-                        </div>
-                      </TableCell>
-                      {/* Transaction status */}
-                      <TableCell className="text-right flex justify-center">
-                        <Badge className="bg-transparent text-center rounded-[2rem]">
-                          <p
-                            className={`text-sm p-2 px-3 w-[6rem] rounded-[2rem] font-[400] ${getColorClass(
-                              transaction.status
-                            )}`}
+        <div className="space-y-4">
+          {Object.entries(groupedTransactions).map(([dateKey, txs]) => {
+            // Get the first transaction to extract the date for display
+            const firstTx = txs[0];
+            const dateDisplay = formatDate(Number(firstTx.timestamp));
+
+            return (
+              <div key={dateKey} className="space-y-2">
+                <div className="text-sm font-light py-2 px-1">
+                  {dateDisplay}
+                </div>
+
+                <Table>
+                  <TableBody>
+                    {txs.map((transaction, index) => (
+                      <TableRow className="border-b border-white/10 my-1">
+                        <TableCell className="">
+                          <span className="font-medium">
+                            {capitalize(transaction.typeOfTransaction)}
+                          </span>
+                        </TableCell>
+
+                        <TableCell className="">
+                          <div className="flex flex-col">
+                            <span className="text-sm text-gray-400">
+                              {formatEther(transaction.amount)}{" "}
+                              {tokenData[transaction.token]?.symbol}
+                            </span>
+                            <div className="text-sm text-gray-400 mt-1">
+                              ≈{" "}
+                              {usdValues[index] !== undefined
+                                ? `$${usdValues[index]?.toFixed(2)}`
+                                : "Loading..."}
+                            </div>
+                          </div>
+                        </TableCell>
+
+                        {/* <TableCell className="hidden md:table-cell">
+                          <div className="flex items-center space-x-1">
+                            <span className="text-sm text-gray-400">
+                              {shortenAddress(transaction.user)}
+                            </span>
+                            <ExternalLink className="h-4 w-4 text-[#22c55e]" />
+                          </div>
+                        </TableCell> */}
+
+                        <TableCell className="text-right">
+                          <span className="text-sm">
+                            {formatDate(Number(transaction.timestamp))}
+                            {"  -  "}
+                            {formatTime(Number(transaction.timestamp))}
+                          </span>
+                        </TableCell>
+
+                        <TableCell className="text-right pr-0">
+                          <Badge
+                            className={`border-0 ${getColorClass(
+                              0
+                            )} px-3 py-1 rounded-full`}
                           >
-                            {getStatusText(transaction.status)}
-                          </p>
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </React.Fragment>
-            ))}
-          </TableBody>
-        </Table>
+                            {getStatusText(0)}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            );
+          })}
+        </div>
       </Card>
     </div>
   );
 };
 
 export default TransactionHistory;
-{
-  /* <div>
-      <Card className="bg-[#13131373] border-0 text-white p-5">
-        <div className="flex sm:flex-row flex-col sm:space-y-0 space-y-3 justify-between sm:items-center mb-4">
-          <h2 className="text-lg font-semibold">Transaction History</h2>
-          <div className="flex space-x-4 items-center">
-            
-            <div className="relative">
-              
-            </div>
-          </div>
-        </div>
-
-        <Table>
-          <TableBody>
-            {Object.entries(groupedTransactions).map(([date, transactions]) => (
-              <React.Fragment key={date}>
-                <TableRow>
-                  <TableCell colSpan={6} className="text-sm font-[300] py-2">
-                    {formatTimestamp(parseInt(date))}
-                  </TableCell>
-                </TableRow>
-                {transactions.map((transaction: Transaction, index) => (
-                  <TableRow
-                    key={`${date}-${index}`}
-                    className="block sm:table-row">
-                    
-                    <TableCell className="hidden sm:table-cell">
-                      {transaction.typeOfTransaction}
-                    </TableCell>
-                    
-                    <TableCell>
-                      <div className="flex flex-col sm:flex-row sm:space-x-2 items-start sm:items-center">
-                        <p>{Number(transaction.amount)}</p>
-                        
-                      </div>
-                      
-                    </TableCell>
-                    
-                    <TableCell className="hidden sm:table-cell">
-                      
-                    </TableCell>
-                    
-                    <TableCell className="block sm:table-cell">
-                      <div className="flex flex-col">
-                        <p className="text-sm font-[500]">
-                          {transaction.token}
-                        </p>
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell className="text-right">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-2">
-                        
-                      </div>
-                    </TableCell>
-                    
-                    <TableCell className="text-right">
-                      <Badge className="bg-transparent text-center rounded-[2rem]">
-                        
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </React.Fragment>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
-    </div> */
-}

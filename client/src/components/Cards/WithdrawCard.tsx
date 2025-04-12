@@ -101,15 +101,7 @@ export default function WithdrawCard() {
       const tokensData = AvailableBalance;
       if (!tokensData) return;
 
-      const tokenBalance =
-        tokensData[0]
-          .map((address: string, index: number) => ({
-            address,
-            balance: tokensData[1][index],
-          }))
-          .find(
-            (item: any) => item.address.toLowerCase() === token.toLowerCase()
-          )?.balance || 0n;
+      const tokenBalance = AvailableBalance[token] as bigint || 0n;
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
     }
