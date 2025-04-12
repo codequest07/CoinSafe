@@ -161,7 +161,9 @@ export default function Deposit({
                   className="text-2xl font-medium bg-transparent text-white w-16 sm:w-full outline-none"
                   placeholder="0"
                 />
-                <div className="text-sm text-left text-gray-400 mt-1">≈ ${tokenPrice}</div>
+                <div className="text-sm text-left text-gray-400 mt-1">
+                  ≈ ${tokenPrice}
+                </div>
               </div>
               <div className="sm:ml-4">
                 <Select onValueChange={handleTokenSelect} value={token}>
@@ -172,12 +174,15 @@ export default function Deposit({
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    {supportedTokens.map(token => <SelectItem value={token}>{tokenData[token]?.symbol}</SelectItem>)}
+                    {supportedTokens.map((token) => (
+                      <SelectItem value={token}>
+                        {tokenData[token]?.symbol}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
           </div>
 
           {/* Wallet Balance Section */}
@@ -192,12 +197,7 @@ export default function Deposit({
                 <div className="text-sm font-[300] text-gray-300">
                   Wallet balance:{" "}
                   <span className="text-gray-400">
-                    {selectedTokenBalance}{" "}
-                    {token == tokens.safu
-                      ? "SAFU"
-                      : token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
+                    {selectedTokenBalance} {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button
@@ -239,9 +239,7 @@ export default function Deposit({
       </DialogContent>
       <SuccessfulTxModal
         amount={amount || 0}
-        token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
-        }
+        token={tokenData[token]?.symbol}
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
         transactionType="deposit"
@@ -254,9 +252,7 @@ export default function Deposit({
         isOpen={approveTxModalOpen}
         onClose={() => setApproveTxModalOpen(false)}
         amount={amount || 0}
-        token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
-        }
+        token={tokenData[token]?.symbol}
         text="To Deposit"
       />
     </Dialog>

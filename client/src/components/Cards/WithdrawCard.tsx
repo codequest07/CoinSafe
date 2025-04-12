@@ -166,11 +166,7 @@ export default function WithdrawCard() {
                   Available balance:{" "}
                   <span className="text-gray-400">
                     {selectedTokenBalance}{" "}
-                    {token == tokens.safu
-                      ? "SAFU"
-                      : token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
+                    {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button
@@ -207,9 +203,7 @@ export default function WithdrawCard() {
       <SuccessfulTxModal
         transactionType="withdraw"
         amount={amount || 0}
-        token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
-        }
+        token={tokenData[token]?.symbol}
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
         additionalDetails={{

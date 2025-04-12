@@ -46,7 +46,7 @@ export default function Withdraw({
   const { AvailableBalance, supportedTokens } = useBalances(address as string);
 
   const openThirdModal = () => {
-    console.log("details", token, amount);
+    // console.log("details", token, amount);
 
     setIsThirdModalOpen(true);
     setIsWithdrawModalOpen(false);
@@ -171,11 +171,7 @@ export default function Withdraw({
                   Available balance:{" "}
                   <span className="text-gray-400">
                     {selectedTokenBalance}{" "}
-                    {token == tokens.safu
-                      ? "SAFU"
-                      : token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
+                    {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button
@@ -222,7 +218,7 @@ export default function Withdraw({
         transactionType="withdraw"
         amount={amount || 0}
         token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+          tokenData[token]?.symbol
         }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
