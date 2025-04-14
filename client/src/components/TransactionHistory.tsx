@@ -221,9 +221,17 @@ const TransactionHistory = () => {
 
                         <TableCell className="">
                           <div className="flex flex-col">
-                            <span className="text-sm text-gray-400">
+                            <span className="flex items-center gap-2 text-sm text-gray-400">
+                              <span>
                               {formatEther(transaction.amount)}{" "}
                               {tokenData[transaction.token]?.symbol}
+                              </span>
+                              <img
+                                src={tokenData[transaction.token]?.image}
+                                width={12}
+                                height={12}
+                                className="w-[14px] h-[14px] rounded-full"
+                              />
                             </span>
                             <div className="text-sm text-gray-400 mt-1">
                               ≈{" "}

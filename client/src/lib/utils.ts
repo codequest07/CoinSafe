@@ -60,15 +60,18 @@ export const tokenData = {
     symbol: "SAFU",
     chain: "Lisk",
     color: "bg-[#22c55e]",
+    image: "/assets/tokens/safu.png",
   },
   "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda": {
     symbol: "USDT",
     chain: "Lisk",
     color: "bg-[#d54f]",
+    image: "/assets/tokens/usdt.jpg",
   },
   "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": {
     symbol: "LSK",
     chain: "Lisk",
     color: "bg-[#55e]",
+    image: "/assets/tokens/lsk.jpg",
   },
 } as any;

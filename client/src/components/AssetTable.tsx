@@ -210,11 +210,18 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                   {/* THIS LINK BELOW IS GOING TO BE USEFUL FOR FETCHING TOKEN ICON INFO */}
                   {/* https://portal.thirdweb.com/references/typescript/v5/TokenIcon */}
                   <div className="flex items-center gap-2">
-                    <div
-                      className={`w-8 h-8 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                    {asset.tokenInfo?.image ? (
+                      <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
+                        <img src={asset.tokenInfo?.image} width={30} height={30} className="w-full h-full"/>
+                      </div>
+                    ) : (
+                      <div
+                      className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
                     >
                       {asset.tokenInfo.symbol?.charAt(0)}
                     </div>
+                    )}
+                    
                     {/* <TokenProvider
                       address={asset.token}
                       chain={liskSepolia}
