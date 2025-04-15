@@ -466,20 +466,20 @@ export const myReward = [
 export const PercentageCardData = [
   {
     title: "Savings points",
-    amount: "5,827,034.00",
+    amount: "0",
     link: "find out ",
     text: "how points will be used",
   },
   {
     title: "Referral points",
-    amount: "5,827,034.00",
+    amount: "0",
     link: "refer",
     text: "more people to get more points",
-    badge: "1100",
+    badge: "Coming soon",
   },
   {
     title: "Points multiplier",
-    amount: "1.2 x",
+    amount: "0.0 x",
     link: "find out ",
     text: "how points will be used",
   },
