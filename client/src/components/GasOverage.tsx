@@ -1,47 +1,47 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BadgeCard from "./Cards/BadgeCard";
-import MyRewardCard from "./Cards/MyRewardCard";
+// import BadgeCard from "./Cards/BadgeCard";
+// import MyRewardCard from "./Cards/MyRewardCard";
+// import ComingSoon from "./Coming-Soon";
+import MiniComingSoon from "./Mini-Coming-Soon";
 
 const GasOVerage = () => {
   return (
     <main className="border-[#FFFFFF17] text-white p-4 border rounded-[1rem]">
       <div className="flex items-center px-6 p-3 justify-between">
         <div>
-          <p className="text-base font-[300]">Gas coverage</p>
-          <p className="font-[500] text-lg">$ 0.0005 / $ 2</p>
+          <p className="text-[15px] font-[300] text-[#CACACA]">Gas coverage</p>
+          <p className="font-[500] text-2xl text-[#F1F1F1]">$ 0.00</p>
         </div>
 
         <div>
-          <button className="text-[#010104] bg-[#FFFFFFE5] px-6 py-2 rounded-[2rem]">
+          <button className="text-[#B5B5B5] bg-[#3F3F3F99] px-6 py-2 rounded-[2rem]">
             Save to earn more gas
           </button>
         </div>
       </div>
       <Tabs defaultValue="All badges" className="text-white">
-        <TabsList className="flex w-full justify-center space-x-4 bg-[#1E1E1E99] rounded-[2rem] p-2 mb-4">
+        <TabsList className="flex  w-[30%] space-x-2 bg-[#7F7F7F] rounded-[2rem] mb-4">
           <TabsTrigger
             value="All badges"
-            className="text-white w-1/2 px-6 py-2 rounded-full">
-            {" "}
-            {/* Reduced padding */}
+            className="text-white w-1/2 px-2 py-2 rounded-full">
             All badges
           </TabsTrigger>
           <TabsTrigger
             value="My badges"
-            className="text-white w-1/2 px-6 py-2 rounded-full">
-            {" "}
-            {/* Reduced padding */}
+            className="text-white w-1/2 px-2 py-2 rounded-full">
             My badges
           </TabsTrigger>
         </TabsList>
         <TabsContent value="All badges">
-          <div className="p-4">
-            <BadgeCard />
+          <div className="">
+            {/* <BadgeCard /> */}
+            <MiniComingSoon />
           </div>
         </TabsContent>
         <TabsContent value="My badges">
-          <div className="p-4">
-            <MyRewardCard />
+          <div className="">
+            {/* <MyRewardCard /> */}
+            <MiniComingSoon />
           </div>
         </TabsContent>
       </Tabs>
