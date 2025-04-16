@@ -7,8 +7,13 @@ interface EtherscanResponse {
   result: any[];
 }
 
+type Network = 'mainnet' | 'sepolia';
+
 export class TransactionModel {
-  private readonly apiBaseUrl = "https://api-sepolia.etherscan.io/api";
+  private readonly apiBaseUrls: Record<Network, string> = {
+    mainnet: "https://api.etherscan.io/api",
+    sepolia: "https://api-sepolia.etherscan.io/api",
+  };
   private readonly maxRetries = 3;
   private readonly retryDelay = 1000;
 
@@ -16,22 +21,48 @@ export class TransactionModel {
 
   async getTransactions(address: string): Promise<Transfer[]> {
     try {
-      const [externalTransfers, erc20Transfers] = await Promise.all([
-        this.fetchExternalTransactions(address),
-        this.fetchERC20Transfers(address),
+      // Fetch from both networks in parallel
+      const results = await Promise.allSettled([
+        this.fetchNetworkTransactions(address, 'mainnet'),
+        this.fetchNetworkTransactions(address, 'sepolia'),
       ]);
 
-      return [...externalTransfers, ...erc20Transfers];
+      const allTransfers: Transfer[] = [];
+      results.forEach((result, index) => {
+        const network = index === 0 ? 'mainnet' : 'sepolia';
+        if (result.status === 'fulfilled') {
+          console.log(`Successfully fetched ${result.value.length} transactions from ${network}`);
+          allTransfers.push(...result.value);
+        } else {
+          console.error(`Failed to fetch transactions from ${network}:`, result.reason);
+        }
+      });
+
+      console.log(`Total transactions fetched from all networks: ${allTransfers.length}`);
+      return allTransfers;
     } catch (error) {
       console.error(`Failed to get transactions for ${address}:`, error);
       return [];
     }
   }
 
+  // Helper to fetch all transactions for a specific network
+  private async fetchNetworkTransactions(address: string, network: Network): Promise<Transfer[]> {
+    const [externalTransfers, erc20Transfers] = await Promise.all([
+      this.fetchExternalTransactions(address, network),
+      this.fetchERC20Transfers(address, network),
+    ]);
+    return [...externalTransfers, ...erc20Transfers];
+  }
+
+
   private async fetchExternalTransactions(
-    address: string
+    address: string,
+    network: Network
   ): Promise<Transfer[]> {
+    const logPrefix = `${network} External transactions`;
     return this.fetchWithRetry<EtherscanResponse>(
+      network,
       {
         module: "account",
         action: "txlist",
@@ -40,12 +71,17 @@ export class TransactionModel {
         endblock: "latest",
         apikey: this.etherscanApiKey,
       },
-      "External transactions"
-    ).then((response) => this.processExternalTransfers(response));
+      logPrefix
+    ).then((response) => this.processExternalTransfers(response, network)); // Pass network
   }
 
-  private async fetchERC20Transfers(address: string): Promise<Transfer[]> {
+  private async fetchERC20Transfers(
+    address: string,
+    network: Network
+  ): Promise<Transfer[]> {
+    const logPrefix = `${network} ERC-20 transfers`;
     return this.fetchWithRetry<EtherscanResponse>(
+      network,
       {
         module: "account",
         action: "tokentx",
@@ -54,19 +90,22 @@ export class TransactionModel {
         endblock: "latest",
         apikey: this.etherscanApiKey,
       },
-      "ERC-20 transfers"
-    ).then((response) => this.processERC20Transfers(response));
+      logPrefix
+    ).then((response) => this.processERC20Transfers(response, network)); // Pass network
   }
 
   private async fetchWithRetry<T>(
+    network: Network, // Added network parameter
     params: Record<string, any>,
     logPrefix: string,
     attempt = 1
   ): Promise<T> {
+    const apiUrl = this.apiBaseUrls[network]; // Use network-specific URL
     try {
-      console.log(`${logPrefix} - Attempt ${attempt}: Fetching...`);
-      const response = await axios.get<T>(this.apiBaseUrl, { params });
+      console.log(`${logPrefix} - Attempt ${attempt}: Fetching from ${apiUrl}...`);
+      const response = await axios.get<T>(apiUrl, { params });
 
+      // Handle potential rate limits or empty results gracefully
       const data = response.data as EtherscanResponse;
       if (data.status !== "1") {
         if (
@@ -89,12 +128,12 @@ export class TransactionModel {
       }
 
       await new Promise((resolve) => setTimeout(resolve, this.retryDelay));
-      return this.fetchWithRetry<T>(params, logPrefix, attempt + 1);
+      return this.fetchWithRetry<T>(network, params, logPrefix, attempt + 1); // Pass network recursively
     }
   }
 
-  private processExternalTransfers(response: EtherscanResponse): Transfer[] {
-    if (response.status !== "1" || !response.result) return [];
+  private processExternalTransfers(response: EtherscanResponse, network: Network): Transfer[] { // Added network parameter
+    if (response.status !== "1" || !Array.isArray(response.result)) return [];
 
     return response.result
       .filter((tx) => Number(tx.value) > 0)
@@ -103,32 +142,34 @@ export class TransactionModel {
         erc721TokenId: null,
         erc1155Metadata: null,
         tokenId: null,
-        asset: "ETH",
+        asset: "ETH", // Assuming ETH for external transfers on both networks
         category: "external",
         hash: tx.hash,
         timestamp: parseInt(tx.timeStamp),
         from: tx.from,
         to: tx.to,
+        network: network, // Add network field
       }));
   }
 
-  private processERC20Transfers(response: EtherscanResponse): Transfer[] {
-    if (response.status !== "1" || !response.result) return [];
+  private processERC20Transfers(response: EtherscanResponse, network: Network): Transfer[] { // Added network parameter
+    if (response.status !== "1" || !Array.isArray(response.result)) return [];
 
     return response.result
       .filter((tx) => Number(tx.value) > 0)
       .map((tx) => ({
-        value: Number(tx.value) / 10 ** Number(tx.tokenDecimal),
+        value: Number(tx.value) / 10 ** Number(tx.tokenDecimal || 18), // Added default decimal
         erc721TokenId: null,
         erc1155Metadata: null,
         tokenId: tx.tokenID || null,
-        asset: tx.tokenSymbol,
+        asset: tx.tokenSymbol || 'Unknown ERC20', // Added default symbol
         category: "erc20",
         hash: tx.hash,
         timestamp: parseInt(tx.timeStamp),
         from: tx.from,
         to: tx.to,
         contractAddress: tx.contractAddress,
+        network: network, // Add network field
       }));
   }
 }
