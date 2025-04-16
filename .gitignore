@@ -22,6 +22,7 @@ dist-ssr
 .idea
 .DS_Store
 client/.DS_Store
+client/package-lock.json
 *.suo
 *.ntvs*
 *.njsproj
