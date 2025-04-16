@@ -3,7 +3,6 @@ import { getContract, prepareContractCall, sendAndConfirmTransaction } from "thi
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
-import { tokens } from "@/lib/contract";
 import { erc20Abi } from "viem";
 
 interface UseDepositAssetParams {
@@ -63,13 +62,6 @@ export const useDepositAsset = ({
           address: coinSafeAddress,
         });
 
-        const safuContract = getContract({
-          client,
-          address: tokens.safu,
-          chain: liskSepolia,
-          abi: erc20Abi,
-        });
-
         if (!amount) {
           toast({
             title: "Please input a value for amount to deposit",
@@ -88,13 +80,20 @@ export const useDepositAsset = ({
           return;
         }
 
+        const tokenContract = getContract({
+          client,
+          address: token,
+          chain: liskSepolia,
+          abi: erc20Abi,
+        });
+
         const decimals = getTokenDecimals(token);
         const amountWithDecimals = BigInt(amount * 10 ** decimals);
 
         if (account) {
           try {
             const approveTx = prepareContractCall({
-              contract: safuContract,
+              contract: tokenContract,
               method: "approve",
               params: [coinSafeAddress, BigInt(amount * 10 ** 18)], // Assuming 18 decimals
             });
