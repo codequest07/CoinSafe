@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
 import { TransactionModel } from "../Models/TransactionModel";
-import { AnthropicService } from "../services/AnthropicService";
+import { GeminiService } from "../services/GeminiService"; 
 import { TransfersData } from "../types/ai";
 
 export class SavingsPlanController {
   constructor(
     private readonly transactionModel: TransactionModel,
-    private readonly anthropicService: AnthropicService
+    private readonly geminiService: GeminiService 
   ) {}
 
   public async getSavingsPlan(req: Request, res: Response): Promise<void> {
+    console.log("Received request body:", req.body); 
     const { address } = req.body;
 
     // Input validation
@@ -85,7 +86,7 @@ export class SavingsPlanController {
     );
 
     try {
-      const savingsPlan = await this.anthropicService.getSavingsPlan(
+      const savingsPlan = await this.geminiService.getSavingsPlan(
         transfersData
       );
       if (!savingsPlan) {
