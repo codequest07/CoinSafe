@@ -13,7 +13,7 @@ import faucetRouter from "./Routes/FaucetClaimRoute";
 
 // Models and Services
 import { TransactionModel } from "./Models/TransactionModel";
-import { AnthropicService } from "./services/AnthropicService";
+import { GeminiService } from "./services/GeminiService";
 import { SavingsPlanController } from "./controllers/SavingsPlanController";
 import { savingsPlanRoutes } from "./Routes/SavingsAiRoutes";
 
@@ -27,7 +27,7 @@ app.use(express.json());
 
 // API Keys
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "";
-const anthropicApiKey = process.env.ANTHROPIC_API_KEY || "";
+const geminiApiKey = process.env.GEMINI_API_KEY || "";
 
 // Root route
 app.get("/", (req: Request, res: Response) => {
@@ -36,10 +36,10 @@ app.get("/", (req: Request, res: Response) => {
 
 // Initialize services
 const transactionModel = new TransactionModel(etherscanApiKey);
-const anthropicService = new AnthropicService(anthropicApiKey);
+const geminiService = new GeminiService(geminiApiKey);
 const savingsPlanController = new SavingsPlanController(
   transactionModel,
-  anthropicService
+  geminiService
 );
 
 // Mount routes
