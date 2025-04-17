@@ -5,6 +5,7 @@ export interface Transfer {
   tokenId: string | null;
   asset: string;
   category: string;
+  network: 'mainnet' | 'sepolia'; // Added network field
 }
 
 export interface TransfersData {
