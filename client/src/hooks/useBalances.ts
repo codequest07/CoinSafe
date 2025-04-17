@@ -11,7 +11,6 @@ import { convertTokenAmountToUsd } from "@/lib/utils";
 import { getContract, readContract } from "thirdweb";
 import { liskSepolia } from "@/lib/config";
 import { client } from "@/lib/config";
-import { Abi } from "viem";
 
 export const useBalances = (address: string) => {
   const [availableBalance, setAvailableBalance] = useRecoilState(
@@ -40,7 +39,7 @@ export const useBalances = (address: string) => {
     client,
     address: CoinsafeDiamondContract.address,
     chain: liskSepolia,
-    abi: facetAbis.fundingFacet as unknown as Abi,
+    abi: facetAbis.fundingFacet, // Removed 'as unknown as Abi'
   });
 
   useEffect(() => {
@@ -50,7 +49,7 @@ export const useBalances = (address: string) => {
         client,
         address: CoinsafeDiamondContract.address,
         chain: liskSepolia,
-        abi: facetAbis.fundingFacet as unknown as Abi,
+        abi: facetAbis.fundingFacet, // Removed 'as unknown as Abi'
       });
       const supportedTokens = (await readContract({
         contract: fundingFacetContract,
@@ -112,32 +111,42 @@ export const useBalances = (address: string) => {
           savings: savedResults,
         });
 
-        let totalUsd = 0;
-        let availableUsd = 0;
-        let savedUsd = 0;
-
+        // Prepare promises for all USD conversions
+        const usdConversionPromises: Promise<number>[] = [];
         for (let i = 0; i < supportedTokens.length; i++) {
           const token = supportedTokens[i];
           const total = totalResults[i] || 0n;
           const available = availableResults[i] || 0n;
           const saved = savedResults[i] || 0n;
 
-          const totalUsdVal = await convertTokenAmountToUsd(
-            token,
-            BigInt(total as unknown as number)
+          // Add promises for total, available, and saved amounts for the current token
+          usdConversionPromises.push(
+            convertTokenAmountToUsd(token, BigInt(total as unknown as number))
           );
-          const availableUsdVal = await convertTokenAmountToUsd(
-            token,
-            BigInt(available as unknown as number)
+          usdConversionPromises.push(
+            convertTokenAmountToUsd(token, BigInt(available as unknown as number))
           );
-          const savedUsdVal = await convertTokenAmountToUsd(
-            token,
-            BigInt(saved as unknown as number)
+          usdConversionPromises.push(
+            convertTokenAmountToUsd(token, BigInt(saved as unknown as number))
           );
+        }
 
-          totalUsd += getValidNumberValue(totalUsdVal);
-          availableUsd += getValidNumberValue(availableUsdVal);
-          savedUsd += getValidNumberValue(savedUsdVal);
+        // Execute all conversion promises concurrently
+        const usdResults = await Promise.all(usdConversionPromises);
+
+        // Process the results
+        let totalUsd = 0;
+        let availableUsd = 0;
+        let savedUsd = 0;
+
+        for (let i = 0; i < supportedTokens.length; i++) {
+          const totalIndex = i * 3;
+          const availableIndex = i * 3 + 1;
+          const savedIndex = i * 3 + 2;
+
+          totalUsd += getValidNumberValue(usdResults[totalIndex]);
+          availableUsd += getValidNumberValue(usdResults[availableIndex]);
+          savedUsd += getValidNumberValue(usdResults[savedIndex]);
         }
 
         setTotalBalance(totalUsd);
