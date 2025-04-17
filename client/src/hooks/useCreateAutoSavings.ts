@@ -105,12 +105,12 @@ const account = useActiveAccount();
 
       if(account) {
                   
-        const { transactionHash } = await sendTransaction({
+        await sendTransaction({
           transaction,
           account,
         });
                   
-          alert(`Save successful! Tx Hash: ${transactionHash}`);
+          // alert(`Save successful! Tx Hash: ${transactionHash}`);
           toast({
             title: "Save successful! Tx Hash",
            className: "bg-[#79E7BA]"

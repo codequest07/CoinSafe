@@ -44,7 +44,8 @@ export const convertTokenAmountToUsd = async (
 ): Promise<number> => {
   switch (token) {
     case tokens.usdt:
-      return await getUsdtToUsd(Number(formatUnits(amount, 6)));
+      // this will be changed when going mainnet
+      return await getUsdtToUsd(Number(formatUnits(amount, 18)));
     case tokens.safu:
       return getSafuToUsd(Number(formatUnits(amount, 18)));
     case tokens.lsk:
