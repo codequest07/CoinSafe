@@ -23,6 +23,7 @@ import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import savingsFacetAbi from "../../abi/AutomatedSavingsFacet.json";
+import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
 import { liskSepolia } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
@@ -39,6 +40,7 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
+import { SafeDetails, useGetSafes } from "@/hooks/useGetSafes";
 
 interface SavingsTarget {
   id: string | number;
@@ -97,6 +99,21 @@ export default function SaveAssetsCard() {
     { value: 120, label: "120 days" },
   ];
 
+  const {
+    safes,
+    isLoading: isGetSafesLoading,
+    fetchSafes,
+    error,
+  } = useGetSafes();
+
+  useEffect(() => {
+    fetchSafes();
+  }, []);
+
+  console.log("Loading?? >>", isGetSafesLoading);
+  console.log("SAFES", safes);
+  console.log("SAFE FETCH ERROR", error);
+
   useEffect(() => {
     handleDurationChange(30);
   }, []);
@@ -152,10 +169,7 @@ export default function SaveAssetsCard() {
   };
 
   // End of duration state code
-  const [savingsTargets, _setSavingsTargets] = useState<SavingsTarget[]>([
-    { id: "1", name: "Growing up", description: "investment ipsum" },
-    { id: "2", name: "Vacation", description: "save for annual vacation" },
-  ]);
+  const [savingsTargets, _setSavingsTargets] = useState<SafeDetails[]>(safes);
   //   const handleCreateTarget = (newTarget: SavingsTarget) => {
   //     setSavingsTargets((prev) => [...prev, newTarget]);
   //     console.log("Created new target:", newTarget);
@@ -180,9 +194,9 @@ export default function SaveAssetsCard() {
     }
   };
 
-  const [savingsTargetInput, setSavingsTargetInput] = useState("");
+  const [savingsTargetInput, _setSavingsTargetInput] = useState("");
   const [_selectedSavingsTarget, setSelectedSavingsTarget] =
-    useState<SavingsTarget | null>(null);
+    useState<SafeDetails | null>(null);
   //   const [nextId, setNextId] = useState(16);
 
   const [selectedOption, setSelectedOption] = useState("by-frequency");
@@ -248,11 +262,12 @@ export default function SaveAssetsCard() {
       },
     });
 
+  console.log("SAVE STATE", saveState);
   const { saveAsset, isPending: isLoading } = useSaveAsset({
     address: address as `0x${string}`,
     saveState,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-    coinSafeAbi: savingsFacetAbi,
+    coinSafeAbi: targetSavingsFacetAbi,
     chainId: liskSepolia.id,
     onSuccess: () => {
       openThirdModal();
@@ -303,6 +318,10 @@ export default function SaveAssetsCard() {
     return Object.keys(errors).length === 0;
   };
 
+  const handleSavingsTargetChange = (targetInput: string) => {
+    setSaveState((prev) => ({ ...prev, target: targetInput }));
+  };
+
   const handleSaveAsset = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -315,6 +334,7 @@ export default function SaveAssetsCard() {
       return;
     }
 
+    console.log("What is the event", event);
     saveAsset(event);
   };
 
@@ -441,8 +461,8 @@ export default function SaveAssetsCard() {
               <label className="text-sm text-gray-300">Savings target</label>
               <SavingsTargetInput
                 data={savingsTargets}
-                value={savingsTargetInput}
-                onChange={setSavingsTargetInput}
+                value={saveState.target}
+                onChange={handleSavingsTargetChange}
                 onSelect={(savingsTarget) =>
                   setSelectedSavingsTarget(savingsTarget)
                 }
@@ -451,11 +471,11 @@ export default function SaveAssetsCard() {
                 handleAddItem={() => setIsCreateTargetModalOpen(true)}
                 // label="Search for a city"
                 placeholder="Enter savings target"
-                getItemValue={(savingsTarget) => savingsTarget.name}
+                getItemValue={(savingsTarget) => savingsTarget.target}
                 itemName="savings target"
                 renderItem={(savingsTarget) => (
                   <div className="flex flex-col">
-                    <span className="font-medium">{savingsTarget.name}</span>
+                    <span className="font-medium">{savingsTarget.target}</span>
                     {/* */}
                   </div>
                 )}
@@ -676,8 +696,8 @@ export default function SaveAssetsCard() {
                     </label>
                     <SavingsTargetInput
                       data={savingsTargets}
-                      value={savingsTargetInput}
-                      onChange={setSavingsTargetInput}
+                      value={saveState.target}
+                      onChange={handleSavingsTargetChange}
                       onSelect={(savingsTarget) =>
                         setSelectedSavingsTarget(savingsTarget)
                       }
@@ -686,12 +706,12 @@ export default function SaveAssetsCard() {
                       handleAddItem={() => setIsCreateTargetModalOpen(true)}
                       // label="Search for a city"
                       placeholder="Enter savings target"
-                      getItemValue={(savingsTarget) => savingsTarget.name}
+                      getItemValue={(savingsTarget) => savingsTarget.target}
                       itemName="savings target"
                       renderItem={(savingsTarget) => (
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {savingsTarget.name}
+                            {savingsTarget.target}
                           </span>
                           {/* */}
                         </div>

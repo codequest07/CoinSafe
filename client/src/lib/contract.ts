@@ -1,6 +1,7 @@
 import faucetAbi from "../abi/faucet.json";
 import coinSafeAbi from "../abi/coinsafe.json";
 import balanceFacetAbi from "../abi/BalanceFacet.json";
+import targetSavingsAbi from "../abi/TargetSavingsFacet.json"
 import automatedSavingsFacetAbi from "../abi/AutomatedSavingsFacet.json";
 import fundingFacetAbi from "../abi/FundingFacet.json";
 
@@ -34,4 +35,5 @@ export const facetAbis = {
   balanceFacet: balanceFacetAbi,
   fundingFacet: fundingFacetAbi,
   automatedSavingsFacet: automatedSavingsFacetAbi,
+  targetSavingsFacet: targetSavingsAbi.abi,
 };

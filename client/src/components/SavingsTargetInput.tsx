@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Plus } from "lucide-react";
+// import { Plus } from "lucide-react";
 // import AddItemModal from "./add-item-modal"
 // import CreateSavingsTargetModal from "./Modals/CreateSavingsTarget";
 
@@ -44,8 +44,8 @@ export default function SavingsTargetInput<T>({
   //   label,
   maxSuggestions = 5,
   disabled = false,
-  itemName = "target",
-}: SavingsTargetInputProps<T>) {
+}: // itemName = "target",
+SavingsTargetInputProps<T>) {
   const [isFocused, setIsFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   //   const [showAddModal, setShowAddModal] = useState(false);
@@ -196,7 +196,7 @@ export default function SavingsTargetInput<T>({
           ))}
 
           {/* Add item option */}
-          {showAddOption && (
+          {/* {showAddOption && (
             <div
               onClick={() => {
                 handleAddItem();
@@ -213,7 +213,7 @@ export default function SavingsTargetInput<T>({
                 Add {itemName}: "{value}"
               </span>
             </div>
-          )}
+          )} */}
         </div>
       )}
 
