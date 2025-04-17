@@ -9,7 +9,7 @@ const PercentageCard = () => {
       {PercentageCardData.map((items, index) => (
         <Card
           key={index}
-          className="flex border border-[#FFFFFF17] flex-col items-start gap-4 bg-[#13131340] text-white rounded-lg p-6 shadow-lg w-full">
+          className="flex border border-[#FFFFFF17] flex-col items-start gap-4 bg-[#13131340] text-white rounded-lg py-6 px-2 shadow-lg w-full">
           <div className="flex justify-between items-center w-full">
             <h3 className="text-base font-semibold">{items.title}</h3>
             {items.badge && (
