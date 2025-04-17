@@ -13,7 +13,7 @@ export default function ScheduledSavings() {
   const navigate = useNavigate();
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const { scheduledSavings, error } = useGetScheduledSavings();
-  const [saveState, setSaveState] = useRecoilState(saveAtom);
+  const [_, setSaveState] = useRecoilState(saveAtom);
 
   const openDepositModal = () => setIsDepositModalOpen(true);
 

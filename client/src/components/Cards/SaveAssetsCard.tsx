@@ -61,7 +61,6 @@ export default function SaveAssetsCard() {
     initialSaveType
   );
 
-
   useEffect(() => {
     if (saveState.typeName === "manual") {
       setSaveState((prevState) => ({
@@ -127,8 +126,6 @@ export default function SaveAssetsCard() {
   console.log("Loading?? >>", isGetSafesLoading);
   console.log("SAFES", safes);
   console.log("SAFE FETCH ERROR", error);
-
-
 
   const calculateEndDate = (days: number) => {
     const currentDate = new Date();
@@ -640,7 +637,7 @@ export default function SaveAssetsCard() {
                       <div>
                         {saveState.amount > selectedTokenBalance && (
                           <p className="text-red-500 text-[13px] text-right">
-                            Amount greater than wallet balance
+                            Insufficient Funds 
                           </p>
                         )}
                       </div>

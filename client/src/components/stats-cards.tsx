@@ -153,7 +153,7 @@ export default function StatsCards() {
 
       // Fetch multiplier with error handling
       getUserMultiplier(address)
-        .then((multiplier) => {
+        .then((_multiplier) => {
         
           // Mark data as loaded
           setInitialDataLoaded(true);
@@ -166,7 +166,7 @@ export default function StatsCards() {
 
       // Fetch streak info with error handling
       getStreakInfo(address)
-        .then((streakInfo) => {
+        .then((_streakInfo) => {
           // Mark initial data as loaded
           setInitialDataLoaded(true);
         })
