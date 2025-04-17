@@ -54,7 +54,22 @@ interface SavingsTarget {
 
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
-  const [saveType, setSaveType] = useState<"one-time" | "auto">("one-time");
+  const [saveState, setSaveState] = useRecoilState(saveAtom);
+
+  const initialSaveType = saveState.typeName === "manual" ? "auto" : "one-time";
+  const [saveType, setSaveType] = useState<"one-time" | "auto">(
+    initialSaveType
+  );
+
+
+  useEffect(() => {
+    if (saveState.typeName === "manual") {
+      setSaveState((prevState) => ({
+        ...prevState,
+        typeName: "",
+      }));
+    }
+  }, [saveState.typeName, setSaveState]);
   //   const [amount, setAmount] = useState("0.00");
   //   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -79,7 +94,6 @@ export default function SaveAssetsCard() {
   ]);
 
   const [, setDecimals] = useState(1);
-  const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
 
   //   Duration state
@@ -114,9 +128,7 @@ export default function SaveAssetsCard() {
   console.log("SAFES", safes);
   console.log("SAFE FETCH ERROR", error);
 
-  useEffect(() => {
-    handleDurationChange(30);
-  }, []);
+
 
   const calculateEndDate = (days: number) => {
     const currentDate = new Date();
@@ -141,6 +153,11 @@ export default function SaveAssetsCard() {
 
     console.log(`Savings duration changed to ${duration} days`);
   };
+
+  // Initialize with default duration
+  useEffect(() => {
+    handleDurationChange(30);
+  }, []);
 
   // Handle custom date selection
   const handleCustomDateSelect = (date: Date | undefined) => {
@@ -372,8 +389,7 @@ export default function SaveAssetsCard() {
               saveType === "one-time"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             One-time save
           </button>
           <button
@@ -383,8 +399,7 @@ export default function SaveAssetsCard() {
               saveType === "auto"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             Autosave
           </button>
         </div>
@@ -448,8 +463,7 @@ export default function SaveAssetsCard() {
                     ...prev,
                     amount: selectedTokenBalance,
                   }))
-                }
-              >
+                }>
                 Save all
               </button>
             </div>
@@ -489,7 +503,7 @@ export default function SaveAssetsCard() {
               placeholder="Search target"
             />
 
-            
+
           </div> */}
             </div>
 
@@ -527,8 +541,7 @@ export default function SaveAssetsCard() {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     {/* }`}
                             > */}
                     <div>
@@ -560,8 +573,7 @@ export default function SaveAssetsCard() {
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     {/* }`}
                             > */}
                     <div>
@@ -653,8 +665,7 @@ export default function SaveAssetsCard() {
                             ...prev,
                             amount: selectedTokenBalance,
                           }))
-                        }
-                      >
+                        }>
                         {/* }
                                   > */}
                         Max
@@ -758,8 +769,7 @@ export default function SaveAssetsCard() {
                   onClick={handleSaveAsset}
                   className="text-black px-8 rounded-[2rem]"
                   variant="outline"
-                  disabled={isLoading || autoSavingsLoading}
-                >
+                  disabled={isLoading || autoSavingsLoading}>
                   {isLoading || autoSavingsLoading ? (
                     <LoaderCircle className="animate-spin" />
                   ) : (
@@ -808,8 +818,7 @@ export default function SaveAssetsCard() {
 
       <Dialog
         open={isCreateTargetModalOpen}
-        onOpenChange={setIsCreateTargetModalOpen}
-      >
+        onOpenChange={setIsCreateTargetModalOpen}>
         <DialogContent className="bg-[#17171C] text-[#F1F1F1] border-[#FFFFFF21]">
           <DialogHeader>
             <DialogTitle>Create Custom Target</DialogTitle>
@@ -847,14 +856,12 @@ export default function SaveAssetsCard() {
               <Button
                 variant="outline"
                 onClick={() => setIsCreateTargetModalOpen(false)}
-                className="bg-[#FFFFFF2B] border-[#FFFFFF2B] rounded-[100px] text-white"
-              >
+                className="bg-[#FFFFFF2B] border-[#FFFFFF2B] rounded-[100px] text-white">
                 Cancel
               </Button>
               <Button
                 onClick={handleCreateTarget}
-                className="rounded-[100px] bg-white text-[#010104] hover:text-white"
-              >
+                className="rounded-[100px] bg-white text-[#010104] hover:text-white">
                 Create Target
               </Button>
             </div>

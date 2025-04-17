@@ -1,20 +1,33 @@
 import { useGetScheduledSavings } from "@/hooks/useGetScheduledSavings";
 import { useState } from "react";
-import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import { format } from "date-fns";
 // import { Loader2 } from "lucide-react";
 import Deposit from "./Modals/Deposit";
 import MemoStory from "@/icons/Story";
+import { useNavigate } from "react-router-dom";
+import { useRecoilState } from "recoil";
+import { saveAtom } from "@/store/atoms/save";
 
 export default function ScheduledSavings() {
-  const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
-  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const navigate = useNavigate();
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const { scheduledSavings, error } = useGetScheduledSavings();
+  const [saveState, setSaveState] = useRecoilState(saveAtom);
 
-  const openFirstModal = () => setIsFirstModalOpen(true);
   const openDepositModal = () => setIsDepositModalOpen(true);
+
+  // Navigate to save-assets page with autosave tab selected
+  const navigateToSaveAssets = () => {
+    // Set the save type to auto in the global state
+    setSaveState((prevState) => ({
+      ...prevState,
+      typeName: "manual",
+    }));
+
+    // Navigate to the save-assets page
+    navigate("/dashboard/save-assets");
+  };
 
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg max-w-lg mx-auto sm:max-w-full">
@@ -72,25 +85,15 @@ export default function ScheduledSavings() {
               <div className="flex gap-5">
                 <Button
                   onClick={openDepositModal}
-                  className="rounded-[100px] px-8 py-2 bg-[#1E1E1E99] text-[#F1F1F1] hover:bg-[#2a2a2a] text-sm"
-                >
+                  className="rounded-[100px] px-8 py-2 bg-[#1E1E1E99] text-[#F1F1F1] hover:bg-[#2a2a2a] text-sm">
                   Deposit
                 </Button>
                 <Button
-                  onClick={openFirstModal}
-                  className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
-                >
+                  onClick={navigateToSaveAssets}
+                  className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm">
                   Save
                 </Button>
               </div>
-              {/* SavingOption Modal */}
-              <SavingOption
-                isFirstModalOpen={isFirstModalOpen}
-                setIsFirstModalOpen={setIsFirstModalOpen}
-                isSecondModalOpen={isSecondModalOpen}
-                setIsSecondModalOpen={setIsSecondModalOpen}
-                tab="autosave"
-              />
             </div>
           )}
         </div>
