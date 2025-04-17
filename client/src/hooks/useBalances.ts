@@ -39,7 +39,7 @@ export const useBalances = (address: string) => {
     client,
     address: CoinsafeDiamondContract.address,
     chain: liskSepolia,
-    abi: facetAbis.fundingFacet, 
+    abi: facetAbis.fundingFacet as any,
   });
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export const useBalances = (address: string) => {
         client,
         address: CoinsafeDiamondContract.address,
         chain: liskSepolia,
-        abi: facetAbis.fundingFacet, 
+        abi: facetAbis.fundingFacet as any,
       });
       const supportedTokens = (await readContract({
         contract: fundingFacetContract,
@@ -124,7 +124,10 @@ export const useBalances = (address: string) => {
             convertTokenAmountToUsd(token, BigInt(total as unknown as number))
           );
           usdConversionPromises.push(
-            convertTokenAmountToUsd(token, BigInt(available as unknown as number))
+            convertTokenAmountToUsd(
+              token,
+              BigInt(available as unknown as number)
+            )
           );
           usdConversionPromises.push(
             convertTokenAmountToUsd(token, BigInt(saved as unknown as number))
