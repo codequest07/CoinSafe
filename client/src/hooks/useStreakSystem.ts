@@ -14,16 +14,6 @@ import {
 } from "@/store/atoms/streak";
 import { userMultiplierState } from "@/store/atoms/points";
 
-// Enable debug mode for detailed logging
-const DEBUG_MODE = true;
-
-// Helper function for logging
-const log = (message: string, data?: any) => {
-  if (DEBUG_MODE) {
-    console.log(`[StreakSystem] ${message}`, data ? data : "");
-  }
-};
-
 export interface StreakInfo {
   currentStreak: bigint;
   longestStreak: bigint;
@@ -38,21 +28,11 @@ export interface StreakSystemHookReturn {
 }
 
 export function useStreakSystem(): StreakSystemHookReturn {
-  log("Initializing useStreakSystem hook");
-
-  // Initialize contract with ThirdWeb v5
   const contract = getContract({
     client,
     chain: liskSepolia,
     address: CoinsafeDiamondContract.address,
-    // Use the balance facet ABI which contains streak functions
     abi: facetAbis.balanceFacet as any,
-  });
-
-  log("Contract initialized", {
-    address: CoinsafeDiamondContract.address,
-    chain: liskSepolia.name,
-    chainId: liskSepolia.id,
   });
 
   // Use Recoil for state management
@@ -70,8 +50,7 @@ export function useStreakSystem(): StreakSystemHookReturn {
     // Add a safety timeout to ensure loading state is reset
     const safetyTimeout = setTimeout(() => {
       setIsLoading(false);
-      log("Safety timeout triggered - forcing loading state to false");
-    }, 5000); // 5 second timeout
+    }, 2000); // 2 second timeout - more aggressive to prevent stuck loading states
 
     return () => clearTimeout(safetyTimeout);
   }, [setIsLoading]);
@@ -83,7 +62,6 @@ export function useStreakSystem(): StreakSystemHookReturn {
 
       try {
         setIsLoading(true);
-        log(`Fetching streak info for address: ${address}`);
 
         // Use Promise.all to fetch all streak data in parallel
         const [currentStreak, longestStreak, multiplier] = await Promise.all([
@@ -93,10 +71,7 @@ export function useStreakSystem(): StreakSystemHookReturn {
             method:
               "function getUserCurrentStreak(address user) view returns (uint256)",
             params: [address],
-          }).catch((err) => {
-            log(`Error fetching current streak: ${err.message}`, {
-              error: err,
-            });
+          }).catch((_err) => {
             return "0"; // Fallback value
           }),
 
@@ -106,10 +81,7 @@ export function useStreakSystem(): StreakSystemHookReturn {
             method:
               "function getUserLongestStreak(address user) view returns (uint256)",
             params: [address],
-          }).catch((err) => {
-            log(`Error fetching longest streak: ${err.message}`, {
-              error: err,
-            });
+          }).catch((_err) => {
             return "0"; // Fallback value
           }),
 
@@ -119,22 +91,15 @@ export function useStreakSystem(): StreakSystemHookReturn {
             method:
               "function getUserMultiplier(address user) view returns (uint256)",
             params: [address],
-          }).catch((err) => {
-            log(`Error fetching multiplier: ${err.message}`, { error: err });
-            return "150"; // Fallback value (1.5x)
+          }).catch((_err) => {
+            return "0"; // Fallback value (0x)
           }),
         ]);
 
         // Convert results to BigInt
         const currentStreakBigInt = BigInt(currentStreak?.toString() || "0");
         const longestStreakBigInt = BigInt(longestStreak?.toString() || "0");
-        const multiplierBigInt = BigInt(multiplier?.toString() || "150");
-
-        log("Streak info retrieved", {
-          currentStreak: currentStreakBigInt.toString(),
-          longestStreak: longestStreakBigInt.toString(),
-          multiplier: multiplierBigInt.toString(),
-        });
+        const multiplierBigInt = BigInt(multiplier?.toString() || "0");
 
         // Update Recoil state
         setUserCurrentStreak(currentStreakBigInt);
@@ -148,14 +113,13 @@ export function useStreakSystem(): StreakSystemHookReturn {
         };
       } catch (err) {
         const error = err as Error;
-        log(`Error fetching streak info: ${error.message}`, { error });
         setError(error);
 
         // Return fallback values on error
         const fallbackInfo = {
-          currentStreak: BigInt(3),
-          longestStreak: BigInt(7),
-          multiplier: BigInt(150),
+          currentStreak: BigInt(0),
+          longestStreak: BigInt(0),
+          multiplier: BigInt(0),
         };
 
         // Still update the state with fallback values
@@ -184,76 +148,29 @@ export function useStreakSystem(): StreakSystemHookReturn {
 
     try {
       setIsLoading(true);
-      log("Fetching multiplier tiers");
-
-      // Since these functions likely don't exist in the contract yet,
-      // we'll use fallback values instead of making actual contract calls
 
       // Fallback values
       const tiers: MultiplierTiers = {
-        base: BigInt(120), // 1.2x
-        medium: BigInt(150), // 1.5x
-        ultra: BigInt(200), // 2.0x
+        base: BigInt(0), // 0x
+        medium: BigInt(0), // 0x
+        ultra: BigInt(0), // 0x
       };
-
-      log("Using fallback multiplier tiers", {
-        base: tiers.base.toString(),
-        medium: tiers.medium.toString(),
-        ultra: tiers.ultra.toString(),
-      });
 
       // Update Recoil state
       setMultiplierTiers(tiers);
       return tiers;
-
-      /*
-      // Original implementation - commented out since these functions likely don't exist
-      const [base, medium, ultra] = await Promise.all([
-        readContract({
-          contract,
-          method: "function baseMultiplier() view returns (uint256)",
-          params: [],
-        }),
-        readContract({
-          contract,
-          method: "function mediumMultiplier() view returns (uint256)",
-          params: [],
-        }),
-        readContract({
-          contract,
-          method: "function ultraMultiplier() view returns (uint256)",
-          params: [],
-        }),
-      ]);
-
-      const tiers = {
-        base: BigInt(base?.toString() || "120"),
-        medium: BigInt(medium?.toString() || "150"),
-        ultra: BigInt(ultra?.toString() || "200")
-      };
-
-      log("Multiplier tiers retrieved", {
-        base: tiers.base.toString(),
-        medium: tiers.medium.toString(),
-        ultra: tiers.ultra.toString()
-      });
-
-      // Update Recoil state
-      setMultiplierTiers(tiers);
-      return tiers;
-      */
     } catch (err) {
-      const error = err as Error;
-      log(`Error fetching multiplier tiers: ${error.message}`, { error });
+      // Log the error but use fallback values
+      console.error("Error fetching multiplier tiers:", err);
+      setError(err as Error);
 
       // Provide fallback values on error
       const fallbackTiers = {
-        base: BigInt(120),
-        medium: BigInt(150),
-        ultra: BigInt(200),
+        base: BigInt(0),
+        medium: BigInt(0),
+        ultra: BigInt(0),
       };
 
-      log("Using fallback tiers due to error", fallbackTiers);
       setMultiplierTiers(fallbackTiers);
 
       // Don't throw the error, just return fallback values
