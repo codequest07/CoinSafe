@@ -112,28 +112,22 @@ export default function StatsCards() {
     // Force loading state to false after a timeout to prevent infinite loading
     const loadingTimeout = setTimeout(() => {
       if (pointsLoading || streakLoading) {
-        console.log(
-          "[StatsCards] Forcing loading state to false after timeout"
-        );
-        // This is a hack to prevent infinite loading
-        // In a real app, you'd want to fix the underlying issue
-
-        // Force the Recoil state to update with fallback values
+      
         if (!userPoints || userPoints === BigInt(0)) {
-          console.log("[StatsCards] Setting fallback points value");
+         
           // Import these from the hooks file
           const setUserPoints = useSetRecoilState(userPointsState);
           setUserPoints(BigInt(0));
         }
 
         if (!userMultiplier || userMultiplier === BigInt(0)) {
-          console.log("[StatsCards] Setting fallback multiplier value");
+          
           const setUserMultiplier = useSetRecoilState(userMultiplierState);
           setUserMultiplier(BigInt(0));
         }
 
         if (!currentStreak || currentStreak === BigInt(0)) {
-          console.log("[StatsCards] Setting fallback streak value");
+          
           const setUserCurrentStreak = useSetRecoilState(
             userCurrentStreakState
           );
@@ -143,15 +137,11 @@ export default function StatsCards() {
     }, 1500); // 1.5 second timeout - more aggressive to prevent long loading states
 
     if (address) {
-      console.log("[StatsCards] Fetching points data for", address);
 
       // Fetch points with error handling
       getUserPoints(address)
-        .then((points) => {
-          console.log(
-            "[StatsCards] Points fetched successfully:",
-            points.toString()
-          );
+        .then((_points) => {
+         
           // Mark data as loaded
           setInitialDataLoaded(true);
         })
@@ -163,11 +153,8 @@ export default function StatsCards() {
 
       // Fetch multiplier with error handling
       getUserMultiplier(address)
-        .then((multiplier) => {
-          console.log(
-            "[StatsCards] Multiplier fetched successfully:",
-            multiplier.toString()
-          );
+        .then((_multiplier) => {
+        
           // Mark data as loaded
           setInitialDataLoaded(true);
         })
@@ -179,12 +166,7 @@ export default function StatsCards() {
 
       // Fetch streak info with error handling
       getStreakInfo(address)
-        .then((streakInfo) => {
-          console.log("[StatsCards] Streak info fetched successfully:", {
-            currentStreak: streakInfo.currentStreak.toString(),
-            longestStreak: streakInfo.longestStreak.toString(),
-            multiplier: streakInfo.multiplier.toString(),
-          });
+        .then((_streakInfo) => {
           // Mark initial data as loaded
           setInitialDataLoaded(true);
         })
@@ -199,9 +181,7 @@ export default function StatsCards() {
       if (streakError) {
         console.error("[StatsCards] Streak system error:", streakError);
       }
-    } else {
-      console.log("[StatsCards] No wallet address available");
-    }
+    } 
 
     // Clean up timeout
     return () => clearTimeout(loadingTimeout);
