@@ -125,13 +125,10 @@ export const useWithdrawAsset = ({
       });
 
       if(account) {
-        const { transactionHash } = await sendTransaction({
+        await sendTransaction({
           transaction,
           account,
         })
-
-        alert(`Save successful! Tx Hash: ${transactionHash}`);
-        toast({ title: "Withdrawal successful", variant: "default" });
       }
 
       onSuccess?.();

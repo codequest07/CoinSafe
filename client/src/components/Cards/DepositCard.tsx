@@ -18,11 +18,11 @@ import { client, liskSepolia } from "@/lib/config";
 import { getBalance } from "thirdweb/extensions/erc20";
 import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
-import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
 import ApproveTxModal from "../Modals/ApproveTxModal";
 import { useNavigate } from "react-router-dom";
 import { useBalances } from "@/hooks/useBalances";
 import { tokenData } from "@/lib/utils";
+import { getTokenPrice } from "@/lib";
 
 export default function DepositCard() {
   const navigate = useNavigate();
@@ -71,32 +71,6 @@ export default function DepositCard() {
     },
     toast,
   });
-
-  async function getTokenPrice(token: string, amount: number | undefined) {
-    if (!token || !amount) return "0.00";
-
-    try {
-      switch (token) {
-        case tokens.safu: {
-          const safuPrice = await getSafuToUsd(amount);
-          return safuPrice.toFixed(2);
-        }
-        case tokens.lsk: {
-          const lskPrice = await getLskToUsd(amount);
-          return lskPrice.toFixed(2);
-        }
-        case tokens.usdt: {
-          const usdtPrice = await getUsdtToUsd(amount);
-          return usdtPrice.toFixed(2);
-        }
-        default:
-          return "0.00";
-      }
-    } catch (error) {
-      console.error("Error getting token price:", error);
-      return "0.00";
-    }
-  }
 
   useEffect(() => {
     const updatePrice = async () => {

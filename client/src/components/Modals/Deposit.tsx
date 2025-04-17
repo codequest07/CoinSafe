@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
-import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
+import { CoinsafeDiamondContract } from "@/lib/contract";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
@@ -24,7 +24,7 @@ import { client, liskSepolia } from "@/lib/config";
 import { getBalance } from "thirdweb/extensions/erc20";
 import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "./SuccessfulTxModal";
-import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+import { getTokenPrice } from "@/lib";
 import ApproveTxModal from "./ApproveTxModal";
 import { tokenData } from "@/lib/utils";
 import { useBalances } from "@/hooks/useBalances";
@@ -83,32 +83,6 @@ export default function Deposit({
     },
     toast,
   });
-
-  async function getTokenPrice(token: string, amount: number | undefined) {
-    if (!token || !amount) return "0.00";
-
-    try {
-      switch (token) {
-        case tokens.safu: {
-          const safuPrice = await getSafuToUsd(amount);
-          return safuPrice.toFixed(2);
-        }
-        case tokens.lsk: {
-          const lskPrice = await getLskToUsd(amount);
-          return lskPrice.toFixed(2);
-        }
-        case tokens.usdt: {
-          const usdtPrice = await getUsdtToUsd(amount);
-          return usdtPrice.toFixed(2);
-        }
-        default:
-          return "0.00";
-      }
-    } catch (error) {
-      console.error("Error getting token price:", error);
-      return "0.00";
-    }
-  }
 
   useEffect(() => {
     const updatePrice = async () => {
