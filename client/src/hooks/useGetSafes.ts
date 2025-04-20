@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
 
@@ -56,6 +56,7 @@ export function useGetSafes() {
         // @ts-expect-error type error
         method: resolveMethod("getSafes"),
         params: [],
+        from: address,
       });
 
       console.log('====================================');
@@ -76,9 +77,9 @@ export function useGetSafes() {
     }
   }, [contract, address]);
 
-  // useEffect(() => {
-  //   fetchSafes();
-  // }, [fetchSafes]);
+  useEffect(() => {
+    fetchSafes();
+  }, [fetchSafes]);
 
   return {
     safes,

@@ -39,7 +39,7 @@ const Vault = () => {
         /> */}
         </div>
 
-        <div className="w-full max-w-[1050px] mx-auto overflow-x-hidden">
+        <div className="w-full max-w-[1050px] overflow-x-hidden">
           <SavingsCards />
         </div>
 
