@@ -35,5 +35,5 @@ export const facetAbis = {
   balanceFacet: balanceFacetAbi,
   fundingFacet: fundingFacetAbi,
   automatedSavingsFacet: automatedSavingsFacetAbi,
-  targetSavingsFacet: targetSavingsAbi.abi,
+  targetSavingsFacet: targetSavingsAbi,
 };
