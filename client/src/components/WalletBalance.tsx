@@ -7,6 +7,7 @@ import Withdraw from "./Modals/Withdraw";
 import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import { Link } from "react-router-dom";
+import { Skeleton } from "./ui/skeleton";
 
 export default function WalletBalance() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -19,7 +20,11 @@ export default function WalletBalance() {
 
   const openFirstModal = () => setIsFirstModalOpen(true);
 
-  const { totalBalance, availableBalance } = useBalances(address as string);
+  const {
+    totalBalance,
+    availableBalance,
+    loading: { total, available },
+  } = useBalances(address as string);
 
   return (
     <div className="bg-black text-white px-6 flex flex-col">
@@ -56,11 +61,17 @@ export default function WalletBalance() {
                 <p className="text-[#CACACA] text-sm">Total wallet balance</p>
                 <p className="text-2xl font-bold text-[#F1F1F1] mt-1">
                   $
-                  {isConnected
-                    ? totalBalance
-                      ? totalBalance?.toFixed(2)
-                      : "0.00"
-                    : "0.00"}{" "}
+                  {isConnected ? (
+                    total ? (
+                      <Skeleton className="w-16 sm:w-20 h-6 sm:h-7" />
+                    ) : totalBalance ? (
+                      totalBalance?.toFixed(2)
+                    ) : (
+                      "0.00"
+                    )
+                  ) : (
+                    "0.00"
+                  )}{" "}
                   <span className="text-xs font-[300]">USD</span>
                 </p>
                 <p className="text-[#7F7F7F] text-xs mt-1">
@@ -75,9 +86,15 @@ export default function WalletBalance() {
                 <p className="text-[#CACACA] text-sm">Available balance</p>
                 <p className="text-2xl font-bold text-[#F1F1F1] mt-1">
                   $
-                  {isConnected
-                    ? availableBalance?.toFixed(2) ?? "0.00"
-                    : "0.00"}{" "}
+                  {isConnected ? (
+                    available ? (
+                      <Skeleton className="w-16 sm:w-20 h-6 sm:h-7" />
+                    ) : (
+                      availableBalance?.toFixed(2) ?? "0.00"
+                    )
+                  ) : (
+                    "0.00"
+                  )}{" "}
                   <span className="text-xs font-[300]">USD</span>
                 </p>
                 {isConnected && (
