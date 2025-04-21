@@ -150,9 +150,9 @@ export default function TopUpModal({
                 </h3>
                 <span className="bg-[#79E7BA33] text-[#F1F1F1] text-sm px-3 py-1 rounded-full">
                   {safeDetails.isLocked
-                    ? `Unlocks every ${
-                        safeDetails.duration / (24 * 60 * 60)
-                      } days`
+                    ? safeDetails.unlockTime > new Date()
+                      ? `${Math.ceil((safeDetails.unlockTime.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days to unlock`
+                      : "Ready to unlock"
                     : "Flexible"}
                 </span>
               </div>
