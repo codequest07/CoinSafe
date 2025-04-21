@@ -31,7 +31,7 @@ type TokenDecimals = {
 };
 
 export const useTopUpSafe = ({
-  address,
+  // address,
   topUpState,
   coinSafeAddress,
   coinSafeAbi,
@@ -117,26 +117,19 @@ export const useTopUpSafe = ({
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
-        
+
         toast({
           title: `Error: ${error.message}`,
           variant: "destructive",
         });
-        
+
         onError?.(error);
         throw error;
       } finally {
         setIsPending(false);
       }
     },
-    [
-      account,
-      topUpState,
-      coinSafeAddress,
-      coinSafeAbi,
-      onSuccess,
-      onError,
-    ]
+    [account, topUpState, coinSafeAddress, coinSafeAbi, onSuccess, onError]
   );
 
   return {

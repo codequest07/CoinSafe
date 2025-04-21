@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useGetSafes, SafeDetails } from "@/hooks/useGetSafes";
+import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
 
@@ -56,7 +56,7 @@ export function useGetSafeById(id: string | undefined) {
     const unlockTime = new Date(Number(safe.unlockTime) * 1000);
 
     // Calculate next unlock date based on duration
-    const durationInDays = Number(safe.duration) / (24 * 60 * 60);
+    // const durationInDays = Number(safe.duration) / (24 * 60 * 60);
     const nextUnlockDate = new Date(unlockTime);
 
     // If the unlock time is in the past, calculate the next unlock date

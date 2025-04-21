@@ -99,7 +99,7 @@ export default function TopUpModal({
     }
   }, [AvailableBalance, saveState.token]);
   // Initialize the topUpSafe hook
-  const { topUpSafe, isPending, error } = useTopUpSafe({
+  const { topUpSafe, isPending } = useTopUpSafe({
     address: address as `0x${string}`,
     topUpState: {
       id: safeId,
@@ -229,8 +229,9 @@ export default function TopUpModal({
             setShowSuccessModal(false);
             onClose();
           }}
-          title="Top-up Successful!"
-          description="Your safe has been topped up successfully!"
+          transactionType="top-up"
+          amount={saveState.amount}
+          token={tokenData[saveState.token]?.symbol || ""}
         />
       )}
     </div>

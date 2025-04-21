@@ -19,6 +19,7 @@ export interface Transaction {
 interface TransactionHistoryParams {
   offset?: number;
   limit?: number;
+  safeId?: number;
 }
 
 interface TransactionHistoryReturn {
@@ -38,6 +39,7 @@ interface TransactionHistoryReturn {
 export function useTransactionHistory({
   offset = 0,
   limit = 10,
+  safeId,
 }: TransactionHistoryParams): TransactionHistoryReturn {
   const [currentOffset, setCurrentOffset] = useState(offset);
   const [currentLimit] = useState(limit);
@@ -66,9 +68,12 @@ export function useTransactionHistory({
     setError(null);
 
     try {
-      console.log('====================================');
-      console.log("trying to fetch transactions");
-      console.log('====================================');
+      console.log("====================================");
+      console.log(
+        "trying to fetch transactions",
+        safeId ? `for safe ID: ${safeId}` : "for all safes"
+      );
+      console.log("====================================");
       const result = await readContract({
         contract,
         // @ts-expect-error type error
@@ -76,10 +81,22 @@ export function useTransactionHistory({
         params: [address, BigInt(currentOffset), BigInt(currentLimit)],
       });
 
-      console.log('====================================');
-      console.log('Transaction History:', result);
-      console.log('====================================');
-      setTransactions(result as Transaction[]);
+      console.log("====================================");
+      console.log("Transaction History:", result);
+      console.log("====================================");
+
+      // Filter transactions by safeId if provided
+      let filteredTransactions = result as Transaction[];
+      if (safeId !== undefined) {
+        filteredTransactions = filteredTransactions.filter((tx) => {
+          return (
+            tx.typeOfTransaction.toLowerCase().includes("save") ||
+            tx.typeOfTransaction.toLowerCase().includes("topup")
+          );
+        });
+      }
+
+      setTransactions(filteredTransactions);
     } catch (err: any) {
       console.error("Transaction fetch failed:", err);
       setIsError(true);
@@ -88,7 +105,7 @@ export function useTransactionHistory({
     } finally {
       setIsLoading(false);
     }
-  }, [contract, address, currentOffset, currentLimit]);
+  }, [contract, address, currentOffset, currentLimit, safeId]);
 
   useEffect(() => {
     fetchTransactions();

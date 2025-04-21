@@ -26,7 +26,6 @@ import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
-import TopUpModal from "./Modals/Top-up-modal";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
