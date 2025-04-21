@@ -5,11 +5,18 @@ import { useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface SuccessfulTxModalProps {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
-  transactionType: "deposit" | "withdraw" | "save" | "setup-recurring-save";
-  amount: number | string;
-  token: string;
+  transactionType?:
+    | "deposit"
+    | "withdraw"
+    | "save"
+    | "setup-recurring-save"
+    | "top-up";
+  amount?: number | string;
+  token?: string;
+  title?: string;
+  description?: string;
   additionalDetails?: {
     frequency?: string;
     savingGoal?: number;
@@ -19,11 +26,13 @@ export interface SuccessfulTxModalProps {
 }
 
 const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
-  isOpen,
+  isOpen = true,
   onClose,
   transactionType,
   amount,
   token,
+  title,
+  description,
   additionalDetails,
 }) => {
   useEffect(() => {
@@ -38,6 +47,12 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
 
   // Generate transaction description based on type
   const getTransactionDescription = () => {
+    // If a custom description is provided, use that
+    if (description) {
+      return <>{description}</>;
+    }
+
+    // Otherwise, generate based on transaction type
     switch (transactionType) {
       case "deposit":
         return (
@@ -75,6 +90,18 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
               : ""}
           </>
         );
+      case "top-up":
+        return (
+          <>
+            You topped up{" "}
+            {
+              <span className="text-[#20FFAF] font-semibold">
+                {amount} {token}
+              </span>
+            }{" "}
+            to your safe
+          </>
+        );
       case "setup-recurring-save":
         return (
           <>
@@ -108,6 +135,12 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
 
   // Generate transaction title based on type
   const getTransactionTitle = () => {
+    // If a custom title is provided, use that
+    if (title) {
+      return title;
+    }
+
+    // Otherwise, generate based on transaction type
     switch (transactionType) {
       case "deposit":
         return "Deposit Transaction Successful";
@@ -115,6 +148,8 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
         return "Withdrawal Transaction Successful";
       case "save":
         return "Saving Transaction Successful";
+      case "top-up":
+        return "Top-up Successful!";
       case "setup-recurring-save":
         return "Create Automated Savings Successful";
       default:

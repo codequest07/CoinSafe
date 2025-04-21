@@ -12,6 +12,7 @@ const SavingsCard = ({
   badge,
   emphasize,
   text,
+  safeId = 1, // Default to 1 if not provided
 }: {
   title: string;
   icon?: any;
@@ -20,21 +21,15 @@ const SavingsCard = ({
   badge?: string;
   emphasize?: string;
   text?: ReactNode;
+  safeId?: number;
 }) => {
   const account = useActiveAccount();
   const isConnected = !!account?.address;
 
   const [showModal, setShowModal] = useState(false);
-  const [lastTopUp, setLastTopUp] = useState<{
-    amount: number;
-    currency: string;
-  } | null>(null);
 
-  const handleTopUp = (amount: number, currency: string) => {
-    setLastTopUp({ amount, currency });
+  const handleTopUp = () => {
     setShowModal(false);
-    // In a real app, you would call an API to process the top-up
-    console.log(`Topped up ${amount} ${currency}`);
   };
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
@@ -84,17 +79,12 @@ const SavingsCard = ({
         )}
       </div>
 
-      {lastTopUp && (
-        <div className="mt-4 text-white">
-          Last top up:{" "}
-          <span className="font-bold">
-            {lastTopUp.amount} {lastTopUp.currency}
-          </span>
-        </div>
-      )}
-
       {showModal && (
-        <TopUpModal onClose={() => setShowModal(false)} onTopUp={handleTopUp} />
+        <TopUpModal
+          onClose={() => setShowModal(false)}
+          onTopUp={() => handleTopUp()}
+          safeId={safeId}
+        />
       )}
     </div>
   );

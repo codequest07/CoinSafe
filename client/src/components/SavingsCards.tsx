@@ -4,8 +4,9 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useGetSafes } from "@/hooks/useGetSafes";
+import { formatUnits } from "viem";
 
-interface SavingsTarget {
+interface DisplaySafe {
   id: string;
   name: string;
   amount: number;
@@ -15,10 +16,11 @@ interface SavingsTarget {
 
 export default function SavingsCards() {
   const navigate = useNavigate();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { safes } = useGetSafes();
 
-  console.log(safes);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { safes, isLoading, isError } = useGetSafes();
+
+  console.log("Safes data:", safes);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -42,84 +44,88 @@ export default function SavingsCards() {
     }
   };
 
-  const targets: SavingsTarget[] = [
-    {
-      id: "emergency",
-      name: "Emergency savings",
-      amount: 0,
-      status: "Flexible",
-      unlockDate: "Unlocks on 25th January,2025",
-    },
-    {
-      id: "general",
-      name: "General savings",
-      amount: 6000,
-      status: "Locked",
-      unlockDate: "Unlocks on 25th January,2025",
-    },
-    {
-      id: "wealth",
-      name: "Generational wealth",
-      amount: 3000,
-      status: "Locked",
-      unlockDate: "Unlocks on 25th January,2025",
-    },
-    {
-      id: "house",
-      name: "House hunting",
-      amount: 2000,
-      status: "Locked",
-      unlockDate: "Unlocks on 25th January,2025",
-    },
-    {
-      id: "house2",
-      name: "House hunting",
-      amount: 2000,
-      status: "Locked",
-      unlockDate: "Unlocks on 25th January,2025",
-    },
-  ];
+  // Transform safes data to display format
+  const displaySafes: DisplaySafe[] =
+    safes?.map((safe) => {
+      // Calculate total amount across all tokens
+      const totalAmount = safe.tokenAmounts.reduce((sum, token) => {
+        // Convert BigInt to number with proper decimal formatting
+        const tokenAmount = Number(formatUnits(token.amount, 18));
+        return sum + tokenAmount;
+      }, 0);
+
+      // Format unlock date
+      const unlockDate = new Date(Number(safe.unlockTime) * 1000);
+      const formattedDate = unlockDate.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+
+      return {
+        id: safe.id.toString(),
+        name: safe.target,
+        amount: totalAmount,
+        // Determine if flexible or locked based on duration
+        status: Number(safe.duration) > 0 ? "Locked" : "Flexible",
+        unlockDate: `Unlocks on ${formattedDate}`,
+      };
+    }) || [];
 
   return (
     <div className="bg-black text-white p-4 w-full">
       <div className="max-w-[73rem] w-full">
         <h2 className="text-xl mb-4">Your savings targets</h2>
         <div className="relative">
-          <div
-            ref={scrollContainerRef}
-            className="flex space-x-4 pb-4 overflow-x-auto hide-scrollbar"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-            {targets.map((target) => (
-              <button
-                key={target.id}
-                onClick={() => navigate(`/dashboard/vault/${target.id}`)}
-                className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="text-sm text-gray-400 font-[300]">
-                    {target.name}
+          {isLoading ? (
+            <div className="text-white text-center py-8">
+              Loading your safes...
+            </div>
+          ) : isError ? (
+            <div className="text-red-500 text-center py-8">
+              Error loading safes. Please try again.
+            </div>
+          ) : displaySafes.length === 0 ? (
+            <div className="text-white text-center py-8">
+              You don't have any safes yet.
+            </div>
+          ) : (
+            <div
+              ref={scrollContainerRef}
+              className="flex space-x-4 pb-4 overflow-x-auto hide-scrollbar"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+              {displaySafes.map((safe) => (
+                <button
+                  key={safe.id}
+                  onClick={() => navigate(`/dashboard/vault/${safe.id}`)}
+                  className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="text-sm text-gray-400 font-[300]">
+                      {safe.name}
+                    </div>
+                    <Badge
+                      className={`
+                        bg-[#79E7BA33] font-[400] text-[#F1F1F1] rounded-xl flex items-center p-1 px-2 hover:bg-[#79E7BA33]
+                      `}>
+                      {safe.status}
+                    </Badge>
                   </div>
-                  <Badge
-                    className={`
-                      bg-[#79E7BA33] font-[400] text-[#F1F1F1] rounded-xl flex items-center p-1 px-2 hover:bg-[#79E7BA33]
-                    `}>
-                    {target.status}
-                  </Badge>
-                </div>
-                <div className="flex items-baseline">
-                  <span className="text-2xl font-[400]">$</span>
-                  <span className="text-2xl font-[400] ml-1">
-                    {target.amount.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                    })}
+                  <div className="flex items-baseline">
+                    <span className="text-2xl font-[400]">$</span>
+                    <span className="text-2xl font-[400] ml-1">
+                      {safe.amount.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                    <span className="text-sm text-gray-400 ml-2">USD</span>
+                  </div>
+                  <span className="text-[12px] text-[#CACACA]">
+                    {safe.unlockDate}
                   </span>
-                  <span className="text-sm text-gray-400 ml-2">USD</span>
-                </div>
-                <span className="text-[12px] text-[#CACACA]">
-                  {target.unlockDate}
-                </span>
-              </button>
-            ))}
-          </div>
+                </button>
+              ))}
+            </div>
+          )}
 
           <Button
             variant="ghost"
