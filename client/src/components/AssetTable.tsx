@@ -19,7 +19,7 @@ import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { useBalances } from "@/hooks/useBalances";
 import { Check, X } from "lucide-react";
-import { getSafuToUsd } from "@/lib";
+import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
@@ -125,8 +125,8 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             token: asset.token,
             balance: asset.balance,
             saved: asset.saved,
-            balance_usd: await getSafuToUsd(Number(asset.balance)),
-            saved_usd: await getSafuToUsd(Number(asset.saved)),
+            balance_usd: await getTokenPrice(asset.token, Number(asset.balance)),
+            saved_usd: await getTokenPrice(asset.token, Number(asset.saved)),
             autosaved: await checkIsTokenAutoSaved(
               address! as `0x${string}`,
               asset.token
@@ -210,11 +210,18 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                   {/* THIS LINK BELOW IS GOING TO BE USEFUL FOR FETCHING TOKEN ICON INFO */}
                   {/* https://portal.thirdweb.com/references/typescript/v5/TokenIcon */}
                   <div className="flex items-center gap-2">
-                    <div
-                      className={`w-8 h-8 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                    {asset.tokenInfo?.image ? (
+                      <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
+                        <img src={asset.tokenInfo?.image} width={30} height={30} className="w-full h-full"/>
+                      </div>
+                    ) : (
+                      <div
+                      className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
                     >
                       {asset.tokenInfo.symbol?.charAt(0)}
                     </div>
+                    )}
+                    
                     {/* <TokenProvider
                       address={asset.token}
                       chain={liskSepolia}
@@ -238,7 +245,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                       {asset.balance} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ ${asset.balance_usd.toFixed(2)}
+                      ≈ ${asset.balance_usd}
                     </p>
                   </div>
                 </TableCell>
@@ -248,7 +255,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                       {asset.saved} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ ${asset.saved_usd.toFixed(2)}
+                      ≈ ${asset.saved_usd}
                     </p>
                   </div>
                 </TableCell>

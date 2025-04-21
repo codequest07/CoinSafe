@@ -73,10 +73,6 @@ export default function DepositCard() {
     toast,
   });
 
-  // Removed unused getTokenPrice function
-
-  // Removed useEffect related to tokenPrice as it is no longer needed
-
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
     if (value == tokens.safu || value == tokens.lsk) {

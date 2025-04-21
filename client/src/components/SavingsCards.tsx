@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useGetSafes } from "@/hooks/useGetSafes";
 
 interface SavingsTarget {
   id: string;
@@ -15,6 +16,9 @@ interface SavingsTarget {
 export default function SavingsCards() {
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { safes } = useGetSafes();
+
+  console.log(safes);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {

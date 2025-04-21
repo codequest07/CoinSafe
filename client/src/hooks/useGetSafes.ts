@@ -1,5 +1,5 @@
-// import { useCallback, useMemo, useState } from "react";
-// import { getContract, readContract, resolveMethod } from "thirdweb";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
 
 import { liskSepolia, client } from "@/lib/config";
@@ -125,7 +125,7 @@ export function useGetSafes(contractAddress: string) {
         contract,
         method: "function getSafes() external view returns (LibDiamond.SafeDetails[] memory)",
         params: [],
-        from: account.address
+        from: address,
       });
 
       console.log("SAFES FETCH RESULT>>>>>", result)
@@ -140,10 +140,8 @@ export function useGetSafes(contractAddress: string) {
   };
 
   useEffect(() => {
-    if (account) {
-      fetchSafes();
-    }
-  }, [account, contractAddress]);
+    fetchSafes();
+  }, [fetchSafes]);
 
   return {
     safes,

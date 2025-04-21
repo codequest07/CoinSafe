@@ -45,28 +45,33 @@ export const useBalances = (address: string) => {
 
   useEffect(() => {
     if (!address) return;
-    async function fetchSupportedTokens() {
-      const fundingFacetContract = getContract({
-        client,
-        address: CoinsafeDiamondContract.address,
-        chain: liskSepolia,
-        abi: facetAbis.fundingFacet as unknown as Abi,
-      });
-      const supportedTokens = (await readContract({
-        contract: fundingFacetContract,
-        method:
-          "function getAcceptedTokenAddresses() external view returns (address[] memory)",
-        params: [],
-      })) as string[];
 
-      setSupportedTokens(supportedTokens);
+    async function fetchSupportedTokens() {
+      try {
+        const fundingFacetContract = getContract({
+          client,
+          address: CoinsafeDiamondContract.address,
+          chain: liskSepolia,
+          abi: facetAbis.fundingFacet as unknown as Abi,
+        });
+        const tokens = (await readContract({
+          contract: fundingFacetContract,
+          method:
+            "function getAcceptedTokenAddresses() external view returns (address[] memory)",
+          params: [],
+        })) as string[];
+
+        setSupportedTokens(tokens);
+      } catch (err) {
+        console.error("Error fetching supported tokens:", err);
+      }
     }
 
     fetchSupportedTokens();
   }, [address]);
 
   useEffect(() => {
-    if (!address || !supportedTokens) return;
+    if (!address || supportedTokens.length === 0) return;
 
     async function fetchBalances() {
       try {
@@ -77,72 +82,88 @@ export const useBalances = (address: string) => {
           savings: true,
         }));
 
-        const totalCalls = supportedTokens.map((token) => ({
-          contract,
-          method:
-            "function getUserTotalBalance(address user, address token) external view returns (uint256)",
-          params: [address, token],
-        }));
+        const balanceCalls = supportedTokens.flatMap((token) => [
+          {
+            type: "total",
+            contractCall: {
+              contract,
+              method:
+                "function getUserTotalBalance(address user, address token) external view returns (uint256)",
+              params: [address, token],
+            },
+          },
+          {
+            type: "available",
+            contractCall: {
+              contract,
+              method:
+                "function getUserAvailableBalance(address user, address token) external view returns (uint256)",
+              params: [address, token],
+            },
+          },
+          {
+            type: "savings",
+            contractCall: {
+              contract,
+              method:
+                "function getUserSavedBalance(address user, address token) external view returns (uint256)",
+              params: [address, token],
+            },
+          },
+        ]);
 
-        const availableCalls = supportedTokens.map((token) => ({
-          contract,
-          method:
-            "function getUserAvailableBalance(address user, address token) external view returns (uint256)",
-          params: [address, token],
-        }));
+        const results = await Promise.all(
+          balanceCalls.map(({ contractCall }) => readContract(contractCall))
+        );
 
-        const savedCalls = supportedTokens.map((token) => ({
-          contract,
-          method:
-            "function getUserSavedBalance(address user, address token) external view returns (uint256)",
-          params: [address, token],
-        }));
+        const balancesMap = {
+          total: [] as bigint[],
+          available: [] as bigint[],
+          savings: [] as bigint[],
+        };
 
-        // Execute all calls concurrently
-        const [totalResults, availableResults, savedResults] =
-          await Promise.all([
-            Promise.all(totalCalls.map((call) => readContract(call))),
-            Promise.all(availableCalls.map((call) => readContract(call))),
-            Promise.all(savedCalls.map((call) => readContract(call))),
-          ]);
-
-        setBalances({
-          available: availableResults,
-          total: totalResults,
-          savings: savedResults,
+        results.forEach((result, index) => {
+          const tokenIndex = Math.floor(index / 3);
+          const type = balanceCalls[index].type as keyof typeof balancesMap;
+          // console.log(result);
+          balancesMap[type][tokenIndex] =
+            typeof result === "bigint" ? result : BigInt(0);
         });
+
+        setBalances(balancesMap);
+
+        const usdPromises = supportedTokens.map(async (token, i) => {
+          const totalUsdVal = convertTokenAmountToUsd(
+            token,
+            balancesMap.total[i] || 0n
+          );
+          const availableUsdVal = convertTokenAmountToUsd(
+            token,
+            BigInt(balancesMap.available[i] || 0n)
+          );
+          const savedUsdVal = convertTokenAmountToUsd(
+            token,
+            BigInt(balancesMap.savings[i] || 0n)
+          );
+
+          return Promise.all([totalUsdVal, availableUsdVal, savedUsdVal]);
+        });
+
+        const usdResults = await Promise.all(usdPromises);
 
         let totalUsd = 0;
         let availableUsd = 0;
         let savedUsd = 0;
 
-        for (let i = 0; i < supportedTokens.length; i++) {
-          const token = supportedTokens[i];
-          const total = totalResults[i] || 0n;
-          const available = availableResults[i] || 0n;
-          const saved = savedResults[i] || 0n;
-
-          const totalUsdVal = await convertTokenAmountToUsd(
-            token,
-            BigInt(total as unknown as number)
-          );
-          const availableUsdVal = await convertTokenAmountToUsd(
-            token,
-            BigInt(available as unknown as number)
-          );
-          const savedUsdVal = await convertTokenAmountToUsd(
-            token,
-            BigInt(saved as unknown as number)
-          );
-
+        usdResults.forEach(([totalUsdVal, availableUsdVal, savedUsdVal]) => {
           totalUsd += getValidNumberValue(totalUsdVal);
           availableUsd += getValidNumberValue(availableUsdVal);
           savedUsd += getValidNumberValue(savedUsdVal);
-        }
+        });
 
-        setTotalBalance(totalUsd);
-        setAvailableBalance(availableUsd);
-        setSavingsBalance(savedUsd);
+        setTotalBalance(Number(totalUsd.toFixed(2)));
+        setAvailableBalance(Number(availableUsd.toFixed(2)));
+        setSavingsBalance(Number(savedUsd.toFixed(2)));
       } catch (err) {
         console.error("Error fetching balances:", err);
       } finally {

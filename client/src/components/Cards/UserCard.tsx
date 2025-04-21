@@ -24,7 +24,7 @@ const UserCard = () => {
         <div className="flex items-center justify-between">
           <p className="text-gray-300 text-sm">Original sage</p>
           <p className="text-white font-[400] text-sm">
-            6,045 / 10,000{" "}
+            0 / 10,000{" "}
             <span className="text-gray-400 font-[300] text-xs">points</span>
           </p>
         </div>
@@ -32,7 +32,7 @@ const UserCard = () => {
         <div className="w-full bg-gray-600 h-2 mt-2 rounded-full">
           <div
             className="bg-gradient-to-r from-[#926080] via-[#4C88AB] to-[#A2B3E5] h-full rounded-full"
-            style={{ width: "60%" }}></div>
+            style={{ width: "0%" }}></div>
         </div>
         <Link to="" className="text-sm underline text-gray-400 mt-2">
           Tier info
