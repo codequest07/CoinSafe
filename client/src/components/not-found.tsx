@@ -1,7 +1,7 @@
 import MemoLogo from "@/icons/Logo";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import LottieAnimation from "./LottieAnimation";
+// import LottieAnimation from "./LottieAnimation";
 
 export default function NotFound() {
   const navigate = useNavigate();
@@ -20,9 +20,9 @@ export default function NotFound() {
         </div>
 
         {/* Illustration */}
-        <div>
+        {/* <div>
           <LottieAnimation />
-        </div>
+        </div> */}
 
         {/* Error Message */}
         <h1 className="text-base md:text-4xl font-normal text-[#F1F1F1] text-center mb-6">
