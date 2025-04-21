@@ -209,9 +209,27 @@ export default function SaveAssetsCard() {
   };
 
   const [savingsTargetInput, _setSavingsTargetInput] = useState("");
-  const [_selectedSavingsTarget, setSelectedSavingsTarget] =
+  const [selectedSavingsTarget, setSelectedSavingsTarget] =
     useState<SafeDetails | null>(null);
   //   const [nextId, setNextId] = useState(16);
+
+  console.log("SELECTED SAVINGS TARGET", selectedSavingsTarget);
+
+  // const handleSavingsTargetSelect = (savingsTarget: SafeDetails) => {
+  //   setSelectedSavingsTarget(savingsTarget);
+
+  //   if (selectedSavingsTarget) {
+  //     setSaveState((prevState) => ({
+  //       ...prevState,
+  //       id: Number(selectedSavingsTarget.id),
+  //       target: selectedSavingsTarget.target,
+  //     }));
+
+  //     console.log("In here in savings target select");
+  //     console.log("savings target", selectedSavingsTarget);
+  //     console.log("New save state", saveState);
+  //   }
+  // };
 
   const [selectedOption, setSelectedOption] = useState("by-frequency");
   const [validationErrors, setValidationErrors] = useState<{
@@ -334,7 +352,7 @@ export default function SaveAssetsCard() {
   };
 
   const handleSavingsTargetChange = (targetInput: string) => {
-    setSaveState((prev) => ({ ...prev, target: targetInput }));
+    setSaveState((prev) => ({ ...prev, target: targetInput, id: 0 }));
   };
 
   const handleSaveAsset = (
@@ -449,12 +467,22 @@ export default function SaveAssetsCard() {
             <div className="mb-2">
               <label className="text-sm text-gray-300">Savings target</label>
               <SavingsTargetInput
-                data={savingsTargets}
+                data={safes}
                 value={saveState.target}
                 onChange={handleSavingsTargetChange}
-                onSelect={(savingsTarget) =>
-                  setSelectedSavingsTarget(savingsTarget)
-                }
+                onSelect={(savingsTarget) => {
+                  setSelectedSavingsTarget(savingsTarget);
+                  console.log("SAVINGS TARGET IN THE SELECT", savingsTarget);
+                  setSaveState((prevState) => ({
+                    ...prevState,
+                    id: Number(selectedSavingsTarget?.id || 0),
+                    target: selectedSavingsTarget?.target || prevState.target,
+                  }));
+
+                  console.log("In here in savings target select");
+                  console.log("savings target", selectedSavingsTarget);
+                  console.log("New save state", saveState);
+                }}
                 onAddItem={handleCreateTarget}
                 setShowAddModal={setIsCreateTargetModalOpen}
                 handleAddItem={() => setIsCreateTargetModalOpen(true)}
@@ -681,9 +709,23 @@ export default function SaveAssetsCard() {
                       data={savingsTargets}
                       value={saveState.target}
                       onChange={handleSavingsTargetChange}
-                      onSelect={(savingsTarget) =>
-                        setSelectedSavingsTarget(savingsTarget)
-                      }
+                      onSelect={(savingsTarget) => {
+                        setSelectedSavingsTarget(savingsTarget);
+                        console.log(
+                          "SAVINGS TARGET IN THE SELECT",
+                          savingsTarget
+                        );
+                        setSaveState((prevState) => ({
+                          ...prevState,
+                          id: Number(selectedSavingsTarget?.id || 0),
+                          target:
+                            selectedSavingsTarget?.target || prevState.target,
+                        }));
+
+                        console.log("In here in savings target select");
+                        console.log("savings target", selectedSavingsTarget);
+                        console.log("New save state", saveState);
+                      }}
                       onAddItem={handleCreateTarget}
                       setShowAddModal={setIsCreateTargetModalOpen}
                       handleAddItem={() => setIsCreateTargetModalOpen(true)}
