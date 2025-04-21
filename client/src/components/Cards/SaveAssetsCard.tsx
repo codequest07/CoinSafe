@@ -102,13 +102,13 @@ export default function SaveAssetsCard() {
   const {
     safes,
     isLoading: isGetSafesLoading,
-    fetchSafes,
+    // fetchSafes,
     error,
-  } = useGetSafes();
+  } = useGetSafes(CoinsafeDiamondContract.address);
 
-  useEffect(() => {
-    fetchSafes();
-  }, []);
+  // useEffect(() => {
+  //   fetchSafes();
+  // }, []);
 
   console.log("Loading?? >>", isGetSafesLoading);
   console.log("SAFES", safes);
@@ -263,6 +263,7 @@ export default function SaveAssetsCard() {
     });
 
   console.log("SAVE STATE", saveState);
+
   const { saveAsset, isPending: isLoading } = useSaveAsset({
     address: address as `0x${string}`,
     saveState,
@@ -334,7 +335,6 @@ export default function SaveAssetsCard() {
       return;
     }
 
-    console.log("What is the event", event);
     saveAsset(event);
   };
 
@@ -402,31 +402,6 @@ export default function SaveAssetsCard() {
               validationErrors={validationErrors}
               supportedTokens={supportedTokens}
             />
-            {/* <div className="mb-1">
-          <label className="text-sm text-gray-300">Amount</label>
-          <div className="mt-1 relative">
-            <div className="flex items-center justify-between bg-transparent rounded-[8px] border-[1px] border-[#FFFFFF3D] px-4 py-6">
-              <div>
-                <input
-                  type="text"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="bg-transparent text-base outline-none w-full"
-                />
-                <div className="text-xs text-gray-300">≈ ₹400.58</div>
-              </div>
-              <div className="relative">
-                <button
-                  className="flex items-center gap-1 bg-[#5a5a5a] px-3 py-1.5 rounded-lg"
-                  onClick={() => setShowDropdown(!showDropdown)}
-                >
-                  <Check size={16} className="text-white" />
-                  <span>LSK</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div> */}
 
             {/* Wallet Balance */}
             <div className="flex justify-between items-center mb-6">
@@ -685,12 +660,6 @@ export default function SaveAssetsCard() {
 
                   {/* savings target section */}
                   <div>
-                    {/* <SavingsTargetSelect
-                      options={savingsTargets}
-                      onSelect={handleSelectTarget}
-                      onCreate={handleCreateTarget}
-                      className=""
-                    /> */}
                     <label className="text-sm text-gray-300">
                       Savings target
                     </label>
@@ -746,13 +715,6 @@ export default function SaveAssetsCard() {
         {selectedOption === "by-frequency" && (
           <>
             <div className="flex justify-end">
-              {/* <Button
-                        onClick={onClose}
-                        className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-                        type="submit"
-                      >
-                        Cancel
-                      </Button> */}
               <div>
                 <Button
                   onClick={handleSaveAsset}
@@ -864,17 +826,3 @@ export default function SaveAssetsCard() {
     </div>
   );
 }
-
-// {searchTerm && (
-//     <div className="absolute top-full left-0 right-0 mt-1 bg-[#1e1e1e] rounded-lg overflow-hidden z-10">
-//       <div className="p-4 border-b border-[#333333]">
-//         <div className="text-white">Housing</div>
-//       </div>
-//       <div className="p-4 border-b border-[#333333]">
-//         <div className="text-white">Housing accomodation</div>
-//       </div>
-//       <div className="p-4">
-//         <div className="text-white">Housing</div>
-//       </div>
-//     </div>
-//   )}
