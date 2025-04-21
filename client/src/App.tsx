@@ -16,6 +16,7 @@ import SaveAssets from "./Pages/SaveAssets";
 import Deposit from "./Pages/Deposit";
 import Withdraw from "./Pages/Withdraw";
 import NotFound from "./components/not-found";
+import TestSavings from "./components/TestSavings";
 // import { useRecoilState } from "recoil";
 // import { availableBalanceState, savingsBalanceState, totalBalanceState } from "./store/atoms/save";
 // import { useContractEvents } from "./hooks/useWatchEvents";
@@ -57,6 +58,8 @@ const App = () => {
           <Route path="/dashboard/rewards" element={<Rewards />} />
           <Route path="/dashboard/rewards/my-rewards" element={<MyRewards />} />
           <Route path="/dashboard/SaveSense" element={<SaveSense />} />
+          {/* <Route path="/dashboard/test-savings" element={<TestSavings />} /> */}
+          {/* Test */}
           {/* Test */}
           <Route path="/dashboard/save-assets" element={<SaveAssets />} />
           <Route path="/dashboard/deposit" element={<Deposit />} />
