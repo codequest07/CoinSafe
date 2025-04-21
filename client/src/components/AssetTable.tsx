@@ -25,6 +25,8 @@ import { client, liskSepolia } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { tokenData } from "@/lib/utils";
+import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
+import TopUpModal from "./Modals/Top-up-modal";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
@@ -45,7 +47,11 @@ async function checkIsTokenAutoSaved(
   return balance;
 }
 
-export default function AssetTable() {
+interface AssetTableProps {
+  safeDetails?: FormattedSafeDetails;
+}
+
+export default function AssetTable({ safeDetails }: AssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
     { token: string; balance: string; saved: string; available: string }[]
   >([]);
@@ -89,13 +95,19 @@ export default function AssetTable() {
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">Assets</h1>
-        <AssetTableContent assets={allAssetData} />
+        <AssetTableContent assets={allAssetData} safeDetails={safeDetails} />
       </div>
     </div>
   );
 }
 
-function AssetTableContent({ assets }: { assets: any[] }) {
+function AssetTableContent({
+  assets,
+  safeDetails,
+}: {
+  assets: any[];
+  safeDetails?: FormattedSafeDetails;
+}) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
@@ -116,7 +128,6 @@ function AssetTableContent({ assets }: { assets: any[] }) {
   useEffect(() => {
     if (!assets || !address) return;
     console.log("Assets in the assets table sub component", assets);
-    
 
     async function updateAssets(assets: any[]) {
       try {
@@ -125,7 +136,10 @@ function AssetTableContent({ assets }: { assets: any[] }) {
             token: asset.token,
             balance: asset.balance,
             saved: asset.saved,
-            balance_usd: await getTokenPrice(asset.token, Number(asset.balance)),
+            balance_usd: await getTokenPrice(
+              asset.token,
+              Number(asset.balance)
+            ),
             saved_usd: await getTokenPrice(asset.token, Number(asset.saved)),
             autosaved: await checkIsTokenAutoSaved(
               address! as `0x${string}`,
@@ -163,8 +177,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
           {isConnected ? (
             <Button
               onClick={openDepositModal}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-            >
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
               Deposit
             </Button>
           ) : (
@@ -212,16 +225,20 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                   <div className="flex items-center gap-2">
                     {asset.tokenInfo?.image ? (
                       <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
-                        <img src={asset.tokenInfo?.image} width={30} height={30} className="w-full h-full"/>
+                        <img
+                          src={asset.tokenInfo?.image}
+                          width={30}
+                          height={30}
+                          className="w-full h-full"
+                        />
                       </div>
                     ) : (
                       <div
-                      className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
-                    >
-                      {asset.tokenInfo.symbol?.charAt(0)}
-                    </div>
+                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
+                        {asset.tokenInfo.symbol?.charAt(0)}
+                      </div>
                     )}
-                    
+
                     {/* <TokenProvider
                       address={asset.token}
                       chain={liskSepolia}
@@ -283,17 +300,24 @@ function AssetTableContent({ assets }: { assets: any[] }) {
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setIsDepositModalOpen(true)}
-                    >
+                      onClick={() => setIsDepositModalOpen(true)}>
                       Deposit
                     </Button>
-                    <Button
-                      variant="link"
-                      className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setIsFirstModalOpen(true)}
-                    >
-                      Save
-                    </Button>
+                    {safeDetails ? (
+                      <Button
+                        variant="link"
+                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                        onClick={() => setIsFirstModalOpen(true)}>
+                        Top Up
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="link"
+                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                        onClick={() => setIsFirstModalOpen(true)}>
+                        Save
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

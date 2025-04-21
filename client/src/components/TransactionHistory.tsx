@@ -77,7 +77,11 @@ const formatTime = (timestamp: number) => {
 //   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 // };
 
-const TransactionHistory = () => {
+interface TransactionHistoryProps {
+  safeId?: string;
+}
+
+const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
@@ -89,7 +93,9 @@ const TransactionHistory = () => {
     setIsDepositModalOpen(true);
   };
 
-  const { transactions } = useTransactionHistory({});
+  const { transactions } = useTransactionHistory({
+    safeId: safeId ? Number(safeId) : undefined,
+  });
 
   // Group transactions by date (using the date part only)
   const groupTransactionsByDate = (transactions: Transaction[]) => {
@@ -150,15 +156,13 @@ const TransactionHistory = () => {
             <div className="flex gap-4">
               <Button
                 onClick={openDepositModal}
-                className="bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#2a2a2a]"
-              >
+                className="bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#2a2a2a]">
                 Deposit
               </Button>
               <Button
                 onClick={openFirstModal}
                 variant="outline"
-                className="bg-white text-black rounded-[2rem] hover:bg-gray-100"
-              >
+                className="bg-white text-black rounded-[2rem] hover:bg-gray-100">
                 Save
               </Button>
             </div>
@@ -223,8 +227,8 @@ const TransactionHistory = () => {
                           <div className="flex flex-col">
                             <span className="flex items-center gap-2 text-sm text-gray-400">
                               <span>
-                              {formatEther(transaction.amount)}{" "}
-                              {tokenData[transaction.token]?.symbol}
+                                {formatEther(transaction.amount)}{" "}
+                                {tokenData[transaction.token]?.symbol}
                               </span>
                               <img
                                 src={tokenData[transaction.token]?.image}
@@ -263,8 +267,7 @@ const TransactionHistory = () => {
                           <Badge
                             className={`border-0 ${getColorClass(
                               0
-                            )} px-3 py-1 rounded-full`}
-                          >
+                            )} px-3 py-1 rounded-full`}>
                             {getStatusText(0)}
                           </Badge>
                         </TableCell>
