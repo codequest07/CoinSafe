@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ReactNode } from "react";
 import SavingOption from "../Modals/SavingOption";
 import { useActiveAccount } from "thirdweb/react";
+import { Skeleton } from "../ui/skeleton";
 
 const VaultCard = ({
   title,
@@ -11,6 +12,7 @@ const VaultCard = ({
   badge,
   emphasize,
   text,
+  loading,
 }: {
   title: string;
   icon?: any;
@@ -19,6 +21,7 @@ const VaultCard = ({
   badge?: string;
   emphasize?: string;
   text?: ReactNode;
+  loading?: boolean;
 }) => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
@@ -45,10 +48,14 @@ const VaultCard = ({
 
       <div className="flex justify-between items-end">
         <div>
-          <div>
-            <span className="text-[#F1F1F1] pr-2 text-3xl">
-              {value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-            </span>
+          <div className="flex items-center gap-0.5">
+            {loading ? (
+              <Skeleton className="w-16 sm:w-20 h-6 sm:h-7" />
+            ) : (
+              <span className="text-[#F1F1F1] pr-2 text-3xl">
+                {value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+              </span>
+            )}
             <span className="text-[#CACACA] text-xs">{unit}</span>
           </div>
           <div>
@@ -67,7 +74,8 @@ const VaultCard = ({
             </button> */}
             <button
               onClick={openFirstModal}
-              className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
+              className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+            >
               Save
             </button>
           </div>

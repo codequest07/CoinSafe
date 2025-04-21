@@ -10,7 +10,7 @@ const Vault = () => {
   const account = useActiveAccount();
   const isConnected = !!account?.address;
   const address = account?.address;
-  const { savingsBalance } = useBalances(address as string);
+  const { savingsBalance, loading: { savings } } = useBalances(address as string);
 
   return (
     <div className="w-full relative px-2 sm:px-4 overflow-x-hidden">
@@ -22,7 +22,7 @@ const Vault = () => {
         <div className="flex flex-col sm:flex-row gap-2 pb-2 w-full">
           <VaultCard
             title="Vault balance"
-            value={isConnected ? Number(savingsBalance.toFixed(2)) ?? 0.0 : 0.0}
+            value={isConnected ? Number(savingsBalance.toFixed(2)) || 0.0 : 0.0}
             unit="USD"
             text={
               <>
@@ -30,6 +30,7 @@ const Vault = () => {
                 previous savings)
               </>
             }
+            loading={savings}
           />
           {/* <ClaimCard
           title="Claimable balance"
@@ -39,7 +40,7 @@ const Vault = () => {
         /> */}
         </div>
 
-        <div className="w-full max-w-[1050px] mx-auto overflow-x-hidden">
+        <div className="w-full max-w-[1050px] overflow-x-hidden">
           <SavingsCards />
         </div>
 
