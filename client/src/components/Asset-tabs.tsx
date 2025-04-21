@@ -2,8 +2,13 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import AssetTable from "./AssetTable";
 import TransactionHistory from "./TransactionHistory";
+import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 
-export function AssetTabs() {
+interface AssetTabsProps {
+  safeDetails?: FormattedSafeDetails;
+}
+
+export function AssetTabs({ safeDetails }: AssetTabsProps) {
   const [activeTab, setActiveTab] = useState<"assets" | "savings">("assets");
 
   return (
@@ -33,11 +38,11 @@ export function AssetTabs() {
 
       <div className="py-2 bg-black text-white">
         {activeTab === "assets" ? (
-          <AssetTable />
+          <AssetTable safeDetails={safeDetails} />
         ) : (
           <div className="p-4">
             <h3 className="text-lg font-medium">Savings history</h3>
-            <TransactionHistory />
+            <TransactionHistory safeId={safeDetails?.id} />
           </div>
         )}
       </div>
