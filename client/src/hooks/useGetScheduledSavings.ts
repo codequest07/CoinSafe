@@ -53,7 +53,6 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
 
   const { data: result, isLoading } = useReadContract({
     contract,
-    // @ts-expect-error type error 
     method: resolveMethod("getScheduledSavings"),
     params: [address, 4],
   });
