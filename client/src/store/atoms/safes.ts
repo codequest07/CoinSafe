@@ -1,4 +1,4 @@
-import { atom, selector, selectorFamily } from "recoil";
+import { atom, selectorFamily } from "recoil";
 import { SafeDetails } from "@/hooks/useGetSafes";
 
 export const safesState = atom<SafeDetails[]>({
