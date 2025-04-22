@@ -2,6 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
+import { useRecoilValue } from "recoil";
+import {
+  safeByIdSelector,
+  safesLoadingState,
+  safesErrorState,
+} from "@/store/atoms/safes";
 
 export interface FormattedSafeDetails {
   id: string;
@@ -21,7 +27,15 @@ export interface FormattedSafeDetails {
 }
 
 export function useGetSafeById(id: string | undefined) {
-  const { safes, isLoading, isError, error } = useGetSafes();
+  // Use Recoil selectors to get the safe by ID and loading/error states
+  const safe = id ? useRecoilValue(safeByIdSelector(id)) : undefined;
+  const isLoading = useRecoilValue(safesLoadingState);
+  const error = useRecoilValue(safesErrorState);
+  const isError = error !== null;
+
+  // We still need to fetch safes if they're not already loaded
+  const { fetchSafes } = useGetSafes();
+
   const [safeDetails, setSafeDetails] = useState<FormattedSafeDetails | null>(
     null
   );
@@ -43,13 +57,16 @@ export function useGetSafeById(id: string | undefined) {
     });
   };
 
+  // Fetch safes only once when the component mounts
   useEffect(() => {
-    if (!id || !safes || isLoading || isError) return;
+    // Force a refresh only if we don't have the safe we're looking for
+    if (id && !safe && !isLoading) {
+      fetchSafes(true); // Force refresh
+    }
+  }, [id, safe, isLoading, fetchSafes]);
 
-    // Find the safe with the matching ID
-    const safe = safes.find((safe) => safe.id.toString() === id);
-
-    if (!safe) return;
+  useEffect(() => {
+    if (!id || !safe || isLoading || isError) return;
 
     // Format the safe data
     const startTime = new Date(Number(safe.startTime) * 1000);
@@ -120,7 +137,7 @@ export function useGetSafeById(id: string | undefined) {
       totalAmountUSD,
       isLocked: Number(safe.duration) > 0,
     });
-  }, [id, safes, isLoading, isError, tokenSymbols]);
+  }, [id, safe, isLoading, isError, tokenSymbols]);
 
   return {
     safeDetails,

@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DisplaySafe {
   id: string;
@@ -18,9 +19,12 @@ export default function SavingsCards() {
   const navigate = useNavigate();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { safes, isLoading, isError } = useGetSafes();
+  const { safes, isLoading, isError, fetchSafes } = useGetSafes();
 
-  console.log("Safes data:", safes);
+  // Force refresh safes when component mounts
+  useEffect(() => {
+    fetchSafes();
+  }, [fetchSafes]);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -78,8 +82,21 @@ export default function SavingsCards() {
         <h2 className="text-xl mb-4">Your savings targets</h2>
         <div className="relative">
           {isLoading ? (
-            <div className="text-white text-center py-8">
-              Loading your safes...
+            <div className="flex space-x-4 pb-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21]">
+                  <div className="flex justify-between items-start mb-4">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-6 w-16 rounded-xl" />
+                  </div>
+                  <div className="flex items-baseline mb-2">
+                    <Skeleton className="h-8 w-32" />
+                  </div>
+                  <Skeleton className="h-4 w-40" />
+                </div>
+              ))}
             </div>
           ) : isError ? (
             <div className="text-red-500 text-center py-8">

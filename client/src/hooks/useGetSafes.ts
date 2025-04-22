@@ -1,12 +1,16 @@
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
+import { useRecoilState } from "recoil";
 
 import { liskSepolia, client } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-// import { useActiveAccount } from "thirdweb/react";
-
+import {
+  safesState,
+  safesLoadingState,
+  safesErrorState,
+} from "@/store/atoms/safes";
 // Define the SafeDetails interface based on the provided struct
 interface Token {
   token: string;
@@ -23,11 +27,12 @@ export interface SafeDetails {
 }
 
 export function useGetSafes() {
-
-  const [safes, setSafes] = useState<SafeDetails[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  // Use Recoil state instead of local state
+  const [safes, setSafes] = useRecoilState(safesState);
+  const [isLoading, setIsLoading] = useRecoilState(safesLoadingState);
+  const [error, setError] = useRecoilState(safesErrorState);
+  // Derive isError from error state
+  const isError = error !== null;
 
   const account = useActiveAccount();
   const address = account?.address;
@@ -41,45 +46,60 @@ export function useGetSafes() {
     });
   }, []); // <-- Only create once
 
-  const fetchSafes = useCallback(async () => {
-    if (!address) return;
+  const fetchSafes = useCallback(
+    async (force = false) => {
+      if (!address) return;
 
-    setIsLoading(true);
-    setIsError(false);
-    setError(null);
+      // Only fetch if we don't already have data or we're forcing a refresh
+      if (safes.length > 0 && !force && !isLoading) {
+        console.log("Using cached safes data");
+        return;
+      }
 
-    try {
-      console.log("fetching safes");
+      setIsLoading(true);
+      setError(null);
 
-      const result = await readContract({
-        contract,
-        // @ts-expect-error type error
-        method: resolveMethod("getSafes"),
-        params: [],
-        from: address
-      });
+      try {
+        console.log("Fetching safes from blockchain...");
 
-      console.log('====================================');
-      console.log('Safes:', result);
-      console.log('====================================');
+        const result = await readContract({
+          contract,
+          method: resolveMethod("getSafes"),
+          params: [],
+          from: address,
+        });
 
-      setSafes(result as SafeDetails[]);
+        console.log("====================================");
+        console.log("Safes:", result);
+        console.log("====================================");
 
-    } catch (err: any) {
+        setSafes(result as SafeDetails[]);
+      } catch (err: any) {
+        console.error("Transaction fetch failed:", err);
+        setError(err);
+        setSafes([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [
+      contract,
+      address,
+      safes.length,
+      isLoading,
+      setSafes,
+      setError,
+      setIsLoading,
+    ]
+  );
 
-      console.error("Transaction fetch failed:", err);
-      setIsError(true);
-      setError(err);
-      setSafes([]);
-
-    } finally {
-      setIsLoading(false);
-    }
-  }, [contract, address]);
-
+  // Only fetch on initial mount, not on every dependency change
   useEffect(() => {
-    fetchSafes();
-  }, [fetchSafes]);
+    // This will only run once when the component mounts
+    if (safes.length === 0 && !isLoading) {
+      fetchSafes();
+    }
+  }, []); // Empty dependency array
 
   return {
     safes,
@@ -87,77 +107,6 @@ export function useGetSafes() {
     isError,
     error,
     fetchSafes,
-    refetch: fetchSafes
+    refetch: fetchSafes,
   };
 }
-
-
-
-// import { useState, useEffect } from 'react';
-// import { getContract, readContract } from 'thirdweb';
-// import { useActiveAccount } from "thirdweb/react";
-
-// // Define the type for SafeDetails based on your contract's structure
-// export interface SafeDetails {
-//   id: bigint;
-//   target: string;
-//   duration: bigint;
-//   startTime: bigint;
-//   unlockTime: bigint;
-//   tokenAmounts: Token[];
-// }
-
-// export function useGetSafes(contractAddress: string) {
-//   const account = useActiveAccount();
-//   const [safes, setSafes] = useState<SafeDetails[]>([]);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [error, setError] = useState<Error | null>(null);
-
-//   const address = account?.address;
-
-//   const fetchSafes = async () => {
-//     if (!account) return;
-
-//     setIsLoading(true);
-//     setError(null);
-    
-//     try {
-//       const contract = getContract({
-//         client,
-//         address: contractAddress as `0x${string}`,
-//         abi: facetAbis.targetSavingsFacet as Abi,
-//         chain: liskSepolia,
-//       });
-
-//       console.log("CONTRACT>>>>>", contract)
-
-//       const result = await readContract({
-//         contract,
-//         method: "function getSafes() external view returns (LibDiamond.SafeDetails[] memory)",
-//         params: [],
-//         from: address,
-//       });
-
-//       console.log("SAFES FETCH RESULT>>>>>", result)
-      
-//       setSafes(result as SafeDetails[]);
-//     } catch (err) {
-//       setError(err instanceof Error ? err : new Error('Failed to fetch safes'));
-//       console.error("Error fetching safes:", err);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchSafes();
-//   }, [fetchSafes]);
-
-//   return {
-//     safes,
-//     isLoading,
-//     error,
-//     refetch: fetchSafes,
-//     walletAddress: account?.address
-//   };
-// }
