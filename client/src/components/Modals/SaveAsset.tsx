@@ -39,7 +39,7 @@ import SaveSuccessful from "./SaveSuccessful";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
-import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
+import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { formatUnits } from "viem";
 import { SavingsTargetSelect } from "../SavingsTarget";
@@ -252,14 +252,9 @@ export default function SaveAsset({
   });
 
   const { createAutoSavings, isLoading: autoSavingsLoading } =
-    usecreateAutoSavings({
+    useCreateAutoSavings({
       address: address as `0x${string}`,
       saveState,
-      coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-      // coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-      coinSafeAbi: savingsFacetAbi,
-      // coinSafeAbi: savingsFacetAbi.abi,
-      chainId: liskSepolia.id,
       onSuccess: () => {
         openThirdModal();
       },

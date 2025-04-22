@@ -2,17 +2,18 @@ import { useGetScheduledSavings } from "@/hooks/useGetScheduledSavings";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { format } from "date-fns";
-// import { Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Deposit from "./Modals/Deposit";
 import MemoStory from "@/icons/Story";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
+import { tokenData } from "@/lib/utils";
 
 export default function ScheduledSavings() {
   const navigate = useNavigate();
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const { scheduledSavings, error } = useGetScheduledSavings();
+  const { scheduledSavings, isLoading, error } = useGetScheduledSavings();
   const [, setSaveState] = useRecoilState(saveAtom);
 
   const openDepositModal = () => setIsDepositModalOpen(true);
@@ -35,45 +36,54 @@ export default function ScheduledSavings() {
         <h2 className="text-base font-[500] sm:text-lg">Scheduled savings</h2>
       </div>
       {scheduledSavings.length > 0 ? (
-        scheduledSavings.slice(0, 3).map((saving, index) => (
-          <div key={index} className="mb-2">
-            <div className="text-sm mb-1 sm:text-base">
-              {format(saving.scheduledDate, "yyyy-MM-dd")}
+        scheduledSavings.slice(0, 4).map((saving, index) => (
+          <div key={index} className="mb-4">
+            <div className="text-[13px] text-white/60 mb-2">
+              {format(saving.scheduledDate, "PPP")}
             </div>
             <div key={index} className="flex justify-between items-center mb-4">
               <div className="flex space-x-2 items-center">
-                {/* <MemoUsdc className="w-6 h-6 sm:w-8 sm:h-8" /> */}
+                {tokenData[saving.token]?.image ? (
+                  <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
+                    <img
+                      src={tokenData[saving.token]?.image}
+                      width={30}
+                      height={30}
+                      className="w-full h-full"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className={`w-7 h-7 rounded-full ${tokenData[saving.token].color} flex items-center justify-center text-white font-medium`}
+                  >
+                    {tokenData[saving.token].symbol?.charAt(0)}
+                  </div>
+                )}
                 <div>
-                  {/* <div className="font-[400] text-sm sm:text-base">
-                    {.symbol}
-                  </div> */}
                   <div className="text-sm text-gray-400 sm:text-base uppercase">
-                    {saving.token}
+                    {tokenData[saving.token].symbol}
                   </div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="font-[400] text-sm sm:text-base">
-                  {saving.amount}{" "}
-                  <span className="text-sm opacity-70">{saving.token}</span>
+                  {Number(saving.amount)?.toFixed(2)}{" "}
+                  <span className="text-[13px] opacity-70">{tokenData[saving.token].symbol}</span>
                 </div>
-                {saving.token === "safu" && (
-                  <div className="text-sm text-gray-400 sm:text-base">
-                    ≈ ${saving.value}
-                  </div>
-                )}
+
+                <div className="text-sm text-gray-400 sm:text-base">
+                  ≈ ${saving.value}
+                </div>
               </div>
             </div>
           </div>
         ))
       ) : (
         <div className="flex flex-col items-center mt-3 justify-center gap-3">
-          {/* Commented this for later review */}
-          {/* isLoading ? (
-            <Loader2 className="w-12 h-12 animate-spin" />
-          ) :  */}
           {error ? (
             <span className="text-red-500">An unexpected error occured..</span>
+          ) : isLoading ? (
+            <Loader2 className="w-12 h-12 animate-spin" />
           ) : (
             <div className="flex py-20 flex-col gap-6 items-center text-center justify-center">
               <div className="mb-4 rounded-full">
@@ -85,12 +95,14 @@ export default function ScheduledSavings() {
               <div className="flex gap-5">
                 <Button
                   onClick={openDepositModal}
-                  className="rounded-[100px] px-8 py-2 bg-[#1E1E1E99] text-[#F1F1F1] hover:bg-[#2a2a2a] text-sm">
+                  className="rounded-[100px] px-8 py-2 bg-[#1E1E1E99] text-[#F1F1F1] hover:bg-[#2a2a2a] text-sm"
+                >
                   Deposit
                 </Button>
                 <Button
                   onClick={navigateToSaveAssets}
-                  className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm">
+                  className="rounded-[100px] px-8 py-2  bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm"
+                >
                   Save
                 </Button>
               </div>
@@ -98,12 +110,6 @@ export default function ScheduledSavings() {
           )}
         </div>
       )}
-      {/* <AllScheduledSavings
-        scheduledSavings={scheduledSavings}
-        isModalOpen={openAllScheduledSavings}
-        setisModalOpen={setOpenAllScheduledSavings}
-        onBack={() => setOpenAllScheduledSavings(false)}
-      /> */}
       <Deposit
         isDepositModalOpen={isDepositModalOpen}
         setIsDepositModalOpen={setIsDepositModalOpen}

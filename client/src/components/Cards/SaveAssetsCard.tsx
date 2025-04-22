@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, tokenData } from "@/lib/utils";
 import SavingsTargetInput from "../SavingsTargetInput";
 import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
@@ -19,9 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
+import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useActiveAccount } from "thirdweb/react";
-import savingsFacetAbi from "../../abi/AutomatedSavingsFacet.json";
 import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
 import { liskSepolia } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
@@ -69,8 +68,6 @@ export default function SaveAssetsCard() {
       }));
     }
   }, [saveState.typeName, setSaveState]);
-  //   const [amount, setAmount] = useState("0.00");
-  //   const [showDropdown, setShowDropdown] = useState(false);
 
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const smartAccount = useActiveAccount();
@@ -230,7 +227,7 @@ export default function SaveAssetsCard() {
       setDecimals(18);
       // USDT check
     } else if (value == tokens.usdt) {
-      setDecimals(6);
+      setDecimals(18);
     }
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
@@ -259,14 +256,9 @@ export default function SaveAssetsCard() {
   };
 
   const { createAutoSavings, isLoading: autoSavingsLoading } =
-    usecreateAutoSavings({
+    useCreateAutoSavings({
       address: address as `0x${string}`,
       saveState,
-      coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-      // coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-      coinSafeAbi: savingsFacetAbi,
-      // coinSafeAbi: savingsFacetAbi.abi,
-      chainId: liskSepolia.id,
       onSuccess: () => {
         openThirdModal();
       },
@@ -278,7 +270,6 @@ export default function SaveAssetsCard() {
       },
     });
 
-  console.log("SAVE STATE", saveState);
   const { saveAsset, isPending: isLoading } = useSaveAsset({
     address: address as `0x${string}`,
     saveState,
@@ -341,9 +332,10 @@ export default function SaveAssetsCard() {
   const handleSaveAsset = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    if (!validateForm()) {
-      return;
-    }
+    if (address)
+      if (!validateForm()) {
+        return;
+      }
 
     if (saveType === "auto" && selectedOption === "by-frequency") {
       createAutoSavings(event);
@@ -449,12 +441,7 @@ export default function SaveAssetsCard() {
               <div className="text-sm text-gray-300">
                 Wallet balance:{" "}
                 <span className="text-gray-400">
-                  {selectedTokenBalance}{" "}
-                  {saveState.token == tokens.safu
-                    ? "SAFU"
-                    : saveState.token === tokens.lsk
-                    ? "LSK"
-                    : "USDT"}
+                  {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
                 </span>
               </div>
               <button
@@ -473,41 +460,34 @@ export default function SaveAssetsCard() {
             <div className="border-t border-[#6a6a6a] my-4"></div>
 
             {/* Savings Target */}
-            <div className="mb-2">
-              <label className="text-sm text-gray-300">Savings target</label>
-              <SavingsTargetInput
-                data={savingsTargets}
-                value={saveState.target}
-                onChange={handleSavingsTargetChange}
-                onSelect={(savingsTarget) =>
-                  setSelectedSavingsTarget(savingsTarget)
-                }
-                onAddItem={handleCreateTarget}
-                setShowAddModal={setIsCreateTargetModalOpen}
-                handleAddItem={() => setIsCreateTargetModalOpen(true)}
-                // label="Search for a city"
-                placeholder="Enter savings target"
-                getItemValue={(savingsTarget) => savingsTarget.target}
-                itemName="savings target"
-                renderItem={(savingsTarget) => (
-                  <div className="flex flex-col">
-                    <span className="font-medium">{savingsTarget.target}</span>
-                    {/* */}
-                  </div>
-                )}
-              />
-              {/* <div className="relative mt-2">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#6a6a6a] rounded-lg p-4 outline-none"
-              placeholder="Search target"
-            />
-
-
-          </div> */}
-            </div>
+            {saveType === "one-time" && (
+              <div className="mb-2">
+                <label className="text-sm text-gray-300">Savings target</label>
+                <SavingsTargetInput
+                  data={savingsTargets}
+                  value={saveState.target}
+                  onChange={handleSavingsTargetChange}
+                  onSelect={(savingsTarget) =>
+                    setSelectedSavingsTarget(savingsTarget)
+                  }
+                  onAddItem={handleCreateTarget}
+                  setShowAddModal={setIsCreateTargetModalOpen}
+                  handleAddItem={() => setIsCreateTargetModalOpen(true)}
+                  // label="Search for a city"
+                  placeholder="Enter savings target"
+                  getItemValue={(savingsTarget) => savingsTarget.target}
+                  itemName="savings target"
+                  renderItem={(savingsTarget) => (
+                    <div className="flex flex-col">
+                      <span className="font-medium">
+                        {savingsTarget.target}
+                      </span>
+                      {/* */}
+                    </div>
+                  )}
+                />
+              </div>
+            )}
 
             {/* Duration section */}
             <div className="py-4">
@@ -654,11 +634,7 @@ export default function SaveAssetsCard() {
                         Wallet balance:{" "}
                         <span className="text-gray-400">
                           {selectedTokenBalance}{" "}
-                          {saveState.token == tokens.safu
-                            ? "SAFU"
-                            : saveState.token === tokens.lsk
-                            ? "LSK"
-                            : "USDT"}
+                          {tokenData[saveState.token]?.symbol}
                         </span>
                       </div>
                       <Button
@@ -699,42 +675,6 @@ export default function SaveAssetsCard() {
                     )}
                   </div>
 
-                  {/* savings target section */}
-                  <div>
-                    {/* <SavingsTargetSelect
-                      options={savingsTargets}
-                      onSelect={handleSelectTarget}
-                      onCreate={handleCreateTarget}
-                      className=""
-                    /> */}
-                    <label className="text-sm text-gray-300">
-                      Savings target
-                    </label>
-                    <SavingsTargetInput
-                      data={savingsTargets}
-                      value={saveState.target}
-                      onChange={handleSavingsTargetChange}
-                      onSelect={(savingsTarget) =>
-                        setSelectedSavingsTarget(savingsTarget)
-                      }
-                      onAddItem={handleCreateTarget}
-                      setShowAddModal={setIsCreateTargetModalOpen}
-                      handleAddItem={() => setIsCreateTargetModalOpen(true)}
-                      // label="Search for a city"
-                      placeholder="Enter savings target"
-                      getItemValue={(savingsTarget) => savingsTarget.target}
-                      itemName="savings target"
-                      renderItem={(savingsTarget) => (
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {savingsTarget.target}
-                          </span>
-                          {/* */}
-                        </div>
-                      )}
-                    />
-                  </div>
-
                   <div className="py-4">
                     <DurationSelector
                       options={savingsDurationOptions}
@@ -762,13 +702,6 @@ export default function SaveAssetsCard() {
         {selectedOption === "by-frequency" && (
           <>
             <div className="flex justify-end">
-              {/* <Button
-                        onClick={onClose}
-                        className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-                        type="submit"
-                      >
-                        Cancel
-                      </Button> */}
               <div>
                 <Button
                   onClick={handleSaveAsset}
@@ -790,13 +723,7 @@ export default function SaveAssetsCard() {
 
       <SaveSuccessful
         amount={saveState.amount}
-        token={
-          saveState.token == tokens.safu
-            ? "SAFU"
-            : saveState.token === tokens.lsk
-            ? "LSK"
-            : "USDT"
-        }
+        token={tokenData[saveState.token]?.symbol}
         duration={saveState.duration}
         isOpen={isThirdModalOpen && saveType === "one-time"}
         onClose={() => setIsThirdModalOpen(false)}
@@ -804,13 +731,7 @@ export default function SaveAssetsCard() {
       <SuccessfulTxModal
         transactionType="setup-recurring-save"
         amount={saveState.amount}
-        token={
-          saveState.token == tokens.safu
-            ? "SAFU"
-            : saveState.token === tokens.lsk
-            ? "LSK"
-            : "USDT"
-        }
+        token={tokenData[saveState.token]?.symbol}
         isOpen={
           isThirdModalOpen &&
           saveType === "auto" &&
