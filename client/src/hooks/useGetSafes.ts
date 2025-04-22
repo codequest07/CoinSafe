@@ -6,12 +6,6 @@ import { useRecoilState } from "recoil";
 import { liskSepolia, client } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import {
-  safesState,
-  safesLoadingState,
-  safesErrorState,
-} from "@/store/atoms/safes";
-
 // Define the SafeDetails interface based on the provided struct
 interface Token {
   token: string;
@@ -111,3 +105,74 @@ export function useGetSafes() {
     refetch: fetchSafes,
   };
 }
+
+
+
+// import { useState, useEffect } from 'react';
+// import { getContract, readContract } from 'thirdweb';
+// import { useActiveAccount } from "thirdweb/react";
+
+// // Define the type for SafeDetails based on your contract's structure
+// export interface SafeDetails {
+//   id: bigint;
+//   target: string;
+//   duration: bigint;
+//   startTime: bigint;
+//   unlockTime: bigint;
+//   tokenAmounts: Token[];
+// }
+
+// export function useGetSafes(contractAddress: string) {
+//   const account = useActiveAccount();
+//   const [safes, setSafes] = useState<SafeDetails[]>([]);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [error, setError] = useState<Error | null>(null);
+
+//   const address = account?.address;
+
+//   const fetchSafes = async () => {
+//     if (!account) return;
+
+//     setIsLoading(true);
+//     setError(null);
+    
+//     try {
+//       const contract = getContract({
+//         client,
+//         address: contractAddress as `0x${string}`,
+//         abi: facetAbis.targetSavingsFacet as Abi,
+//         chain: liskSepolia,
+//       });
+
+//       console.log("CONTRACT>>>>>", contract)
+
+//       const result = await readContract({
+//         contract,
+//         method: "function getSafes() external view returns (LibDiamond.SafeDetails[] memory)",
+//         params: [],
+//         from: address,
+//       });
+
+//       console.log("SAFES FETCH RESULT>>>>>", result)
+      
+//       setSafes(result as SafeDetails[]);
+//     } catch (err) {
+//       setError(err instanceof Error ? err : new Error('Failed to fetch safes'));
+//       console.error("Error fetching safes:", err);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchSafes();
+//   }, [fetchSafes]);
+
+//   return {
+//     safes,
+//     isLoading,
+//     error,
+//     refetch: fetchSafes,
+//     walletAddress: account?.address
+//   };
+// }
