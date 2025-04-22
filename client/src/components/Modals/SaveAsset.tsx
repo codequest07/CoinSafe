@@ -15,7 +15,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MemoBackIcon from "@/icons/BackIcon";
 import MemoRipple from "@/icons/Ripple";
 // import MemoCalenderIcon from "@/icons/CalenderIcon";
@@ -41,12 +41,12 @@ import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import SuccessfulTxModal from "./SuccessfulTxModal";
-import { useBalances } from "@/hooks/useBalances";
 import { formatUnits } from "viem";
 import { SavingsTargetSelect } from "../SavingsTarget";
 // import { DurationSelector } from "../DurationSelector";
 import { useActiveAccount } from "thirdweb/react";
 import { tokenData } from "@/lib/utils";
+import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 // import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 
 interface SavingsTarget {
@@ -81,11 +81,12 @@ export default function SaveAsset({
   const smartAccount = useActiveAccount();
   const address = smartAccount?.address;
 
-  // console.log("Smart Account", smartAccount);
-
-  // const [token, setToken] = useState("");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const { AvailableBalance, supportedTokens } = useBalances(address as string);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
+  const [balances] = useRecoilState(balancesState);
+  const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
+
+
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(
@@ -353,7 +354,7 @@ export default function SaveAsset({
                         </SelectTrigger>
                         <SelectContent>
                           {supportedTokens.map((token) => (
-                            <SelectItem value={token}>
+                            <SelectItem value={token} key={token}>
                               {tokenData[token]?.symbol}
                             </SelectItem>
                           ))}
@@ -643,7 +644,7 @@ export default function SaveAsset({
                         </SelectTrigger>
                         <SelectContent>
                           {supportedTokens.map((token) => (
-                            <SelectItem value={token}>
+                            <SelectItem value={token} key={token}>
                               {tokenData[token]?.symbol}
                             </SelectItem>
                           ))}

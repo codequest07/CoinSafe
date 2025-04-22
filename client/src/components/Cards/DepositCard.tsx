@@ -20,9 +20,10 @@ import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import ApproveTxModal from "../Modals/ApproveTxModal";
 import { useNavigate } from "react-router-dom";
-import { useBalances } from "@/hooks/useBalances";
 import { tokenData } from "@/lib/utils";
 import { getTokenPrice } from "@/lib";
+import { supportedTokensState } from "@/store/atoms/balance";
+import { useRecoilState } from "recoil";
 
 export default function DepositCard() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export default function DepositCard() {
   const [token, setToken] = useState("");
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const { supportedTokens } = useBalances(address as string);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);

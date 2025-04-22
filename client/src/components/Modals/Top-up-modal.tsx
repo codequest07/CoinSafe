@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecoilState } from "recoil";
@@ -7,12 +7,12 @@ import { saveAtom } from "@/store/atoms/save";
 import { tokens, CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import AmountInput from "../AmountInput";
 import { tokenData } from "@/lib/utils";
-import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import { useTopUpSafe } from "@/hooks/useTopUpSafe";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { formatUnits } from "viem";
+import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 interface TopUpModalProps {
   onClose: () => void;
   onTopUp?: (amount: number, currency: string) => void;
@@ -43,7 +43,9 @@ export default function TopUpModal({
   const account = useActiveAccount();
   const address = account?.address;
 
-  const { supportedTokens, AvailableBalance } = useBalances(address as string);
+  const [balances] = useRecoilState(balancesState);
+  const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
 
   // Set initial token if safe details are available
   useEffect(() => {
@@ -76,7 +78,7 @@ export default function TopUpModal({
     if (AvailableBalance && value) {
       const tokenBalance = (AvailableBalance[value] as bigint) || 0n;
       const decimals =
-        value.toLowerCase() === tokens.usdt.toLowerCase() ? 6 : 18;
+        value.toLowerCase() === tokens.usdt.toLowerCase() ? 18 : 18;
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   };
@@ -94,7 +96,7 @@ export default function TopUpModal({
     if (AvailableBalance && saveState.token) {
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
       const decimals =
-        saveState.token.toLowerCase() === tokens.usdt.toLowerCase() ? 6 : 18;
+        saveState.token.toLowerCase() === tokens.usdt.toLowerCase() ? 18 : 18;
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   }, [AvailableBalance, saveState.token]);

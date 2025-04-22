@@ -216,7 +216,7 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                 <Table>
                   <TableBody>
                     {txs.map((transaction, index) => (
-                      <TableRow className="border-b border-white/10 my-1">
+                      <TableRow className="border-b border-white/10 my-1" key={index}>
                         <TableCell className="">
                           <span className="font-medium">
                             {capitalize(transaction.typeOfTransaction)}

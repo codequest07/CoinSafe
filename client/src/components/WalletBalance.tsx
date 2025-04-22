@@ -1,13 +1,18 @@
 import { Button } from "./ui/button";
 import SavingOption from "./Modals/SavingOption";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Deposit from "./Modals/Deposit";
 import { getPercentage } from "@/lib/utils";
 import Withdraw from "./Modals/Withdraw";
-import { useBalances } from "@/hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "./ui/skeleton";
+import {
+  availableBalanceState,
+  loadingState,
+  totalBalanceState,
+} from "@/store/atoms/balance";
+import { useRecoilState } from "recoil";
 
 export default function WalletBalance() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -16,15 +21,15 @@ export default function WalletBalance() {
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
-  const address = account?.address;
 
   const openFirstModal = () => setIsFirstModalOpen(true);
 
-  const {
-    totalBalance,
-    availableBalance,
-    loading: { total, available },
-  } = useBalances(address as string);
+  const [loading] = useRecoilState(loadingState);
+  const [totalBalance] = useRecoilState(totalBalanceState);
+  const [availableBalance] = useRecoilState(availableBalanceState);
+
+  const total = useMemo(() => loading.total, [loading]);
+  const available = useMemo(() => loading.available, [loading]);
 
   return (
     <div className="bg-black text-white px-6 flex flex-col">

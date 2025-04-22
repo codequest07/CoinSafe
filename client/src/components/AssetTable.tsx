@@ -17,7 +17,6 @@ import SavingOption from "./Modals/SavingOption";
 import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { useBalances } from "@/hooks/useBalances";
 import { Check, X } from "lucide-react";
 import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
@@ -26,6 +25,8 @@ import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
+import { useRecoilState } from "recoil";
+import { balancesState } from "@/store/atoms/balance";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
@@ -54,19 +55,15 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
     { token: string; balance: string; saved: string; available: string }[]
   >([]);
-  const account = useActiveAccount();
-  const address = account?.address;
 
-  const { AvailableBalance, TotalBalance, SavedBalance } = useBalances(
-    address as string
-  );
+  const [balances] = useRecoilState(balancesState);
 
   const availableTokenBalances = useMemo(
-    () => AvailableBalance,
-    [AvailableBalance]
+    () => balances.available,
+    [balances.available]
   );
-  const totalTokenBalances = useMemo(() => TotalBalance, [TotalBalance]);
-  const savedTokenBalances = useMemo(() => SavedBalance, [SavedBalance]);
+  const totalTokenBalances = useMemo(() => balances.total, [balances.total]);
+  const savedTokenBalances = useMemo(() => balances.savings, [balances.savings]);
 
   useEffect(() => {
     if (!totalTokenBalances) return;
@@ -82,7 +79,7 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
         ),
         saved: formatEther(BigInt((savedTokenBalances[token] as bigint) || 0)),
         available: formatEther(
-          BigInt((availableTokenBalances[token] as bigint) || 0)
+          BigInt(availableTokenBalances[token] as bigint || 0)
         ),
       };
     });
@@ -130,29 +127,52 @@ function AssetTableContent({
 
     async function updateAssets(assets: any[]) {
       try {
-        const transformedAssets: any[] = await Promise.all(
-          assets.map(async (asset: any) => ({
-            token: asset.token,
-            balance: asset.balance,
-            saved: asset.saved,
-            balance_usd: await getTokenPrice(
-              asset.token,
-              Number(asset.balance)
-            ),
-            saved_usd: await getTokenPrice(asset.token, Number(asset.saved)),
-            autosaved: await checkIsTokenAutoSaved(
-              address! as `0x${string}`,
-              asset.token
-            ),
-            tokenInfo: tokenData[asset.token] || {
-              symbol: "Unknown",
-              name: "Lisk",
-              color: "bg-[#440]",
-            },
-          }))
-        );
+        const transformedAssets: any[] = assets.map((asset: any) => ({
+          token: asset.token,
+          balance: asset.balance,
+          saved: asset.saved,
+          balance_usd: null, // Placeholder for loading state
+          saved_usd: null, // Placeholder for loading state
+          autosaved: null, // Placeholder for loading state
+          tokenInfo: tokenData[asset.token] || {
+            symbol: "Unknown",
+            name: "Lisk",
+            color: "bg-[#440]",
+          },
+        }));
 
         setUpdatedAssets(transformedAssets);
+
+        // Fetch additional data asynchronously
+        assets.forEach(async (asset: any, index: number) => {
+          try {
+            const balanceUsd = await getTokenPrice(
+              asset.token,
+              Number(asset.balance)
+            );
+            const savedUsd = await getTokenPrice(
+              asset.token,
+              Number(asset.saved)
+            );
+            const autosaved = await checkIsTokenAutoSaved(
+              address! as `0x${string}`,
+              asset.token
+            );
+
+            setUpdatedAssets((prev: any) => {
+              const updated = [...prev];
+              updated[index] = {
+                ...updated[index],
+                balance_usd: balanceUsd,
+                saved_usd: savedUsd,
+                autosaved,
+              };
+              return updated;
+            });
+          } catch (error) {
+            console.error("Error fetching asset data:", error);
+          }
+        });
       } catch (error) {
         console.error("Error updating assets:", error);
       }
@@ -176,7 +196,8 @@ function AssetTableContent({
           {isConnected ? (
             <Button
               onClick={openDepositModal}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+            >
               Deposit
             </Button>
           ) : (
@@ -233,18 +254,11 @@ function AssetTableContent({
                       </div>
                     ) : (
                       <div
-                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
+                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                      >
                         {asset.tokenInfo.symbol?.charAt(0)}
                       </div>
                     )}
-
-                    {/* <TokenProvider
-                      address={asset.token}
-                      chain={liskSepolia}
-                      client={client}
-                    >
-                      <TokenIcon loadingComponent={<p>..</p>}/>
-                    </TokenProvider> */}
                     <div className="flex flex-col">
                       <p className="font-medium text-white">
                         {asset.tokenInfo.symbol}
@@ -261,7 +275,7 @@ function AssetTableContent({
                       {asset.balance} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ ${asset.balance_usd}
+                      ≈ ${asset.balance_usd !== null ? asset.balance_usd : "Loading..."}
                     </p>
                   </div>
                 </TableCell>
@@ -271,7 +285,7 @@ function AssetTableContent({
                       {asset.saved} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ ${asset.saved_usd}
+                      ≈ ${asset.saved_usd !== null ? asset.saved_usd : "Loading..."}
                     </p>
                   </div>
                 </TableCell>
@@ -299,21 +313,24 @@ function AssetTableContent({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setIsDepositModalOpen(true)}>
+                      onClick={() => setIsDepositModalOpen(true)}
+                    >
                       Deposit
                     </Button>
                     {safeDetails ? (
                       <Button
                         variant="link"
                         className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                        onClick={() => setIsFirstModalOpen(true)}>
+                        onClick={() => setIsFirstModalOpen(true)}
+                      >
                         Top Up
                       </Button>
                     ) : (
                       <Button
                         variant="link"
                         className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                        onClick={() => setIsFirstModalOpen(true)}>
+                        onClick={() => setIsFirstModalOpen(true)}
+                      >
                         Save
                       </Button>
                     )}
