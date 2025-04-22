@@ -76,7 +76,6 @@ export const useCreateAutoSavings = ({
 
         const transaction = prepareContractCall({
           contract,
-          // @ts-expect-error type error
           method: resolveMethod("createAutomatedSavingsPlan"),
           params: [
             saveState.token,

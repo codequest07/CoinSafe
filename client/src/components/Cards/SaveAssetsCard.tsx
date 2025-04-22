@@ -182,7 +182,7 @@ export default function SaveAssetsCard() {
   };
 
   // End of duration state code
-  const [savingsTargets, _setSavingsTargets] = useState<SafeDetails[]>(safes);
+  const [, _setSavingsTargets] = useState<SafeDetails[]>(safes);
   //   const handleCreateTarget = (newTarget: SavingsTarget) => {
   //     setSavingsTargets((prev) => [...prev, newTarget]);
   //     console.log("Created new target:", newTarget);
@@ -633,7 +633,7 @@ export default function SaveAssetsCard() {
                       <div>
                         {saveState.amount > selectedTokenBalance && (
                           <p className="text-red-500 text-[13px] text-right">
-                            Insufficient Funds 
+                            Insufficient Funds
                           </p>
                         )}
                       </div>
