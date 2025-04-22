@@ -76,7 +76,6 @@ export function useTransactionHistory({
       console.log("====================================");
       const result = await readContract({
         contract,
-        // @ts-expect-error type error
         method: resolveMethod("getTransactionHistory"),
         params: [address, BigInt(currentOffset), BigInt(currentLimit)],
       });

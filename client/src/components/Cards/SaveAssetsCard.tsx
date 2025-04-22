@@ -114,13 +114,13 @@ export default function SaveAssetsCard() {
   const {
     safes,
     isLoading: isGetSafesLoading,
-    fetchSafes,
+    // fetchSafes,
     error,
   } = useGetSafes();
 
-  useEffect(() => {
-    fetchSafes();
-  }, []);
+  // useEffect(() => {
+  //   fetchSafes();
+  // }, []);
 
   console.log("Loading?? >>", isGetSafesLoading);
   console.log("SAFES", safes);
@@ -208,9 +208,27 @@ export default function SaveAssetsCard() {
   };
 
   const [savingsTargetInput, _setSavingsTargetInput] = useState("");
-  const [_selectedSavingsTarget, setSelectedSavingsTarget] =
+  const [selectedSavingsTarget, setSelectedSavingsTarget] =
     useState<SafeDetails | null>(null);
   //   const [nextId, setNextId] = useState(16);
+
+  console.log("SELECTED SAVINGS TARGET", selectedSavingsTarget);
+
+  // const handleSavingsTargetSelect = (savingsTarget: SafeDetails) => {
+  //   setSelectedSavingsTarget(savingsTarget);
+
+  //   if (selectedSavingsTarget) {
+  //     setSaveState((prevState) => ({
+  //       ...prevState,
+  //       id: Number(selectedSavingsTarget.id),
+  //       target: selectedSavingsTarget.target,
+  //     }));
+
+  //     console.log("In here in savings target select");
+  //     console.log("savings target", selectedSavingsTarget);
+  //     console.log("New save state", saveState);
+  //   }
+  // };
 
   const [selectedOption, setSelectedOption] = useState("by-frequency");
   const [validationErrors, setValidationErrors] = useState<{
@@ -326,7 +344,7 @@ export default function SaveAssetsCard() {
   };
 
   const handleSavingsTargetChange = (targetInput: string) => {
-    setSaveState((prev) => ({ ...prev, target: targetInput }));
+    setSaveState((prev) => ({ ...prev, target: targetInput, id: 0 }));
   };
 
   const handleSaveAsset = (
@@ -342,7 +360,6 @@ export default function SaveAssetsCard() {
       return;
     }
 
-    console.log("What is the event", event);
     saveAsset(event);
   };
 
@@ -410,31 +427,6 @@ export default function SaveAssetsCard() {
               validationErrors={validationErrors}
               supportedTokens={supportedTokens}
             />
-            {/* <div className="mb-1">
-          <label className="text-sm text-gray-300">Amount</label>
-          <div className="mt-1 relative">
-            <div className="flex items-center justify-between bg-transparent rounded-[8px] border-[1px] border-[#FFFFFF3D] px-4 py-6">
-              <div>
-                <input
-                  type="text"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="bg-transparent text-base outline-none w-full"
-                />
-                <div className="text-xs text-gray-300">≈ ₹400.58</div>
-              </div>
-              <div className="relative">
-                <button
-                  className="flex items-center gap-1 bg-[#5a5a5a] px-3 py-1.5 rounded-lg"
-                  onClick={() => setShowDropdown(!showDropdown)}
-                >
-                  <Check size={16} className="text-white" />
-                  <span>LSK</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div> */}
 
             {/* Wallet Balance */}
             <div className="flex justify-between items-center mb-6">
@@ -460,34 +452,51 @@ export default function SaveAssetsCard() {
             <div className="border-t border-[#6a6a6a] my-4"></div>
 
             {/* Savings Target */}
-            {saveType === "one-time" && (
-              <div className="mb-2">
-                <label className="text-sm text-gray-300">Savings target</label>
-                <SavingsTargetInput
-                  data={savingsTargets}
-                  value={saveState.target}
-                  onChange={handleSavingsTargetChange}
-                  onSelect={(savingsTarget) =>
-                    setSelectedSavingsTarget(savingsTarget)
-                  }
-                  onAddItem={handleCreateTarget}
-                  setShowAddModal={setIsCreateTargetModalOpen}
-                  handleAddItem={() => setIsCreateTargetModalOpen(true)}
-                  // label="Search for a city"
-                  placeholder="Enter savings target"
-                  getItemValue={(savingsTarget) => savingsTarget.target}
-                  itemName="savings target"
-                  renderItem={(savingsTarget) => (
-                    <div className="flex flex-col">
-                      <span className="font-medium">
-                        {savingsTarget.target}
-                      </span>
-                      {/* */}
-                    </div>
-                  )}
-                />
-              </div>
-            )}
+            <div className="mb-2">
+              <label className="text-sm text-gray-300">Savings target</label>
+              <SavingsTargetInput
+                data={safes}
+                value={saveState.target}
+                onChange={handleSavingsTargetChange}
+                onSelect={(savingsTarget) => {
+                  setSelectedSavingsTarget(savingsTarget);
+                  console.log("SAVINGS TARGET IN THE SELECT", savingsTarget);
+                  setSaveState((prevState) => ({
+                    ...prevState,
+                    id: Number(selectedSavingsTarget?.id || 0),
+                    target: selectedSavingsTarget?.target || prevState.target,
+                  }));
+
+                  console.log("In here in savings target select");
+                  console.log("savings target", selectedSavingsTarget);
+                  console.log("New save state", saveState);
+                }}
+                onAddItem={handleCreateTarget}
+                setShowAddModal={setIsCreateTargetModalOpen}
+                handleAddItem={() => setIsCreateTargetModalOpen(true)}
+                // label="Search for a city"
+                placeholder="Enter savings target"
+                getItemValue={(savingsTarget) => savingsTarget.target}
+                itemName="savings target"
+                renderItem={(savingsTarget) => (
+                  <div className="flex flex-col">
+                    <span className="font-medium">{savingsTarget.target}</span>
+                    {/* */}
+                  </div>
+                )}
+              />
+              {/* <div className="relative mt-2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[#6a6a6a] rounded-lg p-4 outline-none"
+              placeholder="Search target"
+            />
+
+
+          </div> */}
+            </div>
 
             {/* Duration section */}
             <div className="py-4">
@@ -801,17 +810,3 @@ export default function SaveAssetsCard() {
     </div>
   );
 }
-
-// {searchTerm && (
-//     <div className="absolute top-full left-0 right-0 mt-1 bg-[#1e1e1e] rounded-lg overflow-hidden z-10">
-//       <div className="p-4 border-b border-[#333333]">
-//         <div className="text-white">Housing</div>
-//       </div>
-//       <div className="p-4 border-b border-[#333333]">
-//         <div className="text-white">Housing accomodation</div>
-//       </div>
-//       <div className="p-4">
-//         <div className="text-white">Housing</div>
-//       </div>
-//     </div>
-//   )}

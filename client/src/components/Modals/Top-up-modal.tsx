@@ -11,6 +11,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { useTopUpSafe } from "@/hooks/useTopUpSafe";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatUnits } from "viem";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 interface TopUpModalProps {
@@ -140,9 +141,12 @@ export default function TopUpModal({
 
         <div className="mb-6">
           {isSafeLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-5 w-5 animate-spin text-white mr-2" />
-              <span className="text-white">Loading safe details...</span>
+            <div className="py-4">
+              <div className="flex justify-between items-center mb-2">
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-5 w-24 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-48 mt-1" />
             </div>
           ) : safeDetails ? (
             <>
@@ -153,7 +157,11 @@ export default function TopUpModal({
                 <span className="bg-[#79E7BA33] text-[#F1F1F1] text-sm px-3 py-1 rounded-full">
                   {safeDetails.isLocked
                     ? safeDetails.unlockTime > new Date()
-                      ? `${Math.ceil((safeDetails.unlockTime.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days to unlock`
+                      ? `${Math.ceil(
+                          (safeDetails.unlockTime.getTime() -
+                            new Date().getTime()) /
+                            (1000 * 60 * 60 * 24)
+                        )} days to unlock`
                       : "Ready to unlock"
                     : "Flexible"}
                 </span>
