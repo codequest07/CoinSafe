@@ -71,7 +71,7 @@ const PercentageCard = () => {
 
       return () => clearTimeout(timeout);
     }
-  }, [address, getUserPoints, getUserMultiplier, getStreakInfo]);
+  }, [address]);
 
   // Card data with dynamic values
   const cardData = [

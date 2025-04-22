@@ -6,7 +6,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 // import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
@@ -14,13 +14,14 @@ import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useWithdrawAsset } from "@/hooks/useWithdrawAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
-import { useBalances } from "@/hooks/useBalances";
 import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
 import MemoRipple from "@/icons/Ripple";
 import { getTokenPrice } from "@/lib";
 import { useNavigate } from "react-router-dom";
 import { tokenData } from "@/lib/utils";
+import { balancesState, supportedTokensState } from "@/store/atoms/balance";
+import { useRecoilState } from "recoil";
 
 export default function WithdrawCard() {
   const navigate = useNavigate();
@@ -32,7 +33,9 @@ export default function WithdrawCard() {
   const [token, setToken] = useState("");
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const { AvailableBalance, supportedTokens } = useBalances(address as string);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
+  const [balances] = useRecoilState(balancesState);
+  const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
 
   const openThirdModal = () => {
     console.log("details", token, amount);
@@ -117,7 +120,7 @@ export default function WithdrawCard() {
                   </SelectTrigger>
                   <SelectContent>
                     {supportedTokens.map((token) => (
-                      <SelectItem value={token}>
+                      <SelectItem value={token} key={token}>
                         {tokenData[token]?.symbol}
                       </SelectItem>
                     ))}

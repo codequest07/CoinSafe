@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
 import Deposit from "./Modals/Deposit";
 import { getPercentage } from "@/lib/utils";
-import { useBalances } from "@/hooks/useBalances";
 import { Skeleton } from "./ui/skeleton";
 import Withdraw from "./Modals/Withdraw";
 import { useActiveAccount } from "thirdweb/react";
 import { Link } from "react-router-dom";
+import { availableBalanceState, loadingState, savingsBalanceState, totalBalanceState } from "@/store/atoms/balance";
+import { useRecoilState } from "recoil";
 
 const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
@@ -18,17 +19,16 @@ const TrackingChart = () => {
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
-  const address = account?.address;
-  const {
-    loading: {
-      total: userBalanceLoading,
-      savings: savingsBalanceLoading,
-      available: availableBalanceLoading
-    },
-    totalBalance,
-    savingsBalance,
-    availableBalance,
-  } = useBalances(address as string);
+
+  const [loading] = useRecoilState(loadingState);
+  const [totalBalance] = useRecoilState(totalBalanceState);
+  const [savingsBalance] = useRecoilState(savingsBalanceState);
+  const [availableBalance] = useRecoilState(availableBalanceState);
+
+
+  const userBalanceLoading = useMemo(() => loading.total, [loading]);
+  const savingsBalanceLoading = useMemo(() => loading.savings, [loading]);
+  const availableBalanceLoading = useMemo(() => loading.available, [loading]);
 
   const openFirstModal = () => setIsFirstModalOpen(true);
 

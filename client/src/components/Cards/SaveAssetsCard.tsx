@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, tokenData } from "@/lib/utils";
 import SavingsTargetInput from "../SavingsTargetInput";
 import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
@@ -19,10 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
-import { useBalances } from "@/hooks/useBalances";
+import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useActiveAccount } from "thirdweb/react";
-import savingsFacetAbi from "../../abi/AutomatedSavingsFacet.json";
 import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
 import { liskSepolia } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
@@ -41,6 +39,7 @@ import { Textarea } from "../ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { SafeDetails, useGetSafes } from "@/hooks/useGetSafes";
+import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 
 interface SavingsTarget {
   id: string | number;
@@ -69,13 +68,13 @@ export default function SaveAssetsCard() {
       }));
     }
   }, [saveState.typeName, setSaveState]);
-  //   const [amount, setAmount] = useState("0.00");
-  //   const [showDropdown, setShowDropdown] = useState(false);
 
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const smartAccount = useActiveAccount();
   const address = smartAccount?.address;
-  const { AvailableBalance, supportedTokens } = useBalances(address as string);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
+  const [balances] = useRecoilState(balancesState);
+  const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(
@@ -246,7 +245,7 @@ export default function SaveAssetsCard() {
       setDecimals(18);
       // USDT check
     } else if (value == tokens.usdt) {
-      setDecimals(6);
+      setDecimals(18);
     }
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
@@ -275,14 +274,9 @@ export default function SaveAssetsCard() {
   };
 
   const { createAutoSavings, isLoading: autoSavingsLoading } =
-    usecreateAutoSavings({
+    useCreateAutoSavings({
       address: address as `0x${string}`,
       saveState,
-      coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-      // coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-      coinSafeAbi: savingsFacetAbi,
-      // coinSafeAbi: savingsFacetAbi.abi,
-      chainId: liskSepolia.id,
       onSuccess: () => {
         openThirdModal();
       },
@@ -293,8 +287,6 @@ export default function SaveAssetsCard() {
         });
       },
     });
-
-  console.log("SAVE STATE", saveState);
 
   const { saveAsset, isPending: isLoading } = useSaveAsset({
     address: address as `0x${string}`,
@@ -358,9 +350,10 @@ export default function SaveAssetsCard() {
   const handleSaveAsset = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    if (!validateForm()) {
-      return;
-    }
+    if (address)
+      if (!validateForm()) {
+        return;
+      }
 
     if (saveType === "auto" && selectedOption === "by-frequency") {
       createAutoSavings(event);
@@ -440,12 +433,7 @@ export default function SaveAssetsCard() {
               <div className="text-sm text-gray-300">
                 Wallet balance:{" "}
                 <span className="text-gray-400">
-                  {selectedTokenBalance}{" "}
-                  {saveState.token == tokens.safu
-                    ? "SAFU"
-                    : saveState.token === tokens.lsk
-                    ? "LSK"
-                    : "USDT"}
+                  {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
                 </span>
               </div>
               <button
@@ -655,11 +643,7 @@ export default function SaveAssetsCard() {
                         Wallet balance:{" "}
                         <span className="text-gray-400">
                           {selectedTokenBalance}{" "}
-                          {saveState.token == tokens.safu
-                            ? "SAFU"
-                            : saveState.token === tokens.lsk
-                            ? "LSK"
-                            : "USDT"}
+                          {tokenData[saveState.token]?.symbol}
                         </span>
                       </div>
                       <Button
@@ -698,50 +682,6 @@ export default function SaveAssetsCard() {
                         {validationErrors.frequency}
                       </p>
                     )}
-                  </div>
-
-                  {/* savings target section */}
-                  <div>
-                    <label className="text-sm text-gray-300">
-                      Savings target
-                    </label>
-                    <SavingsTargetInput
-                      data={savingsTargets}
-                      value={saveState.target}
-                      onChange={handleSavingsTargetChange}
-                      onSelect={(savingsTarget) => {
-                        setSelectedSavingsTarget(savingsTarget);
-                        console.log(
-                          "SAVINGS TARGET IN THE SELECT",
-                          savingsTarget
-                        );
-                        setSaveState((prevState) => ({
-                          ...prevState,
-                          id: Number(selectedSavingsTarget?.id || 0),
-                          target:
-                            selectedSavingsTarget?.target || prevState.target,
-                        }));
-
-                        console.log("In here in savings target select");
-                        console.log("savings target", selectedSavingsTarget);
-                        console.log("New save state", saveState);
-                      }}
-                      onAddItem={handleCreateTarget}
-                      setShowAddModal={setIsCreateTargetModalOpen}
-                      handleAddItem={() => setIsCreateTargetModalOpen(true)}
-                      // label="Search for a city"
-                      placeholder="Enter savings target"
-                      getItemValue={(savingsTarget) => savingsTarget.target}
-                      itemName="savings target"
-                      renderItem={(savingsTarget) => (
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {savingsTarget.target}
-                          </span>
-                          {/* */}
-                        </div>
-                      )}
-                    />
                   </div>
 
                   <div className="py-4">
@@ -792,13 +732,7 @@ export default function SaveAssetsCard() {
 
       <SaveSuccessful
         amount={saveState.amount}
-        token={
-          saveState.token == tokens.safu
-            ? "SAFU"
-            : saveState.token === tokens.lsk
-            ? "LSK"
-            : "USDT"
-        }
+        token={tokenData[saveState.token]?.symbol}
         duration={saveState.duration}
         isOpen={isThirdModalOpen && saveType === "one-time"}
         onClose={() => setIsThirdModalOpen(false)}
@@ -806,13 +740,7 @@ export default function SaveAssetsCard() {
       <SuccessfulTxModal
         transactionType="setup-recurring-save"
         amount={saveState.amount}
-        token={
-          saveState.token == tokens.safu
-            ? "SAFU"
-            : saveState.token === tokens.lsk
-            ? "LSK"
-            : "USDT"
-        }
+        token={tokenData[saveState.token]?.symbol}
         isOpen={
           isThirdModalOpen &&
           saveType === "auto" &&

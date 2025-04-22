@@ -77,7 +77,7 @@ const AmountInput = ({
               </SelectTrigger>
               <SelectContent>
                 {supportedTokens.map((token) => (
-                  <SelectItem value={token}>
+                  <SelectItem value={token} key={token}>
                     {tokenData[token]?.symbol}
                   </SelectItem>
                 ))}
@@ -94,7 +94,7 @@ const AmountInput = ({
         <div>
           {saveState.amount > selectedTokenBalance && (
             <p className="text-red-500 text-[13px] mt-1 text-right">
-              Insufficient Funds        
+              Insufficient Funds       
             </p>
           )}
         </div>

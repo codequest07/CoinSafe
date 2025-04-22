@@ -1,14 +1,11 @@
-import { useCallback, useState } from "react";
-import { useWriteContract, useConnect } from "wagmi";
-import { waitForTransactionReceipt } from "@wagmi/core";
-// import { injected } from 'wagmi/connectors';
-// import { config } from '@/lib/config';
-// import { liskSepolia } from 'viem/chains';
-import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import { useCallback, useState } from "react"
+import { getContract, prepareContractCall, resolveMethod, sendAndConfirmTransaction } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "./use-toast";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { Abi } from "viem";
 
 interface SaveState {
   token: string;
@@ -22,9 +19,6 @@ interface SaveState {
 interface CreateAutoSavingsParams {
   address?: `0x${string}`;
   saveState: SaveState;
-  coinSafeAddress: `0x${string}`;
-  coinSafeAbi: any;
-  chainId: number;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
@@ -39,25 +33,19 @@ type TokenDecimals = {
   [key: string]: number;
 };
 
-export const usecreateAutoSavings = ({
+export const useCreateAutoSavings = ({
   address,
   saveState,
-  coinSafeAddress,
-  coinSafeAbi,
   onSuccess,
   onError,
 }: CreateAutoSavingsParams): CreateAutoSavingsResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { connectAsync } = useConnect();
-  const { writeContractAsync } = useWriteContract();
-  //   const { waitForTransactionReceipt } = useWaitForTransactionReceipt();
-
   const account = useActiveAccount();
 
   const tokenDecimals: TokenDecimals = {
-    USDT: 6,
+    USDT: 18,
     DEFAULT: 18,
   };
 
@@ -70,26 +58,14 @@ export const usecreateAutoSavings = ({
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
-
-      try {
-        // Connect wallet if not connected
-        // if (!address) {
-        //   try {
-        //     await connectAsync({
-        //       chainId: liskSepolia.id,
-        //       connector: injected(),
-        //     });
-        //   } catch (error) {
-        //     throw new Error('Failed to connect wallet: ' + (error instanceof Error ? error.message : 'Unknown error'));
-        //   }
-        // }
-
+      try {        
         setIsLoading(true);
 
         const contract = getContract({
           client,
           chain: liskSepolia,
-          address: coinSafeAddress,
+          address: CoinsafeDiamondContract.address,
+          abi: facetAbis.automatedSavingsFacet as Abi,
         });
 
         // Calculate amount with appropriate decimals
@@ -100,10 +76,9 @@ export const usecreateAutoSavings = ({
 
         const transaction = prepareContractCall({
           contract,
-          method:
-            "function createAutomatedSavingsPlan(string memory _target, address _token, uint256 _amount, uint256 frequency, uint256 _duration)",
+          // @ts-expect-error type error
+          method: resolveMethod("createAutomatedSavingsPlan"),
           params: [
-            saveState.target,
             saveState.token,
             amountWithDecimals,
             toBigInt(saveState.frequency),
@@ -112,39 +87,16 @@ export const usecreateAutoSavings = ({
         });
 
         if (account) {
-          await sendTransaction({
+          await sendAndConfirmTransaction({
             transaction,
             account,
           });
 
-          // alert(`Save successful! Tx Hash: ${transactionHash}`);
           toast({
             title: "Save successful! Tx Hash",
             className: "bg-[#79E7BA]",
           });
         }
-
-        // Call save function
-        // const saveResponse = await writeContractAsync({
-        //   chainId: liskSepolia.id,
-        //   address: coinSafeAddress,
-        //   functionName: "createAutomatedSavingsPlan",
-        //   abi: coinSafeAbi,
-        //   args: [saveState.token, amountWithDecimals, saveState.frequency, saveState.duration],
-        // });
-
-        // if (!saveResponse) {
-        //   throw new Error('Auto Save transaction failed');
-        // }
-
-        // Wait for transaction confirmation
-        // const saveReceipt = await waitForTransactionReceipt(config, {
-        //   hash: saveResponse,
-        // });
-
-        // if (saveReceipt.status !== 'success') {
-        //   throw new Error('Create Auto Save transaction was not successful');
-        // }
 
         onSuccess?.();
       } catch (err) {
@@ -181,13 +133,8 @@ export const usecreateAutoSavings = ({
     [
       address,
       saveState,
-      coinSafeAddress,
-      coinSafeAbi,
       onSuccess,
       onError,
-      connectAsync,
-      writeContractAsync,
-      waitForTransactionReceipt,
     ]
   );
 

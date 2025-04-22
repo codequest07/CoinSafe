@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
-import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
+import { CoinsafeDiamondContract } from "@/lib/contract";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
@@ -20,9 +20,10 @@ import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import ApproveTxModal from "../Modals/ApproveTxModal";
 import { useNavigate } from "react-router-dom";
-import { useBalances } from "@/hooks/useBalances";
 import { tokenData } from "@/lib/utils";
 import { getTokenPrice } from "@/lib";
+import { supportedTokensState } from "@/store/atoms/balance";
+import { useRecoilState } from "recoil";
 
 export default function DepositCard() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ export default function DepositCard() {
   const [token, setToken] = useState("");
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const { supportedTokens } = useBalances(address as string);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -138,7 +139,7 @@ export default function DepositCard() {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    {supportedTokens.map(token => <SelectItem value={token}>{tokenData[token]?.symbol}</SelectItem>)}
+                    {supportedTokens.map(token => <SelectItem value={token} key={token}>{tokenData[token]?.symbol}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -158,11 +159,7 @@ export default function DepositCard() {
                   Wallet balance:{" "}
                   <span className="text-gray-400">
                     {selectedTokenBalance}{" "}
-                    {token == tokens.safu
-                      ? "SAFU"
-                      : token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
+                    {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button
@@ -195,7 +192,7 @@ export default function DepositCard() {
       <SuccessfulTxModal
         amount={amount || 0}
         token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+          tokenData[token]?.symbol
         }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
@@ -210,7 +207,7 @@ export default function DepositCard() {
         onClose={() => setApproveTxModalOpen(false)}
         amount={amount || 0}
         token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+          tokenData[token]?.symbol
         }
         text="To Deposit"
       />
