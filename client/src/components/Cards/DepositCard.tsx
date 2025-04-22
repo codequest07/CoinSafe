@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
-import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
+import { CoinsafeDiamondContract } from "@/lib/contract";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
@@ -139,7 +139,7 @@ export default function DepositCard() {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    {supportedTokens.map(token => <SelectItem value={token}>{tokenData[token]?.symbol}</SelectItem>)}
+                    {supportedTokens.map(token => <SelectItem value={token} key={token}>{tokenData[token]?.symbol}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -159,11 +159,7 @@ export default function DepositCard() {
                   Wallet balance:{" "}
                   <span className="text-gray-400">
                     {selectedTokenBalance}{" "}
-                    {token == tokens.safu
-                      ? "SAFU"
-                      : token === tokens.lsk
-                      ? "LSK"
-                      : "USDT"}
+                    {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button
@@ -196,7 +192,7 @@ export default function DepositCard() {
       <SuccessfulTxModal
         amount={amount || 0}
         token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+          tokenData[token]?.symbol
         }
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
@@ -211,7 +207,7 @@ export default function DepositCard() {
         onClose={() => setApproveTxModalOpen(false)}
         amount={amount || 0}
         token={
-          token == tokens.safu ? "SAFU" : token === tokens.lsk ? "LSK" : "USDT"
+          tokenData[token]?.symbol
         }
         text="To Deposit"
       />
