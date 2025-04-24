@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface SuccessfulTxModalProps {
@@ -25,7 +25,7 @@ export interface SuccessfulTxModalProps {
   };
 }
 
-const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
+const SuccessfulTxModal = ({
   isOpen = true,
   onClose,
   transactionType,
@@ -34,20 +34,20 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
   title,
   description,
   additionalDetails,
-}) => {
+}: SuccessfulTxModalProps) => {
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 5000); // Close modal after 5 seconds (increased from 3 seconds)
+      }, 5000); // Close modal after 5 seconds
 
       return () => clearTimeout(timer); // Cleanup timer on unmount
     }
   }, [isOpen, onClose]);
 
-  // Format amount to handle different types (number, string, bigint)
-  const formatAmount = (value?: number | string | bigint): string => {
-    if (value === undefined) return "";
+  // Format amount to handle different types
+  const formatAmount = (value: any): string => {
+    if (value === undefined || value === null) return "";
     if (typeof value === "bigint") {
       return Number(value).toLocaleString();
     }
@@ -57,19 +57,46 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
     return String(value);
   };
 
-  // Generate transaction description based on type
-  const renderTransactionDescription = (): JSX.Element => {
-    // If a custom description is provided, use that
-    if (description) {
-      return <>{description}</>;
-    }
+  // Get formatted amount
+  const formattedAmount = formatAmount(amount);
 
-    const formattedAmount = formatAmount(amount);
+  // Get transaction title
+  let transactionTitle = "Transaction Successful";
 
-    // Otherwise, generate based on transaction type
+  if (title) {
+    transactionTitle = title;
+  } else {
     switch (transactionType) {
       case "deposit":
-        return (
+        transactionTitle = "Deposit Transaction Successful";
+        break;
+      case "withdraw":
+        transactionTitle = "Withdrawal Transaction Successful";
+        break;
+      case "save":
+        transactionTitle = "Saving Transaction Successful";
+        break;
+      case "top-up":
+        transactionTitle = "Top-up Successful!";
+        break;
+      case "claim":
+        transactionTitle = "Claim Successful!";
+        break;
+      case "setup-recurring-save":
+        transactionTitle = "Create Automated Savings Successful";
+        break;
+    }
+  }
+
+  // Prepare description content
+  let descriptionContent: JSX.Element;
+
+  if (description) {
+    descriptionContent = <>{description}</>;
+  } else {
+    switch (transactionType) {
+      case "deposit":
+        descriptionContent = (
           <>
             You deposited{" "}
             <span className="text-[#20FFAF] font-semibold">
@@ -77,8 +104,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             </span>
           </>
         );
+        break;
       case "withdraw":
-        return (
+        descriptionContent = (
           <>
             You've withdrawn{" "}
             <span className="text-[#20FFAF] font-semibold">
@@ -86,8 +114,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             </span>
           </>
         );
+        break;
       case "save":
-        return (
+        descriptionContent = (
           <>
             You saved{" "}
             <span className="text-[#20FFAF] font-semibold">
@@ -98,8 +127,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
               : ""}
           </>
         );
+        break;
       case "top-up":
-        return (
+        descriptionContent = (
           <>
             You topped up{" "}
             <span className="text-[#20FFAF] font-semibold">
@@ -108,8 +138,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             to your safe
           </>
         );
+        break;
       case "claim":
-        return (
+        descriptionContent = (
           <>
             You claimed{" "}
             <span className="text-[#20FFAF] font-semibold">
@@ -118,8 +149,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             from your safe
           </>
         );
+        break;
       case "setup-recurring-save":
-        return (
+        descriptionContent = (
           <>
             You set up an{" "}
             <span className="text-[#20FFAF] font-semibold">
@@ -134,8 +166,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             </span>
           </>
         );
+        break;
       default:
-        return (
+        descriptionContent = (
           <>
             Transaction of{" "}
             <span className="text-[#20FFAF] font-semibold">
@@ -145,42 +178,19 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
           </>
         );
     }
-  };
+  }
 
-  // Generate transaction title based on type
-  const getTransactionTitle = (): string => {
-    // If a custom title is provided, use that
-    if (title) {
-      return title;
-    }
-
-    // Otherwise, generate based on transaction type
-    switch (transactionType) {
-      case "deposit":
-        return "Deposit Transaction Successful";
-      case "withdraw":
-        return "Withdrawal Transaction Successful";
-      case "save":
-        return "Saving Transaction Successful";
-      case "top-up":
-        return "Top-up Successful!";
-      case "claim":
-        return "Claim Successful!";
-      case "setup-recurring-save":
-        return "Create Automated Savings Successful";
-      default:
-        return "Transaction Successful";
-    }
-  };
+  // Format saving goal if present
+  const savingGoalText = additionalDetails?.savingGoal
+    ? `Saving Goal: ${formatAmount(additionalDetails.savingGoal)} ${token}`
+    : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className="max-w-[360px] sm:max-w-[410px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg"
         noX={true}>
-        <DialogTitle className="text-center">
-          {getTransactionTitle()}
-        </DialogTitle>
+        <DialogTitle className="text-center">{transactionTitle}</DialogTitle>
 
         <div className="flex flex-col items-center space-y-6">
           {/* Logo */}
@@ -191,19 +201,20 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
           />
 
           {/* Description */}
-          <p className="text-center text-lg">
-            {renderTransactionDescription()}
-          </p>
+          <p className="text-center text-lg">{descriptionContent}</p>
 
-          {additionalDetails?.savingGoal && (
+          {savingGoalText && (
             <div className="text-center text-sm text-gray-500">
-              Saving Goal: {formatAmount(additionalDetails.savingGoal)} {token}
+              {savingGoalText}
             </div>
           )}
         </div>
-        <div className="text-center text-sm text-[#B5B5B5]">
-          {additionalDetails?.subText}
-        </div>
+
+        {additionalDetails?.subText && (
+          <div className="text-center text-sm text-[#B5B5B5]">
+            {additionalDetails.subText}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
