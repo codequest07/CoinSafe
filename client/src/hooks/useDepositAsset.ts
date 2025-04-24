@@ -1,5 +1,9 @@
 import { useCallback, useState } from "react";
-import { getContract, prepareContractCall, sendAndConfirmTransaction } from "thirdweb";
+import {
+  getContract,
+  prepareContractCall,
+  sendAndConfirmTransaction,
+} from "thirdweb";
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
@@ -88,16 +92,32 @@ export const useDepositAsset = ({
         });
 
         const decimals = getTokenDecimals(token);
-        const amountWithDecimals = BigInt(amount * 10 ** decimals);
+
+        // Handle the conversion more safely to avoid overflow
+        // First convert to string with the correct number of decimal places
+        const amountStr = amount.toString();
+        let amountWithDecimals: bigint;
+
+        // Check if the amount has a decimal point
+        if (amountStr.includes(".")) {
+          const [whole, fraction] = amountStr.split(".");
+          const paddedFraction = fraction
+            .padEnd(decimals, "0")
+            .slice(0, decimals);
+          amountWithDecimals = BigInt(whole + paddedFraction);
+        } else {
+          // If no decimal point, just add zeros
+          amountWithDecimals = BigInt(amountStr + "0".repeat(decimals));
+        }
 
         if (account) {
           try {
             const approveTx = prepareContractCall({
               contract: tokenContract,
               method: "approve",
-              params: [coinSafeAddress, BigInt(amount * 10 ** 18)], // Assuming 18 decimals
+              params: [coinSafeAddress, amountWithDecimals], // Use the same amount with decimals
             });
-            
+
             onApprove?.();
 
             await sendAndConfirmTransaction({
@@ -123,7 +143,7 @@ export const useDepositAsset = ({
               params: [amountWithDecimals, token as `0x${string}`],
             });
 
-          await sendAndConfirmTransaction({
+            await sendAndConfirmTransaction({
               transaction: depositTx,
               account,
             });
