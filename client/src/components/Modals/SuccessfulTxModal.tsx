@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export interface SuccessfulTxModalProps {
@@ -47,21 +46,19 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
   }, [isOpen, onClose]);
 
   // Format amount to handle different types (number, string, bigint)
-  const formatAmount = (
-    amount: number | string | bigint | undefined
-  ): string => {
-    if (amount === undefined) return "";
-    if (typeof amount === "bigint") {
-      return Number(amount).toLocaleString();
+  const formatAmount = (value?: number | string | bigint): string => {
+    if (value === undefined) return "";
+    if (typeof value === "bigint") {
+      return Number(value).toLocaleString();
     }
-    if (typeof amount === "number") {
-      return amount.toLocaleString();
+    if (typeof value === "number") {
+      return value.toLocaleString();
     }
-    return String(amount);
+    return String(value);
   };
 
   // Generate transaction description based on type
-  const getTransactionDescription = () => {
+  const renderTransactionDescription = (): JSX.Element => {
     // If a custom description is provided, use that
     if (description) {
       return <>{description}</>;
@@ -75,33 +72,27 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
         return (
           <>
             You deposited{" "}
-            {
-              <span className="text-[#20FFAF] font-semibold">
-                {formattedAmount} {token}
-              </span>
-            }
+            <span className="text-[#20FFAF] font-semibold">
+              {formattedAmount} {token}
+            </span>
           </>
         );
       case "withdraw":
         return (
           <>
             You've withdrawn{" "}
-            {
-              <span className="text-[#20FFAF] font-semibold">
-                {formattedAmount} {token}
-              </span>
-            }
+            <span className="text-[#20FFAF] font-semibold">
+              {formattedAmount} {token}
+            </span>
           </>
         );
       case "save":
         return (
           <>
             You saved{" "}
-            {
-              <span className="text-[#20FFAF] font-semibold">
-                {formattedAmount} {token}
-              </span>
-            }{" "}
+            <span className="text-[#20FFAF] font-semibold">
+              {formattedAmount} {token}
+            </span>{" "}
             {additionalDetails?.poolName
               ? `to ${additionalDetails.poolName}`
               : ""}
@@ -111,11 +102,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
         return (
           <>
             You topped up{" "}
-            {
-              <span className="text-[#20FFAF] font-semibold">
-                {formattedAmount} {token}
-              </span>
-            }{" "}
+            <span className="text-[#20FFAF] font-semibold">
+              {formattedAmount} {token}
+            </span>{" "}
             to your safe
           </>
         );
@@ -123,11 +112,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
         return (
           <>
             You claimed{" "}
-            {
-              <span className="text-[#20FFAF] font-semibold">
-                {formattedAmount} {token}
-              </span>
-            }{" "}
+            <span className="text-[#20FFAF] font-semibold">
+              {formattedAmount} {token}
+            </span>{" "}
             from your safe
           </>
         );
@@ -151,11 +138,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
         return (
           <>
             Transaction of{" "}
-            {
-              <span className="text-[#20FFAF] font-semibold">
-                {formattedAmount} {token}
-              </span>
-            }{" "}
+            <span className="text-[#20FFAF] font-semibold">
+              {formattedAmount} {token}
+            </span>{" "}
             completed
           </>
         );
@@ -163,7 +148,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
   };
 
   // Generate transaction title based on type
-  const getTransactionTitle = () => {
+  const getTransactionTitle = (): string => {
     // If a custom title is provided, use that
     if (title) {
       return title;
@@ -206,7 +191,9 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
           />
 
           {/* Description */}
-          <p className="text-center text-lg">{getTransactionDescription()}</p>
+          <p className="text-center text-lg">
+            {renderTransactionDescription()}
+          </p>
 
           {additionalDetails?.savingGoal && (
             <div className="text-center text-sm text-gray-500">
