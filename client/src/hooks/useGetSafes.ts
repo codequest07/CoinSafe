@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
 import { useRecoilState } from "recoil";
@@ -46,32 +46,57 @@ export function useGetSafes() {
     });
   }, []); // <-- Only create once
 
+  // Track if we've loaded data at least once
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  // Track the last fetch time to prevent too frequent refreshes
+  const [lastFetchTime, setLastFetchTime] = useState(0);
+
   const fetchSafes = useCallback(
     async (force = false) => {
-      if (!address) return;
-
-      // Only fetch if we don't already have data or we're forcing a refresh
-      if (safes.length > 0 && !force && !isLoading) {
-        console.log("Using cached safes data");
+      if (!address) {
         return;
       }
 
-      setIsLoading(true);
+      // Prevent fetching too frequently (at least 5 seconds between any refreshes)
+      const now = Date.now();
+      if (now - lastFetchTime < 5000) {
+        console.log("Skipping fetch - too soon since last fetch");
+        return;
+      }
+
+      // Only fetch if we don't already have data or we're forcing a refresh
+      if (safes.length > 0 && !force && !isLoading) {
+        console.log(
+          "Skipping fetch - already have data and not forcing refresh"
+        );
+        return;
+      }
+
+      // If we're already loading, don't start another fetch
+      if (isLoading) {
+        console.log("Skipping fetch - already loading");
+        return;
+      }
+
+      console.log("====================================");
+      console.log("Safes: ", safes);
+      console.log("====================================");
+
+      // Only set loading to true on initial load
+      if (!initialLoadComplete) {
+        setIsLoading(true);
+      }
       setError(null);
+      setLastFetchTime(now);
 
       try {
-        console.log("Fetching safes from blockchain...");
-
         const result = await readContract({
           contract,
           method: resolveMethod("getSafes"),
           params: [],
           from: address,
         });
-
-        console.log("====================================");
-        console.log("Safes:", result);
-        console.log("====================================");
 
         setSafes(result as SafeDetails[]);
       } catch (err: any) {
@@ -80,6 +105,7 @@ export function useGetSafes() {
         setSafes([]);
       } finally {
         setIsLoading(false);
+        setInitialLoadComplete(true);
       }
     },
     [
@@ -90,16 +116,21 @@ export function useGetSafes() {
       setSafes,
       setError,
       setIsLoading,
+      initialLoadComplete,
+      setInitialLoadComplete,
+      lastFetchTime,
+      setLastFetchTime,
     ]
   );
 
   // Only fetch on initial mount, not on every dependency change
   useEffect(() => {
     // This will only run once when the component mounts
-    if (safes.length === 0 && !isLoading) {
+    if (safes.length === 0 && !isLoading && address && !initialLoadComplete) {
+      console.log("Initial fetch of safes data");
       fetchSafes();
     }
-  }, []); // Empty dependency array
+  }, [address, safes.length, isLoading, fetchSafes, initialLoadComplete]); // Include dependencies to avoid lint warnings
 
   return {
     safes,

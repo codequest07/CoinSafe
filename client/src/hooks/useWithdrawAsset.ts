@@ -1,13 +1,13 @@
-import { useCallback, useState } from 'react';
-import { 
+import { useCallback, useState } from "react";
+import {
   useSendTransaction,
   useActiveAccount,
   useConnect,
-} from 'thirdweb/react';
+} from "thirdweb/react";
 // import { liskSepolia } from 'viem/chains'; // Still used for chain ID reference
-import { getContract, prepareContractCall, sendTransaction } from 'thirdweb';
-import { client, liskSepolia } from '@/lib/config';
-import { Account } from 'thirdweb/wallets';
+import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import { client, liskSepolia } from "@/lib/config";
+import { Account } from "thirdweb/wallets";
 // import { toast } from './use-toast';
 // import { config } from '@/lib/config'; // Assuming this contains Thirdweb client config
 
@@ -49,13 +49,14 @@ export const useWithdrawAsset = ({
   // const account = useActiveAccount();
   // const wallet = useWallet(); // Reference to the wallet (e.g., smart account)
   // const { contract } = useContract({ address: coinSafeAddress, abi: coinSafeAbi });
-  const { mutateAsync: writeContractAsync, isPending: writeLoading } = useSendTransaction();
+  const { mutateAsync: writeContractAsync, isPending: writeLoading } =
+    useSendTransaction();
 
   const contract = getContract({
-            client,
-            chain: liskSepolia,
-            address: coinSafeAddress,
-        });
+    client,
+    chain: liskSepolia,
+    address: coinSafeAddress,
+  });
 
   const getTokenDecimals = (token: string): number => {
     const tokenDecimals: Record<string, number> = {
@@ -71,26 +72,26 @@ export const useWithdrawAsset = ({
       e.preventDefault();
       setError(null);
 
-    try {
-      setIsLoading(true);
+      try {
+        setIsLoading(true);
 
-      if (!address) {
-        try {
-          // await connect(async () => ({
-          //   chainId: liskSepolia.id,
-          //   // Assuming a smart wallet setup; adjust based on your configuration
-          //   wallet: wallet || { id: "inApp" }, // Fallback to in-app wallet if none specified
-          //   client: config.client, // Assuming config.client contains Thirdweb client
-          // }));
-        } catch (error) {
-          toast({
-            title: "Error Connecting Wallet",
-            variant: "destructive",
-          });
-          console.log("Error", error);
-          throw new Error('Failed to connect wallet: ' + error);
+        if (!address) {
+          try {
+            // await connect(async () => ({
+            //   chainId: liskSepolia.id,
+            //   // Assuming a smart wallet setup; adjust based on your configuration
+            //   wallet: wallet || { id: "inApp" }, // Fallback to in-app wallet if none specified
+            //   client: config.client, // Assuming config.client contains Thirdweb client
+            // }));
+          } catch (error) {
+            toast({
+              title: "Error Connecting Wallet",
+              variant: "destructive",
+            });
+            console.log("Error", error);
+            throw new Error("Failed to connect wallet: " + error);
+          }
         }
-      }
 
         if (!amount) {
           toast({
@@ -101,63 +102,81 @@ export const useWithdrawAsset = ({
           return;
         }
 
-      if (!token) {
-        toast({
-          title: "Please select token to Withdraw",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
+        if (!token) {
+          toast({
+            title: "Please select token to Withdraw",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
 
-      if (!contract) {
-        throw new Error('Contract not initialized');
-      }
+        if (!contract) {
+          throw new Error("Contract not initialized");
+        }
 
         const decimals = getTokenDecimals(token);
-        const amountWithDecimals = BigInt(amount * 10 ** decimals);
 
-      // Prepare the contract call for withdrawFromPool
-      const transaction = prepareContractCall({
-        contract,
-        method: "function withdrawFromPool(address token, uint256 amount)",
-        params: [token, amountWithDecimals],
-      });
+        // Handle the conversion more safely to avoid overflow
+        // First convert to string with the correct number of decimal places
+        const amountStr = amount.toString();
+        let amountWithDecimals: bigint;
 
-      if(account) {
-        await sendTransaction({
-          transaction,
-          account,
-        })
+        // Check if the amount has a decimal point
+        if (amountStr.includes(".")) {
+          const [whole, fraction] = amountStr.split(".");
+          const paddedFraction = fraction
+            .padEnd(decimals, "0")
+            .slice(0, decimals);
+          amountWithDecimals = BigInt(whole + paddedFraction);
+        } else {
+          // If no decimal point, just add zeros
+          amountWithDecimals = BigInt(amountStr + "0".repeat(decimals));
+        }
+
+        // Prepare the contract call for withdrawFromPool
+        const transaction = prepareContractCall({
+          contract,
+          method: "function withdrawFromPool(address token, uint256 amount)",
+          params: [token, amountWithDecimals],
+        });
+
+        if (account) {
+          await sendTransaction({
+            transaction,
+            account,
+          });
+        }
+
+        onSuccess?.();
+      } catch (err) {
+        const error =
+          err instanceof Error ? err : new Error("An unknown error occurred");
+        setError(error);
+        onError?.(error);
+        console.error("Withdraw asset error:", error);
+      } finally {
+        setIsLoading(false);
       }
-
-      onSuccess?.();
-
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('An unknown error occurred');
-      setError(error);
-      onError?.(error);
-      console.error('Withdraw asset error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [
-    address,
-    token,
-    amount,
-    coinSafeAddress,
-    coinSafeAbi,
-    onSuccess,
-    onError,
-    toast,
-    connect,
-    writeContractAsync,
-    contract,
-  ]);
+    },
+    [
+      address,
+      token,
+      amount,
+      coinSafeAddress,
+      coinSafeAbi,
+      onSuccess,
+      onError,
+      toast,
+      connect,
+      writeContractAsync,
+      contract,
+    ]
+  );
 
   return {
     withdrawAsset,
     isLoading: isLoading || writeLoading,
-    error
+    error,
   };
 };
