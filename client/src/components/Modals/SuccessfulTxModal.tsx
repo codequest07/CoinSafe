@@ -39,7 +39,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
     if (isOpen) {
       const timer = setTimeout(() => {
         onClose();
-      }, 3000); // Close modal after 3 seconds
+      }, 5000); // Close modal after 5 seconds (increased from 3 seconds)
 
       return () => clearTimeout(timer); // Cleanup timer on unmount
     }

@@ -1,5 +1,10 @@
-import { useCallback, useState } from "react"
-import { getContract, prepareContractCall, resolveMethod, sendAndConfirmTransaction } from "thirdweb";
+import { useCallback, useState } from "react";
+import {
+  getContract,
+  prepareContractCall,
+  resolveMethod,
+  sendAndConfirmTransaction,
+} from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { useActiveAccount } from "thirdweb/react";
@@ -51,14 +56,27 @@ export const useCreateAutoSavings = ({
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     const decimals = tokenDecimals[token] || tokenDecimals.DEFAULT;
-    return BigInt(amount * 10 ** decimals);
+
+    // Handle the conversion more safely to avoid overflow
+    // First convert to string with the correct number of decimal places
+    const amountStr = amount.toString();
+
+    // Check if the amount has a decimal point
+    if (amountStr.includes(".")) {
+      const [whole, fraction] = amountStr.split(".");
+      const paddedFraction = fraction.padEnd(decimals, "0").slice(0, decimals);
+      return toBigInt(whole + paddedFraction);
+    } else {
+      // If no decimal point, just add zeros
+      return toBigInt(amountStr + "0".repeat(decimals));
+    }
   };
 
   const createAutoSavings = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
-      try {        
+      try {
         setIsLoading(true);
 
         const contract = getContract({
@@ -129,12 +147,7 @@ export const useCreateAutoSavings = ({
         setIsLoading(false);
       }
     },
-    [
-      address,
-      saveState,
-      onSuccess,
-      onError,
-    ]
+    [address, saveState, onSuccess, onError]
   );
 
   return {
