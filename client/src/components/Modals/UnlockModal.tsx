@@ -6,7 +6,7 @@ import { saveAtom } from "@/store/atoms/save";
 import { tokens, CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Button } from "../ui/button";
 import { LoaderCircle } from "lucide-react";
-
+import { unlockStateAtom, UnlockState } from "@/store/atoms/unlock";
 import { supportedTokensState } from "@/store/atoms/balance";
 import MemoBackIcon from "@/icons/BackIcon";
 import { Badge } from "../ui/badge";
@@ -19,7 +19,6 @@ import { getContract, readContract } from "thirdweb";
 import { Abi } from "viem";
 import { client, liskSepolia } from "@/lib/config";
 import { useUnlockSafe } from "@/hooks/useUnlockSafe";
-import { unlockStateAtom } from "@/store/atoms/unlock";
 
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
@@ -50,14 +49,14 @@ export default function UnlockModal({
 
   // Recoil state
   const [saveState, setSaveState] = useRecoilState(saveAtom);
+  const [, setUnlockState] = useRecoilState(unlockStateAtom);
   const [supportedTokens] = useRecoilState(supportedTokensState);
-  const [unlockState, setUnlockState] = useRecoilState(unlockStateAtom);
 
   // Hooks
   const { safeDetails, isLoading: isSafeLoading } = useGetSafeById(safeId);
 
   // Set up the useUnlockSafe hook
-  const { unlockSafe, isPending, error, isSuccess } = useUnlockSafe({
+  const { unlockSafe, isPending } = useUnlockSafe({
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
     coinSafeAbi: facetAbis.targetSavingsFacet,
     onSuccess: () => {
@@ -196,7 +195,7 @@ export default function UnlockModal({
 
     // Update the token in both states to ensure synchronization
     setSaveState((prevState) => ({ ...prevState, token: value }));
-    setUnlockState((prevState) => ({ ...prevState, token: value }));
+    setUnlockState((prevState: UnlockState) => ({ ...prevState, token: value }));
 
     // Get the token balance from safeDetails with null checks
     if (safeDetails?.tokenAmounts && Array.isArray(safeDetails.tokenAmounts)) {
@@ -233,7 +232,7 @@ export default function UnlockModal({
         ...prevState,
         amount: _amount,
       }));
-      setUnlockState((prevState) => ({
+      setUnlockState((prevState: UnlockState) => ({
         ...prevState,
         amount: _amount,
       }));
@@ -241,46 +240,61 @@ export default function UnlockModal({
     [setSaveState, setUnlockState]
   );
 
-  const handleUnlockClick = useCallback(async () => {
-    // Validate input
-    if (!saveState.amount || saveState.amount <= 0) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid amount to unlock",
-        variant: "destructive",
-      });
-      return;
-    }
+  const validateAndSyncState = async () => {
+    // Validate current states
+    console.log("Current states before sync:", {
+      saveState: {
+        amount: saveState.amount,
+        token: saveState.token
+      },
+      safeId
+    });
 
-    if (!saveState.token) {
-      toast({
-        title: "Error",
-        description: "Please select a token to unlock",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Update the unlock state
-    await new Promise((resolve) => {
-      setUnlockState((prevState) => {
-        const updatedState = {
+    // Ensure states are properly synchronized
+    return new Promise((resolve) => {
+      setUnlockState((prevState: UnlockState) => {
+        const updatedState: UnlockState = {
           ...prevState,
           safeId: Number(safeId),
           token: saveState.token,
           amount: saveState.amount,
-          acceptEarlyWithdrawalFee: true, // Always accept the fee for now
+          acceptEarlyWithdrawalFee: true,
         };
+        console.log("Synced unlock state:", updatedState);
         resolve(updatedState);
         return updatedState;
       });
     });
+  };
 
-    // Show the approval modal
-    setShowApproveTxModal(true);
-
-    // Call unlockSafe directly after state updates
+  const handleUnlockClick = useCallback(async () => {
     try {
+      // Validate input
+      if (!saveState.amount || saveState.amount <= 0) {
+        toast({
+          title: "Error",
+          description: "Please enter a valid amount to unlock",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!saveState.token) {
+        toast({
+          title: "Error",
+          description: "Please select a token to unlock",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Ensure states are synchronized before proceeding
+      await validateAndSyncState();
+      
+      // Show the approval modal
+      setShowApproveTxModal(true);
+
+      // Call unlockSafe
       await unlockSafe({
         preventDefault: () => {}, // Mock preventDefault method
         target: document.createElement("form"), // Mock target
@@ -289,8 +303,7 @@ export default function UnlockModal({
       console.error("Unlock process failed:", error);
       toast({
         title: "Error",
-        description:
-          "An error occurred during the unlock process. Please try again.",
+        description: "An error occurred during the unlock process. Please try again.",
         variant: "destructive",
       });
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useGetSafes, SafeDetails } from "@/hooks/useGetSafes";
+import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
 

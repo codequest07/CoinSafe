@@ -109,7 +109,10 @@ export const useUnlockSafe = ({
       e.preventDefault();
       setError(null);
 
+      console.log("Starting unlockSafe process");
+      
       if (!account) {
+        console.error("No connected account found");
         const error = new Error("No connected account");
         setError(error);
         onError?.(error);
@@ -117,7 +120,14 @@ export const useUnlockSafe = ({
       }
 
       // Get the latest state directly from Recoil with null check
+      console.log("Current unlockState:", unlockState);
+      
       if (!unlockState || !unlockState.token || !unlockState.safeId) {
+        console.error("Invalid unlock state detected:", {
+          state: unlockState,
+          token: unlockState?.token,
+          safeId: unlockState?.safeId
+        });
         const error = new Error("Invalid unlock state");
         setError(error);
         toast({
@@ -132,11 +142,11 @@ export const useUnlockSafe = ({
       const currentState = unlockState;
 
       // Log the current unlock state for debugging
-      console.log("useUnlockSafe - Current state:", {
+      console.log("useUnlockSafe - Proceeding with state:", {
         safeId: currentState.safeId,
         token: currentState.token,
         amount: currentState.amount,
-        acceptEarlyWithdrawalFee: currentState.acceptEarlyWithdrawalFee,
+        acceptEarlyWithdrawalFee: currentState.acceptEarlyWithdrawalFee
       });
 
       // Validate amount is greater than zero
