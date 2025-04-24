@@ -195,7 +195,10 @@ export default function UnlockModal({
 
     // Update the token in both states to ensure synchronization
     setSaveState((prevState) => ({ ...prevState, token: value }));
-    setUnlockState((prevState: UnlockState) => ({ ...prevState, token: value }));
+    setUnlockState((prevState: UnlockState) => ({
+      ...prevState,
+      token: value,
+    }));
 
     // Get the token balance from safeDetails with null checks
     if (safeDetails?.tokenAmounts && Array.isArray(safeDetails.tokenAmounts)) {
@@ -245,9 +248,9 @@ export default function UnlockModal({
     console.log("Current states before sync:", {
       saveState: {
         amount: saveState.amount,
-        token: saveState.token
+        token: saveState.token,
       },
-      safeId
+      safeId,
     });
 
     // Ensure states are properly synchronized
@@ -290,7 +293,7 @@ export default function UnlockModal({
 
       // Ensure states are synchronized before proceeding
       await validateAndSyncState();
-      
+
       // Show the approval modal
       setShowApproveTxModal(true);
 
@@ -303,7 +306,8 @@ export default function UnlockModal({
       console.error("Unlock process failed:", error);
       toast({
         title: "Error",
-        description: "An error occurred during the unlock process. Please try again.",
+        description:
+          "An error occurred during the unlock process. Please try again.",
         variant: "destructive",
       });
     }
