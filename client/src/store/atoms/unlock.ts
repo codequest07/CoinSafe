@@ -12,7 +12,7 @@ export const unlockStateAtom = atom<UnlockState>({
   default: {
     safeId: 0,
     token: "",
-    amount: 0,
+    amount: 0, // Changed from null to 0 to match the type definition
     acceptEarlyWithdrawalFee: true,
   },
 });

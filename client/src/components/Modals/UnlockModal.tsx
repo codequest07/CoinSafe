@@ -170,40 +170,57 @@ export default function UnlockModal({
     calculateBreakingFee,
   ]);
 
+  // Initialize unlockState when safe details are loaded
+  useEffect(() => {
+    if (safeDetails) {
+      setUnlockState((prevState) => ({
+        ...prevState,
+        safeId: Number(safeId),
+        acceptEarlyWithdrawalFee: true,
+      }));
+    }
+  }, [safeDetails, safeId, setUnlockState]);
+
   const handleTokenSelect = (value: string) => {
+    if (!value) {
+      console.error("Token value is null or undefined");
+      return;
+    }
+
     // SAFU & LSK check
     if (value == tokens.safu || value == tokens.lsk) {
       setDecimals(18);
-      // USDT check
     } else if (value == tokens.usdt) {
       setDecimals(6);
     }
 
-    // Update the token in saveState
+    // Update the token in both states to ensure synchronization
     setSaveState((prevState) => ({ ...prevState, token: value }));
+    setUnlockState((prevState) => ({ ...prevState, token: value }));
 
-    // Get the token balance from safeDetails
-    if (safeDetails && safeDetails.tokenAmounts) {
-      // Find the token in the safe's token amounts
-      const tokenInfo = safeDetails.tokenAmounts.find(
-        (t) => t.token.toLowerCase() === value.toLowerCase()
-      );
-
-      if (tokenInfo) {
-        // Update the selected token balance
-        setSelectedTokenBalance(tokenInfo.amount);
-        console.log(
-          `Token ${value} balance in safe: ${tokenInfo.amount} ${tokenInfo.tokenSymbol}`
+    // Get the token balance from safeDetails with null checks
+    if (safeDetails?.tokenAmounts && Array.isArray(safeDetails.tokenAmounts)) {
+      try {
+        const tokenInfo = safeDetails.tokenAmounts.find(
+          (t) => t?.token?.toLowerCase() === value?.toLowerCase()
         );
-      } else {
-        // If token not found in safe, set balance to 0
+
+        if (tokenInfo && typeof tokenInfo.amount === "number") {
+          setSelectedTokenBalance(tokenInfo.amount);
+          console.log(
+            `Token ${value} balance in safe: ${tokenInfo.amount} ${tokenInfo.tokenSymbol}`
+          );
+        } else {
+          setSelectedTokenBalance(0);
+          console.log(`Token ${value} not found in safe or has invalid amount`);
+        }
+      } catch (error) {
+        console.error("Error processing token info:", error);
         setSelectedTokenBalance(0);
-        console.log(`Token ${value} not found in safe or has zero balance`);
       }
     } else {
-      // If safeDetails not available, set balance to 0
       setSelectedTokenBalance(0);
-      console.log("Safe details not available yet");
+      console.log("Safe details or tokenAmounts not available");
     }
   };
 
@@ -211,16 +228,20 @@ export default function UnlockModal({
   const handleAmountChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const _amount = Number(event.target.value);
+      // Update both states to ensure synchronization
       setSaveState((prevState) => ({
         ...prevState,
         amount: _amount,
       }));
+      setUnlockState((prevState) => ({
+        ...prevState,
+        amount: _amount,
+      }));
     },
-    [setSaveState]
+    [setSaveState, setUnlockState]
   );
 
-  // Handle unlock button click
-  const handleUnlockClick = useCallback(() => {
+  const handleUnlockClick = useCallback(async () => {
     // Validate input
     if (!saveState.amount || saveState.amount <= 0) {
       toast({
@@ -241,25 +262,38 @@ export default function UnlockModal({
     }
 
     // Update the unlock state
-    setUnlockState({
-      safeId: Number(safeId),
-      token: saveState.token,
-      amount: saveState.amount,
-      acceptEarlyWithdrawalFee: true, // Always accept the fee for now
+    await new Promise((resolve) => {
+      setUnlockState((prevState) => {
+        const updatedState = {
+          ...prevState,
+          safeId: Number(safeId),
+          token: saveState.token,
+          amount: saveState.amount,
+          acceptEarlyWithdrawalFee: true, // Always accept the fee for now
+        };
+        resolve(updatedState);
+        return updatedState;
+      });
     });
 
     // Show the approval modal
     setShowApproveTxModal(true);
 
-    // Add a small delay before calling unlockSafe to allow the modal to show
-    setTimeout(() => {
-      // Call the unlockSafe function with a mock event
-      // We need to create a minimal FormEvent-like object
-      unlockSafe({
+    // Call unlockSafe directly after state updates
+    try {
+      await unlockSafe({
         preventDefault: () => {}, // Mock preventDefault method
         target: document.createElement("form"), // Mock target
       } as unknown as React.FormEvent);
-    }, 500);
+    } catch (error) {
+      console.error("Unlock process failed:", error);
+      toast({
+        title: "Error",
+        description:
+          "An error occurred during the unlock process. Please try again.",
+        variant: "destructive",
+      });
+    }
   }, [safeId, saveState.amount, saveState.token, setUnlockState, unlockSafe]);
 
   return (
@@ -323,10 +357,16 @@ export default function UnlockModal({
                     maxAmount = maxAmount / 1000000;
                   }
 
+                  // Update both states to ensure synchronization
                   setSaveState((prev) => ({
                     ...prev,
                     amount: maxAmount,
                   }));
+                  setUnlockState((prev) => ({
+                    ...prev,
+                    amount: maxAmount,
+                  }));
+
                   console.log(`Setting max amount: ${maxAmount}`);
                 } else {
                   toast({

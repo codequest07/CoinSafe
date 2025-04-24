@@ -116,12 +116,28 @@ export const useUnlockSafe = ({
         return;
       }
 
-      // Get the latest state directly from Recoil
-      // This ensures we have the most up-to-date state
+      // Get the latest state directly from Recoil with null check
+      if (!unlockState || !unlockState.token || !unlockState.safeId) {
+        const error = new Error("Invalid unlock state");
+        setError(error);
+        toast({
+          title: "Error",
+          description: "Please ensure token and safe ID are set correctly",
+          variant: "destructive",
+        });
+        onError?.(error);
+        return;
+      }
+
       const currentState = unlockState;
 
       // Log the current unlock state for debugging
-      console.log("useUnlockSafe - Current state:", currentState);
+      console.log("useUnlockSafe - Current state:", {
+        safeId: currentState.safeId,
+        token: currentState.token,
+        amount: currentState.amount,
+        acceptEarlyWithdrawalFee: currentState.acceptEarlyWithdrawalFee,
+      });
 
       // Validate amount is greater than zero
       if (!currentState.amount || currentState.amount <= 0) {
@@ -139,8 +155,65 @@ export const useUnlockSafe = ({
         return;
       }
 
+      // Validate token and safeId
+      if (!currentState.token) {
+        const error = new Error("Token is not set in the unlock state");
+        setError(error);
+        toast({
+          title: "Error",
+          description: "Please select a valid token to unlock.",
+          variant: "destructive",
+        });
+        onError?.(error);
+        return;
+      }
+
+      if (!currentState.safeId) {
+        const error = new Error("Safe ID is not set in the unlock state");
+        setError(error);
+        toast({
+          title: "Error",
+          description: "Safe ID is missing. Please try again.",
+          variant: "destructive",
+        });
+        onError?.(error);
+        return;
+      }
+
       setIsPending(true);
       try {
+        // Validate token and safeId before preparing the transaction
+        if (!currentState.token) {
+          throw new Error("Token is null or undefined in the unlock state");
+        }
+
+        if (!currentState.safeId) {
+          throw new Error("Safe ID is null or undefined in the unlock state");
+        }
+
+        // Log the current state for debugging
+        console.log("Preparing transaction with state:", {
+          safeId: currentState.safeId,
+          token: currentState.token,
+          amount: currentState.amount,
+          acceptFee: currentState.acceptEarlyWithdrawalFee,
+        });
+
+        // Ensure token and safeId are valid before proceeding
+        if (
+          typeof currentState.token !== "string" ||
+          currentState.token.trim() === ""
+        ) {
+          throw new Error("Invalid token value in the unlock state");
+        }
+
+        if (
+          typeof currentState.safeId !== "number" ||
+          currentState.safeId <= 0
+        ) {
+          throw new Error("Invalid safe ID value in the unlock state");
+        }
+
         const contract = getContract({
           client,
           chain: liskSepolia,
