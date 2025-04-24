@@ -12,14 +12,15 @@ export interface SuccessfulTxModalProps {
     | "withdraw"
     | "save"
     | "setup-recurring-save"
-    | "top-up";
-  amount?: number | string;
+    | "top-up"
+    | "claim";
+  amount?: number | string | bigint;
   token?: string;
   title?: string;
   description?: string;
   additionalDetails?: {
     frequency?: string;
-    savingGoal?: number;
+    savingGoal?: number | bigint;
     poolName?: string;
     subText?: string;
   };
@@ -45,12 +46,28 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
     }
   }, [isOpen, onClose]);
 
+  // Format amount to handle different types (number, string, bigint)
+  const formatAmount = (
+    amount: number | string | bigint | undefined
+  ): string => {
+    if (amount === undefined) return "";
+    if (typeof amount === "bigint") {
+      return Number(amount).toLocaleString();
+    }
+    if (typeof amount === "number") {
+      return amount.toLocaleString();
+    }
+    return String(amount);
+  };
+
   // Generate transaction description based on type
   const getTransactionDescription = () => {
     // If a custom description is provided, use that
     if (description) {
       return <>{description}</>;
     }
+
+    const formattedAmount = formatAmount(amount);
 
     // Otherwise, generate based on transaction type
     switch (transactionType) {
@@ -60,7 +77,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             You deposited{" "}
             {
               <span className="text-[#20FFAF] font-semibold">
-                {amount} {token}
+                {formattedAmount} {token}
               </span>
             }
           </>
@@ -71,7 +88,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             You've withdrawn{" "}
             {
               <span className="text-[#20FFAF] font-semibold">
-                {amount} {token}
+                {formattedAmount} {token}
               </span>
             }
           </>
@@ -82,7 +99,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             You saved{" "}
             {
               <span className="text-[#20FFAF] font-semibold">
-                {amount} {token}
+                {formattedAmount} {token}
               </span>
             }{" "}
             {additionalDetails?.poolName
@@ -96,10 +113,22 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             You topped up{" "}
             {
               <span className="text-[#20FFAF] font-semibold">
-                {amount} {token}
+                {formattedAmount} {token}
               </span>
             }{" "}
             to your safe
+          </>
+        );
+      case "claim":
+        return (
+          <>
+            You claimed{" "}
+            {
+              <span className="text-[#20FFAF] font-semibold">
+                {formattedAmount} {token}
+              </span>
+            }{" "}
+            from your safe
           </>
         );
       case "setup-recurring-save":
@@ -111,7 +140,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             </span>{" "}
             plan to save{" "}
             <span className="text-[#20FFAF] font-semibold">
-              {amount} {token}
+              {formattedAmount} {token}
             </span>{" "}
             <span className="font-semibold lowercase">
               {additionalDetails?.frequency || "every day"}
@@ -124,7 +153,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
             Transaction of{" "}
             {
               <span className="text-[#20FFAF] font-semibold">
-                {amount} {token}
+                {formattedAmount} {token}
               </span>
             }{" "}
             completed
@@ -150,6 +179,8 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
         return "Saving Transaction Successful";
       case "top-up":
         return "Top-up Successful!";
+      case "claim":
+        return "Claim Successful!";
       case "setup-recurring-save":
         return "Create Automated Savings Successful";
       default:
@@ -179,7 +210,7 @@ const SuccessfulTxModal: React.FC<SuccessfulTxModalProps> = ({
 
           {additionalDetails?.savingGoal && (
             <div className="text-center text-sm text-gray-500">
-              Saving Goal: {additionalDetails.savingGoal} {token}
+              Saving Goal: {formatAmount(additionalDetails.savingGoal)} {token}
             </div>
           )}
         </div>
