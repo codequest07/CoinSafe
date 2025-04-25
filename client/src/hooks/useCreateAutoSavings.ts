@@ -11,6 +11,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { toast } from "./use-toast";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Abi } from "viem";
+import { publicClient } from "@/lib/client";
 
 interface SaveState {
   token: string;
@@ -30,6 +31,10 @@ interface CreateAutoSavingsParams {
 
 interface CreateAutoSavingsResult {
   createAutoSavings: (e: React.FormEvent) => Promise<void>;
+  addTokenToAutoSafe: (e: React.FormEvent) => Promise<void>;
+  hasCreatedAutoSafe: (
+    supportedTokens: string[]
+  ) => Promise<{ hasAutoSafe: boolean; tokens: string[] }>;
   isLoading: boolean;
   error: Error | null;
 }
@@ -150,8 +155,124 @@ export const useCreateAutoSavings = ({
     [address, saveState, onSuccess, onError]
   );
 
+  const addTokenToAutoSafe = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
+      try {
+        setIsLoading(true);
+
+        const contract = getContract({
+          client,
+          chain: liskSepolia,
+          address: CoinsafeDiamondContract.address,
+          abi: facetAbis.automatedSavingsFacet as Abi,
+        });
+
+        // Calculate amount with appropriate decimals
+        const amountWithDecimals = getAmountWithDecimals(
+          saveState.amount,
+          saveState.token
+        );
+
+        const transaction = prepareContractCall({
+          contract,
+          method: resolveMethod("addTokenToAutomatedPlan"),
+          params: [
+            saveState.token,
+            amountWithDecimals,
+            toBigInt(saveState.frequency),
+          ],
+        });
+
+        if (account) {
+          await sendAndConfirmTransaction({
+            transaction,
+            account,
+          });
+
+          toast({
+            title: "Add token to Auto Safe successful!",
+            className: "bg-[#79E7BA]",
+          });
+        }
+
+        onSuccess?.();
+      } catch (err) {
+        let errorMessage = "An unknown error occurred";
+
+        // Handle specific error cases
+        if (err instanceof Error) {
+          if (err.message.includes("InsufficientFunds()")) {
+            errorMessage =
+              "Insufficient funds. Please deposit enough to be able to save.";
+          } else if (
+            err.message.includes("userAutomatedPlanExistsAlreadyExists()")
+          ) {
+            errorMessage =
+              "You have created an automated savings plan already!";
+          } else {
+            errorMessage = err.message;
+          }
+        }
+
+        console.error("Error writing data to contract:", err);
+        toast({
+          title: "Error writing data to contract",
+          variant: "destructive",
+        });
+
+        const error = new Error(errorMessage);
+        setError(error);
+        onError?.(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [address, saveState, onSuccess, onError]
+  );
+
+  const hasCreatedAutoSafe = async (supportedTokens: string[]) => {
+    const rawTxs = supportedTokens.map((token) => ({
+      address: CoinsafeDiamondContract.address,
+      abi: facetAbis.automatedSavingsFacet as Abi,
+      functionName: "isAutosaveEnabledForToken",
+      args: [address, token],
+    }));
+
+    const results = await publicClient.multicall({
+      contracts: rawTxs,
+    });
+
+    console.log(results);
+
+    let hasAutoSafe: boolean = false;
+    const tokens: string[] = [];
+
+    results
+      .filter(
+        ({ status }: { result?: any; status: string; error?: Error }) =>
+          status === "success"
+      )
+      .map(
+        (
+          { result }: { result?: any; status: string; error?: Error },
+          idx: number,
+        ) => {
+          if (result) {
+            hasAutoSafe = true;
+            tokens.push(supportedTokens[idx]);
+          }
+        }
+      );
+
+    return { hasAutoSafe, tokens };
+  };
+
   return {
     createAutoSavings,
+    addTokenToAutoSafe,
+    hasCreatedAutoSafe,
     isLoading,
     error,
   };
