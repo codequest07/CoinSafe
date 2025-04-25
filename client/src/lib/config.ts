@@ -81,4 +81,3 @@ export const client = createThirdwebClient({
   clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID,
   secretKey: import.meta.env.VITE_THIRDWEB_SECRET_KEY,
 });
-
