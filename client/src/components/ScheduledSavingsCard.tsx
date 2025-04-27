@@ -8,7 +8,7 @@ import MemoStory from "@/icons/Story";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { tokenData } from "@/lib/utils";
+import { formatNumberToMax7Dp, tokenData } from "@/lib/utils";
 
 export default function ScheduledSavings() {
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ export default function ScheduledSavings() {
                 </div>
 
                 <div className="text-sm text-gray-400 sm:text-base">
-                  ≈ ${saving.value}
+                  ≈ ${formatNumberToMax7Dp(Number(saving.value))}
                 </div>
               </div>
             </div>
