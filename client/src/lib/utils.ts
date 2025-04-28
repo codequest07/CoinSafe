@@ -15,6 +15,17 @@ export function getValidNumberValue(value: any) {
 export const getPercentage = (a: number, b: number): number =>
   isFinite(a / b) ? Number(((a / b) * 100).toFixed()) : 0;
 
+export function formatNumberToMax7Dp(num: number, maxDecimals = 7) {
+  const [intPart, decimalPart] = num.toString().split(".");
+
+  if (!decimalPart) return intPart; // No decimal part, return as is
+
+  const trimmedDecimal = decimalPart.slice(0, maxDecimals);
+
+  return `${intPart}.${trimmedDecimal}`;
+}
+
+
 export function transformAndAccumulateTokenBalances(
   data: Array<any>
 ): { token: string; balance: string }[] {

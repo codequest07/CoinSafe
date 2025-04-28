@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getTokenPrice } from "@/lib";
+// import { tokenData } from "@/lib/utils";
 
 interface DisplaySafe {
   id: string;
   name: string;
   amount: number;
+  // token: string;
   status: "Flexible" | "Locked";
   unlockDate: string;
 }
@@ -20,6 +23,7 @@ export default function SavingsCards() {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { safes, isLoading, isError, fetchSafes } = useGetSafes();
+  const [displaySafes, setDisplaySafes] = useState<DisplaySafe[]>([]);
 
   // Force refresh safes when component mounts
   useEffect(() => {
@@ -48,33 +52,44 @@ export default function SavingsCards() {
     }
   };
 
-  // Transform safes data to display format
-  const displaySafes: DisplaySafe[] =
-    safes?.map((safe) => {
-      // Calculate total amount across all tokens
-      const totalAmount = safe.tokenAmounts.reduce((sum, token) => {
-        // Convert BigInt to number with proper decimal formatting
-        const tokenAmount = Number(formatUnits(token.amount, 18));
-        return sum + tokenAmount;
-      }, 0);
-
-      // Format unlock date
-      const unlockDate = new Date(Number(safe.unlockTime) * 1000);
-      const formattedDate = unlockDate.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-
-      return {
-        id: safe.id.toString(),
-        name: safe.target,
-        amount: totalAmount,
-        // Determine if flexible or locked based on duration
-        status: Number(safe.duration) > 0 ? "Locked" : "Flexible",
-        unlockDate: `Unlocks on ${formattedDate}`,
-      };
-    }) || [];
+  useEffect(() => {
+    const getSafes = async () => {
+      const safeList = await Promise.all(
+        safes?.map(async (safe) => {
+          const totalAmount = await Promise.all(
+            safe.tokenAmounts.map(async (token) => {
+              const tokenAmount = Number(formatUnits(token.amount, 18));
+              const usdVal = await getTokenPrice(token.token, tokenAmount);
+              return Number(usdVal);
+            })
+          ).then((amounts) => amounts.reduce((sum, val) => sum + val, 0));
+  
+          const unlockDate = new Date(Number(safe.unlockTime) * 1000);
+          const formattedDate = unlockDate.toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          });
+          
+          const status = Number(safe.duration) > 0 ? "Locked" : "Flexible";
+          
+          return {
+            id: safe.id.toString(),
+            name: safe.target,
+            amount: totalAmount,
+            status: status as "Locked" | "Flexible",
+            unlockDate: `Unlocks on ${formattedDate}`,
+          };
+        }) || []
+      );
+  
+      setDisplaySafes(safeList);
+    };
+  
+    if (safes) {
+      getSafes();
+    }
+  }, [safes]);
 
   return (
     <div className="bg-black text-white p-4 w-full">
