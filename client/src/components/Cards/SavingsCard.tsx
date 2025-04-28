@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 
 import { useActiveAccount } from "thirdweb/react";
 import TopUpModal from "../Modals/Top-up-modal";
+import UnlockModal from "../Modals/UnlockModal";
 
 const SavingsCard = ({
   title,
@@ -23,13 +24,27 @@ const SavingsCard = ({
   text?: ReactNode;
   safeId?: number;
 }) => {
+  // Only log in development mode to avoid console spam
+  if (process.env.NODE_ENV === "development") {
+    // console.log(
+    //   `SavingsCard value changed: ${value} ${unit} for safeId: ${safeId}`
+    // );
+  }
   const account = useActiveAccount();
   const isConnected = !!account?.address;
 
   const [showModal, setShowModal] = useState(false);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
 
   const handleTopUp = () => {
+    // Close the modal - the refresh will be handled by the TopUpModal component
     setShowModal(false);
+  };
+
+  const handleUnlock = () => {
+    // Don't close the modal here - let the UnlockModal handle it
+    // The refresh will be handled by the UnlockModal component
+    console.log("Unlock handled in SavingsCard");
   };
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
@@ -67,7 +82,12 @@ const SavingsCard = ({
         </div>
         {isConnected && (
           <div className="flex justify-end gap-2">
-            <button className="rounded-[100px] px-8 py-[8px] bg-[#1E1E1E99] h-[40px] text-sm text-[#F1F1F1]">
+            <button
+              onClick={() => {
+                console.log("Opening unlock modal for safeId:", safeId);
+                setShowUnlockModal(true);
+              }}
+              className="rounded-[100px] px-8 py-[8px] bg-[#1E1E1E99] h-[40px] text-sm text-[#F1F1F1]">
               Unlock
             </button>
             <button
@@ -84,6 +104,20 @@ const SavingsCard = ({
           onClose={() => setShowModal(false)}
           onTopUp={() => handleTopUp()}
           safeId={safeId}
+        />
+      )}
+      {/* Only render the UnlockModal when showUnlockModal is true */}
+      {showUnlockModal && (
+        <UnlockModal
+          onClose={() => {
+            console.log("Closing unlock modal");
+            setShowUnlockModal(false);
+          }}
+          onUnlock={() => {
+            handleUnlock();
+            // Don't close the modal here - the UnlockModal will handle it
+          }}
+          safeId={safeId.toString()}
         />
       )}
     </div>

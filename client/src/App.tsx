@@ -16,6 +16,8 @@ import SaveAssets from "./Pages/SaveAssets";
 import Deposit from "./Pages/Deposit";
 import Withdraw from "./Pages/Withdraw";
 import NotFound from "./components/not-found";
+import { useBalances } from "./hooks/useBalances";
+import { useActiveAccount } from "thirdweb/react";
 // import { useRecoilState } from "recoil";
 // import { availableBalanceState, savingsBalanceState, totalBalanceState } from "./store/atoms/save";
 // import { useContractEvents } from "./hooks/useWatchEvents";
@@ -39,6 +41,11 @@ const App = () => {
   //     setSavingsBalance((prev) => prev + amountInUsd);
   //   },
   // });
+
+  const account = useActiveAccount();
+  useBalances(account?.address as string);
+  console.log("App Component rerendered");
+
 
   return (
     <div className="bg-[#010104]">

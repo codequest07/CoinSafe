@@ -1,19 +1,21 @@
 import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
 import VaultCard from "@/components/Cards/VaultCard";
-import { useBalances } from "@/hooks/useBalances";
 import SavingsCards from "@/components/SavingsCards";
 import { useActiveAccount } from "thirdweb/react";
 import { AssetTabs } from "@/components/Asset-tabs";
+import { loadingState, savingsBalanceState } from "@/store/atoms/balance";
+import { useRecoilState } from "recoil";
+import { useMemo } from "react";
 // import SavingsTargetsCarousel from "@/components/SavingsTargetsCarousel";
 
 const Vault = () => {
   const account = useActiveAccount();
   const isConnected = !!account?.address;
-  const address = account?.address;
-  const {
-    savingsBalance,
-    loading: { savings },
-  } = useBalances(address as string);
+
+  const [loading] = useRecoilState(loadingState);
+  const [savingsBalance] = useRecoilState(savingsBalanceState);
+
+  const savings = useMemo(() => loading.savings, [loading]);
 
   return (
     <div className="w-full relative px-2 sm:px-4 overflow-x-hidden">

@@ -76,72 +76,35 @@ export default function StatsCards() {
   // Format streak
   const formattedStreak = currentStreak > 0 ? currentStreak.toString() : "0"; // Fallback value
 
-  // Debug state to help diagnose loading issues
-  useEffect(() => {
-    console.log("[StatsCards] Current state:", {
-      address: address
-        ? `${address.slice(0, 6)}...${address.slice(-4)}`
-        : "none",
-      userPoints: userPoints.toString(),
-      userMultiplier: userMultiplier.toString(),
-      currentStreak: currentStreak.toString(),
-      formattedMultiplier,
-      formattedPoints,
-      formattedStreak,
-      pointsLoading,
-      streakLoading,
-      isLoading,
-      initialDataLoaded,
-    });
-  }, [
-    address,
-    userPoints,
-    userMultiplier,
-    currentStreak,
-    formattedMultiplier,
-    formattedPoints,
-    formattedStreak,
-    pointsLoading,
-    streakLoading,
-    isLoading,
-    initialDataLoaded,
-  ]);
-
   // Fetch points data when component mounts or address changes
   useEffect(() => {
     // Force loading state to false after a timeout to prevent infinite loading
     const loadingTimeout = setTimeout(() => {
       if (pointsLoading || streakLoading) {
-      
         if (!userPoints || userPoints === BigInt(0)) {
-         
           // Import these from the hooks file
           const setUserPoints = useSetRecoilState(userPointsState);
           setUserPoints(BigInt(0));
         }
 
         if (!userMultiplier || userMultiplier === BigInt(0)) {
-          
           const setUserMultiplier = useSetRecoilState(userMultiplierState);
           setUserMultiplier(BigInt(0));
         }
 
         if (!currentStreak || currentStreak === BigInt(0)) {
-          
           const setUserCurrentStreak = useSetRecoilState(
             userCurrentStreakState
           );
           setUserCurrentStreak(BigInt(0));
         }
       }
-    }, 1500); // 1.5 second timeout - more aggressive to prevent long loading states
+    }, 500); // 1.5 second timeout - more aggressive to prevent long loading states
 
     if (address) {
-
       // Fetch points with error handling
       getUserPoints(address)
         .then((_points) => {
-         
           // Mark data as loaded
           setInitialDataLoaded(true);
         })
@@ -154,7 +117,6 @@ export default function StatsCards() {
       // Fetch multiplier with error handling
       getUserMultiplier(address)
         .then((_multiplier) => {
-        
           // Mark data as loaded
           setInitialDataLoaded(true);
         })
@@ -181,15 +143,15 @@ export default function StatsCards() {
       if (streakError) {
         console.error("[StatsCards] Streak system error:", streakError);
       }
-    } 
+    }
 
     // Clean up timeout
     return () => clearTimeout(loadingTimeout);
   }, [
     address,
-    getUserPoints,
-    getUserMultiplier,
-    getStreakInfo,
+    // getUserPoints,
+    // getUserMultiplier,
+    // getStreakInfo,
     // Removed pointsLoading and streakLoading from dependencies to prevent potential loops
   ]);
 
@@ -201,7 +163,8 @@ export default function StatsCards() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="relative w-full bg-[#13131340] border border-[#FFFFFF21] rounded-lg p-4">
+            className="relative w-full bg-[#13131340] border border-[#FFFFFF21] rounded-lg p-4"
+          >
             <div className="flex justify-between items-start mb-3">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-6 w-12" />
@@ -218,7 +181,6 @@ export default function StatsCards() {
     <div className="flex flex-col md:flex-row w-full gap-3">
       {/* First Card - Rewards */}
       <div className="relative w-full bg-[#13131340] border border-[#FFFFFF21] rounded-lg p-4">
-      
         <div className="flex justify-between items-start mb-3">
           <span className="text-sm text-[#CACACA] font-medium">Rewards</span>
           <Badge className="text-white bg-[#79E7BA33] rounded-xl hover:bg-[#79E7BA33]">
@@ -241,7 +203,6 @@ export default function StatsCards() {
 
       {/* Second Card - Savings Streak */}
       <div className="relative w-full bg-[#13131340] border border-[#FFFFFF21] rounded-lg p-4">
-       
         <div className="flex justify-between items-start mb-3">
           <span className="text-sm text-[#CACACA] font-medium">
             Savings streak

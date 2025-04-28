@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowLeft, LoaderCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Loader2, LoaderCircle } from "lucide-react";
+import { cn, tokenData } from "@/lib/utils";
 import SavingsTargetInput from "../SavingsTargetInput";
 import AmountInput from "../AmountInput";
 import { useRecoilState, useResetRecoilState } from "recoil";
@@ -19,10 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { usecreateAutoSavings } from "@/hooks/useCreateAutoSavings";
-import { useBalances } from "@/hooks/useBalances";
+import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useActiveAccount } from "thirdweb/react";
-import savingsFacetAbi from "../../abi/AutomatedSavingsFacet.json";
 import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
 import { liskSepolia } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
@@ -38,9 +36,10 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { SafeDetails, useGetSafes } from "@/hooks/useGetSafes";
+import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 
 interface SavingsTarget {
   id: string | number;
@@ -70,13 +69,13 @@ export default function SaveAssetsCard() {
       }));
     }
   }, [saveState.typeName, setSaveState]);
-  //   const [amount, setAmount] = useState("0.00");
-  //   const [showDropdown, setShowDropdown] = useState(false);
 
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const smartAccount = useActiveAccount();
   const address = smartAccount?.address;
-  const { AvailableBalance, supportedTokens } = useBalances(address as string);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
+  const [balances] = useRecoilState(balancesState);
+  const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(
@@ -95,6 +94,10 @@ export default function SaveAssetsCard() {
 
   const [, setDecimals] = useState(1);
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
+  const [checkingAutoSafe, setCheckingAutoSafe] = useState(false);
+  const [hasAutoSafe, setHasAutoSafe] = useState(false);
+  const [autoSafeTokenOptions, setAutoSafeTokenOptions] =
+    useState(supportedTokens);
 
   //   Duration state
   const [savingsDuration, setSavingsDuration] = useState(30);
@@ -115,18 +118,18 @@ export default function SaveAssetsCard() {
 
   const {
     safes,
-    isLoading: isGetSafesLoading,
+    // isLoading: isGetSafesLoading,
     // fetchSafes,
-    error,
+    // error,
   } = useGetSafes();
 
   // useEffect(() => {
   //   fetchSafes();
   // }, []);
 
-  console.log("Loading?? >>", isGetSafesLoading);
-  console.log("SAFES", safes);
-  console.log("SAFE FETCH ERROR", error);
+  // console.log("Loading?? >>", isGetSafesLoading);
+  // console.log("SAFES", safes);
+  // console.log("SAFE FETCH ERROR", error);
 
   const calculateEndDate = (days: number) => {
     const currentDate = new Date();
@@ -149,7 +152,7 @@ export default function SaveAssetsCard() {
     const calculatedUnlockDate = addDays(new Date(), duration);
     setUnlockDate(calculatedUnlockDate);
 
-    console.log(`Savings duration changed to ${duration} days`);
+    // console.log(`Savings duration changed to ${duration} days`);
   };
 
   // Initialize with default duration
@@ -175,16 +178,16 @@ export default function SaveAssetsCard() {
       duration: durationInSeconds,
     }));
 
-    console.log(
-      `Custom date selected: ${format(
-        date,
-        "dd MMMM yyyy"
-      )}, ${daysDiff} days from now`
-    );
+    // console.log(
+    //   `Custom date selected: ${format(
+    //     date,
+    //     "dd MMMM yyyy"
+    //   )}, ${daysDiff} days from now`
+    // );
   };
 
   // End of duration state code
-  const [savingsTargets, _setSavingsTargets] = useState<SafeDetails[]>(safes);
+  const [, _setSavingsTargets] = useState<SafeDetails[]>(safes);
   //   const handleCreateTarget = (newTarget: SavingsTarget) => {
   //     setSavingsTargets((prev) => [...prev, newTarget]);
   //     console.log("Created new target:", newTarget);
@@ -202,7 +205,7 @@ export default function SaveAssetsCard() {
       //     newTarget,
       //     id: Date.now().toString(),
       //   }));
-      console.log("Created new target:", newTarget);
+      // console.log("Created new target:", newTarget);
       //   onCreate({ ...newTarget, id: Date.now().toString() });
       setNewTarget({ name: "", description: "" });
       setIsCreateTargetModalOpen(false);
@@ -214,7 +217,7 @@ export default function SaveAssetsCard() {
     useState<SafeDetails | null>(null);
   //   const [nextId, setNextId] = useState(16);
 
-  console.log("SELECTED SAVINGS TARGET", selectedSavingsTarget);
+  // console.log("SELECTED SAVINGS TARGET", selectedSavingsTarget);
 
   // const handleSavingsTargetSelect = (savingsTarget: SafeDetails) => {
   //   setSelectedSavingsTarget(savingsTarget);
@@ -247,7 +250,7 @@ export default function SaveAssetsCard() {
       setDecimals(18);
       // USDT check
     } else if (value == tokens.usdt) {
-      setDecimals(6);
+      setDecimals(18);
     }
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
@@ -275,28 +278,27 @@ export default function SaveAssetsCard() {
     // onClose();
   };
 
-  const { createAutoSavings, isLoading: autoSavingsLoading } =
-    usecreateAutoSavings({
-      address: address as `0x${string}`,
-      saveState,
-      coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-      // coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-      coinSafeAbi: savingsFacetAbi,
-      // coinSafeAbi: savingsFacetAbi.abi,
-      chainId: liskSepolia.id,
-      onSuccess: () => {
-        openThirdModal();
-        setTimeout(() => {
-          resetSaveState();
-        }, 4000);
-      },
-      onError: (error: { message: any }) => {
-        toast({
-          title: error.message,
-          variant: "destructive",
-        });
-      },
-    });
+  const {
+    createAutoSavings,
+    addTokenToAutoSafe,
+    hasCreatedAutoSafe,
+    isLoading: autoSavingsLoading,
+  } = useCreateAutoSavings({
+    address: address as `0x${string}`,
+    saveState,
+    onSuccess: () => {
+      openThirdModal();
+      setTimeout(() => {
+        resetSaveState();
+      }, 4000);
+    },
+    onError: (error: { message: any }) => {
+      toast({
+        title: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   useEffect(() => {
     console.log("SAVE STATE", saveState);
@@ -400,11 +402,15 @@ export default function SaveAssetsCard() {
   const handleSaveAsset = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    if (!validateForm()) {
-      return;
-    }
+    if (address)
+      if (!validateForm()) {
+        return;
+      }
 
     if (saveType === "auto" && selectedOption === "by-frequency") {
+      if (hasAutoSafe) {
+        return addTokenToAutoSafe(event);
+      }
       createAutoSavings(event);
       return;
     }
@@ -417,14 +423,33 @@ export default function SaveAssetsCard() {
       const tokensData = AvailableBalance;
       if (!tokensData) return;
 
-      console.log("Tokens Data: ", tokensData);
+      // console.log("Tokens Data: ", tokensData);
 
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
-      console.log("token Balance: ", tokenBalance);
+      // console.log("token Balance: ", tokenBalance);
     }
   }, [saveState.token, address, AvailableBalance]);
+
+  useEffect(() => {
+    async function run() {
+      setCheckingAutoSafe(true);
+      try {
+        const { hasAutoSafe, tokens } = await hasCreatedAutoSafe(
+          supportedTokens
+        );
+        console.log("Has AutoSafe::", hasAutoSafe, "Tokens::", tokens);
+        setHasAutoSafe(hasAutoSafe);
+        setAutoSafeTokenOptions(tokens);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setCheckingAutoSafe(false);
+      }
+    }
+    run();
+  }, [supportedTokens]);
 
   return (
     <div className="flex justify-center min-h-fit bg-[#010104] p-4">
@@ -482,12 +507,7 @@ export default function SaveAssetsCard() {
               <div className="text-sm text-gray-300">
                 Wallet balance:{" "}
                 <span className="text-gray-400">
-                  {selectedTokenBalance}{" "}
-                  {saveState.token == tokens.safu
-                    ? "SAFU"
-                    : saveState.token === tokens.lsk
-                    ? "LSK"
-                    : "USDT"}
+                  {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
                 </span>
               </div>
               <button
@@ -514,7 +534,7 @@ export default function SaveAssetsCard() {
                 onChange={handleSavingsTargetChange}
                 onSelect={(savingsTarget) => {
                   setSelectedSavingsTarget(savingsTarget);
-                  console.log("SAVINGS TARGET IN THE SELECT", savingsTarget);
+                  // console.log("SAVINGS TARGET IN THE SELECT", savingsTarget);
                   setSaveState((prevState) => ({
                     ...prevState,
                     id: Number(savingsTarget.id),
@@ -522,9 +542,9 @@ export default function SaveAssetsCard() {
                     duration: Number(savingsTarget.duration),
                   }));
 
-                  console.log("In here in savings target select");
-                  console.log("savings target", selectedSavingsTarget);
-                  console.log("New save state", saveState);
+                  // console.log("In here in savings target select");
+                  // console.log("savings target", selectedSavingsTarget);
+                  // console.log("New save state", saveState);
                 }}
                 onAddItem={handleCreateTarget}
                 setShowAddModal={setIsCreateTargetModalOpen}
@@ -582,39 +602,6 @@ export default function SaveAssetsCard() {
                 <p className="font-[200] text-base">Choose savings method</p>
                 <div className="flex gap-2">
                   <Label
-                    htmlFor="per-transaction"
-                    className={`w-full flex flex-col items-start justify-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${
-                      selectedOption === "per-transaction"
-                        ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
-                        : ""
-                    }`}
-                  >
-                    {/* }`}
-                            > */}
-                    <div>
-                      <div className="flex gap-2">
-                        <input
-                          type="radio"
-                          id="per-transaction"
-                          name="savingOption"
-                          value="per-transaction"
-                          checked={selectedOption === "per-transaction"}
-                          onChange={() => setSelectedOption("per-transaction")}
-                          className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
-                        />
-
-                        <div className="font-medium mb-1 text-white">
-                          Spend and save
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-[400] text-[#C7C7D1]">
-                          Save a percentage of every transaction
-                        </p>
-                      </div>
-                    </div>
-                  </Label>
-                  <Label
                     htmlFor="by-frequency"
                     className={`w-full flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${
                       selectedOption === "by-frequency"
@@ -647,6 +634,39 @@ export default function SaveAssetsCard() {
                       </div>
                     </div>
                   </Label>
+                  <Label
+                    htmlFor="per-transaction"
+                    className={`w-full flex flex-col items-start justify-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${
+                      selectedOption === "per-transaction"
+                        ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
+                        : ""
+                    }`}
+                  >
+                    {/* }`}
+                            > */}
+                    <div>
+                      <div className="flex gap-2">
+                        <input
+                          type="radio"
+                          id="per-transaction"
+                          name="savingOption"
+                          value="per-transaction"
+                          checked={selectedOption === "per-transaction"}
+                          onChange={() => setSelectedOption("per-transaction")}
+                          className="appearance-none h-4 w-4 border-2 border-gray-400 rounded-full checked:bg-[#79E7BA] checked:border-[#79E7BA] focus:outline-none"
+                        />
+
+                        <div className="font-medium mb-1 text-white">
+                          Spend and save
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-[400] text-[#C7C7D1]">
+                          Save a percentage of every transaction
+                        </p>
+                      </div>
+                    </div>
+                  </Label>
                 </div>
               </div>
 
@@ -666,186 +686,158 @@ export default function SaveAssetsCard() {
                 </div>
               )}
 
-              {selectedOption === "by-frequency" && (
-                <div>
-                  {/* <label htmlFor="amount" className="text-sm text-gray-400">
+              {selectedOption === "by-frequency" &&
+                (checkingAutoSafe ? (
+                  <div className="flex w-full items-center justify-center p-4">
+                    <Loader2 className="w-12 h-12 animate-spin " />
+                  </div>
+                ) : supportedTokens.filter(
+                    (token) => !autoSafeTokenOptions.includes(token)
+                  ).length < 1 ? (
+                  <div className="p-4 flex flex-col items-center justify-center text-center gap-5">
+                    <h4 className="text-2xl ">You're all set up</h4>
+                    <p className="">
+                      You have successfully set up your your automated savings
+                      plan and added automated savings plans for all our
+                      supported tokens.
+                    </p>
+                    <Link to={""}>
+                      <Button
+                        variant="link"
+                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                      >
+                        View your Automated Safe here
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div>
+                    {/* <label htmlFor="amount" className="text-sm text-gray-400">
                     Amount
                   </label> */}
-                  <AmountInput
-                    amount={saveState.amount}
-                    handleAmountChange={handleAmountChange}
-                    handleTokenSelect={handleTokenSelect}
-                    saveState={saveState}
-                    tokens={tokens}
-                    selectedTokenBalance={selectedTokenBalance}
-                    validationErrors={validationErrors}
-                    supportedTokens={supportedTokens}
-                  />
+                    <AmountInput
+                      amount={saveState.amount}
+                      handleAmountChange={handleAmountChange}
+                      handleTokenSelect={handleTokenSelect}
+                      saveState={saveState}
+                      tokens={tokens}
+                      selectedTokenBalance={selectedTokenBalance}
+                      validationErrors={validationErrors}
+                      supportedTokens={
+                        hasAutoSafe
+                          ? supportedTokens.filter(
+                              (token) => !autoSafeTokenOptions.includes(token)
+                            )
+                          : supportedTokens
+                      }
+                    />
 
-                  {/* Wallet balance */}
-                  <>
-                    {saveState.token && (
-                      <div>
-                        {saveState.amount > selectedTokenBalance && (
-                          <p className="text-red-500 text-[13px] text-right">
-                            Insufficient Funds 
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="text-sm font-[300] text-gray-300">
-                        Wallet balance:{" "}
-                        <span className="text-gray-400">
-                          {selectedTokenBalance}{" "}
-                          {saveState.token == tokens.safu
-                            ? "SAFU"
-                            : saveState.token === tokens.lsk
-                            ? "LSK"
-                            : "USDT"}
-                        </span>
-                      </div>
-                      <Button
-                        className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                        // onClick={() => setAmount(selectedTokenBalance)}
-                        onClick={() =>
-                          setSaveState((prev) => ({
-                            ...prev,
-                            amount: selectedTokenBalance,
-                          }))
-                        }
-                      >
-                        {/* }
-                                  > */}
-                        Max
-                      </Button>
-                    </div>
-                  </>
-
-                  <div className="space-y-4 py-2 text-white">
-                    <Label htmlFor="frequencyAmount">Frequency</Label>
-                    <Select onValueChange={handleFrequencyChange}>
-                      <SelectTrigger className="w-full bg-gray-700 border bg-transparent text-white rounded-lg">
-                        <SelectValue placeholder="Select Frequency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {frequencies.map((freq) => (
-                          <SelectItem key={freq.value} value={freq.value}>
-                            {freq.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {validationErrors.frequency && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {validationErrors.frequency}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* savings target section */}
-                  <div>
-                    <label className="text-sm text-gray-300">
-                      Savings target
-                    </label>
-                    <SavingsTargetInput
-                      data={savingsTargets}
-                      value={saveState.target}
-                      onChange={handleSavingsTargetChange}
-                      onSelect={(savingsTarget) => {
-                        setSelectedSavingsTarget(savingsTarget);
-                        console.log(
-                          "SAVINGS TARGET IN THE SELECT",
-                          savingsTarget
-                        );
-                        console.log(
-                          "SELECTED SAVINGS TARGET",
-                          selectedSavingsTarget?.id
-                        );
-                        setSaveState((prevState) => ({
-                          ...prevState,
-                          id: Number(selectedSavingsTarget?.id),
-                          target:
-                            selectedSavingsTarget?.target || prevState.target,
-                        }));
-
-                        console.log("In here in savings target select");
-                        console.log("savings target", selectedSavingsTarget);
-                        console.log("New save state", saveState);
-                      }}
-                      onAddItem={handleCreateTarget}
-                      setShowAddModal={setIsCreateTargetModalOpen}
-                      handleAddItem={() => setIsCreateTargetModalOpen(true)}
-                      // label="Search for a city"
-                      placeholder="Enter savings target"
-                      getItemValue={(savingsTarget) => savingsTarget.target}
-                      itemName="savings target"
-                      renderItem={(savingsTarget) => (
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {savingsTarget.target}
+                    {/* Wallet balance */}
+                    <>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="text-sm font-[300] text-gray-300">
+                          Wallet balance:{" "}
+                          <span className="text-gray-400">
+                            {selectedTokenBalance}{" "}
+                            {tokenData[saveState.token]?.symbol}
                           </span>
-                          {/* */}
                         </div>
+                        <Button
+                          className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                          // onClick={() => setAmount(selectedTokenBalance)}
+                          onClick={() =>
+                            setSaveState((prev) => ({
+                              ...prev,
+                              amount: selectedTokenBalance,
+                            }))
+                          }
+                        >
+                          {/* }
+                                  > */}
+                          Max
+                        </Button>
+                      </div>
+                    </>
+
+                    <div className="space-y-4 py-2 text-white">
+                      <Label htmlFor="frequencyAmount">Frequency</Label>
+                      <Select onValueChange={handleFrequencyChange}>
+                        <SelectTrigger className="w-full bg-gray-700 border bg-transparent text-white rounded-lg">
+                          <SelectValue placeholder="Select Frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {frequencies.map((freq) => (
+                            <SelectItem key={freq.value} value={freq.value}>
+                              {freq.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {validationErrors.frequency && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {validationErrors.frequency}
+                        </p>
                       )}
-                    />
-                  </div>
-
-                  <div className="py-4">
-                    <DurationSelector
-                      options={savingsDurationOptions}
-                      selectedValue={savingsDuration}
-                      onChange={handleDurationChange}
-                      onCustomDateSelect={handleCustomDateSelect}
-                      customDate={customDate}
-                      isCustomSelected={isCustomSelected}
-                      className="mb-4"
-                    />
-
-                    <div className="py-4">
-                      <p className="text-[12px] font-semibold text-[#CACACA]">
-                        Unlocks on{" "}
-                        <span className="text-[#CACACA]">{endDate}</span>
-                      </p>
                     </div>
+
+                    {!hasAutoSafe && (
+                      <div className="py-4">
+                        <DurationSelector
+                          options={savingsDurationOptions}
+                          selectedValue={savingsDuration}
+                          onChange={handleDurationChange}
+                          onCustomDateSelect={handleCustomDateSelect}
+                          customDate={customDate}
+                          isCustomSelected={isCustomSelected}
+                          className="mb-4"
+                        />
+
+                        <div className="py-4">
+                          <p className="text-[12px] font-semibold text-[#CACACA]">
+                            Unlocks on{" "}
+                            <span className="text-[#CACACA]">{endDate}</span>
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                ))}
             </div>
           </>
         )}
 
-        {selectedOption === "by-frequency" && (
-          <>
-            <div className="flex justify-end">
-              <div>
-                <Button
-                  onClick={handleSaveAsset}
-                  className="text-black px-8 rounded-[2rem]"
-                  variant="outline"
-                  disabled={isLoading || autoSavingsLoading}
-                >
-                  {isLoading || autoSavingsLoading ? (
-                    <LoaderCircle className="animate-spin" />
-                  ) : (
-                    "Save assets"
-                  )}
-                </Button>
+        {selectedOption === "by-frequency" &&
+          (supportedTokens.filter(
+            (token) => !autoSafeTokenOptions.includes(token)
+          ).length < 1 ? (
+            <></>
+          ) : (
+            <>
+              <div className="flex justify-end">
+                <div>
+                  <Button
+                    onClick={handleSaveAsset}
+                    className="text-black px-8 rounded-[2rem]"
+                    variant="outline"
+                    disabled={isLoading || autoSavingsLoading}
+                  >
+                    {isLoading || autoSavingsLoading ? (
+                      <LoaderCircle className="animate-spin" />
+                    ) : hasAutoSafe ? (
+                      "Add token to safe"
+                    ) : (
+                      "Save assets"
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          ))}
       </div>
 
       <SaveSuccessful
         amount={saveState.amount}
-        token={
-          saveState.token == tokens.safu
-            ? "SAFU"
-            : saveState.token === tokens.lsk
-            ? "LSK"
-            : "USDT"
-        }
+        token={tokenData[saveState.token]?.symbol}
         duration={saveState.duration}
         isOpen={isThirdModalOpen && saveType === "one-time"}
         onClose={() => setIsThirdModalOpen(false)}
@@ -853,13 +845,7 @@ export default function SaveAssetsCard() {
       <SuccessfulTxModal
         transactionType="setup-recurring-save"
         amount={saveState.amount}
-        token={
-          saveState.token == tokens.safu
-            ? "SAFU"
-            : saveState.token === tokens.lsk
-            ? "LSK"
-            : "USDT"
-        }
+        token={tokenData[saveState.token]?.symbol}
         isOpen={
           isThirdModalOpen &&
           saveType === "auto" &&

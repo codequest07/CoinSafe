@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ClaimCard from "./Cards/ClaimCard";
@@ -14,6 +15,25 @@ export default function SavingsDetail() {
 
   const { safeDetails, isLoading, isError } = useGetSafeById(id);
   console.log("safeDetails", safeDetails);
+
+  // Log detailed information about the safe details
+  useEffect(() => {
+    if (safeDetails) {
+      console.log("Safe ID:", safeDetails.id);
+      console.log("Target:", safeDetails.target);
+      console.log("Is Locked:", safeDetails.isLocked);
+      console.log("Token Amounts:", safeDetails.tokenAmounts);
+      console.log("Total Amount USD:", safeDetails.totalAmountUSD);
+
+      // Log each token amount in detail
+      safeDetails.tokenAmounts.forEach((token, index) => {
+        console.log(`Token ${index + 1}:`);
+        console.log(`  Symbol: ${token.tokenSymbol}`);
+        console.log(`  Amount: ${token.amount}`);
+        console.log(`  Formatted Amount: ${token.formattedAmount}`);
+      });
+    }
+  }, [safeDetails]);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">

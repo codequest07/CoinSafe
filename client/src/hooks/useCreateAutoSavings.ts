@@ -1,14 +1,17 @@
 import { useCallback, useState } from "react";
-import { useWriteContract, useConnect } from "wagmi";
-import { waitForTransactionReceipt } from "@wagmi/core";
-// import { injected } from 'wagmi/connectors';
-// import { config } from '@/lib/config';
-// import { liskSepolia } from 'viem/chains';
-import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import {
+  getContract,
+  prepareContractCall,
+  resolveMethod,
+  sendAndConfirmTransaction,
+} from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "./use-toast";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { Abi } from "viem";
+import { publicClient } from "@/lib/client";
 
 interface SaveState {
   token: string;
@@ -22,15 +25,16 @@ interface SaveState {
 interface CreateAutoSavingsParams {
   address?: `0x${string}`;
   saveState: SaveState;
-  coinSafeAddress: `0x${string}`;
-  coinSafeAbi: any;
-  chainId: number;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
 
 interface CreateAutoSavingsResult {
   createAutoSavings: (e: React.FormEvent) => Promise<void>;
+  addTokenToAutoSafe: (e: React.FormEvent) => Promise<void>;
+  hasCreatedAutoSafe: (
+    supportedTokens: string[]
+  ) => Promise<{ hasAutoSafe: boolean; tokens: string[] }>;
   isLoading: boolean;
   error: Error | null;
 }
@@ -39,57 +43,52 @@ type TokenDecimals = {
   [key: string]: number;
 };
 
-export const usecreateAutoSavings = ({
+export const useCreateAutoSavings = ({
   address,
   saveState,
-  coinSafeAddress,
-  coinSafeAbi,
   onSuccess,
   onError,
 }: CreateAutoSavingsParams): CreateAutoSavingsResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { connectAsync } = useConnect();
-  const { writeContractAsync } = useWriteContract();
-  //   const { waitForTransactionReceipt } = useWaitForTransactionReceipt();
-
   const account = useActiveAccount();
 
   const tokenDecimals: TokenDecimals = {
-    USDT: 6,
+    USDT: 18,
     DEFAULT: 18,
   };
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     const decimals = tokenDecimals[token] || tokenDecimals.DEFAULT;
-    return BigInt(amount * 10 ** decimals);
+
+    // Handle the conversion more safely to avoid overflow
+    // First convert to string with the correct number of decimal places
+    const amountStr = amount.toString();
+
+    // Check if the amount has a decimal point
+    if (amountStr.includes(".")) {
+      const [whole, fraction] = amountStr.split(".");
+      const paddedFraction = fraction.padEnd(decimals, "0").slice(0, decimals);
+      return toBigInt(whole + paddedFraction);
+    } else {
+      // If no decimal point, just add zeros
+      return toBigInt(amountStr + "0".repeat(decimals));
+    }
   };
 
   const createAutoSavings = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
-
       try {
-        // Connect wallet if not connected
-        // if (!address) {
-        //   try {
-        //     await connectAsync({
-        //       chainId: liskSepolia.id,
-        //       connector: injected(),
-        //     });
-        //   } catch (error) {
-        //     throw new Error('Failed to connect wallet: ' + (error instanceof Error ? error.message : 'Unknown error'));
-        //   }
-        // }
-
         setIsLoading(true);
 
         const contract = getContract({
           client,
           chain: liskSepolia,
-          address: coinSafeAddress,
+          address: CoinsafeDiamondContract.address,
+          abi: facetAbis.automatedSavingsFacet as Abi,
         });
 
         // Calculate amount with appropriate decimals
@@ -100,10 +99,8 @@ export const usecreateAutoSavings = ({
 
         const transaction = prepareContractCall({
           contract,
-          method:
-            "function createAutomatedSavingsPlan(string memory _target, address _token, uint256 _amount, uint256 frequency, uint256 _duration)",
+          method: resolveMethod("createAutomatedSavingsPlan"),
           params: [
-            saveState.target,
             saveState.token,
             amountWithDecimals,
             toBigInt(saveState.frequency),
@@ -112,39 +109,16 @@ export const usecreateAutoSavings = ({
         });
 
         if (account) {
-          await sendTransaction({
+          await sendAndConfirmTransaction({
             transaction,
             account,
           });
 
-          // alert(`Save successful! Tx Hash: ${transactionHash}`);
           toast({
             title: "Save successful! Tx Hash",
             className: "bg-[#79E7BA]",
           });
         }
-
-        // Call save function
-        // const saveResponse = await writeContractAsync({
-        //   chainId: liskSepolia.id,
-        //   address: coinSafeAddress,
-        //   functionName: "createAutomatedSavingsPlan",
-        //   abi: coinSafeAbi,
-        //   args: [saveState.token, amountWithDecimals, saveState.frequency, saveState.duration],
-        // });
-
-        // if (!saveResponse) {
-        //   throw new Error('Auto Save transaction failed');
-        // }
-
-        // Wait for transaction confirmation
-        // const saveReceipt = await waitForTransactionReceipt(config, {
-        //   hash: saveResponse,
-        // });
-
-        // if (saveReceipt.status !== 'success') {
-        //   throw new Error('Create Auto Save transaction was not successful');
-        // }
 
         onSuccess?.();
       } catch (err) {
@@ -178,21 +152,127 @@ export const usecreateAutoSavings = ({
         setIsLoading(false);
       }
     },
-    [
-      address,
-      saveState,
-      coinSafeAddress,
-      coinSafeAbi,
-      onSuccess,
-      onError,
-      connectAsync,
-      writeContractAsync,
-      waitForTransactionReceipt,
-    ]
+    [address, saveState, onSuccess, onError]
   );
+
+  const addTokenToAutoSafe = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
+      try {
+        setIsLoading(true);
+
+        const contract = getContract({
+          client,
+          chain: liskSepolia,
+          address: CoinsafeDiamondContract.address,
+          abi: facetAbis.automatedSavingsFacet as Abi,
+        });
+
+        // Calculate amount with appropriate decimals
+        const amountWithDecimals = getAmountWithDecimals(
+          saveState.amount,
+          saveState.token
+        );
+
+        const transaction = prepareContractCall({
+          contract,
+          method: resolveMethod("addTokenToAutomatedPlan"),
+          params: [
+            saveState.token,
+            amountWithDecimals,
+            toBigInt(saveState.frequency),
+          ],
+        });
+
+        if (account) {
+          await sendAndConfirmTransaction({
+            transaction,
+            account,
+          });
+
+          toast({
+            title: "Add token to Auto Safe successful!",
+            className: "bg-[#79E7BA]",
+          });
+        }
+
+        onSuccess?.();
+      } catch (err) {
+        let errorMessage = "An unknown error occurred";
+
+        // Handle specific error cases
+        if (err instanceof Error) {
+          if (err.message.includes("InsufficientFunds()")) {
+            errorMessage =
+              "Insufficient funds. Please deposit enough to be able to save.";
+          } else if (
+            err.message.includes("userAutomatedPlanExistsAlreadyExists()")
+          ) {
+            errorMessage =
+              "You have created an automated savings plan already!";
+          } else {
+            errorMessage = err.message;
+          }
+        }
+
+        console.error("Error writing data to contract:", err);
+        toast({
+          title: "Error writing data to contract",
+          variant: "destructive",
+        });
+
+        const error = new Error(errorMessage);
+        setError(error);
+        onError?.(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [address, saveState, onSuccess, onError]
+  );
+
+  const hasCreatedAutoSafe = async (supportedTokens: string[]) => {
+    const rawTxs = supportedTokens.map((token) => ({
+      address: CoinsafeDiamondContract.address,
+      abi: facetAbis.automatedSavingsFacet as Abi,
+      functionName: "isAutosaveEnabledForToken",
+      args: [address, token],
+    }));
+
+    const results = await publicClient.multicall({
+      contracts: rawTxs,
+    });
+
+    console.log(results);
+
+    let hasAutoSafe: boolean = false;
+    const tokens: string[] = [];
+
+    results
+      .filter(
+        ({ status }: { result?: any; status: string; error?: Error }) =>
+          status === "success"
+      )
+      .map(
+        (
+          { result }: { result?: any; status: string; error?: Error },
+          idx: number,
+        ) => {
+          if (result) {
+            hasAutoSafe = true;
+            tokens.push(supportedTokens[idx]);
+          }
+        }
+      );
+
+    return { hasAutoSafe, tokens };
+  };
 
   return {
     createAutoSavings,
+    addTokenToAutoSafe,
+    hasCreatedAutoSafe,
     isLoading,
     error,
   };

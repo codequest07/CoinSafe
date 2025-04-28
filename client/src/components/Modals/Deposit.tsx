@@ -27,7 +27,8 @@ import SuccessfulTxModal from "./SuccessfulTxModal";
 import { getTokenPrice } from "@/lib";
 import ApproveTxModal from "./ApproveTxModal";
 import { tokenData } from "@/lib/utils";
-import { useBalances } from "@/hooks/useBalances";
+import { supportedTokensState } from "@/store/atoms/balance";
+import { useRecoilState } from "recoil";
 
 export default function Deposit({
   isDepositModalOpen,
@@ -46,7 +47,8 @@ export default function Deposit({
   const [token, setToken] = useState("");
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const { supportedTokens } = useBalances(address as string);
+
+  const [supportedTokens] = useRecoilState(supportedTokensState);
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -149,7 +151,7 @@ export default function Deposit({
                   </SelectTrigger>
                   <SelectContent>
                     {supportedTokens.map((token) => (
-                      <SelectItem value={token}>
+                      <SelectItem value={token} key={token}>
                         {tokenData[token]?.symbol}
                       </SelectItem>
                     ))}

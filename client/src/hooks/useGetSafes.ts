@@ -1,12 +1,16 @@
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
+import { useRecoilState } from "recoil";
 
 import { liskSepolia, client } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-// import { useActiveAccount } from "thirdweb/react";
-
+import {
+  safesState,
+  safesLoadingState,
+  safesErrorState,
+} from "@/store/atoms/safes";
 // Define the SafeDetails interface based on the provided struct
 interface Token {
   token: string;
@@ -23,11 +27,12 @@ export interface SafeDetails {
 }
 
 export function useGetSafes() {
-
-  const [safes, setSafes] = useState<SafeDetails[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  // Use Recoil state instead of local state
+  const [safes, setSafes] = useRecoilState(safesState);
+  const [isLoading, setIsLoading] = useRecoilState(safesLoadingState);
+  const [error, setError] = useRecoilState(safesErrorState);
+  // Derive isError from error state
+  const isError = error !== null;
 
   const account = useActiveAccount();
   const address = account?.address;
@@ -41,45 +46,91 @@ export function useGetSafes() {
     });
   }, []); // <-- Only create once
 
-  const fetchSafes = useCallback(async () => {
-    if (!address) return;
+  // Track if we've loaded data at least once
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-    setIsLoading(true);
-    setIsError(false);
-    setError(null);
+  // Track the last fetch time to prevent too frequent refreshes
+  const [lastFetchTime, setLastFetchTime] = useState(0);
 
-    try {
-      console.log("fetching safes");
+  const fetchSafes = useCallback(
+    async (force = false) => {
+      if (!address) {
+        return;
+      }
 
-      const result = await readContract({
-        contract,
-        // @ts-expect-error type error
-        method: resolveMethod("getSafes"),
-        params: [],
-        from: address
-      });
+      // Prevent fetching too frequently (at least 5 seconds between any refreshes)
+      const now = Date.now();
+      if (now - lastFetchTime < 5000) {
+        console.log("Skipping fetch - too soon since last fetch");
+        return;
+      }
 
-      console.log('====================================');
-      console.log('Safes:', result);
-      console.log('====================================');
+      // Only fetch if we don't already have data or we're forcing a refresh
+      if (safes.length > 0 && !force && !isLoading) {
+        console.log(
+          "Skipping fetch - already have data and not forcing refresh"
+        );
+        return;
+      }
 
-      setSafes(result as SafeDetails[]);
+      // If we're already loading, don't start another fetch
+      if (isLoading) {
+        console.log("Skipping fetch - already loading");
+        return;
+      }
 
-    } catch (err: any) {
+      console.log("====================================");
+      console.log("Safes: ", safes);
+      console.log("====================================");
 
-      console.error("Transaction fetch failed:", err);
-      setIsError(true);
-      setError(err);
-      setSafes([]);
+      // Only set loading to true on initial load
+      if (!initialLoadComplete) {
+        setIsLoading(true);
+      }
+      setError(null);
+      setLastFetchTime(now);
 
-    } finally {
-      setIsLoading(false);
-    }
-  }, [contract, address]);
+      try {
+        const result = await readContract({
+          contract,
+          method: resolveMethod("getSafes"),
+          params: [],
+          from: address,
+        });
 
+        setSafes(result as SafeDetails[]);
+      } catch (err: any) {
+        console.error("Transaction fetch failed:", err);
+        setError(err);
+        setSafes([]);
+      } finally {
+        setIsLoading(false);
+        setInitialLoadComplete(true);
+      }
+    },
+    [
+      contract,
+      address,
+      safes.length,
+      isLoading,
+      setSafes,
+      setError,
+      setIsLoading,
+      initialLoadComplete,
+      setInitialLoadComplete,
+      lastFetchTime,
+      setLastFetchTime,
+    ]
+  );
+
+  // Only fetch on initial mount, not on every dependency change
   useEffect(() => {
-    fetchSafes();
-  }, [fetchSafes]);
+    // This will only run once when the component mounts
+    if (safes.length === 0 && !isLoading && address && !initialLoadComplete) {
+      console.log("Initial fetch of safes data");
+      fetchSafes();
+    }
+  }, [address, safes.length, isLoading, fetchSafes, initialLoadComplete]); // Include dependencies to avoid lint warnings
 
   return {
     safes,
@@ -87,77 +138,6 @@ export function useGetSafes() {
     isError,
     error,
     fetchSafes,
-    refetch: fetchSafes
+    refetch: fetchSafes,
   };
 }
-
-
-
-// import { useState, useEffect } from 'react';
-// import { getContract, readContract } from 'thirdweb';
-// import { useActiveAccount } from "thirdweb/react";
-
-// // Define the type for SafeDetails based on your contract's structure
-// export interface SafeDetails {
-//   id: bigint;
-//   target: string;
-//   duration: bigint;
-//   startTime: bigint;
-//   unlockTime: bigint;
-//   tokenAmounts: Token[];
-// }
-
-// export function useGetSafes(contractAddress: string) {
-//   const account = useActiveAccount();
-//   const [safes, setSafes] = useState<SafeDetails[]>([]);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [error, setError] = useState<Error | null>(null);
-
-//   const address = account?.address;
-
-//   const fetchSafes = async () => {
-//     if (!account) return;
-
-//     setIsLoading(true);
-//     setError(null);
-    
-//     try {
-//       const contract = getContract({
-//         client,
-//         address: contractAddress as `0x${string}`,
-//         abi: facetAbis.targetSavingsFacet as Abi,
-//         chain: liskSepolia,
-//       });
-
-//       console.log("CONTRACT>>>>>", contract)
-
-//       const result = await readContract({
-//         contract,
-//         method: "function getSafes() external view returns (LibDiamond.SafeDetails[] memory)",
-//         params: [],
-//         from: address,
-//       });
-
-//       console.log("SAFES FETCH RESULT>>>>>", result)
-      
-//       setSafes(result as SafeDetails[]);
-//     } catch (err) {
-//       setError(err instanceof Error ? err : new Error('Failed to fetch safes'));
-//       console.error("Error fetching safes:", err);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchSafes();
-//   }, [fetchSafes]);
-
-//   return {
-//     safes,
-//     isLoading,
-//     error,
-//     refetch: fetchSafes,
-//     walletAddress: account?.address
-//   };
-// }

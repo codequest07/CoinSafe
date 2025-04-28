@@ -1,11 +1,14 @@
-import { useRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import {
   availableBalanceState,
   savingsBalanceState,
   totalBalanceState,
-} from "../store/atoms/save";
+  supportedTokensState,
+  balancesState,
+  loadingState,
+} from "../store/atoms/balance";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getValidNumberValue } from "@/lib/utils";
 import { convertTokenAmountToUsd } from "@/lib/utils";
 import { getContract, readContract } from "thirdweb";
@@ -14,27 +17,12 @@ import { client } from "@/lib/config";
 import { Abi } from "viem";
 
 export const useBalances = (address: string) => {
-  const [availableBalance, setAvailableBalance] = useRecoilState(
-    availableBalanceState
-  );
-  const [savingsBalance, setSavingsBalance] =
-    useRecoilState(savingsBalanceState);
-  const [totalBalance, setTotalBalance] = useRecoilState(totalBalanceState);
-  const [supportedTokens, setSupportedTokens] = useState<string[]>([]);
-  const [loading, setIsLoading] = useState({
-    available: false,
-    total: false,
-    savings: false,
-  });
-  const [balances, setBalances] = useState<{
-    available: unknown[];
-    total: unknown[];
-    savings: unknown[];
-  }>({
-    available: [],
-    total: [],
-    savings: [],
-  });
+  const setAvailableBalance = useSetRecoilState(availableBalanceState);
+  const setSavingsBalance = useSetRecoilState(savingsBalanceState);
+  const setTotalBalance = useSetRecoilState(totalBalanceState);
+  const setSupportedTokens = useSetRecoilState(supportedTokensState);
+  const setBalances = useSetRecoilState(balancesState);
+  const setLoading = useSetRecoilState(loadingState);
 
   const contract = getContract({
     client,
@@ -68,19 +56,25 @@ export const useBalances = (address: string) => {
     }
 
     fetchSupportedTokens();
-  }, [address]);
+  }, [address, setSupportedTokens]);
 
   useEffect(() => {
-    if (!address || supportedTokens.length === 0) return;
+    if (!address) return;
 
     async function fetchBalances() {
       try {
-        setIsLoading((prev) => ({
-          ...prev,
+        setLoading({
           available: true,
           total: true,
           savings: true,
-        }));
+        });
+
+        const supportedTokens = await readContract({
+          contract,
+          method:
+            "function getAcceptedTokenAddresses() external view returns (address[] memory)",
+          params: [],
+        });
 
         const balanceCalls = supportedTokens.flatMap((token) => [
           {
@@ -125,12 +119,25 @@ export const useBalances = (address: string) => {
         results.forEach((result, index) => {
           const tokenIndex = Math.floor(index / 3);
           const type = balanceCalls[index].type as keyof typeof balancesMap;
-          // console.log(result);
           balancesMap[type][tokenIndex] =
             typeof result === "bigint" ? result : BigInt(0);
         });
 
-        setBalances(balancesMap);
+        const updatedTokenBalanceMap = supportedTokens.reduce(
+          (acc, token, index) => {
+            acc.available[token] = balancesMap.available[index];
+            acc.total[token] = balancesMap.total[index];
+            acc.savings[token] = balancesMap.savings[index];
+            return acc;
+          },
+          {
+            available: {} as Record<string, unknown>,
+            total: {} as Record<string, unknown>,
+            savings: {} as Record<string, unknown>,
+          }
+        );
+
+        setBalances(updatedTokenBalanceMap);
 
         const usdPromises = supportedTokens.map(async (token, i) => {
           const totalUsdVal = convertTokenAmountToUsd(
@@ -167,57 +174,22 @@ export const useBalances = (address: string) => {
       } catch (err) {
         console.error("Error fetching balances:", err);
       } finally {
-        setIsLoading((prev) => ({
-          ...prev,
+        setLoading({
           available: false,
           total: false,
           savings: false,
-        }));
+        });
       }
     }
 
     fetchBalances();
-  }, [address, supportedTokens]);
-
-  // -------------------------------
-  // 🧠 Derived mapped balances
-  // -------------------------------
-  const [tokenBalanceMap, setTokenBalanceMap] = useState<{
-    available: Record<string, unknown>;
-    total: Record<string, unknown>;
-    savings: Record<string, unknown>;
-  }>({
-    available: {},
-    total: {},
-    savings: {},
-  });
-
-  useEffect(() => {
-    const updatedTokenBalanceMap = supportedTokens.reduce(
-      (acc, token, index) => {
-        acc.available[token] = balances.available[index];
-        acc.total[token] = balances.total[index];
-        acc.savings[token] = balances.savings[index];
-        return acc;
-      },
-      {
-        available: {} as Record<string, unknown>,
-        total: {} as Record<string, unknown>,
-        savings: {} as Record<string, unknown>,
-      }
-    );
-
-    setTokenBalanceMap(updatedTokenBalanceMap);
-  }, [balances, supportedTokens]);
-
-  return {
-    availableBalance,
-    savingsBalance,
-    totalBalance,
-    AvailableBalance: tokenBalanceMap.available,
-    TotalBalance: tokenBalanceMap.total,
-    SavedBalance: tokenBalanceMap.savings,
-    loading,
-    supportedTokens,
-  };
+  }, [
+    address,
+    setBalances,
+    setAvailableBalance,
+    setSavingsBalance,
+    setTotalBalance,
+    setLoading,
+    contract,
+  ]);
 };

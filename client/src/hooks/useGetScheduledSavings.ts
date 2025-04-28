@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { getContract } from "thirdweb";
+import { getContract, resolveMethod } from "thirdweb";
 import { liskSepolia } from "@/lib/config";
 import { client } from "@/lib/config";
 import { useReadContract } from "thirdweb/react";
-import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
-import { formatUnits } from "viem";
-import { getSafuToUsd } from "@/lib";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { Abi, formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
+import { convertTokenAmountToUsd } from "@/lib/utils";
 
 export interface ScheduledSaving {
   token: string;
@@ -21,24 +21,18 @@ interface ScheduledSavingsResult {
   error: Error | null;
 }
 
-export function transformArrayData(
+export async function transformArrayData(
   data: Array<{ token: string; amount: bigint; scheduledDate: bigint }>
-): ScheduledSaving[] {
-  // Create a token mapping for quick lookup
-  const tokenMap = Object.entries(tokens).reduce<Record<string, string>>(
-    (map, [key, address]) => {
-      map[address.toLowerCase()] = key; // Lowercase the address for case-insensitive comparison
-      return map;
-    },
-    {}
+): Promise<ScheduledSaving[]> {
+  if (!data || data.length === 0) return [];
+  return Promise.all(
+    data.map(async (item) => ({
+      token: item.token, 
+      amount: formatUnits(item.amount, 18), 
+      scheduledDate: Number(item.scheduledDate) * 1000,
+      value: await convertTokenAmountToUsd(item.token, item.amount),
+    }))
   );
-
-  return data.map((item) => ({
-    token: tokenMap[item.token.toLowerCase()] || "unknown", // Map token address to name
-    amount: formatUnits(item.amount, 18), // Convert BigInt to number
-    scheduledDate: Number(item.scheduledDate) * 1000, // Convert seconds to milliseconds
-    value: getSafuToUsd(Number(formatUnits(item.amount, 18))),
-  }));
 }
 
 export const useGetScheduledSavings = (): ScheduledSavingsResult => {
@@ -54,35 +48,27 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
     client,
     address: CoinsafeDiamondContract.address,
     chain: liskSepolia,
+    abi: facetAbis.automatedSavingsFacet as Abi,
   });
 
   const { data: result, isLoading } = useReadContract({
     contract,
-    method:
-      "function getScheduledSavings() external view returns (LibDiamond.ScheduledSaving[] memory)",
-    from: address,
-    // queryOptions: {
-    //   refetchInterval: 0,
-    // },
+    method: resolveMethod("getScheduledSavings"),
+    params: [address, 4],
   });
 
   useEffect(() => {
     async function run() {
-      // console.log("====================================");
-      // console.log("Runningggggggg");
-      // console.log("====================================");
+      console.log("====================================");
+      console.log("Runningggggggg");
+      console.log("====================================");
       if (!isConnected || !result) return;
-
       try {
-        // console.log("====================================");
-        // console.log("Tryingggg");
-        // console.log("====================================");
-        // console.log(result);
+        console.log("====================================");
+        console.log("Tryingggg");
+        console.log("====================================");
+        console.log(result);
         if (result) {
-          // console.log("====================================");
-          // console.log();
-          // console.log("====================================");
-          // console.log(result);
           const scheduledSavingsRes = await transformArrayData(result as []);
           setScheduledSavings(
             scheduledSavingsRes.filter(
