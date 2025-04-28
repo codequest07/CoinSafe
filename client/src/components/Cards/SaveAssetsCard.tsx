@@ -47,10 +47,6 @@ interface SavingsTarget {
   description?: string;
 }
 
-// const initialSavingsTargets: SavingsTarget[] = [
-//
-// ];
-
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
   const [saveState, setSaveState] = useRecoilState(saveAtom);
@@ -761,7 +757,7 @@ export default function SaveAssetsCard() {
           </>
         )}
 
-        {selectedOption === "by-frequency" &&
+        {selectedOption === "by-frequency" && saveType !== "one-time" &&
           (supportedTokens.filter(
             (token) => !autoSafeTokenOptions.includes(token)
           ).length < 1 ? (
@@ -788,6 +784,25 @@ export default function SaveAssetsCard() {
               </div>
             </>
           ))}
+
+        {saveType === "one-time" && (
+          <div className="flex justify-end">
+            <div>
+              <Button
+                onClick={handleSaveAsset}
+                className="text-black px-8 rounded-[2rem]"
+                variant="outline"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <LoaderCircle className="animate-spin" />
+                ) : (
+                  "Save assets"
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <SaveSuccessful
