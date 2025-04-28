@@ -213,7 +213,7 @@ export default function SaveAssetsCard() {
   };
 
   const [savingsTargetInput, _setSavingsTargetInput] = useState("");
-  const [selectedSavingsTarget, setSelectedSavingsTarget] =
+  const [_selectedSavingsTarget, setSelectedSavingsTarget] =
     useState<SafeDetails | null>(null);
   //   const [nextId, setNextId] = useState(16);
 
