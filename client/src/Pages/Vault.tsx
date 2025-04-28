@@ -10,7 +10,10 @@ const Vault = () => {
   const account = useActiveAccount();
   const isConnected = !!account?.address;
   const address = account?.address;
-  const { savingsBalance, loading: { savings } } = useBalances(address as string);
+  const {
+    savingsBalance,
+    loading: { savings },
+  } = useBalances(address as string);
 
   return (
     <div className="w-full relative px-2 sm:px-4 overflow-x-hidden">
