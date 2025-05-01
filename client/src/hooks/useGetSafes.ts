@@ -11,6 +11,8 @@ import {
   safesLoadingState,
   safesErrorState,
 } from "@/store/atoms/safes";
+import { supportedTokensState } from "@/store/atoms/balance";
+import { publicClient } from "@/lib/client";
 // Define the SafeDetails interface based on the provided struct
 interface Token {
   token: string;
@@ -31,6 +33,7 @@ export function useGetSafes() {
   const [safes, setSafes] = useRecoilState(safesState);
   const [isLoading, setIsLoading] = useRecoilState(safesLoadingState);
   const [error, setError] = useRecoilState(safesErrorState);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
   // Derive isError from error state
   const isError = error !== null;
 
@@ -46,11 +49,48 @@ export function useGetSafes() {
     });
   }, []); // <-- Only create once
 
+  // const emergencySavingsFacet = useMemo(() => {
+  //   return getContract({
+  //     client,
+  //     address: CoinsafeDiamondContract.address,
+  //     chain: liskSepolia,
+  //     abi: facetAbis.emergencySavingsFacet as Abi,
+  //   });
+  // }, []);
+
   // Track if we've loaded data at least once
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   // Track the last fetch time to prevent too frequent refreshes
   const [lastFetchTime, setLastFetchTime] = useState(0);
+
+  const fetchEmergencySafe = async () => {
+    const rawTxs = supportedTokens.map((token: string) => ({
+      address: CoinsafeDiamondContract.address,
+      abi: facetAbis.emergencySavingsFacet as Abi,
+      args: [address, token],
+      functionName: "getEmergencySafeBalance",
+    }))
+
+    const results = await publicClient.multicall({
+      contracts: rawTxs,
+      chain: liskSepolia,
+    });
+
+    console.log("Results::", results);
+
+    const tokenAmounts: Token[] = results.filter(({ status }: {  status: string }) => status === "success").map(({ result }: { result: any }, idx: number) => ({ token: supportedTokens[idx], amount: result }));
+    console.log("Token amounts: ", tokenAmounts);
+
+    return {
+      id: 911n,
+      target: 'Emergency Safe',
+      duration: 0n,
+      startTime: 0n,
+      unlockTime: 0n,
+      tokenAmounts,
+    }
+  }
 
   const fetchSafes = useCallback(
     async (force = false) => {
@@ -98,7 +138,9 @@ export function useGetSafes() {
           from: address,
         });
 
-        setSafes(result as SafeDetails[]);
+        const emergencySafe = await fetchEmergencySafe();
+
+        setSafes([emergencySafe, ...result] as SafeDetails[]);
       } catch (err: any) {
         console.error("Transaction fetch failed:", err);
         setError(err);
@@ -130,7 +172,7 @@ export function useGetSafes() {
       console.log("Initial fetch of safes data");
       fetchSafes();
     }
-  }, [address, safes.length, isLoading, fetchSafes, initialLoadComplete]); // Include dependencies to avoid lint warnings
+  }, [address, safes.length, isLoading, fetchSafes, initialLoadComplete, supportedTokens]); // Include dependencies to avoid lint warnings
 
   return {
     safes,

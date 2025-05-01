@@ -18,6 +18,7 @@ import Withdraw from "./Pages/Withdraw";
 import NotFound from "./components/not-found";
 import { useBalances } from "./hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
+import EmergencySafe from "./Pages/EmergencySafe";
 // import { useRecoilState } from "recoil";
 // import { availableBalanceState, savingsBalanceState, totalBalanceState } from "./store/atoms/save";
 // import { useContractEvents } from "./hooks/useWatchEvents";
@@ -60,6 +61,7 @@ const App = () => {
           <Route path="/dashboard/wallet" element={<Portfolio />} />
           <Route path="/dashboard/vault" element={<Vault />} />
           <Route path="/dashboard/vault/:id" element={<SavingsDetail />} />
+          <Route path="/dashboard/vault/emergency-safe" element={<EmergencySafe />} />
           <Route path="/dashboard/staking" element={<Staking />} />
           <Route path="/dashboard/rewards" element={<Rewards />} />
           <Route path="/dashboard/rewards/my-rewards" element={<MyRewards />} />

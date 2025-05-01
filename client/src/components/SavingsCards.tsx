@@ -63,13 +63,18 @@ export default function SavingsCards() {
               return Number(usdVal);
             })
           ).then((amounts) => amounts.reduce((sum, val) => sum + val, 0));
-  
-          const unlockDate = new Date(Number(safe.unlockTime) * 1000);
-          const formattedDate = unlockDate.toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          });
+          
+          let formattedDate = "N/A";
+
+          if (safe.unlockTime) {
+            const unlockDate = new Date(Number(safe.unlockTime) * 1000);
+
+            formattedDate = unlockDate.toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
+          }
           
           const status = Number(safe.duration) > 0 ? "Locked" : "Flexible";
           
@@ -78,7 +83,7 @@ export default function SavingsCards() {
             name: safe.target,
             amount: totalAmount,
             status: status as "Locked" | "Flexible",
-            unlockDate: `Unlocks on ${formattedDate}`,
+            unlockDate: safe.unlockTime ? `Unlocks on ${formattedDate}` : "Unlocks Anytime",
           };
         }) || []
       );
@@ -129,7 +134,7 @@ export default function SavingsCards() {
               {displaySafes.map((safe) => (
                 <button
                   key={safe.id}
-                  onClick={() => navigate(`/dashboard/vault/${safe.id}`)}
+                  onClick={() => navigate(safe.id === "911" && safe.name === "Emergency Safe" ? '/dashboard/vault/emergency-safe' :`/dashboard/vault/${safe.id}`)}
                   className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors">
                   <div className="flex justify-between items-start mb-4">
                     <div className="text-sm text-gray-400 font-[300]">

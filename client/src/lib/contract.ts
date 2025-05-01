@@ -3,6 +3,7 @@ import coinSafeAbi from "../abi/coinsafe.json";
 import balanceFacetAbi from "../abi/BalanceFacet.json";
 import targetSavingsAbi from "../abi/TargetSavingsFacet.json"
 import automatedSavingsFacetAbi from "../abi/AutomatedSavingsFacet.json";
+import emergencySavingsFacetAbi from "../abi/EmergencySavingsFacet.json";
 import fundingFacetAbi from "../abi/FundingFacet.json";
 
 export const tokens = {
@@ -36,4 +37,5 @@ export const facetAbis = {
   fundingFacet: fundingFacetAbi,
   automatedSavingsFacet: automatedSavingsFacetAbi,
   targetSavingsFacet: targetSavingsAbi,
+  emergencySavingsFacet: emergencySavingsFacetAbi,
 };
