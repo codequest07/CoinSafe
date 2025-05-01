@@ -1,21 +1,21 @@
 import { AssetTabs } from "@/components/Asset-tabs";
-import ClaimCard from "@/components/Cards/ClaimCard";
-import SavingsCard from "@/components/Cards/SavingsCard";
+import TopUpEmergencySafe from "@/components/Modals/TopUpEmegencySafe";
+import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
-import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Badge, Loader2 } from "lucide-react";
-// import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import { useActiveAccount } from "thirdweb/react";
+import { useActiveAccount } from "thirdweb/react";
 
 const EmergencySafe = () => {
   const navigate = useNavigate();
   const { safeDetails, isLoading, isError } = useGetSafeById("911");
-  console.log("safeDetails", safeDetails);
-//   const account = useActiveAccount();
-  //   const isConnected = !!account?.address;
-  //   const address = account?.address;
+  const account = useActiveAccount();
+  const isConnected = !!account?.address;
+
+  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -73,31 +73,77 @@ const EmergencySafe = () => {
         {safeDetails && (
           <div className="flex flex-col gap-4 pr-4 pb-2">
             <div className="flex gap-2">
-              <SavingsCard
-                title="Savings balance"
-                value={safeDetails.totalAmountUSD}
-                unit="USD"
-                text={<>Total value of all tokens in this safe</>}
-                safeId={Number(safeDetails.id)}
-              />
-              {safeDetails.isLocked && (
-                <ClaimCard
-                  title="Claimable balance"
-                  value={
-                    safeDetails.unlockTime < new Date()
-                      ? safeDetails.totalAmountUSD
-                      : 0.0
-                  }
-                  unit="USD"
-                  text={
-                    safeDetails.unlockTime < new Date()
-                      ? "Available to withdraw now"
-                      : `Available in ${formatDistanceToNow(
-                          safeDetails.unlockTime
-                        )}`
-                  }
-                />
-              )}
+              <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+                <div className="flex justify-between items-center pb-4">
+                  <div className="text-[#CACACA] font-light">
+                    Savings Balance
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-end">
+                <div>
+                  <div>
+                    <span className="text-[#F1F1F1] pr-2 text-3xl">
+                      {safeDetails?.totalAmountUSD?.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                    <span className="text-[#CACACA] text-xs">USD</span>
+                  </div>
+                  <div>
+                    <div className="pt-2">
+                      <p className="text-[#7F7F7F] text-xs">
+                        Total value of all tokens in this safe
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {isConnected && (
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowTopUpModal(true)}
+                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+                    >
+                      Top up
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+              <div className="flex justify-between items-center pb-4">
+                <div className="text-[#CACACA] font-light">Claimable Balance</div>
+              </div>
+
+              <div className="flex justify-between items-end">
+                <div>
+                  <div>
+                    <span className="text-[#F1F1F1] pr-2 text-3xl">
+                      {safeDetails?.totalAmountUSD?.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                    <span className="text-[#CACACA] text-xs">USD</span>
+                  </div>
+                  <div>
+                    <div className="pt-2">
+                      <p className="text-[#7F7F7F] text-xs">
+                        Available to withdraw anytime
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setShowWithdrawModal(true)}
+                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
+                  >
+                    Withdraw
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -108,6 +154,20 @@ const EmergencySafe = () => {
           </div>
         )}
       </div>
+
+      {showTopUpModal && (
+        <TopUpEmergencySafe
+          onClose={() => setShowTopUpModal(false)}
+          onTopUp={() => setShowTopUpModal(false)}
+        />
+      )}
+
+      {showWithdrawModal && (
+        <WithdrawEmergencySafe
+          isWithdrawModalOpen={showWithdrawModal}
+          setIsWithdrawModalOpen={setShowWithdrawModal}
+        />
+      )}
     </div>
   );
 };
