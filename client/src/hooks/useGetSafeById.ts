@@ -25,6 +25,7 @@ export function useGetSafeById(id: string | undefined) {
   const [safeDetails, setSafeDetails] = useState<FormattedSafeDetails | null>(
     null
   );
+  const [tokenAmounts, setTokenAmounts] = useState<Record<string, unknown>>({});
 
   // Token address to symbol mapping
   const tokenSymbols: Record<string, string> = useMemo(() => {
@@ -84,6 +85,15 @@ export function useGetSafeById(id: string | undefined) {
       console.log("No token amounts found in the safe");
     }
 
+    console.log("token amounts::", safe.tokenAmounts);
+
+    setTokenAmounts(
+      safe.tokenAmounts.reduce((acc, token) => {
+        if (token && token.token) acc[token.token] = token.amount;
+        return acc;
+      }, {} as Record<string, unknown>)
+    );
+
     const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
       if (!token || !token.token) {
         console.log("Invalid token data:", token);
@@ -101,7 +111,7 @@ export function useGetSafeById(id: string | undefined) {
 
       // Make symbol comparison case-insensitive for decimals
       const symbolUpper = symbol.toUpperCase();
-      const decimals = symbolUpper === "USDT" ? 6 : 18;
+      const decimals = symbolUpper === "USDT" ? 18 : 18;
       console.log(
         `Symbol: ${symbol}, Uppercase: ${symbolUpper}, Decimals: ${decimals}`
       );
@@ -189,7 +199,7 @@ export function useGetSafeById(id: string | undefined) {
           tokenSymbolUpper === "SAFU"
             ? 0.339
             : tokenSymbolUpper === "LSK"
-            ? 1.25
+            ? 0.53
             : tokenSymbolUpper === "USDT"
             ? 1
             : 0;
@@ -245,6 +255,7 @@ export function useGetSafeById(id: string | undefined) {
 
   return {
     safeDetails,
+    tokenAmounts,
     isLoading,
     isError,
     error,
