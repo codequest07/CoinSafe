@@ -68,21 +68,11 @@ export function useTransactionHistory({
     setError(null);
 
     try {
-      console.log("====================================");
-      console.log(
-        "trying to fetch transactions",
-        safeId ? `for safe ID: ${safeId}` : "for all safes"
-      );
-      console.log("====================================");
       const result = await readContract({
         contract,
         method: resolveMethod("getTransactionHistory"),
         params: [address, BigInt(currentOffset), BigInt(currentLimit)],
       });
-
-      console.log("====================================");
-      console.log("Transaction History:", result);
-      console.log("====================================");
 
       // Filter transactions by safeId if provided
       let filteredTransactions = result as Transaction[];
@@ -97,7 +87,6 @@ export function useTransactionHistory({
 
       setTransactions(filteredTransactions);
     } catch (err: any) {
-      console.error("Transaction fetch failed:", err);
       setIsError(true);
       setError(err);
       setTransactions([]);

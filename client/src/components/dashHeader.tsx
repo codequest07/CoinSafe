@@ -12,6 +12,10 @@ import ExtensionCard from "./Cards/ExtensionCard";
 import ClaimBtn from "./ClaimBtn";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { Skeleton } from "./ui/skeleton";
+import { useStreakSystem } from "@/hooks/useStreakSystem";
+import { useRecoilValue } from "recoil";
+import { userCurrentStreakState } from "@/store/atoms/streak";
+import { useActiveAccount } from "thirdweb/react";
 
 const getRandomMessage = () => {
   const messages = [
@@ -30,6 +34,17 @@ const DashHeader = () => {
   const location = useLocation();
   const params = useParams();
   const [randomMessage, setRandomMessage] = useState("");
+  const account = useActiveAccount();
+  const address = account?.address;
+
+  // Get streak information
+  const { getStreakInfo } = useStreakSystem();
+  const currentStreak = useRecoilValue(userCurrentStreakState);
+
+  // Format streak with fire emoji
+  const formattedStreak = `${
+    currentStreak > 0 ? currentStreak.toString() : "0"
+  } days 🔥`;
 
   // Check if we're on a vault detail page
   const isVaultDetailPage =
@@ -66,10 +81,24 @@ const DashHeader = () => {
     return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
   };
 
+  // This effect runs only once when the component mounts
   useEffect(() => {
     // Generate a new random message when the component mounts
     setRandomMessage(getRandomMessage());
-  }, []);
+  }, []); // Empty dependency array means this runs only once on mount
+
+  // Separate effect for fetching streak data that runs when address changes
+  useEffect(() => {
+    // Fetch streak info if address is available
+    if (address) {
+      getStreakInfo(address).catch((err) => {
+        console.error("[DashHeader] Error fetching streak info:", err);
+      });
+    }
+    // We intentionally omit getStreakInfo from dependencies to prevent
+    // constant re-renders and message changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address]);
 
   return (
     <main>
@@ -137,7 +166,7 @@ const DashHeader = () => {
                   </span>
                 )}
                 <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
-                  1000 days 🔥
+                  {formattedStreak}
                 </span>
               </div>
               {/* Message */}
