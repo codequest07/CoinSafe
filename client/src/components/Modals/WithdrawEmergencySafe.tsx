@@ -12,28 +12,30 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 // import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useWithdrawAsset } from "@/hooks/useWithdrawAsset";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
 import MemoRipple from "@/icons/Ripple";
 import { getTokenPrice } from "@/lib";
 import { tokenData } from "@/lib/utils";
-import { balancesState, supportedTokensState } from "@/store/atoms/balance";
+import { supportedTokensState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
+import { useWithdrawEmergencySafe } from "@/hooks/useWithdrawEmergencySafe";
 
 export default function WithdrawEmergencySafe({
   isWithdrawModalOpen,
   setIsWithdrawModalOpen,
+  AvailableBalance
 }: {
   isWithdrawModalOpen: boolean;
   setIsWithdrawModalOpen: (open: boolean) => void;
+  AvailableBalance:  Record<string, unknown>;
 }) {
   const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
   const account = useActiveAccount();
@@ -44,8 +46,6 @@ export default function WithdrawEmergencySafe({
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [supportedTokens] = useRecoilState(supportedTokensState);
-  const [balances] = useRecoilState(balancesState);
-  const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
 
   const openThirdModal = () => {
     // console.log("details", token, amount);
@@ -54,7 +54,7 @@ export default function WithdrawEmergencySafe({
     setIsWithdrawModalOpen(false);
   };
 
-  const { withdrawAsset, isLoading } = useWithdrawAsset({
+  const { withdrawFromEmergencySafe, isLoading } = useWithdrawEmergencySafe({
     address: address as `0x${string}`,
     account,
     token: token as `0x${string}`,
@@ -88,6 +88,9 @@ export default function WithdrawEmergencySafe({
   useEffect(() => {
     if (address && token && AvailableBalance) {
       const tokensData = AvailableBalance;
+
+      // console.log("token amounts::", tokensData);
+      
       if (!tokensData) return;
 
       const tokenBalance = AvailableBalance[token] as bigint || 0n;
@@ -100,7 +103,7 @@ export default function WithdrawEmergencySafe({
     <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
       <DialogContent className="w-11/12 sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C]">
         <DialogTitle className="text-white flex items-center space-x-3">
-          <p>Withdraw Assets</p>
+          <p>Withdraw from emergency safe</p>
         </DialogTitle>
         <div className="py-4 text-gray-700">
           <div className="space-y-2">
@@ -139,12 +142,12 @@ export default function WithdrawEmergencySafe({
             <>
               {amount && amount > selectedTokenBalance && (
                 <p className="text-red-500 text-[13px] mt-1 text-right">
-                  Amount greater than available balance
+                  Amount greater than safe token balance
                 </p>
               )}
               <div className="flex items-center justify-between my-2">
                 <div className="text-sm font-[300] text-gray-300">
-                  Available balance:{" "}
+                  Safe token balance:{" "}
                   <span className="text-gray-400">
                     {selectedTokenBalance}{" "}
                     {tokenData[token]?.symbol}
@@ -171,7 +174,7 @@ export default function WithdrawEmergencySafe({
             </Button>
             <Button
               onClick={(e) => {
-                withdrawAsset(e);
+                withdrawFromEmergencySafe(e);
 
                 // if(isSuccess) {
                 //   openThirdModal();

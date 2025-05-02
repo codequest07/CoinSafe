@@ -8,6 +8,7 @@ import {
 import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
+import { parseUnits } from "ethers";
 // import { toast } from './use-toast';
 // import { config } from '@/lib/config'; // Assuming this contains Thirdweb client config
 
@@ -25,7 +26,7 @@ interface UseWithdrawEmergencySafeParams {
 }
 
 interface WithdrawEmergencySafeResult {
-  withdrawEmergencySafe: (e: React.FormEvent) => Promise<void>;
+  withdrawFromEmergencySafe: (e: React.FormEvent) => Promise<void>;
   isLoading: boolean;
   error: Error | null;
 }
@@ -60,14 +61,14 @@ export const useWithdrawEmergencySafe = ({
 
   const getTokenDecimals = (token: string): number => {
     const tokenDecimals: Record<string, number> = {
-      USDT: 6,
+      USDT: 18,
       DEFAULT: 18,
     };
 
     return tokenDecimals[token] || tokenDecimals.DEFAULT;
   };
 
-  const withdrawEmergencySafe = useCallback(
+  const withdrawFromEmergencySafe = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
@@ -115,30 +116,14 @@ export const useWithdrawEmergencySafe = ({
           throw new Error("Contract not initialized");
         }
 
-        const decimals = getTokenDecimals(token);
-
-        // Handle the conversion more safely to avoid overflow
-        // First convert to string with the correct number of decimal places
-        const amountStr = amount.toString();
-        let amountWithDecimals: bigint;
-
-        // Check if the amount has a decimal point
-        if (amountStr.includes(".")) {
-          const [whole, fraction] = amountStr.split(".");
-          const paddedFraction = fraction
-            .padEnd(decimals, "0")
-            .slice(0, decimals);
-          amountWithDecimals = BigInt(whole + paddedFraction);
-        } else {
-          // If no decimal point, just add zeros
-          amountWithDecimals = BigInt(amountStr + "0".repeat(decimals));
-        }
+        const decimals: number = getTokenDecimals(token);
 
         // Prepare the contract call for withdrawFromPool
         const transaction = prepareContractCall({
           contract,
-          method: "function withdrawFromPool(address token, uint256 amount)",
-          params: [token, amountWithDecimals],
+          method:
+            "function withdrawFromEmergencySafe(address _token, uint256 _amount)",
+          params: [token, parseUnits(amount.toString(), decimals)],
         });
 
         if (account) {
@@ -175,7 +160,7 @@ export const useWithdrawEmergencySafe = ({
   );
 
   return {
-    withdrawEmergencySafe,
+    withdrawFromEmergencySafe,
     isLoading: isLoading || writeLoading,
     error,
   };

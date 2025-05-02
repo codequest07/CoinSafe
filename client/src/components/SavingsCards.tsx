@@ -56,6 +56,7 @@ export default function SavingsCards() {
     const getSafes = async () => {
       const safeList = await Promise.all(
         safes?.map(async (safe) => {
+          console.log("Safe::", safe);
           const totalAmount = await Promise.all(
             safe.tokenAmounts.map(async (token) => {
               const tokenAmount = Number(formatUnits(token.amount, 18));

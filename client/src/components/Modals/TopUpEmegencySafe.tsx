@@ -99,6 +99,7 @@ export default function TopUpEmergencySafe({
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   }, [AvailableBalance, saveState.token]);
+  
   // Initialize the topUpSafe hook
   const { topUpSafe, isPending } = useTopUpEmergencySafe({
     address: address as `0x${string}`,
@@ -127,7 +128,7 @@ export default function TopUpEmergencySafe({
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
       <div className="bg-[#1A1A1A] rounded-2xl max-w-xl w-full p-8 relative">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-white text-[20px] font-medium">Top up savings</h2>
+          <h2 className="text-white text-[20px] font-medium">Top up emergency savings</h2>
           <button
             onClick={onClose}
             className="rounded-full p-2  bg-[#FFFFFF] transition-colors">
@@ -187,7 +188,7 @@ export default function TopUpEmergencySafe({
         <>
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-[300] text-gray-300">
-              Wallet balance:{" "}
+              Available balance:{" "}
               <span className="text-gray-400">
                 {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
               </span>

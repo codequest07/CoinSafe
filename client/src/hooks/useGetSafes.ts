@@ -70,7 +70,7 @@ export function useGetSafes() {
       abi: facetAbis.emergencySavingsFacet as Abi,
       args: [address, token],
       functionName: "getEmergencySafeBalance",
-    }))
+    }));
 
     const results = await publicClient.multicall({
       contracts: rawTxs,
@@ -79,24 +79,31 @@ export function useGetSafes() {
 
     console.log("Results::", results);
 
-    const tokenAmounts: Token[] = results.filter(({ status }: {  status: string }) => status === "success").map(({ result }: { result: any }, idx: number) => ({ token: supportedTokens[idx], amount: result }));
+    const tokenAmounts: Token[] = results
+      .filter(({ status }: { status: string }) => status === "success")
+      .map(({ result }: { result: any }, idx: number) => ({
+        token: supportedTokens[idx],
+        amount: result,
+      }));
     console.log("Token amounts: ", tokenAmounts);
 
     return {
       id: 911n,
-      target: 'Emergency Safe',
+      target: "Emergency Safe",
       duration: 0n,
       startTime: 0n,
       unlockTime: 0n,
       tokenAmounts,
-    }
-  }
+    };
+  };
 
   const fetchSafes = useCallback(
     async (force = false) => {
       if (!address) {
         return;
       }
+
+      console.log(force);
 
       // Prevent fetching too frequently (at least 5 seconds between any refreshes)
       const now = Date.now();
@@ -106,12 +113,12 @@ export function useGetSafes() {
       }
 
       // Only fetch if we don't already have data or we're forcing a refresh
-      if (safes.length > 0 && !force && !isLoading) {
-        console.log(
-          "Skipping fetch - already have data and not forcing refresh"
-        );
-        return;
-      }
+      // if (safes.length > 0 && !force && !isLoading) {
+      //   console.log(
+      //     "Skipping fetch - already have data and not forcing refresh"
+      //   );
+      //   return;
+      // }
 
       // If we're already loading, don't start another fetch
       if (isLoading) {
@@ -172,7 +179,14 @@ export function useGetSafes() {
       console.log("Initial fetch of safes data");
       fetchSafes();
     }
-  }, [address, safes.length, isLoading, fetchSafes, initialLoadComplete, supportedTokens]); // Include dependencies to avoid lint warnings
+  }, [
+    address,
+    safes.length,
+    isLoading,
+    fetchSafes,
+    initialLoadComplete,
+    supportedTokens,
+  ]); // Include dependencies to avoid lint warnings
 
   return {
     safes,

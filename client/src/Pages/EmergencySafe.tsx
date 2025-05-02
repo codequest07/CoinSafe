@@ -10,7 +10,7 @@ import { useActiveAccount } from "thirdweb/react";
 
 const EmergencySafe = () => {
   const navigate = useNavigate();
-  const { safeDetails, isLoading, isError } = useGetSafeById("911");
+  const { safeDetails, isLoading, isError, tokenAmounts } = useGetSafeById("911");
   const account = useActiveAccount();
   const isConnected = !!account?.address;
 
@@ -71,50 +71,51 @@ const EmergencySafe = () => {
         )}
 
         {safeDetails && (
-          <div className="flex flex-col gap-4 pr-4 pb-2">
-            <div className="flex gap-2">
+          <div className="flex gap-4 pr-4 pb-2">
+            <div className="flex-1 flex gap-2">
               <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
                 <div className="flex justify-between items-center pb-4">
                   <div className="text-[#CACACA] font-light">
                     Savings Balance
                   </div>
                 </div>
-              </div>
-
-              <div className="flex justify-between items-end">
-                <div>
+                <div className="flex justify-between items-end">
                   <div>
-                    <span className="text-[#F1F1F1] pr-2 text-3xl">
-                      {safeDetails?.totalAmountUSD?.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                    <span className="text-[#CACACA] text-xs">USD</span>
-                  </div>
-                  <div>
-                    <div className="pt-2">
-                      <p className="text-[#7F7F7F] text-xs">
-                        Total value of all tokens in this safe
-                      </p>
+                    <div>
+                      <span className="text-[#F1F1F1] pr-2 text-3xl">
+                        {safeDetails?.totalAmountUSD?.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </span>
+                      <span className="text-[#CACACA] text-xs">USD</span>
+                    </div>
+                    <div>
+                      <div className="pt-2">
+                        <p className="text-[#7F7F7F] text-xs">
+                          Total value of all tokens in this safe
+                        </p>
+                      </div>
                     </div>
                   </div>
+                  {isConnected && (
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setShowTopUpModal(true)}
+                        className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+                      >
+                        Top up
+                      </button>
+                    </div>
+                  )}
                 </div>
-                {isConnected && (
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => setShowTopUpModal(true)}
-                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
-                    >
-                      Top up
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
 
-            <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+            <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
               <div className="flex justify-between items-center pb-4">
-                <div className="text-[#CACACA] font-light">Claimable Balance</div>
+                <div className="text-[#CACACA] font-light">
+                  Claimable Balance
+                </div>
               </div>
 
               <div className="flex justify-between items-end">
@@ -166,6 +167,7 @@ const EmergencySafe = () => {
         <WithdrawEmergencySafe
           isWithdrawModalOpen={showWithdrawModal}
           setIsWithdrawModalOpen={setShowWithdrawModal}
+          AvailableBalance={tokenAmounts}
         />
       )}
     </div>
