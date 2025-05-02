@@ -36,12 +36,16 @@ export const useBalances = (address: string) => {
 
     async function fetchSupportedTokens() {
       try {
+        console.log("Fetching supported tokens for address:", address);
         const fundingFacetContract = getContract({
           client,
           address: CoinsafeDiamondContract.address,
           chain: liskSepolia,
           abi: facetAbis.fundingFacet as unknown as Abi,
         });
+
+        console.log("FundingFacet contract:", fundingFacetContract.address);
+
         const tokens = (await readContract({
           contract: fundingFacetContract,
           method:
@@ -49,7 +53,16 @@ export const useBalances = (address: string) => {
           params: [],
         })) as string[];
 
-        setSupportedTokens(tokens);
+        console.log("Supported tokens fetched:", tokens);
+
+        // Only set tokens if we actually got some from the contract
+        if (tokens && tokens.length > 0) {
+          console.log("Setting supported tokens:", tokens);
+          setSupportedTokens(tokens);
+        } else {
+          console.warn("No supported tokens returned from contract");
+          // Don't set empty tokens - let the contract handle this case
+        }
       } catch (err) {
         console.error("Error fetching supported tokens:", err);
       }
