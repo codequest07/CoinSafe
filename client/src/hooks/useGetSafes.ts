@@ -64,71 +64,27 @@ export function useGetSafes() {
   // Track the last fetch time to prevent too frequent refreshes
   const [lastFetchTime, setLastFetchTime] = useState(0);
 
-  const fetchEmergencySafe = async () => {
-    const rawTxs = supportedTokens.map((token: string) => ({
-      address: CoinsafeDiamondContract.address,
-      abi: facetAbis.emergencySavingsFacet as Abi,
-      args: [address, token],
-      functionName: "getEmergencySafeBalance",
-    }));
-
-    const results = await publicClient.multicall({
-      contracts: rawTxs,
-      chain: liskSepolia,
-    });
-
-    console.log("Results::", results);
-
-    const tokenAmounts: Token[] = results
-      .filter(({ status }: { status: string }) => status === "success")
-      .map(({ result }: { result: any }, idx: number) => ({
-        token: supportedTokens[idx],
-        amount: result,
-      }));
-    console.log("Token amounts: ", tokenAmounts);
-
-    return {
-      id: 911n,
-      target: "Emergency Safe",
-      duration: 0n,
-      startTime: 0n,
-      unlockTime: 0n,
-      tokenAmounts,
-    };
-  };
-
   const fetchSafes = useCallback(
     async (force = false) => {
       if (!address) {
         return;
       }
 
-      console.log(force);
-
       // Prevent fetching too frequently (at least 5 seconds between any refreshes)
       const now = Date.now();
       if (now - lastFetchTime < 5000) {
-        console.log("Skipping fetch - too soon since last fetch");
         return;
       }
 
       // Only fetch if we don't already have data or we're forcing a refresh
-      // if (safes.length > 0 && !force && !isLoading) {
-      //   console.log(
-      //     "Skipping fetch - already have data and not forcing refresh"
-      //   );
-      //   return;
-      // }
-
-      // If we're already loading, don't start another fetch
-      if (isLoading) {
-        console.log("Skipping fetch - already loading");
+      if (safes.length > 0 && !force && !isLoading) {
         return;
       }
 
-      console.log("====================================");
-      console.log("Safes: ", safes);
-      console.log("====================================");
+      // If we're already loading, don't start another fetch
+      if (isLoading) {
+        return;
+      }
 
       // Only set loading to true on initial load
       if (!initialLoadComplete) {
@@ -145,11 +101,41 @@ export function useGetSafes() {
           from: address,
         });
 
+        // Define fetchEmergencySafe inside the callback
+        const fetchEmergencySafe = async () => {
+          const rawTxs = supportedTokens.map((token: string) => ({
+            address: CoinsafeDiamondContract.address,
+            abi: facetAbis.emergencySavingsFacet as Abi,
+            args: [address, token],
+            functionName: "getEmergencySafeBalance",
+          }));
+
+          const results = await publicClient.multicall({
+            contracts: rawTxs,
+            chain: liskSepolia,
+          });
+
+          const tokenAmounts: Token[] = results
+            .filter(({ status }: { status: string }) => status === "success")
+            .map(({ result }: { result: any }, idx: number) => ({
+              token: supportedTokens[idx],
+              amount: result,
+            }));
+
+          return {
+            id: 911n,
+            target: "Emergency Safe",
+            duration: 0n,
+            startTime: 0n,
+            unlockTime: 0n,
+            tokenAmounts,
+          };
+        };
+
         const emergencySafe = await fetchEmergencySafe();
 
         setSafes([emergencySafe, ...result] as SafeDetails[]);
       } catch (err: any) {
-        console.error("Transaction fetch failed:", err);
         setError(err);
         setSafes([]);
       } finally {
@@ -169,6 +155,7 @@ export function useGetSafes() {
       setInitialLoadComplete,
       lastFetchTime,
       setLastFetchTime,
+      supportedTokens,
     ]
   );
 
@@ -176,8 +163,7 @@ export function useGetSafes() {
   useEffect(() => {
     // This will only run once when the component mounts
     if (safes.length === 0 && !isLoading && address && !initialLoadComplete) {
-      console.log("Initial fetch of safes data");
-      fetchSafes();
+      fetchSafes(false); // Explicitly pass false to indicate this is not a forced refresh
     }
   }, [
     address,
@@ -194,6 +180,6 @@ export function useGetSafes() {
     isError,
     error,
     fetchSafes,
-    refetch: fetchSafes,
+    refetch: () => fetchSafes(true), // Explicitly pass true to force a refresh
   };
 }
