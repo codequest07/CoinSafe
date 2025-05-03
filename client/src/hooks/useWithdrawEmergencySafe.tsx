@@ -27,7 +27,7 @@ interface UseWithdrawEmergencySafeParams {
 }
 
 interface WithdrawEmergencySafeResult {
-  withdrawFromEmergencySafe: (e: React.FormEvent) => Promise<void>;
+  withdrawFromEmergencySafe: (e: React.FormEvent) => Promise<any>;
   isLoading: boolean;
   error: Error | null;
 }

@@ -117,7 +117,7 @@ export default function ClaimModal({
   // Handle claim button click
   const handleClaim = async () => {
     // Check if this is an Emergency Safe
-    if (safeDetails?.id === 911n) {
+    if (safeDetails?.id?.toString() === "911") {
       toast({
         title: "Emergency Safe",
         description: "Please use the Emergency Safe withdrawal option instead.",
@@ -232,7 +232,7 @@ export default function ClaimModal({
                   This safe has not matured yet. You can only claim tokens after
                   the maturity date.
                 </div>
-              ) : safeDetails?.id === 911n ? (
+              ) : safeDetails?.id?.toString() === "911" ? (
                 <div className="bg-red-900/20 text-red-400 p-4 rounded-lg mb-4">
                   This is an Emergency Safe. Please use the Emergency Safe
                   withdrawal option instead.
@@ -359,7 +359,7 @@ export default function ClaimModal({
                 isLoading ||
                 !isSafeMatured ||
                 claimableTokens.length === 0 ||
-                safeDetails?.id === 911n ||
+                safeDetails?.id?.toString() === "911" ||
                 !isTargetSaving
               }>
               {isLoading ? (
