@@ -7,6 +7,7 @@ import { tokenData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import ClaimModal from "./ClaimModal";
 import { format } from "date-fns";
+import { toast } from "@/hooks/use-toast";
 
 export default function ClaimAssets({
   isDepositModalOpen,
@@ -26,14 +27,45 @@ export default function ClaimAssets({
     return new Date(Number(timestamp) * 1000);
   };
 
-  // Filter safes that have matured (unlockTime <= current time)
+  // Filter safes that have matured (unlockTime <= current time) and are Target Savings
   const maturedSafes = safes.filter((safe) => {
+    // Skip Emergency Safe (id 911n)
+    if (safe.id === 911n) {
+      console.log("Skipping Emergency Safe with ID 911n");
+      return false;
+    }
+
+    // Skip safes with invalid or missing unlockTime
+    if (!safe.unlockTime) {
+      console.log(`Safe ${safe.id} has no unlockTime, skipping`);
+      return false;
+    }
+
     // Convert the unlockTime to a Date object
     const unlockDate = convertTimestampToDate(safe.unlockTime);
-    return (
-      unlockDate <= new Date() &&
-      safe.tokenAmounts.some((token) => token.amount > 0)
+
+    // Skip safes with invalid dates (like 1970-01-01)
+    const minValidDate = new Date(2020, 0, 1); // Jan 1, 2020
+    if (unlockDate < minValidDate) {
+      console.log(`Safe ${safe.id} has invalid date: ${unlockDate}, skipping`);
+      return false;
+    }
+
+    // Check if it's a Target Saving (has a target property)
+    const isTargetSaving = safe.target && safe.target !== "Emergency Safe";
+
+    // Check if it has matured and has tokens to claim
+    const isMatured = unlockDate <= new Date();
+    const hasTokens =
+      safe.tokenAmounts && safe.tokenAmounts.some((token) => token.amount > 0);
+
+    console.log(
+      `Safe ${
+        safe.id
+      }: isTargetSaving=${isTargetSaving}, isMatured=${isMatured}, hasTokens=${hasTokens}, unlockDate=${unlockDate.toISOString()}`
     );
+
+    return isTargetSaving && isMatured && hasTokens;
   });
 
   // Fetch safes when component mounts
@@ -42,6 +74,97 @@ export default function ClaimAssets({
   }, [fetchSafes]);
 
   const openClaimModal = (safeId: string) => {
+    // Find the safe by ID
+    const safe = safes.find((safe) => safe.id.toString() === safeId);
+
+    if (!safe) {
+      console.error(`Safe with ID ${safeId} not found`);
+      return;
+    }
+
+    // Check if this is an Emergency Safe
+    if (safe.id === 911n) {
+      // Show a toast notification that Emergency Safe has a different withdrawal process
+      toast({
+        title: "Emergency Safe",
+        description: "Please use the Emergency Safe withdrawal option instead.",
+        variant: "destructive",
+      });
+
+      // Redirect to Emergency Safe page
+      window.location.href = "/emergency-safe";
+      return;
+    }
+
+    // Skip safes with invalid or missing unlockTime
+    if (!safe.unlockTime) {
+      console.error(`Safe ${safe.id} has no unlockTime`);
+      toast({
+        title: "Invalid Safe",
+        description: "This safe has no maturity date.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Convert the unlockTime to a Date object
+    const unlockDate = convertTimestampToDate(safe.unlockTime);
+
+    // Skip safes with invalid dates (like 1970-01-01)
+    const minValidDate = new Date(2020, 0, 1); // Jan 1, 2020
+    if (unlockDate < minValidDate) {
+      console.error(`Safe ${safe.id} has invalid date: ${unlockDate}`);
+      toast({
+        title: "Invalid Safe",
+        description: "This safe has an invalid maturity date.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if the safe has matured
+    const isMatured = unlockDate <= new Date();
+
+    if (!isMatured) {
+      // Show a toast notification that the safe hasn't matured yet
+      toast({
+        title: "Safe not matured",
+        description: `This safe will mature on ${format(
+          unlockDate,
+          "dd MMM yyyy"
+        )}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if it's a Target Saving
+    const isTargetSaving = safe.target && safe.target !== "Emergency Safe";
+
+    if (!isTargetSaving) {
+      // Show a toast notification that this is not a target saving
+      toast({
+        title: "Not a Target Saving",
+        description: "Only Target Savings can be claimed this way.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if the safe has tokens to claim
+    const hasTokens =
+      safe.tokenAmounts && safe.tokenAmounts.some((token) => token.amount > 0);
+
+    if (!hasTokens) {
+      toast({
+        title: "No tokens to claim",
+        description: "This safe has no tokens available to claim.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Proceed with opening the claim modal
     setSelectedSafeId(safeId);
     setIsClaimModalOpen(true);
     setIsDepositModalOpen(false);
@@ -49,9 +172,27 @@ export default function ClaimAssets({
 
   // Calculate USD value for a token amount
   const calculateUsdValue = (amount: any, tokenAddress: string) => {
+    // Skip tokens with zero or invalid amounts
+    if (!amount || amount === 0) return 0;
+
     // Convert BigInt to number if needed
-    const amountAsNumber =
-      typeof amount === "bigint" ? Number(amount) : Number(amount);
+    let amountAsNumber;
+    try {
+      // For very large BigInt values, this could throw an error
+      amountAsNumber =
+        typeof amount === "bigint" ? Number(amount) : Number(amount);
+
+      // Check if the conversion resulted in Infinity or NaN
+      if (!isFinite(amountAsNumber) || isNaN(amountAsNumber)) {
+        console.warn(
+          `Token amount too large to convert to number: ${amount.toString()}`
+        );
+        return 0;
+      }
+    } catch (error) {
+      console.error("Error converting token amount to number:", error);
+      return 0;
+    }
 
     const symbol = tokenData[tokenAddress]?.symbol?.toUpperCase() || "";
     const rate =
@@ -117,6 +258,17 @@ export default function ClaimAssets({
               .map((token: any) => tokenData[token.token]?.symbol || "Unknown")
               .join(", ");
 
+            // Check if the safe is matured
+            const unlockDate = convertTimestampToDate(safe.unlockTime);
+            const isMatured = unlockDate <= new Date();
+
+            // Check if it's a Target Saving
+            const isTargetSaving =
+              safe.target && safe.target !== "Emergency Safe";
+
+            // Determine if this safe is claimable
+            const isClaimable = isMatured && isTargetSaving;
+
             return (
               <div
                 key={index}
@@ -153,7 +305,12 @@ export default function ClaimAssets({
                     <Button
                       onClick={() => openClaimModal(safe.id.toString())}
                       variant="link"
-                      className="text-[#79E7BA] text-base hover:text-[#79E7BA]">
+                      className={`text-base ${
+                        isClaimable
+                          ? "text-[#79E7BA] hover:text-[#79E7BA]"
+                          : "text-gray-400 cursor-not-allowed"
+                      }`}
+                      disabled={!isClaimable}>
                       Claim
                     </Button>
                   </div>

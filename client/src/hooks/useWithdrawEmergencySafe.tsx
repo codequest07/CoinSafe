@@ -21,6 +21,7 @@ interface UseWithdrawEmergencySafeParams {
   coinSafeAbi: any;
   chainId?: number;
   onSuccess?: () => void;
+  onApprove?: () => void;
   onError?: (error: Error) => void;
   toast: (props: { title: string; variant: "default" | "destructive" }) => void;
 }
@@ -38,6 +39,7 @@ export const useWithdrawEmergencySafe = ({
   coinSafeAddress,
   coinSafeAbi,
   onSuccess,
+  onApprove,
   onError,
   toast,
 }: UseWithdrawEmergencySafeParams): WithdrawEmergencySafeResult => {
@@ -75,6 +77,7 @@ export const useWithdrawEmergencySafe = ({
 
       try {
         setIsLoading(true);
+        console.log("Starting emergency safe withdrawal process");
 
         if (!address) {
           try {
@@ -100,7 +103,7 @@ export const useWithdrawEmergencySafe = ({
             variant: "destructive",
           });
           setIsLoading(false);
-          return;
+          return Promise.reject(new Error("No amount specified"));
         }
 
         if (!token) {
@@ -109,7 +112,7 @@ export const useWithdrawEmergencySafe = ({
             variant: "destructive",
           });
           setIsLoading(false);
-          return;
+          return Promise.reject(new Error("No token selected"));
         }
 
         if (!contract) {
@@ -117,8 +120,12 @@ export const useWithdrawEmergencySafe = ({
         }
 
         const decimals: number = getTokenDecimals(token);
+        console.log(`Using decimals: ${decimals} for token: ${token}`);
 
         // Prepare the contract call for withdrawFromPool
+        // Call onApprove callback to show the approval modal
+        onApprove?.();
+
         const transaction = prepareContractCall({
           contract,
           method:
@@ -126,20 +133,30 @@ export const useWithdrawEmergencySafe = ({
           params: [token, parseUnits(amount.toString(), decimals)],
         });
 
+        console.log("Transaction prepared:", transaction);
+
         if (account) {
-          await sendTransaction({
+          const result = await sendTransaction({
             transaction,
             account,
           });
-        }
 
-        onSuccess?.();
+          console.log("Transaction sent successfully:", result);
+
+          // Call onSuccess callback
+          onSuccess?.();
+
+          return Promise.resolve(result);
+        } else {
+          throw new Error("No account connected");
+        }
       } catch (err) {
         const error =
           err instanceof Error ? err : new Error("An unknown error occurred");
         setError(error);
         onError?.(error);
         console.error("Withdraw asset error:", error);
+        return Promise.reject(error);
       } finally {
         setIsLoading(false);
       }
