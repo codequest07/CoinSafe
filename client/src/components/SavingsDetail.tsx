@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ClaimCard from "./Cards/ClaimCard";
 import { AssetTabs } from "./Asset-tabs";
@@ -8,6 +8,7 @@ import { Badge } from "./ui/badge";
 import SavingsCard from "./Cards/SavingsCard";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { formatDistanceToNow } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
@@ -39,9 +40,30 @@ export default function SavingsDetail() {
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-5xl mx-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-40">
-            <Loader2 className="h-8 w-8 animate-spin text-green-400" />
-            <span className="ml-2 text-lg">Loading safe details...</span>
+          <div className="space-y-6 p-4">
+            {/* Skeleton for the header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Skeleton className="h-8 w-8 rounded-full bg-gray-700" />
+                <Skeleton className="h-6 w-32 bg-gray-700" />
+              </div>
+              <Skeleton className="h-6 w-20 bg-gray-700" />
+            </div>
+
+            {/* Skeleton for the cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Skeleton className="h-40 w-full rounded-lg bg-gray-700" />
+              <Skeleton className="h-40 w-full rounded-lg bg-gray-700" />
+            </div>
+
+            {/* Skeleton for the tabs */}
+            <div className="space-y-4">
+              <div className="flex space-x-2">
+                <Skeleton className="h-10 w-24 rounded-lg bg-gray-700" />
+                <Skeleton className="h-10 w-24 rounded-lg bg-gray-700" />
+              </div>
+              <Skeleton className="h-60 w-full rounded-lg bg-gray-700" />
+            </div>
           </div>
         ) : isError ? (
           <div className="text-red-500 text-center py-8">

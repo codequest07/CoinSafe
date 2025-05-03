@@ -19,6 +19,7 @@ import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import SuccessfulTxModal from "./SuccessfulTxModal";
+import ApproveTxModal from "./ApproveTxModal";
 import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
 import MemoRipple from "@/icons/Ripple";
@@ -31,13 +32,14 @@ import { useWithdrawEmergencySafe } from "@/hooks/useWithdrawEmergencySafe";
 export default function WithdrawEmergencySafe({
   isWithdrawModalOpen,
   setIsWithdrawModalOpen,
-  AvailableBalance
+  AvailableBalance,
 }: {
   isWithdrawModalOpen: boolean;
   setIsWithdrawModalOpen: (open: boolean) => void;
-  AvailableBalance:  Record<string, unknown>;
+  AvailableBalance: Record<string, unknown>;
 }) {
-  const [isThirdModalOpen, setIsThirdModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const account = useActiveAccount();
   const address = account?.address;
 
@@ -47,11 +49,19 @@ export default function WithdrawEmergencySafe({
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [supportedTokens] = useRecoilState(supportedTokensState);
 
-  const openThirdModal = () => {
-    // console.log("details", token, amount);
+  const showApprovalModal = () => {
+    console.log("Showing approval modal");
+    setIsApproveModalOpen(true);
+  };
 
-    setIsThirdModalOpen(true);
+  const openSuccessModal = () => {
+    console.log("Opening success modal");
+    // Hide the approval modal and show the success modal
+    setIsApproveModalOpen(false);
+    setIsSuccessModalOpen(true);
     setIsWithdrawModalOpen(false);
+
+    // Toast is now shown in the onClick handler only, not here
   };
 
   const { withdrawFromEmergencySafe, isLoading } = useWithdrawEmergencySafe({
@@ -62,9 +72,19 @@ export default function WithdrawEmergencySafe({
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
     coinSafeAbi: fundingFacetAbi,
     onSuccess: () => {
-      openThirdModal();
+      console.log("Withdrawal successful");
+      // Success is handled in the onClick handler
+    },
+    onApprove: () => {
+      console.log("Showing approval modal");
+      // Show the approval modal
+      setIsApproveModalOpen(true);
     },
     onError: (error) => {
+      console.error("Withdrawal error:", error);
+      // Hide the approval modal
+      setIsApproveModalOpen(false);
+
       toast({
         title: error.message,
         variant: "destructive",
@@ -90,10 +110,10 @@ export default function WithdrawEmergencySafe({
       const tokensData = AvailableBalance;
 
       // console.log("token amounts::", tokensData);
-      
+
       if (!tokensData) return;
 
-      const tokenBalance = AvailableBalance[token] as bigint || 0n;
+      const tokenBalance = (AvailableBalance[token] as bigint) || 0n;
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
     }
@@ -130,7 +150,11 @@ export default function WithdrawEmergencySafe({
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    {supportedTokens.map(token => <SelectItem value={token} key={token}>{tokenData[token]?.symbol}</SelectItem>)}
+                    {supportedTokens.map((token) => (
+                      <SelectItem value={token} key={token}>
+                        {tokenData[token]?.symbol}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -149,14 +173,12 @@ export default function WithdrawEmergencySafe({
                 <div className="text-sm font-[300] text-gray-300">
                   Safe token balance:{" "}
                   <span className="text-gray-400">
-                    {selectedTokenBalance}{" "}
-                    {tokenData[token]?.symbol}
+                    {selectedTokenBalance} {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button
                   className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}
-                >
+                  onClick={() => setAmount(selectedTokenBalance)}>
                   Max
                 </Button>
               </div>
@@ -168,22 +190,83 @@ export default function WithdrawEmergencySafe({
             <Button
               onClick={() => setIsWithdrawModalOpen(false)}
               className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-              type="submit"
-            >
+              type="submit">
               Cancel
             </Button>
             <Button
-              onClick={(e) => {
-                withdrawFromEmergencySafe(e);
+              onClick={async (e) => {
+                // Validate inputs
+                if (!amount) {
+                  toast({
+                    title: "Please enter an amount",
+                    variant: "destructive",
+                  });
+                  return;
+                }
 
-                // if(isSuccess) {
-                //   openThirdModal();
-                // }
+                if (!token) {
+                  toast({
+                    title: "Please select a token",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
+                if ((amount || 0) > selectedTokenBalance) {
+                  toast({
+                    title: "Insufficient balance",
+                    description: "Amount exceeds your available balance",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+
+                console.log("Starting withdrawal process");
+
+                try {
+                  // First show the approval modal
+                  showApprovalModal();
+
+                  // Wait a bit to ensure the modal is visible
+                  await new Promise((resolve) => setTimeout(resolve, 500));
+
+                  // Process the withdrawal
+                  await withdrawFromEmergencySafe(e);
+
+                  // Show success modal after a short delay
+                  setTimeout(() => {
+                    openSuccessModal();
+
+                    // Show a toast notification
+                    toast({
+                      title: "Withdrawal Successful",
+                      description: `Successfully withdrew ${amount} ${
+                        tokenData[token]?.symbol || "tokens"
+                      }`,
+                      variant: "default",
+                    });
+                  }, 1000);
+                } catch (error) {
+                  console.error("Withdrawal failed:", error);
+                  setIsApproveModalOpen(false);
+                  toast({
+                    title: "Withdrawal Failed",
+                    description:
+                      error instanceof Error
+                        ? error.message
+                        : "Unknown error occurred",
+                    variant: "destructive",
+                  });
+                }
               }}
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
-              disabled={isLoading || (amount || 0) > selectedTokenBalance}
-            >
+              disabled={
+                isLoading ||
+                !amount ||
+                !token ||
+                (amount || 0) > selectedTokenBalance
+              }>
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (
@@ -193,14 +276,31 @@ export default function WithdrawEmergencySafe({
           </div>
         </DialogFooter>
       </DialogContent>
+      {/* Approval Transaction Modal */}
+      <ApproveTxModal
+        isOpen={isApproveModalOpen}
+        onClose={() => {
+          if (!isLoading) {
+            setIsApproveModalOpen(false);
+          }
+        }}
+        amount={amount || 0}
+        token={tokenData[token]?.symbol || "tokens"}
+        text="To Withdraw"
+        disableAutoClose={true}
+      />
+
+      {/* Success Modal */}
       <SuccessfulTxModal
         transactionType="withdraw"
         amount={amount || 0}
-        token={
-          tokenData[token]?.symbol
-        }
-        isOpen={isThirdModalOpen}
-        onClose={() => setIsThirdModalOpen(false)}
+        token={tokenData[token]?.symbol || "tokens"}
+        isOpen={isSuccessModalOpen}
+        onClose={() => {
+          setIsSuccessModalOpen(false);
+          // Refresh the page or update balances
+          window.location.reload();
+        }}
         additionalDetails={{
           subText: "Assets will be available in your wallet.",
         }}
