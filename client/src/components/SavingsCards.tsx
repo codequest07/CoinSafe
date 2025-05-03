@@ -56,7 +56,6 @@ export default function SavingsCards() {
     const getSafes = async () => {
       const safeList = await Promise.all(
         safes?.map(async (safe) => {
-          console.log("Safe::", safe);
           const totalAmount = await Promise.all(
             safe.tokenAmounts.map(async (token) => {
               const tokenAmount = Number(formatUnits(token.amount, 18));
@@ -64,7 +63,7 @@ export default function SavingsCards() {
               return Number(usdVal);
             })
           ).then((amounts) => amounts.reduce((sum, val) => sum + val, 0));
-          
+
           let formattedDate = "N/A";
 
           if (safe.unlockTime) {
@@ -76,22 +75,24 @@ export default function SavingsCards() {
               year: "numeric",
             });
           }
-          
+
           const status = Number(safe.duration) > 0 ? "Locked" : "Flexible";
-          
+
           return {
             id: safe.id.toString(),
             name: safe.target,
             amount: totalAmount,
             status: status as "Locked" | "Flexible",
-            unlockDate: safe.unlockTime ? `Unlocks on ${formattedDate}` : "Unlocks Anytime",
+            unlockDate: safe.unlockTime
+              ? `Unlocks on ${formattedDate}`
+              : "Unlocks Anytime",
           };
         }) || []
       );
-  
+
       setDisplaySafes(safeList);
     };
-  
+
     if (safes) {
       getSafes();
     }
@@ -135,7 +136,13 @@ export default function SavingsCards() {
               {displaySafes.map((safe) => (
                 <button
                   key={safe.id}
-                  onClick={() => navigate(safe.id === "911" && safe.name === "Emergency Safe" ? '/dashboard/vault/emergency-safe' :`/dashboard/vault/${safe.id}`)}
+                  onClick={() =>
+                    navigate(
+                      safe.id === "911" && safe.name === "Emergency Safe"
+                        ? "/dashboard/vault/emergency-safe"
+                        : `/dashboard/vault/${safe.id}`
+                    )
+                  }
                   className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors">
                   <div className="flex justify-between items-start mb-4">
                     <div className="text-sm text-gray-400 font-[300]">

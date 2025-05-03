@@ -63,7 +63,10 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
     [balances.available]
   );
   const totalTokenBalances = useMemo(() => balances.total, [balances.total]);
-  const savedTokenBalances = useMemo(() => balances.savings, [balances.savings]);
+  const savedTokenBalances = useMemo(
+    () => balances.savings,
+    [balances.savings]
+  );
 
   useEffect(() => {
     if (!totalTokenBalances) return;
@@ -79,7 +82,7 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
         ),
         saved: formatEther(BigInt((savedTokenBalances[token] as bigint) || 0)),
         available: formatEther(
-          BigInt(availableTokenBalances[token] as bigint || 0)
+          BigInt((availableTokenBalances[token] as bigint) || 0)
         ),
       };
     });
@@ -123,7 +126,6 @@ function AssetTableContent({
 
   useEffect(() => {
     if (!assets || !address) return;
-    console.log("Assets in the assets table sub component", assets);
 
     async function updateAssets(assets: any[]) {
       try {
@@ -170,11 +172,11 @@ function AssetTableContent({
               return updated;
             });
           } catch (error) {
-            console.error("Error fetching asset data:", error);
+            // Silent error handling
           }
         });
       } catch (error) {
-        console.error("Error updating assets:", error);
+        // Silent error handling
       }
     }
 
@@ -196,8 +198,7 @@ function AssetTableContent({
           {isConnected ? (
             <Button
               onClick={openDepositModal}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-            >
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
               Deposit
             </Button>
           ) : (
@@ -254,8 +255,7 @@ function AssetTableContent({
                       </div>
                     ) : (
                       <div
-                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
-                      >
+                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
                         {asset.tokenInfo.symbol?.charAt(0)}
                       </div>
                     )}
@@ -275,7 +275,10 @@ function AssetTableContent({
                       {asset.balance} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ ${asset.balance_usd !== null ? asset.balance_usd : "Loading..."}
+                      ≈ $
+                      {asset.balance_usd !== null
+                        ? asset.balance_usd
+                        : "Loading..."}
                     </p>
                   </div>
                 </TableCell>
@@ -285,7 +288,10 @@ function AssetTableContent({
                       {asset.saved} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ ${asset.saved_usd !== null ? asset.saved_usd : "Loading..."}
+                      ≈ $
+                      {asset.saved_usd !== null
+                        ? asset.saved_usd
+                        : "Loading..."}
                     </p>
                   </div>
                 </TableCell>
@@ -313,24 +319,21 @@ function AssetTableContent({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setIsDepositModalOpen(true)}
-                    >
+                      onClick={() => setIsDepositModalOpen(true)}>
                       Deposit
                     </Button>
                     {safeDetails ? (
                       <Button
                         variant="link"
                         className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                        onClick={() => setIsFirstModalOpen(true)}
-                      >
+                        onClick={() => setIsFirstModalOpen(true)}>
                         Top Up
                       </Button>
                     ) : (
                       <Button
                         variant="link"
                         className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                        onClick={() => setIsFirstModalOpen(true)}
-                      >
+                        onClick={() => setIsFirstModalOpen(true)}>
                         Save
                       </Button>
                     )}

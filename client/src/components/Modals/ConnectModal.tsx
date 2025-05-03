@@ -56,11 +56,8 @@ const ConnectModal = ({
 
   return (
     <Dialog open={isConnectModalOpen} onOpenChange={setIsConnectModalOpen}>
-      <DialogContent
-        className="max-w-[390px] sm:max-w-[400px] border-0 text-white bg-[#17171C]"
-        noX
-      >
-        <div className="flex items-center justify-center">
+      <DialogContent className="max-w-[390px] sm:max-w-[400px] border-0 text-white bg-[#17171C]">
+        `<div className="flex items-center justify-center">
           <img src="/assets/wallet.png" alt="wallet-icon" className="w-32" />
         </div>
         <p className="my-3 text-[16px] text-center text-[#F1F1F1]">
@@ -70,16 +67,14 @@ const ConnectModal = ({
           <Button
             className="rounded-full border-none outline-none font-light py-2 px-10 text-sm bg-[#FFFFFF2B]/20"
             onClick={() => setIsConnectModalOpen(false)}
-            disabled={isConnecting || localIsConnecting}
-          >
+            disabled={isConnecting || localIsConnecting}>
             Close
           </Button>
           <Button
             className="rounded-full border-none outline-none text-black font-light py-2 px-10 text-sm"
             variant="outline"
             onClick={handleConnect}
-            disabled={isConnecting || localIsConnecting}
-          >
+            disabled={isConnecting || localIsConnecting}>
             {isConnecting || localIsConnecting
               ? "Connecting..."
               : "Connect Wallet"}

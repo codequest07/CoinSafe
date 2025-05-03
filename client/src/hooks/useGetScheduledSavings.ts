@@ -27,8 +27,8 @@ export async function transformArrayData(
   if (!data || data.length === 0) return [];
   return Promise.all(
     data.map(async (item) => ({
-      token: item.token, 
-      amount: formatUnits(item.amount, 18), 
+      token: item.token,
+      amount: formatUnits(item.amount, 18),
       scheduledDate: Number(item.scheduledDate) * 1000,
       value: await convertTokenAmountToUsd(item.token, item.amount),
     }))
@@ -59,15 +59,8 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
 
   useEffect(() => {
     async function run() {
-      console.log("====================================");
-      console.log("Runningggggggg");
-      console.log("====================================");
       if (!isConnected || !result) return;
       try {
-        console.log("====================================");
-        console.log("Tryingggg");
-        console.log("====================================");
-        console.log(result);
         if (result) {
           const scheduledSavingsRes = await transformArrayData(result as []);
           setScheduledSavings(
