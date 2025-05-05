@@ -7,6 +7,8 @@ import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTokenPrice } from "@/lib";
+import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
+import { useActiveAccount } from "thirdweb/react";
 // import { tokenData } from "@/lib/utils";
 
 interface DisplaySafe {
@@ -20,9 +22,22 @@ interface DisplaySafe {
 
 export default function SavingsCards() {
   const navigate = useNavigate();
+  const account = useActiveAccount();
+  const userAddress = account?.address;
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { safes, isLoading, isError, fetchSafes } = useGetSafes();
+  const {
+    details,
+    isLoading: automatedSafeLoading,
+    error: automatedSafeError,
+  } = useAutomatedSafeForUser(userAddress as `0x${string}`);
+  console.log(
+    "AUTOMED SAVIMGS>>> ",
+    details,
+    automatedSafeLoading,
+    automatedSafeError
+  );
   const [displaySafes, setDisplaySafes] = useState<DisplaySafe[]>([]);
 
   // Force refresh safes when component mounts
@@ -108,7 +123,8 @@ export default function SavingsCards() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21]">
+                  className="shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21]"
+                >
                   <div className="flex justify-between items-start mb-4">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-6 w-16 rounded-xl" />
@@ -129,54 +145,91 @@ export default function SavingsCards() {
               You don't have any safes yet.
             </div>
           ) : (
-            <div
-              ref={scrollContainerRef}
-              className="flex space-x-4 pb-4 overflow-x-auto hide-scrollbar"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-              {displaySafes.map((safe) => (
+            <>
+              <div
+                ref={scrollContainerRef}
+                className="flex space-x-4 pb-4 overflow-x-auto hide-scrollbar"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
                 <button
-                  key={safe.id}
-                  onClick={() =>
-                    navigate(
-                      safe.id === "911" && safe.name === "Emergency Safe"
-                        ? "/dashboard/vault/emergency-safe"
-                        : `/dashboard/vault/${safe.id}`
-                    )
-                  }
-                  className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors">
+                  onClick={() => navigate("")}
+                  className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors"
+                >
                   <div className="flex justify-between items-start mb-4">
                     <div className="text-sm text-gray-400 font-[300]">
-                      {safe.name}
+                      {"Auto-savings"}
                     </div>
                     <Badge
                       className={`
                         bg-[#79E7BA33] font-[400] text-[#F1F1F1] rounded-xl flex items-center p-1 px-2 hover:bg-[#79E7BA33]
-                      `}>
-                      {safe.status}
+                      `}
+                    >
+                      {"Locked"}
                     </Badge>
                   </div>
                   <div className="flex items-baseline">
                     <span className="text-2xl font-[400]">$</span>
                     <span className="text-2xl font-[400] ml-1">
-                      {safe.amount.toLocaleString("en-US", {
+                      {/* {safe.amount.toLocaleString("en-US", {
                         minimumFractionDigits: 2,
-                      })}
+                      })} */}
+                      0.0
                     </span>
                     <span className="text-sm text-gray-400 ml-2">USD</span>
                   </div>
                   <span className="text-[12px] text-[#CACACA]">
-                    {safe.unlockDate}
+                    {/* {safe.unlockDate} */}
                   </span>
                 </button>
-              ))}
-            </div>
+
+                {displaySafes.map((safe) => (
+                  <button
+                    key={safe.id}
+                    onClick={() =>
+                      navigate(
+                        safe.id === "911" && safe.name === "Emergency Safe"
+                          ? "/dashboard/vault/emergency-safe"
+                          : `/dashboard/vault/${safe.id}`
+                      )
+                    }
+                    className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="text-sm text-gray-400 font-[300]">
+                        {safe.name}
+                      </div>
+                      <Badge
+                        className={`
+                        bg-[#79E7BA33] font-[400] text-[#F1F1F1] rounded-xl flex items-center p-1 px-2 hover:bg-[#79E7BA33]
+                      `}
+                      >
+                        {safe.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-baseline">
+                      <span className="text-2xl font-[400]">$</span>
+                      <span className="text-2xl font-[400] ml-1">
+                        {safe.amount.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </span>
+                      <span className="text-sm text-gray-400 ml-2">USD</span>
+                    </div>
+                    <span className="text-[12px] text-[#CACACA]">
+                      {safe.unlockDate}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </>
           )}
 
           <Button
             variant="ghost"
             size="icon"
             onClick={handleScrollBack}
-            className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/80 hover:bg-black/70 text-white z-10 border border-gray-700">
+            className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/80 hover:bg-black/70 text-white z-10 border border-gray-700"
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
 
@@ -184,7 +237,8 @@ export default function SavingsCards() {
             variant="ghost"
             size="icon"
             onClick={handleScroll}
-            className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/80 hover:bg-black/70 text-white z-10 border border-gray-700">
+            className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/80 hover:bg-black/70 text-white z-10 border border-gray-700"
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
