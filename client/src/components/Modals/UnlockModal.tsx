@@ -190,7 +190,7 @@ export default function UnlockModal({
     if (value == tokens.safu || value == tokens.lsk) {
       setDecimals(18);
     } else if (value == tokens.usdt) {
-      setDecimals(6);
+      setDecimals(18);
     }
 
     // Update the token in both states to ensure synchronization

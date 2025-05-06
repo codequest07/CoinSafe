@@ -12,6 +12,7 @@ import {
   unlockSuccessState,
   UnlockState,
 } from "@/store/atoms/unlock";
+import { tokenDecimals } from "@/lib/utils";
 
 // Using the UnlockState interface from the Recoil atom
 
@@ -33,10 +34,6 @@ interface UseUnlockSafeResult {
   resetUnlockState: () => void;
 }
 
-type TokenDecimals = {
-  [key: string]: number;
-};
-
 export const useUnlockSafe = ({
   coinSafeAddress,
   coinSafeAbi,
@@ -49,11 +46,6 @@ export const useUnlockSafe = ({
   const [error, setError] = useRecoilState(unlockErrorState);
   const [isSuccess, setIsSuccess] = useRecoilState(unlockSuccessState);
   const account = useActiveAccount();
-
-  const tokenDecimals: TokenDecimals = {
-    USDT: 6,
-    DEFAULT: 18,
-  };
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     // Ensure amount is greater than zero

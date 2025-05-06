@@ -12,6 +12,7 @@ import { liskSepolia } from "@/lib/config";
 import { client } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { toast } from "./use-toast";
+import { tokenDecimals } from "@/lib/utils";
 // import { liskSepolia } from 'viem/chains';
 
 interface SaveState {
@@ -40,10 +41,6 @@ interface UseSaveAssetResult {
   error: Error | null;
 }
 
-type TokenDecimals = {
-  [key: string]: number;
-};
-
 export const useSaveAsset = ({
   address,
   saveState,
@@ -60,11 +57,6 @@ export const useSaveAsset = ({
   const { writeContractAsync } = useWriteContract();
 
   // const { mutate: sendTransaction, isPending, data: transactionResult, error: transactionError } = useSendTransaction();
-
-  const tokenDecimals: TokenDecimals = {
-    USDT: 6,
-    DEFAULT: 18,
-  };
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     const decimals = tokenDecimals[token] || tokenDecimals.DEFAULT;

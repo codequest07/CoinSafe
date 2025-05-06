@@ -27,15 +27,6 @@ import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import SaveSuccessful from "../Modals/SaveSuccessful";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { SafeDetails, useGetSafes } from "@/hooks/useGetSafes";
@@ -872,62 +863,6 @@ export default function SaveAssetsCard() {
           frequency: getFrequencyLabel(saveState.frequency.toString()),
         }}
       />
-
-      <Dialog
-        open={isCreateTargetModalOpen}
-        onOpenChange={setIsCreateTargetModalOpen}
-      >
-        <DialogContent className="bg-[#17171C] text-[#F1F1F1] border-[#FFFFFF21]">
-          <DialogHeader>
-            <DialogTitle>Create Custom Target</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="target-name">Name of target</Label>
-              <Input
-                id="target-name"
-                value={newTarget.name || savingsTargetInput}
-                onChange={(e) =>
-                  setNewTarget((prev) => ({ ...prev, name: e.target.value }))
-                }
-                placeholder="Enter target name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="target-description">Description (optional)</Label>
-              <Textarea
-                id="target-description"
-                value={newTarget.description}
-                onChange={(e) =>
-                  setNewTarget((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                placeholder="Enter target description"
-                className="bg-[#17171C]"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <div className="flex justify-between w-full">
-              <Button
-                variant="outline"
-                onClick={() => setIsCreateTargetModalOpen(false)}
-                className="bg-[#FFFFFF2B] border-[#FFFFFF2B] rounded-[100px] text-white"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreateTarget}
-                className="rounded-[100px] bg-white text-[#010104] hover:text-white"
-              >
-                Create Target
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -70,7 +70,7 @@ export default function TopUpModal({
       setDecimals(18);
       // USDT check
     } else if (value == tokens.usdt) {
-      setDecimals(6);
+      setDecimals(18);
     }
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
