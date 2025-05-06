@@ -23,7 +23,10 @@ export default function SaveSenseResp({
 }: SaveSenseRespProps) {
   const formatResponse = (response: { savingsPlan: string }) => {
     try {
-      return response.savingsPlan
+      // Remove asterisks from the text
+      const cleanedText = response.savingsPlan.replace(/\*\*/g, "");
+
+      return cleanedText
         .split("\n\n")
         .filter((section) => section.trim() !== "")
         .map((section, index) => (

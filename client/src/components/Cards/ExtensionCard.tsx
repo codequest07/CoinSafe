@@ -43,7 +43,7 @@ const ExtensionCard: React.FC<ExtensionCardProps> = ({
         setShowKitchenLoading(false);
         // Here you would typically initiate the actual download
         console.log("Download completed");
-      }, 3000); // Simulating a 3-second download
+      }, 6000); // Simulating a 3-second download
     }
   };
 
@@ -58,8 +58,7 @@ const ExtensionCard: React.FC<ExtensionCardProps> = ({
         <button
           className="bg-white text-[#010104] font-[500] py-2 px-6 rounded-full"
           aria-label={btnTitle}
-          onClick={handleClick}
-        >
+          onClick={handleClick}>
           {btnTitle}
         </button>
       </CardContent>
@@ -128,6 +127,8 @@ export default function ExtensionCardCarousel({
       });
       return;
     }
+
+    console.log("Current approval status:", hasApproved);
     if (hasApproved) {
       fetchData();
     } else {
@@ -137,39 +138,64 @@ export default function ExtensionCardCarousel({
 
   const fetchData = async () => {
     setIsLoadingModalOpen(true);
+    setSaveSenseData(null); // Reset previous data
+
     try {
       const response = await fetch(
-        `https://coinsafe-0q0m.onrender.com/main/${address}`
+        `https://coinsafe-0q0m.onrender.com/api/ai/savings-plan`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ address }),
+        }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch data");
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const result = await response.json();
+      console.log("API response:", result);
+
+      // Handle both direct and nested response structures
+      const data = result.savingsPlan ? result : result.data;
+      if (!data?.savingsPlan) {
+        throw new Error("Invalid data format: missing savingsPlan");
+      }
+
       setSaveSenseData(data);
-      setIsLoadingModalOpen(false);
       setIsSaveSenseModalOpen(true);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setIsLoadingModalOpen(false);
       Toast({
         title: "Failed to fetch data",
-        // description: "Please try again later",
         variant: "destructive",
       });
+    } finally {
+      setIsLoadingModalOpen(false);
     }
   };
 
-  const handlePermissionApprove = () => {
+  const handlePermissionApprove = async () => {
     setIsPermissionModalOpen(false);
     setApproved();
-    fetchData();
+    await fetchData();
   };
 
   const handlePermissionReject = () => {
     setIsPermissionModalOpen(false);
     onClose?.();
+  };
+
+  const closeSaveSenseModal = () => {
+    setIsSaveSenseModalOpen(false);
+    onClose?.();
+  };
+
+  const closeKitchenLoading = () => {
+    setShowKitchenLoading(false);
   };
 
   return (
@@ -179,8 +205,7 @@ export default function ExtensionCardCarousel({
         className="w-full max-w-xs"
         opts={{
           loop: true,
-        }}
-      >
+        }}>
         <CarouselContent>
           {extensionCardData.map((card, index) => (
             <CarouselItem key={index}>
@@ -217,12 +242,12 @@ export default function ExtensionCardCarousel({
       />
       <SaveSenseResp
         isOpen={isSaveSenseModalOpen}
-        onClose={() => setIsSaveSenseModalOpen(false)}
+        onClose={closeSaveSenseModal}
         data={saveSenseData}
       />
       <KitchenLoading
         isOpen={showKitchenLoading}
-        onClose={() => setShowKitchenLoading(false)}
+        onClose={closeKitchenLoading}
       />
     </div>
   );

@@ -4,12 +4,18 @@ import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useParams } from "react-router-dom";
 import { NavLinks } from "@/lib/data";
 import MemoLogo from "@/icons/Logo";
 import SmileFace from "./Smile";
 import ExtensionCard from "./Cards/ExtensionCard";
 import ClaimBtn from "./ClaimBtn";
+import { useGetSafeById } from "@/hooks/useGetSafeById";
+import { Skeleton } from "./ui/skeleton";
+import { useStreakSystem } from "@/hooks/useStreakSystem";
+import { useRecoilValue } from "recoil";
+import { userCurrentStreakState } from "@/store/atoms/streak";
+import { useActiveAccount } from "thirdweb/react";
 
 const getRandomMessage = () => {
   const messages = [
@@ -26,7 +32,28 @@ const getRandomMessage = () => {
 
 const DashHeader = () => {
   const location = useLocation();
+  const params = useParams();
   const [randomMessage, setRandomMessage] = useState("");
+  const account = useActiveAccount();
+  const address = account?.address;
+
+  // Get streak information
+  const { getStreakInfo } = useStreakSystem();
+  const currentStreak = useRecoilValue(userCurrentStreakState);
+
+  // Format streak with fire emoji
+  const formattedStreak = `${
+    currentStreak > 0 ? currentStreak.toString() : "0"
+  } days 🔥`;
+
+  // Check if we're on a vault detail page
+  const isVaultDetailPage =
+    location.pathname.includes("/dashboard/vault/") && params.id;
+
+  // Get safe details if we're on a vault detail page
+  const { safeDetails, isLoading } = useGetSafeById(
+    isVaultDetailPage ? params.id : undefined
+  );
 
   // Get current route name - only the last segment
   const getCurrentRouteName = () => {
@@ -34,6 +61,17 @@ const DashHeader = () => {
 
     // Return Dashboard for root path
     if (path === "/") return "Dashboard";
+
+    // If we're on a vault detail page and have safe details, show "Vault / Safe Name"
+    if (isVaultDetailPage) {
+      if (isLoading) {
+        return "Vault / Loading...";
+      }
+      if (safeDetails?.target) {
+        return `Vault / ${safeDetails.target}`;
+      }
+      return "Vault / Details";
+    }
 
     // Split the path by '/' and get the last non-empty segment
     const segments = path.split("/").filter((segment) => segment !== "");
@@ -43,10 +81,24 @@ const DashHeader = () => {
     return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
   };
 
+  // This effect runs only once when the component mounts
   useEffect(() => {
     // Generate a new random message when the component mounts
     setRandomMessage(getRandomMessage());
-  }, []);
+  }, []); // Empty dependency array means this runs only once on mount
+
+  // Separate effect for fetching streak data that runs when address changes
+  useEffect(() => {
+    // Fetch streak info if address is available
+    if (address) {
+      getStreakInfo(address).catch((err) => {
+        console.error("[DashHeader] Error fetching streak info:", err);
+      });
+    }
+    // We intentionally omit getStreakInfo from dependencies to prevent
+    // constant re-renders and message changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address]);
 
   return (
     <main>
@@ -106,11 +158,15 @@ const DashHeader = () => {
             <div className="sm:flex flex-col space-y-2 hidden items-start">
               {/* Current Route Name and Badge */}
               <div className="flex space-x-2 items-center">
-                <span className="text-sm text-[#F1F1F1]">
-                  {getCurrentRouteName()}
-                </span>
+                {isVaultDetailPage && isLoading ? (
+                  <Skeleton className="h-5 w-32" />
+                ) : (
+                  <span className="text-sm text-[#F1F1F1]">
+                    {getCurrentRouteName()}
+                  </span>
+                )}
                 <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
-                  1000 days 🔥
+                  {formattedStreak}
                 </span>
               </div>
               {/* Message */}

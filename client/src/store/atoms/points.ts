@@ -1,5 +1,7 @@
 import { atom } from "recoil";
 import { PointWeights } from "@/types";
+// Import streak-related atoms from streak.ts to re-export them if needed
+import { userCurrentStreakState, userLongestStreakState } from "./streak";
 
 // User points balance
 export const userPointsState = atom<bigint>({
@@ -13,17 +15,8 @@ export const userMultiplierState = atom<bigint>({
   default: BigInt(0),
 });
 
-// User current streak
-export const userCurrentStreakState = atom<bigint>({
-  key: "userCurrentStreakState",
-  default: BigInt(0),
-});
-
-// User longest streak
-export const userLongestStreakState = atom<bigint>({
-  key: "userLongestStreakState",
-  default: BigInt(0),
-});
+// Re-export streak atoms for backward compatibility
+export { userCurrentStreakState, userLongestStreakState };
 
 // Point weights for different actions
 export const pointWeightsState = atom<PointWeights>({
