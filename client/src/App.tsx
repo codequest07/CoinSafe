@@ -19,6 +19,7 @@ import NotFound from "./components/not-found";
 import { useBalances } from "./hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import EmergencySafe from "./Pages/EmergencySafe";
+import { useEffect } from 'react';
 // import { useRecoilState } from "recoil";
 // import { availableBalanceState, savingsBalanceState, totalBalanceState } from "./store/atoms/save";
 // import { useContractEvents } from "./hooks/useWatchEvents";
@@ -44,7 +45,14 @@ const App = () => {
   // });
 
   const account = useActiveAccount();
-  useBalances(account?.address as string);
+  const balances = useBalances(account?.address as string);
+
+  useEffect(() => {
+    if (account?.address) {
+      console.log("Balances updated:", balances);
+    }
+  }, [account?.address, balances]);
+
   console.log("App Component rerendered");
 
 
