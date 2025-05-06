@@ -113,7 +113,7 @@ export default function SaveAssetsCard() {
   ];
 
   const {
-    safes,
+    targetedSafes: safes,
     // isLoading: isGetSafesLoading,
     // fetchSafes,
     // error,
@@ -802,7 +802,8 @@ export default function SaveAssetsCard() {
           </>
         )}
 
-        {selectedOption === "by-frequency" && saveType !== "one-time" &&
+        {selectedOption === "by-frequency" &&
+          saveType !== "one-time" &&
           (supportedTokens.filter(
             (token) => !autoSafeTokenOptions.includes(token)
           ).length < 1 ? (

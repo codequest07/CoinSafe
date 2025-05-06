@@ -6,6 +6,11 @@ export const safesState = atom<SafeDetails[]>({
   default: [],
 });
 
+export const targetedSafesState = atom<SafeDetails[]>({
+  key: "targetedSafesState",
+  default: [],
+});
+
 export const safesLoadingState = atom<boolean>({
   key: "safesLoadingState",
   default: false,
