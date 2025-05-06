@@ -29,15 +29,12 @@ export function useGetSafeById(id: string | undefined) {
 
   // Token address to symbol mapping
   const tokenSymbols: Record<string, string> = useMemo(() => {
-    console.log("Tokens object:", tokens);
     const mapping = Object.entries(tokens).reduce((acc, [symbol, address]) => {
       if (typeof address === "string") {
-        console.log(`Mapping token: ${symbol} -> ${address.toLowerCase()}`);
         acc[address.toLowerCase()] = symbol;
       }
       return acc;
     }, {} as Record<string, string>);
-    console.log("Token symbols mapping:", mapping);
     return mapping;
   }, []);
 
@@ -78,14 +75,6 @@ export function useGetSafeById(id: string | undefined) {
     }
 
     // Format token amounts
-    console.log("Raw token amounts:", safe.tokenAmounts);
-
-    // Check if tokenAmounts is empty or undefined
-    if (!safe.tokenAmounts || safe.tokenAmounts.length === 0) {
-      console.log("No token amounts found in the safe");
-    }
-
-    console.log("token amounts::", safe.tokenAmounts);
 
     setTokenAmounts(
       safe.tokenAmounts.reduce((acc, token) => {
@@ -96,7 +85,6 @@ export function useGetSafeById(id: string | undefined) {
 
     const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
       if (!token || !token.token) {
-        console.log("Invalid token data:", token);
         return {
           token: "unknown",
           tokenSymbol: "Unknown",
@@ -107,33 +95,20 @@ export function useGetSafeById(id: string | undefined) {
 
       const tokenAddress = token.token.toLowerCase();
       const symbol = tokenSymbols[tokenAddress] || "Unknown";
-      console.log(`Token address: ${tokenAddress}, Mapped symbol: ${symbol}`);
 
       // Make symbol comparison case-insensitive for decimals
       const symbolUpper = symbol.toUpperCase();
       const decimals = symbolUpper === "USDT" ? 18 : 18;
-      console.log(
-        `Symbol: ${symbol}, Uppercase: ${symbolUpper}, Decimals: ${decimals}`
-      );
 
       // Ensure token.amount is a valid BigInt
       let amount = 0;
       try {
-        // Log the raw token amount for debugging
-        console.log(
-          `Raw token amount before formatting: ${
-            token.amount
-          }, type: ${typeof token.amount}`
-        );
-
         // Check if token.amount is already a number
         if (typeof token.amount === "number") {
           amount = token.amount;
-          console.log(`Token amount is already a number: ${amount}`);
         } else {
           // Format the token amount using the correct decimals
           amount = Number(formatUnits(token.amount, decimals));
-          console.log(`Formatted token amount: ${amount}`);
         }
 
         // Normalize token amounts based on symbol
@@ -141,28 +116,17 @@ export function useGetSafeById(id: string | undefined) {
         if (symbolUpper === "USDT" && amount >= 1000000) {
           // If the amount is unreasonably large for USDT, normalize it
           // For example, if it's 2,000,000 USDT, normalize to 2 USDT
-          console.log(`Normalizing large USDT amount: ${amount}`);
           amount = amount / 1000000;
-          console.log(`Normalized USDT amount: ${amount}`);
         } else if (amount > 1000000) {
           // For other tokens, if the amount is very large, also normalize
-          console.log(`Normalizing large token amount: ${amount}`);
           // Determine the appropriate divisor based on the magnitude
           const magnitude = Math.floor(Math.log10(amount));
           const divisor = Math.pow(10, magnitude - 1);
           amount = amount / divisor;
-          console.log(`Normalized token amount: ${amount}`);
         }
       } catch (error) {
-        console.error(`Error formatting token amount: ${error}`);
-        console.log(
-          `Token amount: ${token.amount}, type: ${typeof token.amount}`
-        );
+        // Silent error handling
       }
-
-      console.log(
-        `Token: ${symbol}, Address: ${tokenAddress}, Raw amount: ${token.amount}, Decimals: ${decimals}, Formatted amount: ${amount}`
-      );
 
       return {
         token: token.token,
@@ -176,19 +140,12 @@ export function useGetSafeById(id: string | undefined) {
     });
 
     // Calculate total amount in USD (simplified conversion)
-    console.log("Formatted token amounts:", formattedTokenAmounts);
-
-    // Check if formattedTokenAmounts is empty
-    if (!formattedTokenAmounts || formattedTokenAmounts.length === 0) {
-      console.log("No formatted token amounts available");
-    }
 
     let totalAmountUSD = 0;
 
     try {
       totalAmountUSD = formattedTokenAmounts.reduce((sum, token) => {
         if (!token || !token.tokenSymbol) {
-          console.log("Invalid token data in reduce:", token);
           return sum;
         }
 
@@ -204,10 +161,6 @@ export function useGetSafeById(id: string | undefined) {
             ? 1
             : 0;
 
-        console.log(
-          `Token symbol: ${token.tokenSymbol}, Uppercase: ${tokenSymbolUpper}, Rate: ${rate}`
-        );
-
         // Use the already normalized amount from above
         let tokenAmount = token.amount;
 
@@ -215,29 +168,20 @@ export function useGetSafeById(id: string | undefined) {
         // the token amounts in the previous step
 
         const tokenValueUSD = tokenAmount * rate;
-        console.log(
-          `Token: ${token.tokenSymbol}, Original Amount: ${token.amount}, Used Amount: ${tokenAmount}, Rate: ${rate}, Value in USD: ${tokenValueUSD}`
-        );
 
         return sum + tokenValueUSD;
       }, 0);
     } catch (error) {
-      console.error("Error calculating total USD amount:", error);
+      // Silent error handling
     }
-
-    console.log("Total amount in USD before sanity check:", totalAmountUSD);
 
     // Sanity check for the total amount
     if (totalAmountUSD > 1000000) {
       // If greater than 1 million
-      console.log(
-        `Total USD amount is very large: ${totalAmountUSD}, applying sanity check`
-      );
       // Apply normalization based on magnitude
       const magnitude = Math.floor(Math.log10(totalAmountUSD));
       const divisor = Math.pow(10, magnitude - 1);
       totalAmountUSD = totalAmountUSD / divisor;
-      console.log(`Adjusted total USD amount: ${totalAmountUSD}`);
     }
 
     setSafeDetails({

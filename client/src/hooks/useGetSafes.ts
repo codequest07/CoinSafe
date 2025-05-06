@@ -33,7 +33,8 @@ export function useGetSafes() {
   const [safes, setSafes] = useRecoilState(safesState);
   const [isLoading, setIsLoading] = useRecoilState(safesLoadingState);
   const [error, setError] = useRecoilState(safesErrorState);
-  const [supportedTokens] = useRecoilState(supportedTokensState);
+  const [supportedTokens, setSupportedTokens] =
+    useRecoilState(supportedTokensState);
   // Derive isError from error state
   const isError = error !== null;
 
@@ -64,71 +65,27 @@ export function useGetSafes() {
   // Track the last fetch time to prevent too frequent refreshes
   const [lastFetchTime, setLastFetchTime] = useState(0);
 
-  const fetchEmergencySafe = async () => {
-    const rawTxs = supportedTokens.map((token: string) => ({
-      address: CoinsafeDiamondContract.address,
-      abi: facetAbis.emergencySavingsFacet as Abi,
-      args: [address, token],
-      functionName: "getEmergencySafeBalance",
-    }));
-
-    const results = await publicClient.multicall({
-      contracts: rawTxs,
-      chain: liskSepolia,
-    });
-
-    console.log("Results::", results);
-
-    const tokenAmounts: Token[] = results
-      .filter(({ status }: { status: string }) => status === "success")
-      .map(({ result }: { result: any }, idx: number) => ({
-        token: supportedTokens[idx],
-        amount: result,
-      }));
-    console.log("Token amounts: ", tokenAmounts);
-
-    return {
-      id: 911n,
-      target: "Emergency Safe",
-      duration: 0n,
-      startTime: 0n,
-      unlockTime: 0n,
-      tokenAmounts,
-    };
-  };
-
   const fetchSafes = useCallback(
     async (force = false) => {
       if (!address) {
         return;
       }
 
-      console.log(force);
-
       // Prevent fetching too frequently (at least 5 seconds between any refreshes)
       const now = Date.now();
       if (now - lastFetchTime < 5000) {
-        console.log("Skipping fetch - too soon since last fetch");
         return;
       }
 
       // Only fetch if we don't already have data or we're forcing a refresh
-      // if (safes.length > 0 && !force && !isLoading) {
-      //   console.log(
-      //     "Skipping fetch - already have data and not forcing refresh"
-      //   );
-      //   return;
-      // }
-
-      // If we're already loading, don't start another fetch
-      if (isLoading) {
-        console.log("Skipping fetch - already loading");
+      if (safes.length > 0 && !force && !isLoading) {
         return;
       }
 
-      console.log("====================================");
-      console.log("Safes: ", safes);
-      console.log("====================================");
+      // If we're already loading, don't start another fetch
+      if (isLoading) {
+        return;
+      }
 
       // Only set loading to true on initial load
       if (!initialLoadComplete) {
@@ -138,18 +95,190 @@ export function useGetSafes() {
       setLastFetchTime(now);
 
       try {
+        // First, ensure we have supported tokens
+        if (!supportedTokens || supportedTokens.length === 0) {
+          console.warn("No supported tokens available, fetching from contract");
+
+          try {
+            // Get the supported tokens directly from the contract
+            const fundingFacetContract = getContract({
+              client,
+              address: CoinsafeDiamondContract.address,
+              chain: liskSepolia,
+              abi: facetAbis.fundingFacet as unknown as Abi,
+            });
+
+            const tokens = (await readContract({
+              contract: fundingFacetContract,
+              method:
+                "function getAcceptedTokenAddresses() external view returns (address[] memory)",
+              params: [],
+            })) as string[];
+
+            console.log("Supported tokens fetched directly:", tokens);
+
+            if (tokens && tokens.length > 0) {
+              // Update the supportedTokens state with the fetched tokens
+              setSupportedTokens(tokens);
+            } else {
+              console.error("Contract returned empty tokens array");
+            }
+          } catch (err) {
+            console.error("Error fetching supported tokens directly:", err);
+          }
+        }
+
+        // Get regular safes
+        console.log("Fetching regular safes for address:", address);
         const result = await readContract({
           contract,
           method: resolveMethod("getSafes"),
           params: [],
           from: address,
         });
+        console.log("Regular safes fetched:", result);
 
+        // Define fetchEmergencySafe inside the callback
+        const fetchEmergencySafe = async () => {
+          console.log(
+            "Fetching emergency safe with supported tokens:",
+            supportedTokens
+          );
+
+          // Use the tokens we have from the state
+          let tokensToUse = supportedTokens;
+
+          // If we still don't have any supported tokens, try to fetch them directly
+          if (!tokensToUse || tokensToUse.length === 0) {
+            console.warn(
+              "No supported tokens available for emergency safe, trying to fetch directly"
+            );
+
+            try {
+              // Get the supported tokens directly from the contract
+              const fundingFacetContract = getContract({
+                client,
+                address: CoinsafeDiamondContract.address,
+                chain: liskSepolia,
+                abi: facetAbis.fundingFacet as unknown as Abi,
+              });
+
+              const tokens = (await readContract({
+                contract: fundingFacetContract,
+                method:
+                  "function getAcceptedTokenAddresses() external view returns (address[] memory)",
+                params: [],
+              })) as string[];
+
+              console.log(
+                "Supported tokens fetched directly for emergency safe:",
+                tokens
+              );
+
+              if (tokens && tokens.length > 0) {
+                tokensToUse = tokens;
+                // Also update the state for future use
+                setSupportedTokens(tokens);
+              } else {
+                console.error(
+                  "Contract returned empty tokens array for emergency safe"
+                );
+                return {
+                  id: 911n,
+                  target: "Emergency Safe",
+                  duration: 0n,
+                  startTime: 0n,
+                  unlockTime: 0n,
+                  tokenAmounts: [],
+                };
+              }
+            } catch (err) {
+              console.error(
+                "Error fetching supported tokens for emergency safe:",
+                err
+              );
+              return {
+                id: 911n,
+                target: "Emergency Safe",
+                duration: 0n,
+                startTime: 0n,
+                unlockTime: 0n,
+                tokenAmounts: [],
+              };
+            }
+          } else {
+            console.log(
+              "Using actual supported tokens for emergency safe:",
+              tokensToUse
+            );
+          }
+
+          // Create a contract instance specifically for emergency savings
+          const emergencyContract = getContract({
+            client,
+            address: CoinsafeDiamondContract.address,
+            chain: liskSepolia,
+            abi: facetAbis.emergencySavingsFacet as Abi,
+          });
+
+          console.log("Emergency contract address:", emergencyContract.address);
+
+          // Prepare multicall requests
+          const rawTxs = tokensToUse.map((token: string) => ({
+            address: CoinsafeDiamondContract.address,
+            abi: facetAbis.emergencySavingsFacet as Abi,
+            args: [address, token],
+            functionName: "getEmergencySafeBalance",
+          }));
+
+          console.log("Preparing multicall with contracts:", rawTxs);
+
+          try {
+            const results = await publicClient.multicall({
+              contracts: rawTxs,
+              chain: liskSepolia,
+            });
+
+            console.log("Multicall results:", results);
+
+            const tokenAmounts: Token[] = results
+              .filter(({ status }: { status: string }) => status === "success")
+              .map(({ result }: { result: any }, idx: number) => ({
+                token: tokensToUse[idx],
+                amount: result,
+              }));
+
+            console.log("Processed token amounts:", tokenAmounts);
+
+            return {
+              id: 911n,
+              target: "Emergency Safe",
+              duration: 0n,
+              startTime: 0n,
+              unlockTime: 0n,
+              tokenAmounts,
+            };
+          } catch (err) {
+            console.error("Error in multicall for emergency safe:", err);
+            // Return empty emergency safe on error
+            return {
+              id: 911n,
+              target: "Emergency Safe",
+              duration: 0n,
+              startTime: 0n,
+              unlockTime: 0n,
+              tokenAmounts: [],
+            };
+          }
+        };
+
+        // Fetch emergency safe
         const emergencySafe = await fetchEmergencySafe();
+        console.log("Emergency safe fetched:", emergencySafe);
 
+        // Combine and update state
         setSafes([emergencySafe, ...result] as SafeDetails[]);
       } catch (err: any) {
-        console.error("Transaction fetch failed:", err);
         setError(err);
         setSafes([]);
       } finally {
@@ -169,24 +298,35 @@ export function useGetSafes() {
       setInitialLoadComplete,
       lastFetchTime,
       setLastFetchTime,
+      supportedTokens,
+      setSupportedTokens,
     ]
   );
+
+  // Add an effect to monitor supportedTokens changes
+  useEffect(() => {
+    console.log("supportedTokens changed in useGetSafes:", supportedTokens);
+    // If we have tokens and safes are already loaded, consider refreshing
+    if (supportedTokens.length > 0 && safes.length > 0) {
+      // Check if emergency safe has token amounts
+      const emergencySafe = safes.find((safe) => safe.id === 911n);
+      if (
+        emergencySafe &&
+        (!emergencySafe.tokenAmounts || emergencySafe.tokenAmounts.length === 0)
+      ) {
+        console.log("Emergency safe has no token amounts, refreshing...");
+        fetchSafes(true); // Force refresh to get emergency safe with tokens
+      }
+    }
+  }, [supportedTokens, safes, fetchSafes]);
 
   // Only fetch on initial mount, not on every dependency change
   useEffect(() => {
     // This will only run once when the component mounts
     if (safes.length === 0 && !isLoading && address && !initialLoadComplete) {
-      console.log("Initial fetch of safes data");
-      fetchSafes();
+      fetchSafes(false); // Explicitly pass false to indicate this is not a forced refresh
     }
-  }, [
-    address,
-    safes.length,
-    isLoading,
-    fetchSafes,
-    initialLoadComplete,
-    supportedTokens,
-  ]); // Include dependencies to avoid lint warnings
+  }, [address, safes.length, isLoading, fetchSafes, initialLoadComplete]); // Include dependencies to avoid lint warnings
 
   return {
     safes,
@@ -194,6 +334,6 @@ export function useGetSafes() {
     isError,
     error,
     fetchSafes,
-    refetch: fetchSafes,
+    refetch: () => fetchSafes(true), // Explicitly pass true to force a refresh
   };
 }

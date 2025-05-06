@@ -5,7 +5,7 @@ import { ArrowLeft, Loader2, LoaderCircle } from "lucide-react";
 import { cn, tokenData } from "@/lib/utils";
 import SavingsTargetInput from "../SavingsTargetInput";
 import AmountInput from "../AmountInput";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { DurationSelector } from "../DurationSelector";
@@ -50,6 +50,7 @@ interface SavingsTarget {
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
   const [saveState, setSaveState] = useRecoilState(saveAtom);
+  const resetSaveState = useResetRecoilState(saveAtom);
 
   const initialSaveType = saveState.typeName === "manual" ? "auto" : "one-time";
   const [saveType, setSaveType] = useState<"one-time" | "auto">(
@@ -208,7 +209,7 @@ export default function SaveAssetsCard() {
   };
 
   const [savingsTargetInput, _setSavingsTargetInput] = useState("");
-  const [selectedSavingsTarget, setSelectedSavingsTarget] =
+  const [_selectedSavingsTarget, setSelectedSavingsTarget] =
     useState<SafeDetails | null>(null);
   //   const [nextId, setNextId] = useState(16);
 
@@ -283,6 +284,9 @@ export default function SaveAssetsCard() {
     saveState,
     onSuccess: () => {
       openThirdModal();
+      setTimeout(() => {
+        resetSaveState();
+      }, 4000);
     },
     onError: (error: { message: any }) => {
       toast({
@@ -292,6 +296,10 @@ export default function SaveAssetsCard() {
     },
   });
 
+  useEffect(() => {
+    console.log("SAVE STATE", saveState);
+  }, [saveState]);
+
   const { saveAsset, isPending: isLoading } = useSaveAsset({
     address: address as `0x${string}`,
     saveState,
@@ -300,6 +308,11 @@ export default function SaveAssetsCard() {
     chainId: liskSepolia.id,
     onSuccess: () => {
       openThirdModal();
+
+      // add a little delay so that the modal can display the correct amount and duration
+      setTimeout(() => {
+        resetSaveState();
+      }, 4000);
     },
     onError: (error: { message: any }) => {
       toast({
@@ -347,8 +360,39 @@ export default function SaveAssetsCard() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSavingsTargetChange = (targetInput: string) => {
-    setSaveState((prev) => ({ ...prev, target: targetInput, id: 0 }));
+  // const handleSavingsTargetChange = (targetInput: string) => {
+  //   setSaveState((prev) => ({ ...prev, target: targetInput, id: 0 }));
+  // };
+  // Handle input change for savings target
+  const handleSavingsTargetChange = (value: string) => {
+    // Update saveState with the raw input value to allow typing
+    setSaveState((prevState) => ({
+      ...prevState,
+      target: value,
+    }));
+
+    // Find matching SafeDetails (case-insensitive)
+    const matchingSafe = safes.find(
+      (safe) => safe.target.toLowerCase() === value.trim().toLowerCase()
+    );
+
+    // Update selectedSavingsTarget
+    setSelectedSavingsTarget(matchingSafe || null);
+
+    // Update saveState with matching details if found
+    if (matchingSafe) {
+      setSaveState((prevState) => ({
+        ...prevState,
+        id: Number(matchingSafe.id),
+        target: matchingSafe.target,
+      }));
+    }
+
+    // Log for debugging
+    console.log("Input value:", value);
+    console.log("Matching Safe:", matchingSafe);
+    console.log("Selected Savings Target:", matchingSafe || null);
+    console.log("Save State:", { ...saveState, target: value });
   };
 
   const handleSaveAsset = (
@@ -489,8 +533,9 @@ export default function SaveAssetsCard() {
                   // console.log("SAVINGS TARGET IN THE SELECT", savingsTarget);
                   setSaveState((prevState) => ({
                     ...prevState,
-                    id: Number(selectedSavingsTarget?.id || 0),
-                    target: selectedSavingsTarget?.target || prevState.target,
+                    id: Number(savingsTarget.id),
+                    target: savingsTarget.target,
+                    duration: Number(savingsTarget.duration),
                   }));
 
                   // console.log("In here in savings target select");

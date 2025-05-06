@@ -69,7 +69,10 @@ const App = () => {
           <Route path="/dashboard/wallet" element={<Portfolio />} />
           <Route path="/dashboard/vault" element={<Vault />} />
           <Route path="/dashboard/vault/:id" element={<SavingsDetail />} />
-          <Route path="/dashboard/vault/emergency-safe" element={<EmergencySafe />} />
+          <Route
+            path="/dashboard/vault/emergency-safe"
+            element={<EmergencySafe />}
+          />
           <Route path="/dashboard/staking" element={<Staking />} />
           <Route path="/dashboard/rewards" element={<Rewards />} />
           <Route path="/dashboard/rewards/my-rewards" element={<MyRewards />} />

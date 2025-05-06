@@ -45,13 +45,20 @@ export default function ClaimModal({
   const account = useActiveAccount();
   const { safeDetails, isLoading: isSafeLoading } = useGetSafeById(safeId);
 
+  // Determine if this is a target saving
+  const isTargetSaving =
+    safeDetails?.target && safeDetails.target !== "Emergency Safe";
+
   // Set up the useClaimAsset hook
   const { claimAsset, claimAllAssets, isLoading } = useClaimAsset({
     account,
     safeId: Number(safeId),
     token: selectedToken as `0x${string}`,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-    coinSafeAbi: facetAbis.targetSavingsFacet,
+    // Use the correct ABI based on the safe type
+    coinSafeAbi: isTargetSaving
+      ? facetAbis.targetSavingsFacet
+      : facetAbis.emergencySavingsFacet,
     onSuccess: () => {
       // Hide the approval modal and show the success modal
       setShowApproveTxModal(false);
@@ -101,18 +108,43 @@ export default function ClaimModal({
     }
   }, [safeDetails, selectedToken]);
 
-
   // Check if the safe is matured
   const isSafeMatured = safeDetails
-    ? BigInt(Math.floor(Date.now() / 1000)) >= BigInt(Math.floor(safeDetails.unlockTime.getTime() / 1000))
+    ? BigInt(Math.floor(Date.now() / 1000)) >=
+      BigInt(Math.floor(safeDetails.unlockTime.getTime() / 1000))
     : false;
 
   // Handle claim button click
   const handleClaim = async () => {
+    // Check if this is an Emergency Safe
+    if (safeDetails?.id?.toString() === "911") {
+      toast({
+        title: "Emergency Safe",
+        description: "Please use the Emergency Safe withdrawal option instead.",
+        variant: "destructive",
+      });
+
+      // Redirect to Emergency Safe page
+      window.location.href = "/emergency-safe";
+      return;
+    }
+
+    // For Target Savings, check if it's matured
     if (!isSafeMatured) {
       toast({
         title: "Safe has not matured yet",
         description: "You cannot claim tokens from a safe that hasn't matured.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if this is a target saving
+    if (!isTargetSaving) {
+      toast({
+        title: "Not a Target Saving",
+        description:
+          "This safe is not a target saving and cannot be claimed this way.",
         variant: "destructive",
       });
       return;
@@ -199,6 +231,16 @@ export default function ClaimModal({
                 <div className="bg-amber-900/20 text-amber-400 p-4 rounded-lg mb-4">
                   This safe has not matured yet. You can only claim tokens after
                   the maturity date.
+                </div>
+              ) : safeDetails?.id?.toString() === "911" ? (
+                <div className="bg-red-900/20 text-red-400 p-4 rounded-lg mb-4">
+                  This is an Emergency Safe. Please use the Emergency Safe
+                  withdrawal option instead.
+                </div>
+              ) : !isTargetSaving ? (
+                <div className="bg-red-900/20 text-red-400 p-4 rounded-lg mb-4">
+                  This safe is not a Target Saving and cannot be claimed this
+                  way.
                 </div>
               ) : claimableTokens.length === 0 ? (
                 <div className="bg-gray-800/20 text-gray-400 p-4 rounded-lg mb-4">
@@ -314,7 +356,11 @@ export default function ClaimModal({
               className="text-black px-8 rounded-[2rem]"
               variant="outline"
               disabled={
-                isLoading || !isSafeMatured || claimableTokens.length === 0
+                isLoading ||
+                !isSafeMatured ||
+                claimableTokens.length === 0 ||
+                safeDetails?.id?.toString() === "911" ||
+                !isTargetSaving
               }>
               {isLoading ? (
                 <LoaderCircle className="animate-spin mr-2" />
