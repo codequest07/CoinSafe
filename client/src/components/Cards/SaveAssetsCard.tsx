@@ -32,12 +32,6 @@ import { formatUnits } from "viem";
 import { SafeDetails, useGetSafes } from "@/hooks/useGetSafes";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 
-interface SavingsTarget {
-  id: string | number;
-  name: string;
-  description?: string;
-}
-
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
   const [saveState, setSaveState] = useRecoilState(saveAtom);
@@ -90,7 +84,6 @@ export default function SaveAssetsCard() {
   const [savingsDuration, setSavingsDuration] = useState(30);
   const [endDate, setEndDate] = useState("");
   const [, setUnlockDate] = useState<Date | null>(null);
-  const [, _setSelectedDate] = useState<Date | undefined>(undefined);
 
   // Custom date state
   const [customDate, setCustomDate] = useState<Date | undefined>(undefined);
@@ -109,14 +102,6 @@ export default function SaveAssetsCard() {
     // fetchSafes,
     // error,
   } = useGetSafes();
-
-  // useEffect(() => {
-  //   fetchSafes();
-  // }, []);
-
-  // console.log("Loading?? >>", isGetSafesLoading);
-  // console.log("SAFES", safes);
-  // console.log("SAFE FETCH ERROR", error);
 
   const calculateEndDate = (days: number) => {
     const currentDate = new Date();
@@ -164,63 +149,10 @@ export default function SaveAssetsCard() {
       ...prevState,
       duration: durationInSeconds,
     }));
-
-    // console.log(
-    //   `Custom date selected: ${format(
-    //     date,
-    //     "dd MMMM yyyy"
-    //   )}, ${daysDiff} days from now`
-    // );
   };
 
-  // End of duration state code
-  const [, _setSavingsTargets] = useState<SafeDetails[]>(safes);
-  //   const handleCreateTarget = (newTarget: SavingsTarget) => {
-  //     setSavingsTargets((prev) => [...prev, newTarget]);
-  //     console.log("Created new target:", newTarget);
-  //   };
-  const [isCreateTargetModalOpen, setIsCreateTargetModalOpen] = useState(false);
-  const [newTarget, setNewTarget] = useState<Omit<SavingsTarget, "id">>({
-    name: "",
-    description: "",
-  });
-
-  const handleCreateTarget = () => {
-    if (newTarget.name || savingsTargetInput) {
-      //   setSavingsTargets((prev) => ({
-      //     ...prev,
-      //     newTarget,
-      //     id: Date.now().toString(),
-      //   }));
-      // console.log("Created new target:", newTarget);
-      //   onCreate({ ...newTarget, id: Date.now().toString() });
-      setNewTarget({ name: "", description: "" });
-      setIsCreateTargetModalOpen(false);
-    }
-  };
-
-  const [savingsTargetInput, _setSavingsTargetInput] = useState("");
-  const [_selectedSavingsTarget, setSelectedSavingsTarget] =
+  const [selectedSavingsTarget, setSelectedSavingsTarget] =
     useState<SafeDetails | null>(null);
-  //   const [nextId, setNextId] = useState(16);
-
-  // console.log("SELECTED SAVINGS TARGET", selectedSavingsTarget);
-
-  // const handleSavingsTargetSelect = (savingsTarget: SafeDetails) => {
-  //   setSelectedSavingsTarget(savingsTarget);
-
-  //   if (selectedSavingsTarget) {
-  //     setSaveState((prevState) => ({
-  //       ...prevState,
-  //       id: Number(selectedSavingsTarget.id),
-  //       target: selectedSavingsTarget.target,
-  //     }));
-
-  //     console.log("In here in savings target select");
-  //     console.log("savings target", selectedSavingsTarget);
-  //     console.log("New save state", saveState);
-  //   }
-  // };
 
   const [selectedOption, setSelectedOption] = useState("by-frequency");
   const [validationErrors, setValidationErrors] = useState<{
@@ -275,9 +207,9 @@ export default function SaveAssetsCard() {
     saveState,
     onSuccess: () => {
       openThirdModal();
-      setTimeout(() => {
-        resetSaveState();
-      }, 4000);
+      // setTimeout(() => {
+      //   resetSaveState();
+      // }, 000);
     },
     onError: (error: { message: any }) => {
       toast({
@@ -287,11 +219,11 @@ export default function SaveAssetsCard() {
     },
   });
 
-  useEffect(() => {
-    console.log("SAVE STATE", saveState);
-  }, [saveState]);
-
-  const { saveAsset, isPending: isLoading } = useSaveAsset({
+  const {
+    saveAsset,
+    topUpSafe,
+    isPending: isLoading,
+  } = useSaveAsset({
     address: address as `0x${string}`,
     saveState,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
@@ -351,15 +283,12 @@ export default function SaveAssetsCard() {
     return Object.keys(errors).length === 0;
   };
 
-  // const handleSavingsTargetChange = (targetInput: string) => {
-  //   setSaveState((prev) => ({ ...prev, target: targetInput, id: 0 }));
-  // };
-  // Handle input change for savings target
   const handleSavingsTargetChange = (value: string) => {
     // Update saveState with the raw input value to allow typing
     setSaveState((prevState) => ({
       ...prevState,
       target: value,
+      id: null,
     }));
 
     // Find matching SafeDetails (case-insensitive)
@@ -379,11 +308,11 @@ export default function SaveAssetsCard() {
       }));
     }
 
-    // Log for debugging
-    console.log("Input value:", value);
-    console.log("Matching Safe:", matchingSafe);
-    console.log("Selected Savings Target:", matchingSafe || null);
-    console.log("Save State:", { ...saveState, target: value });
+    // // Log for debugging
+    // console.log("Input value:", value);
+    // console.log("Matching Safe:", matchingSafe);
+    // console.log("Selected Savings Target:", matchingSafe || null);
+    // console.log("Save State:", { ...saveState, target: value });
   };
 
   const handleSaveAsset = (
@@ -399,6 +328,12 @@ export default function SaveAssetsCard() {
         return addTokenToAutoSafe(event);
       }
       createAutoSavings(event);
+      return;
+    }
+
+    if (selectedSavingsTarget && saveState.id) {
+      event.preventDefault();
+      topUpSafe(saveState.id, saveState.token, saveState.amount);
       return;
     }
 
@@ -426,7 +361,7 @@ export default function SaveAssetsCard() {
         const { hasAutoSafe, tokens } = await hasCreatedAutoSafe(
           supportedTokens
         );
-        console.log("Has AutoSafe::", hasAutoSafe, "Tokens::", tokens);
+        // console.log("Has AutoSafe::", hasAutoSafe, "Tokens::", tokens);
         setHasAutoSafe(hasAutoSafe);
         setAutoSafeTokenOptions(tokens);
       } catch (error) {
@@ -528,14 +463,7 @@ export default function SaveAssetsCard() {
                     target: savingsTarget.target,
                     duration: Number(savingsTarget.duration),
                   }));
-
-                  // console.log("In here in savings target select");
-                  // console.log("savings target", selectedSavingsTarget);
-                  // console.log("New save state", saveState);
                 }}
-                onAddItem={handleCreateTarget}
-                setShowAddModal={setIsCreateTargetModalOpen}
-                handleAddItem={() => setIsCreateTargetModalOpen(true)}
                 // label="Search for a city"
                 placeholder="Enter savings target"
                 getItemValue={(savingsTarget) => savingsTarget.target}
@@ -547,37 +475,27 @@ export default function SaveAssetsCard() {
                   </div>
                 )}
               />
-              {/* <div className="relative mt-2">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#6a6a6a] rounded-lg p-4 outline-none"
-              placeholder="Search target"
-            />
-
-
-          </div> */}
             </div>
 
-            {/* Duration section */}
-            <div className="py-4">
-              <DurationSelector
-                options={savingsDurationOptions}
-                selectedValue={savingsDuration}
-                onChange={handleDurationChange}
-                onCustomDateSelect={handleCustomDateSelect}
-                customDate={customDate}
-                isCustomSelected={isCustomSelected}
-                className="mb-4"
-              />
-
+            {!selectedSavingsTarget && (
               <div className="py-4">
-                <p className="text-[12px] font-semibold text-[#CACACA]">
-                  Unlocks on <span className="text-[#CACACA]">{endDate}</span>
-                </p>
+                <DurationSelector
+                  options={savingsDurationOptions}
+                  selectedValue={savingsDuration}
+                  onChange={handleDurationChange}
+                  onCustomDateSelect={handleCustomDateSelect}
+                  customDate={customDate}
+                  isCustomSelected={isCustomSelected}
+                  className="mb-4"
+                />
+
+                <div className="py-4">
+                  <p className="text-[12px] font-semibold text-[#CACACA]">
+                    Unlocks on <span className="text-[#CACACA]">{endDate}</span>
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
 
@@ -823,7 +741,7 @@ export default function SaveAssetsCard() {
           ))}
 
         {saveType === "one-time" && (
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-5">
             <div>
               <Button
                 onClick={handleSaveAsset}
