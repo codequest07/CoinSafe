@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
+import { convertTokenAmountToUsd } from "@/lib/utils";
 
 export interface FormattedSafeDetails {
   id: string;
@@ -126,6 +127,7 @@ export function useGetSafeById(id: string | undefined) {
         }
       } catch (error) {
         // Silent error handling
+        console.error("Error formatting token amount:", error);
       }
 
       return {
@@ -139,61 +141,57 @@ export function useGetSafeById(id: string | undefined) {
       };
     });
 
-    // Calculate total amount in USD (simplified conversion)
+    // Calculate total amount in USD using asynchronous getTokenPrice function
 
     let totalAmountUSD = 0;
 
-    try {
-      totalAmountUSD = formattedTokenAmounts.reduce((sum, token) => {
-        if (!token || !token.tokenSymbol) {
-          return sum;
-        }
+    const fetchTokenPrices = async () => {
+      try {
+        const tokenPrices = await Promise.all(
+          formattedTokenAmounts.map(async (token) => {
+            if (!token || !token.tokenSymbol) {
+              return 0;
+            }
 
-        // Simple conversion rates (in a real app, you'd use an API)
-        // Make token symbol comparison case-insensitive
-        const tokenSymbolUpper = token.tokenSymbol.toUpperCase();
-        const rate =
-          tokenSymbolUpper === "SAFU"
-            ? 0.339
-            : tokenSymbolUpper === "LSK"
-            ? 0.53
-            : tokenSymbolUpper === "USDT"
-            ? 1
-            : 0;
+            // Fetch the token price using the asynchronous function
+            const price = await convertTokenAmountToUsd(
+              token.token,
+              BigInt(token.amount)
+            );
+            return token.amount * price;
+          })
+        );
 
-        // Use the already normalized amount from above
-        let tokenAmount = token.amount;
+        // Sum up all token values in USD
+        totalAmountUSD = tokenPrices.reduce((sum, value) => sum + value, 0);
+      } catch (error) {
+        // Silent error handling
+        console.error("Error fetching token prices:", error);
+      }
+    };
 
-        // No need for additional normalization here since we've already normalized
-        // the token amounts in the previous step
+    // Execute the fetchTokenPrices function
+    fetchTokenPrices().then(() => {
+      // Sanity check for the total amount
+      if (totalAmountUSD > 1000000) {
+        // If greater than 1 million
+        // Apply normalization based on magnitude
+        const magnitude = Math.floor(Math.log10(totalAmountUSD));
+        const divisor = Math.pow(10, magnitude - 1);
+        totalAmountUSD = totalAmountUSD / divisor;
+      }
 
-        const tokenValueUSD = tokenAmount * rate;
-
-        return sum + tokenValueUSD;
-      }, 0);
-    } catch (error) {
-      // Silent error handling
-    }
-
-    // Sanity check for the total amount
-    if (totalAmountUSD > 1000000) {
-      // If greater than 1 million
-      // Apply normalization based on magnitude
-      const magnitude = Math.floor(Math.log10(totalAmountUSD));
-      const divisor = Math.pow(10, magnitude - 1);
-      totalAmountUSD = totalAmountUSD / divisor;
-    }
-
-    setSafeDetails({
-      id: safe.id.toString(),
-      target: safe.target,
-      duration: Number(safe.duration),
-      startTime,
-      unlockTime,
-      nextUnlockDate: formatDate(nextUnlockDate),
-      tokenAmounts: formattedTokenAmounts,
-      totalAmountUSD,
-      isLocked: Number(safe.duration) > 0,
+      setSafeDetails({
+        id: safe.id.toString(),
+        target: safe.target,
+        duration: Number(safe.duration),
+        startTime,
+        unlockTime,
+        nextUnlockDate: formatDate(nextUnlockDate),
+        tokenAmounts: formattedTokenAmounts,
+        totalAmountUSD,
+        isLocked: Number(safe.duration) > 0,
+      });
     });
   }, [id, safes, isLoading, isError, tokenSymbols]);
 
