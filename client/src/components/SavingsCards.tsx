@@ -187,7 +187,7 @@ export default function SavingsCards() {
                         )
                       ).toLocaleString("en-US", {
                         minimumFractionDigits: 2,
-                      })}
+                      }) || 0.0}
                     </span>
                     <span className="text-sm text-gray-400 ml-2">USD</span>
                   </div>
