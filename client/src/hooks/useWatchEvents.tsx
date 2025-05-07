@@ -1,4 +1,4 @@
-import { CoinSafeContract } from "@/lib/contract";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { convertTokenAmountToUsd } from "@/lib/utils";
 import { useEffect, useMemo } from "react";
 import { Contract } from "ethers";
@@ -12,7 +12,7 @@ interface UseContractEventsProps {
   onSave?: EventHandler;
 }
 
-export const useContractEvents = ({
+export const useWatchEvents = ({
   onDeposit,
   onWithdraw,
   onSave,
@@ -21,6 +21,7 @@ export const useContractEvents = ({
   const createEventHandler = (callback?: EventHandler) => {
     return async (logs: any) => {
       try {
+        console.log("Logs:::", logs);
         const log = logs[0];
         const { token, amount } = log.args;
 
@@ -74,8 +75,8 @@ export const useContractEvents = ({
 
   useEffect(() => {
     const contract = new Contract(
-      CoinSafeContract.address as `0x${string}`, // Address of the contract
-      CoinSafeContract.abi.abi,
+      CoinsafeDiamondContract.address as `0x${string}`, // Address of the contract
+      facetAbis.fundingFacet,
       jsonRpcProvider
     );
 
@@ -88,8 +89,8 @@ export const useContractEvents = ({
 
   useEffect(() => {
     const contract = new Contract(
-      CoinSafeContract.address as `0x${string}`, // Address of the contract
-      CoinSafeContract.abi.abi,
+      CoinsafeDiamondContract.address as `0x${string}`, // Address of the contract
+      facetAbis.targetSavingsFacet,
       jsonRpcProvider
     );
 
@@ -102,8 +103,8 @@ export const useContractEvents = ({
 
   useEffect(() => {
     const contract = new Contract(
-      CoinSafeContract.address as `0x${string}`, // Address of the contract
-      CoinSafeContract.abi.abi,
+      CoinsafeDiamondContract.address as `0x${string}`, // Address of the contract
+      facetAbis.fundingFacet,
       jsonRpcProvider
     );
 
