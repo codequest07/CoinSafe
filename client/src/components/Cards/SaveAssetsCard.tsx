@@ -233,9 +233,9 @@ export default function SaveAssetsCard() {
       openThirdModal();
 
       // add a little delay so that the modal can display the correct amount and duration
-      setTimeout(() => {
-        resetSaveState();
-      }, 4000);
+      // setTimeout(() => {
+      //   resetSaveState();
+      // }, 4000);
     },
     onError: (error: { message: any }) => {
       toast({
@@ -765,7 +765,10 @@ export default function SaveAssetsCard() {
         token={tokenData[saveState.token]?.symbol}
         duration={saveState.duration}
         isOpen={isThirdModalOpen && saveType === "one-time"}
-        onClose={() => setIsThirdModalOpen(false)}
+        onClose={() => {
+          setIsThirdModalOpen(false);
+          resetSaveState();
+        }}
       />
       <SuccessfulTxModal
         transactionType="setup-recurring-save"
@@ -776,7 +779,10 @@ export default function SaveAssetsCard() {
           saveType === "auto" &&
           selectedOption === "by-frequency"
         }
-        onClose={() => setIsThirdModalOpen(false)}
+        onClose={() => {
+          setIsThirdModalOpen(false);
+          resetSaveState();
+        }}
         additionalDetails={{
           frequency: getFrequencyLabel(saveState.frequency.toString()),
         }}

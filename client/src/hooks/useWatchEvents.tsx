@@ -5,30 +5,49 @@ import { Contract } from "ethers";
 import { jsonRpcProvider } from "@/lib";
 
 type EventHandler = (amountInUsd: number) => void;
+type EventHandlerWithFee = (
+  amountInUsdToDeduct: number,
+  amountInUsdToAdd: number
+) => void;
 
 interface UseContractEventsProps {
   onDeposit?: EventHandler;
   onWithdraw?: EventHandler;
   onSave?: EventHandler;
+  onClaim?: EventHandler;
+  onSavingsWithdrawn?: EventHandlerWithFee;
 }
 
 export const useWatchEvents = ({
   onDeposit,
   onWithdraw,
   onSave,
+  onClaim,
+  onSavingsWithdrawn,
 }: UseContractEventsProps) => {
   // Main event handler function
-  const createEventHandler = (callback?: EventHandler) => {
+  const createEventHandler = (
+    callback?: EventHandler | EventHandlerWithFee
+  ) => {
     return async (logs: any) => {
       try {
         console.log("Logs:::", logs);
         const log = logs[0];
         const { token, amount } = log.args;
 
-        const amountInUsd = await convertTokenAmountToUsd(token, amount);
+        const amountInUsd: number = await convertTokenAmountToUsd(token, amount);
         if (amountInUsd === 0) return;
 
-        callback?.(amountInUsd);
+        if (callback && callback.length === 2) {
+          // Check if the callback expects two arguments
+          const fee = log.args.fee || 0; // Assuming fee is part of the log args
+          const amountInUsdToDeduct: number = await convertTokenAmountToUsd(token, fee);
+          callback?.(amountInUsdToDeduct, amountInUsd);
+        } else {
+          if (typeof callback === "function" && callback.length === 1) {
+            (callback as EventHandler)?.(amountInUsd);
+          }
+        }
       } catch (error) {
         console.error("Error processing event logs:", error);
       }
@@ -36,6 +55,10 @@ export const useWatchEvents = ({
   };
 
   const saveEventHandler = useMemo(() => createEventHandler(onSave), [onSave]);
+  const claimEventHandler = useMemo(
+    () => createEventHandler(onClaim),
+    [onClaim]
+  );
   const withdrawEventHandler = useMemo(
     () => createEventHandler(onWithdraw),
     [onWithdraw]
@@ -43,6 +66,10 @@ export const useWatchEvents = ({
   const depositEventHandler = useMemo(
     () => createEventHandler(onDeposit),
     [onDeposit]
+  );
+  const savingsWithdrawnEventHandler = useMemo(
+    () => createEventHandler(onSavingsWithdrawn),
+    [onSavingsWithdrawn]
   );
 
   const handleDeposited = (user: string, token: string, amount: string) => {
@@ -64,13 +91,54 @@ export const useWatchEvents = ({
     user: string,
     token: string,
     amount: number,
-    duration: number
+    duration: number,
+    id: number
   ) => {
-    console.log(user, duration);
+    console.log(id, user, duration);
 
     const logs = [{ args: { token, amount } }];
 
     saveEventHandler(logs);
+  };
+
+  const handleTopUp = (
+    user: string,
+    id: number,
+    token: string,
+    amount: number
+  ) => {
+    console.log(id, user);
+
+    const logs = [{ args: { token, amount } }];
+
+    saveEventHandler(logs);
+  };
+
+  const handleClaimed = (
+    user: string,
+    id: number,
+    token: string,
+    amount: number
+  ) => {
+    console.log(id, user);
+
+    const logs = [{ args: { token, amount } }];
+
+    claimEventHandler(logs);
+  };
+
+  const handleSavingsWithdrawn = (
+    user: string,
+    token: string,
+    amount: number,
+    fee: number,
+    earlyWithdrawal: boolean
+  ) => {
+    console.log(earlyWithdrawal, user);
+
+    const logs = [{ args: { token, amount, fee } }];
+
+    savingsWithdrawnEventHandler(logs);
   };
 
   useEffect(() => {
@@ -98,6 +166,49 @@ export const useWatchEvents = ({
 
     return () => {
       contract.off("SavedSuccessfully", handleSaved);
+    };
+  }, []);
+
+  useEffect(() => {
+    const contract = new Contract(
+      CoinsafeDiamondContract.address as `0x${string}`, // Address of the contract
+      facetAbis.targetSavingsFacet,
+      jsonRpcProvider
+    );
+
+    contract.on("TopUpSuccessful", handleTopUp);
+
+    return () => {
+      contract.off("TopUpSuccessful", handleTopUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    const contract = new Contract(
+      CoinsafeDiamondContract.address as `0x${string}`, // Address of the contract
+      facetAbis.targetSavingsFacet,
+      jsonRpcProvider
+    );
+
+    contract.on("ClaimSuccessful", handleClaimed);
+
+    return () => {
+      contract.off("ClaimSuccessful", handleClaimed);
+    };
+  }, []);
+
+  //
+  useEffect(() => {
+    const contract = new Contract(
+      CoinsafeDiamondContract.address as `0x${string}`, // Address of the contract
+      facetAbis.targetSavingsFacet,
+      jsonRpcProvider
+    );
+
+    contract.on("SavingsWithdrawn", handleSavingsWithdrawn);
+
+    return () => {
+      contract.off("SavingsWithdrawn", handleSavingsWithdrawn);
     };
   }, []);
 

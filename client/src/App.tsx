@@ -46,6 +46,14 @@ const App = () => {
       setAvailableBalance((prev) => prev - amountInUsd);
       setSavingsBalance((prev) => prev + amountInUsd);
     },
+    onClaim: (amountInUsd) => {
+      setSavingsBalance(prev => prev - amountInUsd);
+      setAvailableBalance(prev => prev + amountInUsd);
+    },
+    onSavingsWithdrawn: (amountInUsdToDeduct, amountInUsdToAdd) => {
+      setSavingsBalance(prev => prev - amountInUsdToDeduct);
+      setAvailableBalance(prev => prev + amountInUsdToAdd);
+    },
   });
 
   const account = useActiveAccount();
