@@ -31,10 +31,24 @@ export function DurationSelector({
   isCustomSelected,
   disablePastDates = true,
 }: PillSelectorProps) {
+  // // if a date should be disabled
+  // const isDateDisabled = (date: Date) => {
+  //   if (!disablePastDates) return false;
+  //   return date < new Date(new Date().setHours(0, 0, 0, 0));
+  // };
+
   // if a date should be disabled
   const isDateDisabled = (date: Date) => {
-    if (!disablePastDates) return false;
-    return date < new Date(new Date().setHours(0, 0, 0, 0));
+    // Get today's date with time set to midnight
+    const today = new Date(new Date().setHours(0, 0, 0, 0));
+
+    // Calculate the date 30 days from today
+    const thirtyDaysFromNow = new Date(today);
+    thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+    // Disable if date is before today (if disablePastDates is true)
+    // OR if date is less than 30 days from today
+    return (disablePastDates && date < today) || date < thirtyDaysFromNow;
   };
 
   return (
