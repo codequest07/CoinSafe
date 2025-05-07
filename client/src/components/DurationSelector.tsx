@@ -19,6 +19,7 @@ interface PillSelectorProps {
   isCustomSelected: boolean;
   disablePastDates?: boolean;
   className?: string;
+  isDisabled?: boolean;
 }
 
 export function DurationSelector({
@@ -30,6 +31,7 @@ export function DurationSelector({
   customDate,
   isCustomSelected,
   disablePastDates = true,
+  isDisabled,
 }: PillSelectorProps) {
   // // if a date should be disabled
   // const isDateDisabled = (date: Date) => {
@@ -68,6 +70,7 @@ export function DurationSelector({
                   ? "bg-[#79E7BA] text-[#010104]"
                   : "bg-[#092324] text-[#F1F1F1] hover:bg-secondary/80"
               }`}
+            disabled={isDisabled}
           >
             {option.label}
           </button>
@@ -83,6 +86,7 @@ export function DurationSelector({
                     ? "bg-[#79E7BA] text-[#010104]"
                     : "bg-[#092324] text-[#F1F1F1] hover:bg-secondary/80"
                 }`}
+              disabled={isDisabled}
             >
               {isCustomSelected ? `${selectedValue} days` : "Custom"}
               <CalendarIcon className="ml-1 h-4 w-4" />
