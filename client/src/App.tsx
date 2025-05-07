@@ -32,8 +32,10 @@ const App = () => {
   const [, setAvailableBalance] = useRecoilState(availableBalanceState);
   const [, setSavingsBalance] = useRecoilState(savingsBalanceState);
   const [, setTotalBalance] = useRecoilState(totalBalanceState);
+  const account = useActiveAccount();
 
   useWatchEvents({
+    address: account?.address as string,
     onDeposit: (amountInUsd) => {
       setAvailableBalance((prev) => prev + amountInUsd);
       setTotalBalance((prev) => prev + amountInUsd);
@@ -56,7 +58,6 @@ const App = () => {
     },
   });
 
-  const account = useActiveAccount();
   const balances = useBalances(account?.address as string);
 
   useEffect(() => {
