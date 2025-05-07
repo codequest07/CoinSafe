@@ -30,7 +30,11 @@ import SaveSuccessful from "../Modals/SaveSuccessful";
 import { Link, useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { SafeDetails, useGetSafes } from "@/hooks/useGetSafes";
-import { balancesState, supportedTokensState } from "@/store/atoms/balance";
+import {
+  balancesState,
+  savingsBalanceState,
+  supportedTokensState,
+} from "@/store/atoms/balance";
 
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
@@ -79,6 +83,7 @@ export default function SaveAssetsCard() {
   const [hasAutoSafe, setHasAutoSafe] = useState(false);
   const [autoSafeTokenOptions, setAutoSafeTokenOptions] =
     useState(supportedTokens);
+  const [savingsBalance] = useRecoilState(savingsBalanceState);
 
   //   Duration state
   const [savingsDuration, setSavingsDuration] = useState(30);
@@ -98,10 +103,15 @@ export default function SaveAssetsCard() {
 
   const {
     targetedSafes: safes,
+    refetch,
     // isLoading: isGetSafesLoading,
     // fetchSafes,
     // error,
   } = useGetSafes();
+
+  useEffect(() => {
+    refetch();
+  }, [savingsBalance]);
 
   const calculateEndDate = (days: number) => {
     const currentDate = new Date();
