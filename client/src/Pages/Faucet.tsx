@@ -8,29 +8,26 @@ import Footer from "@/components/Footer";
 import { FaucetData } from "@/lib/data";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ThirdwebConnectButton from "@/components/ThirdwebConnectButton";
-import { useActiveAccount } from "thirdweb/react";
+
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 import MemoClipboard from "@/icons/Clipboard";
 
 export default function Faucet() {
-  const account = useActiveAccount();
-  const isConnected = !!account?.address;
   const navigate = useNavigate();
   const [message, setMessage] = useState({ text: "", type: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
 
   const handleClaim = async () => {
-    // Use manually entered address if available, otherwise use connected wallet
-    const addressToUse = walletAddress.trim() || account?.address || "";
+    // Use manually entered address
+    const addressToUse = walletAddress.trim();
 
     if (!addressToUse) {
       setMessage({
         type: "error",
-        text: "❌ Error: Please enter a wallet address or connect your wallet",
+        text: "❌ Error: Please enter a wallet address",
       });
       return;
     }
@@ -142,16 +139,12 @@ export default function Faucet() {
                 <div className="">
                   <AddTokenToMetaMask />
                 </div>
-                {!isConnected ? (
-                  <ThirdwebConnectButton />
-                ) : (
-                  <Button
-                    className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
-                    onClick={handleClaim}
-                    disabled={isLoading}>
-                    {isLoading ? "Processing..." : "Claim faucet"}
-                  </Button>
-                )}
+                <Button
+                  className="bg-white rounded-[2rem] text-[#010104] hover:bg-[#ececee]"
+                  onClick={handleClaim}
+                  disabled={isLoading}>
+                  {isLoading ? "Processing..." : "Claim faucet"}
+                </Button>
               </div>
             </div>
           </CardContent>
