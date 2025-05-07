@@ -44,6 +44,7 @@ export default function SavingsCards() {
   useEffect(() => {
     fetchSafes();
   }, [fetchSafes]);
+  console.log("SAFES", displaySafes);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -152,7 +153,7 @@ export default function SavingsCards() {
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
                 <button
-                  onClick={() => navigate("")}
+                  onClick={() => navigate("/dashboard/vault/auto-safe")}
                   className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors"
                 >
                   <div className="flex justify-between items-start mb-4">
@@ -173,7 +174,20 @@ export default function SavingsCards() {
                       {/* {safe.amount.toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                       })} */}
-                      0.0
+                      {/* const tokenAmount = Number(formatUnits(token.amount, 18));
+                      const usdVal = await getTokenPrice(token.token,
+                      tokenAmount); */}
+                      {Number(
+                        formatUnits(
+                          details?.tokenDetails?.reduce(
+                            (total: any, obj: any) => total + obj.amountToSave,
+                            0n
+                          ),
+                          18
+                        )
+                      ).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                     <span className="text-sm text-gray-400 ml-2">USD</span>
                   </div>

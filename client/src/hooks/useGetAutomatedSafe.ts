@@ -28,12 +28,7 @@ export function useAutomatedSafeForUser(userAddress: `0x${string}`) {
   
     return {
       details: data as
-        | {
-            amount: bigint;
-            beneficiary: string;
-            frequency: bigint;
-          }
-        | undefined,
+        | any | undefined,
       isLoading,
       error,
     };
