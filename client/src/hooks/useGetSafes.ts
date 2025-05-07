@@ -10,6 +10,7 @@ import {
   safesState,
   safesLoadingState,
   safesErrorState,
+  targetedSafesState,
 } from "@/store/atoms/safes";
 import { supportedTokensState } from "@/store/atoms/balance";
 import { publicClient } from "@/lib/client";
@@ -31,10 +32,10 @@ export interface SafeDetails {
 export function useGetSafes() {
   // Use Recoil state instead of local state
   const [safes, setSafes] = useRecoilState(safesState);
+  const [targetedSafes, setTargetedSafes] = useRecoilState(targetedSafesState);
   const [isLoading, setIsLoading] = useRecoilState(safesLoadingState);
   const [error, setError] = useRecoilState(safesErrorState);
-  const [supportedTokens, setSupportedTokens] =
-    useRecoilState(supportedTokensState);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
   // Derive isError from error state
   const isError = error !== null;
 
@@ -50,20 +51,77 @@ export function useGetSafes() {
     });
   }, []); // <-- Only create once
 
-  // const emergencySavingsFacet = useMemo(() => {
-  //   return getContract({
-  //     client,
-  //     address: CoinsafeDiamondContract.address,
-  //     chain: liskSepolia,
-  //     abi: facetAbis.emergencySavingsFacet as Abi,
-  //   });
-  // }, []);
-
   // Track if we've loaded data at least once
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   // Track the last fetch time to prevent too frequent refreshes
   const [lastFetchTime, setLastFetchTime] = useState(0);
+
+  // Define fetchEmergencySafe inside the callback
+  const fetchEmergencySafe = async () => {
+    console.log(
+      "Fetching emergency safe with supported tokens:",
+      supportedTokens
+    );
+
+    // Create a contract instance specifically for emergency savings
+    const emergencyContract = getContract({
+      client,
+      address: CoinsafeDiamondContract.address,
+      chain: liskSepolia,
+      abi: facetAbis.emergencySavingsFacet as Abi,
+    });
+
+    console.log("Emergency contract address:", emergencyContract.address);
+
+    // Prepare multicall requests
+    const rawTxs = supportedTokens.map((token: string) => ({
+      address: CoinsafeDiamondContract.address,
+      abi: facetAbis.emergencySavingsFacet as Abi,
+      args: [address, token],
+      functionName: "getEmergencySafeBalance",
+    }));
+
+    console.log("Preparing multicall with contracts:", rawTxs);
+
+    try {
+      const results = await publicClient.multicall({
+        contracts: rawTxs,
+        chain: liskSepolia,
+      });
+
+      console.log("Multicall results:", results);
+
+      const tokenAmounts: Token[] = results
+        .filter(({ status }: { status: string }) => status === "success")
+        .map(({ result }: { result: any }, idx: number) => ({
+          token: supportedTokens[idx],
+          amount: result,
+        }));
+
+      console.log("Processed token amounts:", tokenAmounts);
+
+      return {
+        id: 911n,
+        target: "Emergency Safe",
+        duration: 0n,
+        startTime: 0n,
+        unlockTime: 0n,
+        tokenAmounts,
+      };
+    } catch (err) {
+      console.error("Error in multicall for emergency safe:", err);
+      // Return empty emergency safe on error
+      return {
+        id: 911n,
+        target: "Emergency Safe",
+        duration: 0n,
+        startTime: 0n,
+        unlockTime: 0n,
+        tokenAmounts: [],
+      };
+    }
+  };
 
   const fetchSafes = useCallback(
     async (force = false) => {
@@ -98,34 +156,6 @@ export function useGetSafes() {
         // First, ensure we have supported tokens
         if (!supportedTokens || supportedTokens.length === 0) {
           console.warn("No supported tokens available, fetching from contract");
-
-          try {
-            // Get the supported tokens directly from the contract
-            const fundingFacetContract = getContract({
-              client,
-              address: CoinsafeDiamondContract.address,
-              chain: liskSepolia,
-              abi: facetAbis.fundingFacet as unknown as Abi,
-            });
-
-            const tokens = (await readContract({
-              contract: fundingFacetContract,
-              method:
-                "function getAcceptedTokenAddresses() external view returns (address[] memory)",
-              params: [],
-            })) as string[];
-
-            console.log("Supported tokens fetched directly:", tokens);
-
-            if (tokens && tokens.length > 0) {
-              // Update the supportedTokens state with the fetched tokens
-              setSupportedTokens(tokens);
-            } else {
-              console.error("Contract returned empty tokens array");
-            }
-          } catch (err) {
-            console.error("Error fetching supported tokens directly:", err);
-          }
         }
 
         // Get regular safes
@@ -137,146 +167,13 @@ export function useGetSafes() {
           from: address,
         });
         console.log("Regular safes fetched:", result);
-
-        // Define fetchEmergencySafe inside the callback
-        const fetchEmergencySafe = async () => {
-          console.log(
-            "Fetching emergency safe with supported tokens:",
-            supportedTokens
-          );
-
-          // Use the tokens we have from the state
-          let tokensToUse = supportedTokens;
-
-          // If we still don't have any supported tokens, try to fetch them directly
-          if (!tokensToUse || tokensToUse.length === 0) {
-            console.warn(
-              "No supported tokens available for emergency safe, trying to fetch directly"
-            );
-
-            try {
-              // Get the supported tokens directly from the contract
-              const fundingFacetContract = getContract({
-                client,
-                address: CoinsafeDiamondContract.address,
-                chain: liskSepolia,
-                abi: facetAbis.fundingFacet as unknown as Abi,
-              });
-
-              const tokens = (await readContract({
-                contract: fundingFacetContract,
-                method:
-                  "function getAcceptedTokenAddresses() external view returns (address[] memory)",
-                params: [],
-              })) as string[];
-
-              console.log(
-                "Supported tokens fetched directly for emergency safe:",
-                tokens
-              );
-
-              if (tokens && tokens.length > 0) {
-                tokensToUse = tokens;
-                // Also update the state for future use
-                setSupportedTokens(tokens);
-              } else {
-                console.error(
-                  "Contract returned empty tokens array for emergency safe"
-                );
-                return {
-                  id: 911n,
-                  target: "Emergency Safe",
-                  duration: 0n,
-                  startTime: 0n,
-                  unlockTime: 0n,
-                  tokenAmounts: [],
-                };
-              }
-            } catch (err) {
-              console.error(
-                "Error fetching supported tokens for emergency safe:",
-                err
-              );
-              return {
-                id: 911n,
-                target: "Emergency Safe",
-                duration: 0n,
-                startTime: 0n,
-                unlockTime: 0n,
-                tokenAmounts: [],
-              };
-            }
-          } else {
-            console.log(
-              "Using actual supported tokens for emergency safe:",
-              tokensToUse
-            );
-          }
-
-          // Create a contract instance specifically for emergency savings
-          const emergencyContract = getContract({
-            client,
-            address: CoinsafeDiamondContract.address,
-            chain: liskSepolia,
-            abi: facetAbis.emergencySavingsFacet as Abi,
-          });
-
-          console.log("Emergency contract address:", emergencyContract.address);
-
-          // Prepare multicall requests
-          const rawTxs = tokensToUse.map((token: string) => ({
-            address: CoinsafeDiamondContract.address,
-            abi: facetAbis.emergencySavingsFacet as Abi,
-            args: [address, token],
-            functionName: "getEmergencySafeBalance",
-          }));
-
-          console.log("Preparing multicall with contracts:", rawTxs);
-
-          try {
-            const results = await publicClient.multicall({
-              contracts: rawTxs,
-              chain: liskSepolia,
-            });
-
-            console.log("Multicall results:", results);
-
-            const tokenAmounts: Token[] = results
-              .filter(({ status }: { status: string }) => status === "success")
-              .map(({ result }: { result: any }, idx: number) => ({
-                token: tokensToUse[idx],
-                amount: result,
-              }));
-
-            console.log("Processed token amounts:", tokenAmounts);
-
-            return {
-              id: 911n,
-              target: "Emergency Safe",
-              duration: 0n,
-              startTime: 0n,
-              unlockTime: 0n,
-              tokenAmounts,
-            };
-          } catch (err) {
-            console.error("Error in multicall for emergency safe:", err);
-            // Return empty emergency safe on error
-            return {
-              id: 911n,
-              target: "Emergency Safe",
-              duration: 0n,
-              startTime: 0n,
-              unlockTime: 0n,
-              tokenAmounts: [],
-            };
-          }
-        };
+        setTargetedSafes(result as SafeDetails[]);
 
         // Fetch emergency safe
         const emergencySafe = await fetchEmergencySafe();
         console.log("Emergency safe fetched:", emergencySafe);
 
-        // Combine and update state
+        // Combine and update state for both targeted and emergency safes
         setSafes([emergencySafe, ...result] as SafeDetails[]);
       } catch (err: any) {
         setError(err);
@@ -299,7 +196,6 @@ export function useGetSafes() {
       lastFetchTime,
       setLastFetchTime,
       supportedTokens,
-      setSupportedTokens,
     ]
   );
 
@@ -330,6 +226,7 @@ export function useGetSafes() {
 
   return {
     safes,
+    targetedSafes,
     isLoading,
     isError,
     error,

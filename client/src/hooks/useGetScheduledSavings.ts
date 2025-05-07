@@ -63,6 +63,7 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
       try {
         if (result) {
           const scheduledSavingsRes = await transformArrayData(result as []);
+          console.log("Scheduled savings res from contract already transformed", scheduledSavingsRes);
           setScheduledSavings(
             scheduledSavingsRes.filter(
               (item) => item.scheduledDate >= new Date().getTime()

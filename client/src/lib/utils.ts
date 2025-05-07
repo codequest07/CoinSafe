@@ -25,6 +25,14 @@ export function formatNumberToMax7Dp(num: number, maxDecimals = 7) {
   return `${intPart}.${trimmedDecimal}`;
 }
 
+export const tokenDecimals: Record<string, number> = {
+  USDT: 18,
+  DEFAULT: 18,
+};
+
+export const getTokenDecimals = (token: string): number => {
+  return tokenDecimals[token] || tokenDecimals.DEFAULT;
+};
 
 export function transformAndAccumulateTokenBalances(
   data: Array<any>

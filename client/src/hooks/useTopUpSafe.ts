@@ -4,6 +4,7 @@ import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { toast } from "./use-toast";
+import { tokenDecimals } from "@/lib/utils";
 
 interface TopUpState {
   id: number;
@@ -26,10 +27,6 @@ interface UseTopUpSafeResult {
   error: Error | null;
 }
 
-type TokenDecimals = {
-  [key: string]: number;
-};
-
 export const useTopUpSafe = ({
   //address,
   topUpState,
@@ -41,11 +38,6 @@ export const useTopUpSafe = ({
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const account = useActiveAccount();
-
-  const tokenDecimals: TokenDecimals = {
-    USDT: 6,
-    DEFAULT: 18,
-  };
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     const decimals = tokenDecimals[token] || tokenDecimals.DEFAULT;
