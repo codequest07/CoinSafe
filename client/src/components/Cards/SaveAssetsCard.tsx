@@ -90,6 +90,8 @@ export default function SaveAssetsCard() {
   const [endDate, setEndDate] = useState("");
   const [, setUnlockDate] = useState<Date | null>(null);
 
+  const [isDurationDisabled, setIsDurationDisabled] = useState(false);
+
   // Custom date state
   const [customDate, setCustomDate] = useState<Date | undefined>(undefined);
   const [isCustomSelected, setIsCustomSelected] = useState(false);
@@ -301,6 +303,8 @@ export default function SaveAssetsCard() {
       id: null,
     }));
 
+    setIsDurationDisabled(false);
+
     // Find matching SafeDetails (case-insensitive)
     const matchingSafe = safes.find(
       (safe) => safe.target.toLowerCase() === value.trim().toLowerCase()
@@ -316,6 +320,8 @@ export default function SaveAssetsCard() {
         id: Number(matchingSafe.id),
         target: matchingSafe.target,
       }));
+
+      setIsDurationDisabled(true);
     }
 
     // // Log for debugging
@@ -466,6 +472,9 @@ export default function SaveAssetsCard() {
                 onChange={handleSavingsTargetChange}
                 onSelect={(savingsTarget) => {
                   setSelectedSavingsTarget(savingsTarget);
+
+                  setIsDurationDisabled(true);
+
                   // console.log("SAVINGS TARGET IN THE SELECT", savingsTarget);
                   setSaveState((prevState) => ({
                     ...prevState,
@@ -497,6 +506,7 @@ export default function SaveAssetsCard() {
                   customDate={customDate}
                   isCustomSelected={isCustomSelected}
                   className="mb-4"
+                  isDisabled={isDurationDisabled}
                 />
 
                 <div className="py-4">
@@ -705,6 +715,7 @@ export default function SaveAssetsCard() {
                           customDate={customDate}
                           isCustomSelected={isCustomSelected}
                           className="mb-4"
+                          isDisabled={isDurationDisabled}
                         />
 
                         <div className="py-4">

@@ -19,6 +19,7 @@ import NotFound from "./components/not-found";
 import { useBalances } from "./hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import EmergencySafe from "./Pages/EmergencySafe";
+import AutoSave from "./Pages/AutoSave";
 import { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import {
@@ -49,12 +50,12 @@ const App = () => {
       setSavingsBalance((prev) => prev + amountInUsd);
     },
     onClaim: (amountInUsd) => {
-      setSavingsBalance(prev => prev - amountInUsd);
-      setAvailableBalance(prev => prev + amountInUsd);
+      setSavingsBalance((prev) => prev - amountInUsd);
+      setAvailableBalance((prev) => prev + amountInUsd);
     },
     onSavingsWithdrawn: (amountInUsdToDeduct, amountInUsdToAdd) => {
-      setSavingsBalance(prev => prev - amountInUsdToDeduct);
-      setAvailableBalance(prev => prev + amountInUsdToAdd);
+      setSavingsBalance((prev) => prev - amountInUsdToDeduct);
+      setAvailableBalance((prev) => prev + amountInUsdToAdd);
     },
   });
 
@@ -85,6 +86,7 @@ const App = () => {
             path="/dashboard/vault/emergency-safe"
             element={<EmergencySafe />}
           />
+          <Route path="/dashboard/vault/auto-safe" element={<AutoSave />} />
           <Route path="/dashboard/staking" element={<Staking />} />
           <Route path="/dashboard/rewards" element={<Rewards />} />
           <Route path="/dashboard/rewards/my-rewards" element={<MyRewards />} />
