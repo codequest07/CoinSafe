@@ -19,6 +19,7 @@ interface PillSelectorProps {
   isCustomSelected: boolean;
   disablePastDates?: boolean;
   className?: string;
+  isDisabled?: boolean;
 }
 
 export function DurationSelector({
@@ -30,11 +31,26 @@ export function DurationSelector({
   customDate,
   isCustomSelected,
   disablePastDates = true,
+  isDisabled,
 }: PillSelectorProps) {
+  // // if a date should be disabled
+  // const isDateDisabled = (date: Date) => {
+  //   if (!disablePastDates) return false;
+  //   return date < new Date(new Date().setHours(0, 0, 0, 0));
+  // };
+
   // if a date should be disabled
   const isDateDisabled = (date: Date) => {
-    if (!disablePastDates) return false;
-    return date < new Date(new Date().setHours(0, 0, 0, 0));
+    // Get today's date with time set to midnight
+    const today = new Date(new Date().setHours(0, 0, 0, 0));
+
+    // Calculate the date 30 days from today
+    const thirtyDaysFromNow = new Date(today);
+    thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+    // Disable if date is before today (if disablePastDates is true)
+    // OR if date is less than 30 days from today
+    return (disablePastDates && date < today) || date < thirtyDaysFromNow;
   };
 
   return (
@@ -54,6 +70,7 @@ export function DurationSelector({
                   ? "bg-[#79E7BA] text-[#010104]"
                   : "bg-[#092324] text-[#F1F1F1] hover:bg-secondary/80"
               }`}
+            disabled={isDisabled}
           >
             {option.label}
           </button>
@@ -69,6 +86,7 @@ export function DurationSelector({
                     ? "bg-[#79E7BA] text-[#010104]"
                     : "bg-[#092324] text-[#F1F1F1] hover:bg-secondary/80"
                 }`}
+              disabled={isDisabled}
             >
               {isCustomSelected ? `${selectedValue} days` : "Custom"}
               <CalendarIcon className="ml-1 h-4 w-4" />
