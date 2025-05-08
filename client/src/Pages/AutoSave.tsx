@@ -180,7 +180,7 @@ const AutoSave = () => {
 
         {safeDetails && (
           <div className="py-2">
-            <AssetTabs safeDetails={safeDetails} />
+            <AssetTabs safeDetails={details} />
           </div>
         )}
       </div>

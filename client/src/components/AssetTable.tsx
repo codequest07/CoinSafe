@@ -68,6 +68,8 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
     [balances.savings]
   );
 
+  console.log("AUTI SAFE DE", safeDetails);
+
   useEffect(() => {
     // If safeDetails is provided, use the safe-specific token amounts
     if (
@@ -122,7 +124,11 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">
-          {safeDetails ? `Assets in ${safeDetails.target}` : "Assets"}
+          {safeDetails
+            ? `Assets in ${
+                safeDetails.target ? safeDetails.target : "Auto safe"
+              }`
+            : "Assets"}
         </h1>
         <AssetTableContent assets={allAssetData} safeDetails={safeDetails} />
       </div>
@@ -233,13 +239,15 @@ function AssetTableContent({
           {safeDetails ? (
             <Button
               onClick={() => setIsFirstModalOpen(true)}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+            >
               Top Up Safe
             </Button>
           ) : isConnected ? (
             <Button
               onClick={openDepositModal}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+            >
               Deposit
             </Button>
           ) : (
@@ -315,7 +323,8 @@ function AssetTableContent({
                       </div>
                     ) : (
                       <div
-                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
+                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                      >
                         {asset.tokenInfo.symbol?.charAt(0)}
                       </div>
                     )}
@@ -403,21 +412,24 @@ function AssetTableContent({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setIsDepositModalOpen(true)}>
+                      onClick={() => setIsDepositModalOpen(true)}
+                    >
                       Deposit
                     </Button>
                     {safeDetails ? (
                       <Button
                         variant="link"
                         className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                        onClick={() => setIsFirstModalOpen(true)}>
+                        onClick={() => setIsFirstModalOpen(true)}
+                      >
                         Top Up
                       </Button>
                     ) : (
                       <Button
                         variant="link"
                         className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                        onClick={() => setIsFirstModalOpen(true)}>
+                        onClick={() => setIsFirstModalOpen(true)}
+                      >
                         Save
                       </Button>
                     )}
