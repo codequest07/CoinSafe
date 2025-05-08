@@ -90,6 +90,8 @@ export default function SaveAssetsCard() {
   const [endDate, setEndDate] = useState("");
   const [, setUnlockDate] = useState<Date | null>(null);
 
+  const [isDurationDisabled, setIsDurationDisabled] = useState(false);
+
   // Custom date state
   const [customDate, setCustomDate] = useState<Date | undefined>(undefined);
   const [isCustomSelected, setIsCustomSelected] = useState(false);
