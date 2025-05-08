@@ -9,6 +9,7 @@ import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { parseUnits } from "ethers";
+import { getTokenDecimals } from "@/lib/utils";
 // import { toast } from './use-toast';
 // import { config } from '@/lib/config'; // Assuming this contains Thirdweb client config
 
@@ -60,15 +61,6 @@ export const useWithdrawEmergencySafe = ({
     chain: liskSepolia,
     address: coinSafeAddress,
   });
-
-  const getTokenDecimals = (token: string): number => {
-    const tokenDecimals: Record<string, number> = {
-      USDT: 18,
-      DEFAULT: 18,
-    };
-
-    return tokenDecimals[token] || tokenDecimals.DEFAULT;
-  };
 
   const withdrawFromEmergencySafe = useCallback(
     async (e: React.FormEvent) => {

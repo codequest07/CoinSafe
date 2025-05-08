@@ -7,7 +7,9 @@ import {
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
-import { erc20Abi } from "viem";
+import { erc20Abi, Abi } from "viem";
+import { getTokenDecimals } from "@/lib/utils";
+import { facetAbis } from "@/lib/contract";
 
 interface UseDepositAssetParams {
   address?: `0x${string}`;
@@ -44,15 +46,6 @@ export const useDepositAsset = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const getTokenDecimals = (token: string): number => {
-    const tokenDecimals: Record<string, number> = {
-      USDT: 6,
-      DEFAULT: 18,
-    };
-
-    return tokenDecimals[token] || tokenDecimals.DEFAULT;
-  };
-
   const depositAsset = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -64,6 +57,7 @@ export const useDepositAsset = ({
           client,
           chain: liskSepolia,
           address: coinSafeAddress,
+          abi: facetAbis.fundingFacet as Abi,
         });
 
         if (!amount) {

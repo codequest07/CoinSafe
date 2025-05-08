@@ -69,6 +69,29 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
   );
 
   useEffect(() => {
+    // If safeDetails is provided, use the safe-specific token amounts
+    if (
+      safeDetails &&
+      safeDetails.tokenAmounts &&
+      safeDetails.tokenAmounts.length > 0
+    ) {
+      const safeAssetsRes = safeDetails.tokenAmounts.map((tokenInfo) => {
+        return {
+          token: tokenInfo.token,
+          // For a specific safe, the balance is the amount in the safe
+          balance: tokenInfo.formattedAmount,
+          // For a specific safe, all tokens are "saved" in this safe
+          saved: tokenInfo.formattedAmount,
+          // For a specific safe, available is 0 as all tokens are locked in the safe
+          available: "0",
+        };
+      });
+
+      setAllAssetData(safeAssetsRes);
+      return;
+    }
+
+    // If no safeDetails or using global view, use the global balances
     if (!totalTokenBalances) return;
 
     const tokens = Object.keys(totalTokenBalances || {});
@@ -88,12 +111,19 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
     });
 
     setAllAssetData(allAssetsRes);
-  }, [availableTokenBalances, totalTokenBalances, savedTokenBalances]);
+  }, [
+    availableTokenBalances,
+    totalTokenBalances,
+    savedTokenBalances,
+    safeDetails,
+  ]);
 
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
       <div className="sm:mx-auto">
-        <h1 className="text-xl font-semibold mb-4">Assets</h1>
+        <h1 className="text-xl font-semibold mb-4">
+          {safeDetails ? `Assets in ${safeDetails.target}` : "Assets"}
+        </h1>
         <AssetTableContent assets={allAssetData} safeDetails={safeDetails} />
       </div>
     </div>
@@ -148,14 +178,17 @@ function AssetTableContent({
         // Fetch additional data asynchronously
         assets.forEach(async (asset: any, index: number) => {
           try {
-            const balanceUsd = await getTokenPrice(
-              asset.token,
-              Number(asset.balance)
-            );
+            // For safe-specific view, we only need the saved USD value
+            // For global view, we need both balance and saved USD values
+            const balanceUsd = safeDetails
+              ? null
+              : await getTokenPrice(asset.token, Number(asset.balance));
+
             const savedUsd = await getTokenPrice(
               asset.token,
               Number(asset.saved)
             );
+
             const autosaved = await checkIsTokenAutoSaved(
               address! as `0x${string}`,
               asset.token
@@ -171,17 +204,17 @@ function AssetTableContent({
               };
               return updated;
             });
-          } catch (error) {
+          } catch {
             // Silent error handling
           }
         });
-      } catch (error) {
+      } catch {
         // Silent error handling
       }
     }
 
     if (address && assets.length > 0) updateAssets(assets);
-  }, [assets, address]);
+  }, [assets, address, safeDetails]);
 
   if (!assets || assets.length === 0 || !hasNonZeroAssets) {
     return (
@@ -191,11 +224,19 @@ function AssetTableContent({
             <MemoMoney className="w-20 h-20" />
           </div>
           <h3 className="mb-2 text-sm font-[400] text-white">
-            {isConnected
+            {safeDetails
+              ? `No assets found in this safe.`
+              : isConnected
               ? "Too much empty space? fill it up with deposits!"
               : "No wallet connected, connect your wallet to get the best of coinsafe"}
           </h3>
-          {isConnected ? (
+          {safeDetails ? (
+            <Button
+              onClick={() => setIsFirstModalOpen(true)}
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
+              Top Up Safe
+            </Button>
+          ) : isConnected ? (
             <Button
               onClick={openDepositModal}
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
@@ -210,6 +251,12 @@ function AssetTableContent({
           setIsDepositModalOpen={setIsDepositModalOpen}
           onBack={() => {}}
         />
+        <SavingOption
+          isFirstModalOpen={isFirstModalOpen}
+          setIsFirstModalOpen={setIsFirstModalOpen}
+          isSecondModalOpen={isSecondModalOpen}
+          setIsSecondModalOpen={setIsSecondModalOpen}
+        />
       </>
     );
   }
@@ -223,12 +270,25 @@ function AssetTableContent({
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 TICKER
               </TableHead>
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                AMOUNT
-              </TableHead>
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                IN VAULT
-              </TableHead>
+              {safeDetails ? (
+                <>
+                  <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                    AMOUNT IN SAFE
+                  </TableHead>
+                  <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                    VALUE (USD)
+                  </TableHead>
+                </>
+              ) : (
+                <>
+                  <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                    AMOUNT
+                  </TableHead>
+                  <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                    IN VAULT
+                  </TableHead>
+                </>
+              )}
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 AUTOSAVED
               </TableHead>
@@ -269,32 +329,56 @@ function AssetTableContent({
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="py-4 px-4">
-                  <div className="flex flex-col">
-                    <p className="text-white">
-                      {asset.balance} {asset.tokenInfo.symbol}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      ≈ $
-                      {asset.balance_usd !== null
-                        ? asset.balance_usd
-                        : "Loading..."}
-                    </p>
-                  </div>
-                </TableCell>
-                <TableCell className="py-4 px-4">
-                  <div className="flex flex-col">
-                    <p className="text-white">
-                      {asset.saved} {asset.tokenInfo.symbol}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      ≈ $
-                      {asset.saved_usd !== null
-                        ? asset.saved_usd
-                        : "Loading..."}
-                    </p>
-                  </div>
-                </TableCell>
+                {safeDetails ? (
+                  <>
+                    <TableCell className="py-4 px-4">
+                      <div className="flex flex-col">
+                        <p className="text-white">
+                          {asset.saved} {asset.tokenInfo.symbol}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 px-4">
+                      <div className="flex flex-col">
+                        <p className="text-white">
+                          $
+                          {asset.saved_usd !== null
+                            ? asset.saved_usd
+                            : "Loading..."}
+                        </p>
+                      </div>
+                    </TableCell>
+                  </>
+                ) : (
+                  <>
+                    <TableCell className="py-4 px-4">
+                      <div className="flex flex-col">
+                        <p className="text-white">
+                          {asset.balance} {asset.tokenInfo.symbol}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          ≈ $
+                          {asset.balance_usd !== null
+                            ? asset.balance_usd
+                            : "Loading..."}
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 px-4">
+                      <div className="flex flex-col">
+                        <p className="text-white">
+                          {asset.saved} {asset.tokenInfo.symbol}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          ≈ $
+                          {asset.saved_usd !== null
+                            ? asset.saved_usd
+                            : "Loading..."}
+                        </p>
+                      </div>
+                    </TableCell>
+                  </>
+                )}
                 <TableCell className="py-4 px-4">
                   <div className="flex items-center gap-2">
                     {asset.autosaved ? (

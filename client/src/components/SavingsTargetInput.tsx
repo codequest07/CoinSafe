@@ -13,13 +13,10 @@ type SavingsTargetInputProps<T> = {
   value: string;
   onChange: (value: string) => void;
   onSelect?: (item: T) => void;
-  onAddItem?: (value: string) => void;
   placeholder?: string;
   className?: string;
   renderItem?: (item: T) => React.ReactNode;
   getItemValue?: (item: T) => string;
-  setShowAddModal: (state: boolean) => any;
-  handleAddItem: () => any;
   filterItem?: (item: T, query: string) => boolean;
   label?: string;
   maxSuggestions?: number;
@@ -32,12 +29,9 @@ export default function SavingsTargetInput<T>({
   value,
   onChange,
   onSelect,
-  onAddItem,
   placeholder = "Type to search...",
   className,
   renderItem,
-  //   setShowAddModal,
-  handleAddItem,
   getItemValue = (item: any) => item.toString(),
   filterItem = (item: T, query: string) =>
     getItemValue(item).toLowerCase().includes(query.toLowerCase()),
@@ -66,7 +60,7 @@ SavingsTargetInputProps<T>) {
     );
 
   // Determine if we should show the "add" option
-  const showAddOption = value.trim() !== "" && !valueExists && onAddItem;
+  const showAddOption = value.trim() !== "" && !valueExists;
 
   // Combine filtered suggestions with the "add" option if needed
   const suggestions = showAddOption
@@ -94,7 +88,7 @@ SavingsTargetInputProps<T>) {
       if (highlightedIndex < suggestions.length) {
         handleSelectItem(suggestions[highlightedIndex]);
       } else if (showAddOption) {
-        handleAddItem();
+        // handleAddItem();
       }
     }
     // Escape
@@ -111,20 +105,6 @@ SavingsTargetInputProps<T>) {
     setIsFocused(false);
     inputRef.current?.blur();
   };
-
-  // Handle add item action
-  //   const handleAddItem = () => {
-  //     setShowAddModal(true);
-  //     setIsFocused(false);
-  //   };
-
-  // Handle adding a new item
-  //   const handleAddNewItem = () => {
-  //     if (onAddItem && value.trim() !== "") {
-  //       onAddItem(value);
-  //       setShowAddModal(false);
-  //     }
-  //   };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -194,41 +174,8 @@ SavingsTargetInputProps<T>) {
               {renderItem ? renderItem(item) : getItemValue(item)}
             </div>
           ))}
-
-          {/* Add item option */}
-          {/* {showAddOption && (
-            <div
-              onClick={() => {
-                handleAddItem();
-                setIsFocused(false);
-              }}
-              onMouseEnter={() => setHighlightedIndex(suggestions.length)}
-              className={cn(
-                "px-4 py-2 cursor-pointer hover:bg-gray-400 hover:text-black text-white flex items-center",
-                highlightedIndex === suggestions.length && "bg-gray-400"
-              )}
-            >
-              <Plus size={16} className="mr-1" />
-              <span>
-                Add {itemName}: "{value}"
-              </span>
-            </div>
-          )} */}
         </div>
       )}
-
-      {/* Add item modal */}
-      {/* {showAddModal && (
-        <CreateSavingsTargetModal
-          isOpen={showAddModal}
-          onClose={() => setShowAddModal(false)}
-          //   onAdd={handleAddNewItem}
-          onCreate={handleCreateTarget}
-          itemName={itemName}
-          value={value}
-          onChange={onChange}
-        />
-      )} */}
     </div>
   );
 }

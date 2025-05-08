@@ -20,32 +20,54 @@ import { useBalances } from "./hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import EmergencySafe from "./Pages/EmergencySafe";
 import AutoSave from "./Pages/AutoSave";
-// import { useRecoilState } from "recoil";
-// import { availableBalanceState, savingsBalanceState, totalBalanceState } from "./store/atoms/save";
-// import { useContractEvents } from "./hooks/useWatchEvents";
+import { useEffect } from "react";
+import { useRecoilState } from "recoil";
+import {
+  availableBalanceState,
+  savingsBalanceState,
+  totalBalanceState,
+} from "./store/atoms/balance";
+import { useWatchEvents } from "./hooks/useWatchEvents";
 
 const App = () => {
-  // const [, setAvailableBalance] = useRecoilState(availableBalanceState);
-  // const [, setSavingsBalance] = useRecoilState(savingsBalanceState);
-  // const [, setTotalBalance] = useRecoilState(totalBalanceState);
-
-  // useContractEvents({
-  //   onDeposit: (amountInUsd) => {
-  //     setAvailableBalance((prev) => prev + amountInUsd);
-  //     setTotalBalance((prev) => prev + amountInUsd);
-  //   },
-  //   onWithdraw: (amountInUsd) => {
-  //     setAvailableBalance((prev) => prev - amountInUsd);
-  //     setTotalBalance((prev) => prev - amountInUsd);
-  //   },
-  //   onSave: (amountInUsd) => {
-  //     setAvailableBalance((prev) => prev - amountInUsd);
-  //     setSavingsBalance((prev) => prev + amountInUsd);
-  //   },
-  // });
-
+  const [, setAvailableBalance] = useRecoilState(availableBalanceState);
+  const [, setSavingsBalance] = useRecoilState(savingsBalanceState);
+  const [, setTotalBalance] = useRecoilState(totalBalanceState);
   const account = useActiveAccount();
-  useBalances(account?.address as string);
+
+  useWatchEvents({
+    address: account?.address as string,
+    onDeposit: (amountInUsd) => {
+      setAvailableBalance((prev) => prev + amountInUsd);
+      setTotalBalance((prev) => prev + amountInUsd);
+    },
+    onWithdraw: (amountInUsd) => {
+      setAvailableBalance((prev) => prev - amountInUsd);
+      setTotalBalance((prev) => prev - amountInUsd);
+    },
+    onSave: (amountInUsd) => {
+      setAvailableBalance((prev) => prev - amountInUsd);
+      setSavingsBalance((prev) => prev + amountInUsd);
+    },
+    onClaim: (amountInUsd) => {
+      setSavingsBalance((prev) => prev - amountInUsd);
+      setAvailableBalance((prev) => prev + amountInUsd);
+    },
+    onSavingsWithdrawn: (amountInUsdToDeduct, amountInUsdToAdd) => {
+      setSavingsBalance((prev) => prev - amountInUsdToDeduct);
+      setAvailableBalance((prev) => prev + amountInUsdToAdd);
+    },
+  });
+
+  const balances = useBalances(account?.address as string);
+
+  useEffect(() => {
+    if (account?.address) {
+      console.log("Balances updated:", balances);
+    }
+  }, [account?.address, balances]);
+
+  console.log("App Component rerendered");
 
   return (
     <div className="bg-[#010104]">

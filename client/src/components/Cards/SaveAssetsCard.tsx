@@ -27,25 +27,14 @@ import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import SaveSuccessful from "../Modals/SaveSuccessful";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { SafeDetails, useGetSafes } from "@/hooks/useGetSafes";
-import { balancesState, supportedTokensState } from "@/store/atoms/balance";
-
-interface SavingsTarget {
-  id: string | number;
-  name: string;
-  description?: string;
-}
+import {
+  balancesState,
+  savingsBalanceState,
+  supportedTokensState,
+} from "@/store/atoms/balance";
 
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
@@ -94,12 +83,12 @@ export default function SaveAssetsCard() {
   const [hasAutoSafe, setHasAutoSafe] = useState(false);
   const [autoSafeTokenOptions, setAutoSafeTokenOptions] =
     useState(supportedTokens);
+  const [savingsBalance] = useRecoilState(savingsBalanceState);
 
   //   Duration state
   const [savingsDuration, setSavingsDuration] = useState(30);
   const [endDate, setEndDate] = useState("");
   const [, setUnlockDate] = useState<Date | null>(null);
-  const [, _setSelectedDate] = useState<Date | undefined>(undefined);
 
   // Custom date state
   const [customDate, setCustomDate] = useState<Date | undefined>(undefined);
@@ -113,19 +102,16 @@ export default function SaveAssetsCard() {
   ];
 
   const {
-    safes,
+    targetedSafes: safes,
+    refetch,
     // isLoading: isGetSafesLoading,
     // fetchSafes,
     // error,
   } = useGetSafes();
 
-  // useEffect(() => {
-  //   fetchSafes();
-  // }, []);
-
-  // console.log("Loading?? >>", isGetSafesLoading);
-  // console.log("SAFES", safes);
-  // console.log("SAFE FETCH ERROR", error);
+  useEffect(() => {
+    refetch();
+  }, [savingsBalance]);
 
   const calculateEndDate = (days: number) => {
     const currentDate = new Date();
@@ -173,65 +159,10 @@ export default function SaveAssetsCard() {
       ...prevState,
       duration: durationInSeconds,
     }));
-
-    // console.log(
-    //   `Custom date selected: ${format(
-    //     date,
-    //     "dd MMMM yyyy"
-    //   )}, ${daysDiff} days from now`
-    // );
   };
 
-  // End of duration state code
-  const [, _setSavingsTargets] = useState<SafeDetails[]>(safes);
-  //   const handleCreateTarget = (newTarget: SavingsTarget) => {
-  //     setSavingsTargets((prev) => [...prev, newTarget]);
-  //     console.log("Created new target:", newTarget);
-  //   };
-  const [isCreateTargetModalOpen, setIsCreateTargetModalOpen] = useState(false);
-  const [newTarget, setNewTarget] = useState<Omit<SavingsTarget, "id">>({
-    name: "",
-    description: "",
-  });
-
-  const [isDurationDisabled, setIsDurationDisabled] = useState(false);
-
-  const handleCreateTarget = () => {
-    if (newTarget.name || savingsTargetInput) {
-      //   setSavingsTargets((prev) => ({
-      //     ...prev,
-      //     newTarget,
-      //     id: Date.now().toString(),
-      //   }));
-      // console.log("Created new target:", newTarget);
-      //   onCreate({ ...newTarget, id: Date.now().toString() });
-      setNewTarget({ name: "", description: "" });
-      setIsCreateTargetModalOpen(false);
-    }
-  };
-
-  const [savingsTargetInput, _setSavingsTargetInput] = useState("");
-  const [_selectedSavingsTarget, setSelectedSavingsTarget] =
+  const [selectedSavingsTarget, setSelectedSavingsTarget] =
     useState<SafeDetails | null>(null);
-  //   const [nextId, setNextId] = useState(16);
-
-  // console.log("SELECTED SAVINGS TARGET", selectedSavingsTarget);
-
-  // const handleSavingsTargetSelect = (savingsTarget: SafeDetails) => {
-  //   setSelectedSavingsTarget(savingsTarget);
-
-  //   if (selectedSavingsTarget) {
-  //     setSaveState((prevState) => ({
-  //       ...prevState,
-  //       id: Number(selectedSavingsTarget.id),
-  //       target: selectedSavingsTarget.target,
-  //     }));
-
-  //     console.log("In here in savings target select");
-  //     console.log("savings target", selectedSavingsTarget);
-  //     console.log("New save state", saveState);
-  //   }
-  // };
 
   const [selectedOption, setSelectedOption] = useState("by-frequency");
   const [validationErrors, setValidationErrors] = useState<{
@@ -286,9 +217,9 @@ export default function SaveAssetsCard() {
     saveState,
     onSuccess: () => {
       openThirdModal();
-      setTimeout(() => {
-        resetSaveState();
-      }, 4000);
+      // setTimeout(() => {
+      //   resetSaveState();
+      // }, 000);
     },
     onError: (error: { message: any }) => {
       toast({
@@ -298,11 +229,11 @@ export default function SaveAssetsCard() {
     },
   });
 
-  useEffect(() => {
-    console.log("SAVE STATE", saveState);
-  }, [saveState]);
-
-  const { saveAsset, isPending: isLoading } = useSaveAsset({
+  const {
+    saveAsset,
+    topUpSafe,
+    isPending: isLoading,
+  } = useSaveAsset({
     address: address as `0x${string}`,
     saveState,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
@@ -312,9 +243,9 @@ export default function SaveAssetsCard() {
       openThirdModal();
 
       // add a little delay so that the modal can display the correct amount and duration
-      setTimeout(() => {
-        resetSaveState();
-      }, 4000);
+      // setTimeout(() => {
+      //   resetSaveState();
+      // }, 4000);
     },
     onError: (error: { message: any }) => {
       toast({
@@ -362,15 +293,12 @@ export default function SaveAssetsCard() {
     return Object.keys(errors).length === 0;
   };
 
-  // const handleSavingsTargetChange = (targetInput: string) => {
-  //   setSaveState((prev) => ({ ...prev, target: targetInput, id: 0 }));
-  // };
-  // Handle input change for savings target
   const handleSavingsTargetChange = (value: string) => {
     // Update saveState with the raw input value to allow typing
     setSaveState((prevState) => ({
       ...prevState,
       target: value,
+      id: null,
     }));
 
     setIsDurationDisabled(false);
@@ -394,11 +322,11 @@ export default function SaveAssetsCard() {
       setIsDurationDisabled(true);
     }
 
-    // Log for debugging
-    console.log("Input value:", value);
-    console.log("Matching Safe:", matchingSafe);
-    console.log("Selected Savings Target:", matchingSafe || null);
-    console.log("Save State:", { ...saveState, target: value });
+    // // Log for debugging
+    // console.log("Input value:", value);
+    // console.log("Matching Safe:", matchingSafe);
+    // console.log("Selected Savings Target:", matchingSafe || null);
+    // console.log("Save State:", { ...saveState, target: value });
   };
 
   const handleSaveAsset = (
@@ -414,6 +342,12 @@ export default function SaveAssetsCard() {
         return addTokenToAutoSafe(event);
       }
       createAutoSavings(event);
+      return;
+    }
+
+    if (selectedSavingsTarget && saveState.id) {
+      event.preventDefault();
+      topUpSafe(saveState.id, saveState.token, saveState.amount);
       return;
     }
 
@@ -441,7 +375,7 @@ export default function SaveAssetsCard() {
         const { hasAutoSafe, tokens } = await hasCreatedAutoSafe(
           supportedTokens
         );
-        console.log("Has AutoSafe::", hasAutoSafe, "Tokens::", tokens);
+        // console.log("Has AutoSafe::", hasAutoSafe, "Tokens::", tokens);
         setHasAutoSafe(hasAutoSafe);
         setAutoSafeTokenOptions(tokens);
       } catch (error) {
@@ -546,14 +480,7 @@ export default function SaveAssetsCard() {
                     target: savingsTarget.target,
                     duration: Number(savingsTarget.duration),
                   }));
-
-                  // console.log("In here in savings target select");
-                  // console.log("savings target", selectedSavingsTarget);
-                  // console.log("New save state", saveState);
                 }}
-                onAddItem={handleCreateTarget}
-                setShowAddModal={setIsCreateTargetModalOpen}
-                handleAddItem={() => setIsCreateTargetModalOpen(true)}
                 // label="Search for a city"
                 placeholder="Enter savings target"
                 getItemValue={(savingsTarget) => savingsTarget.target}
@@ -565,38 +492,28 @@ export default function SaveAssetsCard() {
                   </div>
                 )}
               />
-              {/* <div className="relative mt-2">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#6a6a6a] rounded-lg p-4 outline-none"
-              placeholder="Search target"
-            />
-
-
-          </div> */}
             </div>
 
-            {/* Duration section */}
-            <div className="py-4">
-              <DurationSelector
-                options={savingsDurationOptions}
-                selectedValue={savingsDuration}
-                onChange={handleDurationChange}
-                onCustomDateSelect={handleCustomDateSelect}
-                customDate={customDate}
-                isCustomSelected={isCustomSelected}
-                className="mb-4"
-                isDisabled={isDurationDisabled}
-              />
-
+            {!selectedSavingsTarget && (
               <div className="py-4">
-                <p className="text-[12px] font-semibold text-[#CACACA]">
-                  Unlocks on <span className="text-[#CACACA]">{endDate}</span>
-                </p>
+                <DurationSelector
+                  options={savingsDurationOptions}
+                  selectedValue={savingsDuration}
+                  onChange={handleDurationChange}
+                  onCustomDateSelect={handleCustomDateSelect}
+                  customDate={customDate}
+                  isCustomSelected={isCustomSelected}
+                  className="mb-4"
+                  isDisabled={isDurationDisabled}
+                />
+
+                <div className="py-4">
+                  <p className="text-[12px] font-semibold text-[#CACACA]">
+                    Unlocks on <span className="text-[#CACACA]">{endDate}</span>
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
 
@@ -843,7 +760,7 @@ export default function SaveAssetsCard() {
           ))}
 
         {saveType === "one-time" && (
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-5">
             <div>
               <Button
                 onClick={handleSaveAsset}
@@ -867,7 +784,10 @@ export default function SaveAssetsCard() {
         token={tokenData[saveState.token]?.symbol}
         duration={saveState.duration}
         isOpen={isThirdModalOpen && saveType === "one-time"}
-        onClose={() => setIsThirdModalOpen(false)}
+        onClose={() => {
+          setIsThirdModalOpen(false);
+          resetSaveState();
+        }}
       />
       <SuccessfulTxModal
         transactionType="setup-recurring-save"
@@ -878,67 +798,14 @@ export default function SaveAssetsCard() {
           saveType === "auto" &&
           selectedOption === "by-frequency"
         }
-        onClose={() => setIsThirdModalOpen(false)}
+        onClose={() => {
+          setIsThirdModalOpen(false);
+          resetSaveState();
+        }}
         additionalDetails={{
           frequency: getFrequencyLabel(saveState.frequency.toString()),
         }}
       />
-
-      <Dialog
-        open={isCreateTargetModalOpen}
-        onOpenChange={setIsCreateTargetModalOpen}
-      >
-        <DialogContent className="bg-[#17171C] text-[#F1F1F1] border-[#FFFFFF21]">
-          <DialogHeader>
-            <DialogTitle>Create Custom Target</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="target-name">Name of target</Label>
-              <Input
-                id="target-name"
-                value={newTarget.name || savingsTargetInput}
-                onChange={(e) =>
-                  setNewTarget((prev) => ({ ...prev, name: e.target.value }))
-                }
-                placeholder="Enter target name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="target-description">Description (optional)</Label>
-              <Textarea
-                id="target-description"
-                value={newTarget.description}
-                onChange={(e) =>
-                  setNewTarget((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                placeholder="Enter target description"
-                className="bg-[#17171C]"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <div className="flex justify-between w-full">
-              <Button
-                variant="outline"
-                onClick={() => setIsCreateTargetModalOpen(false)}
-                className="bg-[#FFFFFF2B] border-[#FFFFFF2B] rounded-[100px] text-white"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreateTarget}
-                className="rounded-[100px] bg-white text-[#010104] hover:text-white"
-              >
-                Create Target
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { toast } from "./use-toast";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Abi } from "viem";
 import { publicClient } from "@/lib/client";
+import { tokenDecimals } from "@/lib/utils";
 
 interface SaveState {
   token: string;
@@ -39,10 +40,6 @@ interface CreateAutoSavingsResult {
   error: Error | null;
 }
 
-type TokenDecimals = {
-  [key: string]: number;
-};
-
 export const useCreateAutoSavings = ({
   address,
   saveState,
@@ -53,11 +50,6 @@ export const useCreateAutoSavings = ({
   const [error, setError] = useState<Error | null>(null);
 
   const account = useActiveAccount();
-
-  const tokenDecimals: TokenDecimals = {
-    USDT: 18,
-    DEFAULT: 18,
-  };
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     const decimals = tokenDecimals[token] || tokenDecimals.DEFAULT;

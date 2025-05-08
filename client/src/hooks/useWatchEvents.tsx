@@ -1,116 +1,165 @@
-import { CoinSafeContract } from "@/lib/contract";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { convertTokenAmountToUsd } from "@/lib/utils";
 import { useEffect, useMemo } from "react";
 import { Contract } from "ethers";
 import { jsonRpcProvider } from "@/lib";
 
 type EventHandler = (amountInUsd: number) => void;
+type EventHandlerWithFee = (
+  amountInUsdToDeduct: number,
+  amountInUsdToAdd: number
+) => void;
 
 interface UseContractEventsProps {
+  address: string;
   onDeposit?: EventHandler;
   onWithdraw?: EventHandler;
   onSave?: EventHandler;
+  onClaim?: EventHandler;
+  onSavingsWithdrawn?: EventHandlerWithFee;
 }
 
-export const useContractEvents = ({
+export const useWatchEvents = ({
+  address,
   onDeposit,
   onWithdraw,
   onSave,
+  onClaim,
+  onSavingsWithdrawn,
 }: UseContractEventsProps) => {
-  // Main event handler function
-  const createEventHandler = (callback?: EventHandler) => {
+  const createEventHandler = (
+    callback?: EventHandler | EventHandlerWithFee
+  ) => {
     return async (logs: any) => {
       try {
         const log = logs[0];
-        const { token, amount } = log.args;
+        const { token, amount, fee } = log.args;
 
         const amountInUsd = await convertTokenAmountToUsd(token, amount);
         if (amountInUsd === 0) return;
 
-        callback?.(amountInUsd);
+        if (callback && callback.length === 2) {
+          const amountInUsdToDeduct = await convertTokenAmountToUsd(
+            token,
+            fee || 0
+          );
+          (callback as EventHandlerWithFee)?.(amountInUsdToDeduct, amountInUsd);
+        } else {
+          (callback as EventHandler)?.(amountInUsd);
+        }
       } catch (error) {
         console.error("Error processing event logs:", error);
       }
     };
   };
 
-  const saveEventHandler = useMemo(() => createEventHandler(onSave), [onSave]);
-  const withdrawEventHandler = useMemo(
-    () => createEventHandler(onWithdraw),
-    [onWithdraw]
+  const eventHandlers = useMemo(
+    () => ({
+      deposit: createEventHandler(onDeposit),
+      withdraw: createEventHandler(onWithdraw),
+      save: createEventHandler(onSave),
+      claim: createEventHandler(onClaim),
+      savingsWithdrawn: createEventHandler(onSavingsWithdrawn),
+    }),
+    [onDeposit, onWithdraw, onSave, onClaim, onSavingsWithdrawn]
   );
-  const depositEventHandler = useMemo(
-    () => createEventHandler(onDeposit),
-    [onDeposit]
-  );
 
-  const handleDeposited = (user: string, token: string, amount: string) => {
-    console.log(user);
-    const logs = [{ args: { token, amount } }];
-
-    depositEventHandler(logs);
-  };
-
-  const handleWithdrawn = (user: string, tokenType: string, amount: number) => {
-    console.log(user);
-
-    const logs = [{ args: { token: tokenType, amount } }];
-
-    withdrawEventHandler(logs);
-  };
-
-  const handleSaved = (
+  const handleEvent = (
     user: string,
-    token: string,
-    amount: number,
-    duration: number
+    callback: (logs: any) => void,
+    args: Record<string, any>
   ) => {
-    console.log(user, duration);
-
-    const logs = [{ args: { token, amount } }];
-
-    saveEventHandler(logs);
+    if (user !== address) return;
+    callback([{ args }]);
   };
 
-  useEffect(() => {
-    const contract = new Contract(
-      CoinSafeContract.address as `0x${string}`, // Address of the contract
-      CoinSafeContract.abi.abi,
-      jsonRpcProvider
-    );
+  const eventMappings = [
+    {
+      event: "DepositSuccessful",
+      handler: (user: string, token: string, amount: string) =>
+        handleEvent(user, eventHandlers.deposit, { token, amount }),
+      abi: facetAbis.fundingFacet,
+    },
+    {
+      event: "Withdrawn",
+      handler: (user: string, token: string, amount: number) =>
+        handleEvent(user, eventHandlers.withdraw, { token, amount }),
+      abi: facetAbis.fundingFacet,
+    },
+    {
+      event: "SavedSuccessfully",
+      handler: (user: string, token: string, amount: number) =>
+        handleEvent(user, eventHandlers.save, { token, amount }),
+      abi: facetAbis.targetSavingsFacet,
+    },
+    {
+      event: "TopUpSuccessful",
+      handler: (user: string, token: string, amount: number) =>
+        handleEvent(user, eventHandlers.save, { token, amount }),
+      abi: facetAbis.targetSavingsFacet,
+    },
+    {
+      event: "ClaimSuccessful",
+      handler: (user: string, token: string, amount: number) =>
+        handleEvent(user, eventHandlers.claim, { token, amount }),
+      abi: facetAbis.targetSavingsFacet,
+    },
+    {
+      event: "SavingsWithdrawn",
+      handler: (
+        user: string,
+        token: string,
+        amount: number,
+        fee: number
+      ) =>
+        handleEvent(user, eventHandlers.savingsWithdrawn, {
+          token,
+          amount,
+          fee,
+        }),
+      abi: facetAbis.targetSavingsFacet,
+    },
+    {
+      event: "AutomatedPlanUpdated",
+      handler: (user: string, token: string, amount: number) =>
+        handleEvent(user, eventHandlers.save, { token, amount }),
+      abi: facetAbis.automatedSavingsFacet,
+    },
+    {
+      event: "AutomatedPlanCreated",
+      handler: (user: string, token: string, amount: number) =>
+        handleEvent(user, eventHandlers.save, { token, amount }),
+      abi: facetAbis.automatedSavingsFacet,
+    },
+    {
+      event: "SavedToEmergencySuccessfully",
+      handler: (user: string, token: string, amount: number) =>
+        handleEvent(user, eventHandlers.save, { token, amount }),
+      abi: facetAbis.emergencySavingsFacet,
+    },
+    {
+      event: "EmergencyWithdrawalExecuted",
+      handler: (user: string, token: string, amount: number) =>
+        handleEvent(user, eventHandlers.withdraw, { token, amount }),
+      abi: facetAbis.emergencySavingsFacet,
+    },
+  ];
 
-    contract.on("DepositSuccessful", handleDeposited);
+  useEffect(() => {
+    const contracts = eventMappings.map(({ event, handler, abi }) => {
+      const contract = new Contract(
+        CoinsafeDiamondContract.address as `0x${string}`,
+        abi,
+        jsonRpcProvider
+      );
+      contract.on(event, handler);
+      return { contract, event, handler };
+    });
 
     return () => {
-      contract.off("DepositSuccessful", handleDeposited);
+      contracts.forEach(({ contract, event, handler }) =>
+        contract.off(event, handler)
+      );
     };
-  }, []);
-
-  useEffect(() => {
-    const contract = new Contract(
-      CoinSafeContract.address as `0x${string}`, // Address of the contract
-      CoinSafeContract.abi.abi,
-      jsonRpcProvider
-    );
-
-    contract.on("SavedSuccessfully", handleSaved);
-
-    return () => {
-      contract.off("SavedSuccessfully", handleSaved);
-    };
-  }, []);
-
-  useEffect(() => {
-    const contract = new Contract(
-      CoinSafeContract.address as `0x${string}`, // Address of the contract
-      CoinSafeContract.abi.abi,
-      jsonRpcProvider
-    );
-
-    contract.on("Withdrawn", handleWithdrawn);
-
-    return () => {
-      contract.off("Withdrawn", handleWithdrawn);
-    };
-  }, []);
+  }, [eventHandlers]);
 };
