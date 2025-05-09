@@ -119,12 +119,12 @@ export const useTopUpSafe = ({
 
         onSuccess?.();
         return result;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
+      } catch (error: any) {
         setError(error);
 
+        console.error(error);
         toast({
-          title: `Error: ${error.message}`,
+          title: `Error: ${error?.message || "An unexpected error occured"}`,
           variant: "destructive",
         });
 

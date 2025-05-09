@@ -14,7 +14,6 @@ import { formatEther } from "viem";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
-import Deposit from "./Modals/Deposit";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { Check, X } from "lucide-react";
@@ -27,6 +26,7 @@ import { tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
+import { useNavigate } from 'react-router-dom';
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
@@ -67,8 +67,6 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
     () => balances.savings,
     [balances.savings]
   );
-
-  console.log("AUTI SAFE DE", safeDetails);
 
   useEffect(() => {
     // If safeDetails is provided, use the safe-specific token amounts
@@ -145,16 +143,12 @@ function AssetTableContent({
 }) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
-  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [updatedAssets, setUpdatedAssets] = useState<any>([]);
+  const navigate = useNavigate();
 
   const account = useActiveAccount();
   const isConnected = !!account?.address;
   const address = account?.address;
-
-  const openDepositModal = () => {
-    setIsDepositModalOpen(true);
-  };
 
   const hasNonZeroAssets = assets.some(
     (asset) => Number.parseFloat(asset.balance) > 0
@@ -245,8 +239,8 @@ function AssetTableContent({
             </Button>
           ) : isConnected ? (
             <Button
-              onClick={openDepositModal}
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+              onClick={() => navigate("/dashboard/deposit")}
             >
               Deposit
             </Button>
@@ -254,11 +248,6 @@ function AssetTableContent({
             <ThirdwebConnectButton />
           )}
         </div>
-        <Deposit
-          isDepositModalOpen={isDepositModalOpen}
-          setIsDepositModalOpen={setIsDepositModalOpen}
-          onBack={() => {}}
-        />
         <SavingOption
           isFirstModalOpen={isFirstModalOpen}
           setIsFirstModalOpen={setIsFirstModalOpen}
@@ -412,7 +401,7 @@ function AssetTableContent({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setIsDepositModalOpen(true)}
+                      onClick={() => navigate("/dashboard/deposit")}
                     >
                       Deposit
                     </Button>
@@ -445,11 +434,6 @@ function AssetTableContent({
         setIsFirstModalOpen={setIsFirstModalOpen}
         isSecondModalOpen={isSecondModalOpen}
         setIsSecondModalOpen={setIsSecondModalOpen}
-      />
-      <Deposit
-        isDepositModalOpen={isDepositModalOpen}
-        setIsDepositModalOpen={setIsDepositModalOpen}
-        onBack={() => {}}
       />
     </div>
   );

@@ -1,9 +1,7 @@
 import { useGetScheduledSavings } from "@/hooks/useGetScheduledSavings";
-import { useState } from "react";
 import { Button } from "./ui/button";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import Deposit from "./Modals/Deposit";
 import MemoStory from "@/icons/Story";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
@@ -12,11 +10,8 @@ import { formatNumberToMax7Dp, tokenData } from "@/lib/utils";
 
 export default function ScheduledSavings() {
   const navigate = useNavigate();
-  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const { scheduledSavings, isLoading, error } = useGetScheduledSavings();
   const [, setSaveState] = useRecoilState(saveAtom);
-
-  const openDepositModal = () => setIsDepositModalOpen(true);
 
   // Navigate to save-assets page with autosave tab selected
   const navigateToSaveAssets = () => {
@@ -94,7 +89,7 @@ export default function ScheduledSavings() {
               </p>
               <div className="flex gap-5">
                 <Button
-                  onClick={openDepositModal}
+                  onClick={() => navigate("/dashboard/deposit")}
                   className="rounded-[100px] px-8 py-2 bg-[#1E1E1E99] text-[#F1F1F1] hover:bg-[#2a2a2a] text-sm"
                 >
                   Deposit
@@ -110,11 +105,6 @@ export default function ScheduledSavings() {
           )}
         </div>
       )}
-      <Deposit
-        isDepositModalOpen={isDepositModalOpen}
-        setIsDepositModalOpen={setIsDepositModalOpen}
-        onBack={() => {}}
-      />
     </div>
   );
 }

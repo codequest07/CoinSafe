@@ -12,7 +12,7 @@ import {
   safesErrorState,
   targetedSafesState,
 } from "@/store/atoms/safes";
-import { supportedTokensState } from "@/store/atoms/balance";
+import { savingsBalanceState, supportedTokensState } from "@/store/atoms/balance";
 import { publicClient } from "@/lib/client";
 // Define the SafeDetails interface based on the provided struct
 interface Token {
@@ -40,6 +40,7 @@ export function useGetSafes() {
   const isError = error !== null;
 
   const account = useActiveAccount();
+  const [savingsBalance] = useRecoilState(savingsBalanceState);
   const address = account?.address;
 
   const contract = useMemo(() => {
@@ -64,15 +65,13 @@ export function useGetSafes() {
       supportedTokens
     );
 
-    // Create a contract instance specifically for emergency savings
-    const emergencyContract = getContract({
-      client,
-      address: CoinsafeDiamondContract.address,
-      chain: liskSepolia,
-      abi: facetAbis.emergencySavingsFacet as Abi,
-    });
-
-    console.log("Emergency contract address:", emergencyContract.address);
+    // // Create a contract instance specifically for emergency savings
+    // const emergencyContract = getContract({
+    //   client,
+    //   address: CoinsafeDiamondContract.address,
+    //   chain: liskSepolia,
+    //   abi: facetAbis.emergencySavingsFacet as Abi,
+    // });
 
     // Prepare multicall requests
     const rawTxs = supportedTokens.map((token: string) => ({
@@ -82,7 +81,7 @@ export function useGetSafes() {
       functionName: "getEmergencySafeBalance",
     }));
 
-    console.log("Preparing multicall with contracts:", rawTxs);
+    // console.log("Preparing multicall with contracts:", rawTxs);
 
     try {
       const results = await publicClient.multicall({
@@ -90,7 +89,7 @@ export function useGetSafes() {
         chain: liskSepolia,
       });
 
-      console.log("Multicall results:", results);
+      // console.log("Multicall results:", results);
 
       const tokenAmounts: Token[] = results
         .filter(({ status }: { status: string }) => status === "success")
@@ -99,7 +98,7 @@ export function useGetSafes() {
           amount: result,
         }));
 
-      console.log("Processed token amounts:", tokenAmounts);
+      // console.log("Processed token amounts:", tokenAmounts);
 
       return {
         id: 911n,
@@ -159,19 +158,19 @@ export function useGetSafes() {
         }
 
         // Get regular safes
-        console.log("Fetching regular safes for address:", address);
+        // console.log("Fetching regular safes for address:", address);
         const result = await readContract({
           contract,
           method: resolveMethod("getSafes"),
           params: [],
           from: address,
         });
-        console.log("Regular safes fetched:", result);
+        // console.log("Regular safes fetched:", result);
         setTargetedSafes(result as SafeDetails[]);
 
         // Fetch emergency safe
         const emergencySafe = await fetchEmergencySafe();
-        console.log("Emergency safe fetched:", emergencySafe);
+        // console.log("Emergency safe fetched:", emergencySafe);
 
         // Combine and update state for both targeted and emergency safes
         setSafes([emergencySafe, ...result] as SafeDetails[]);
@@ -198,10 +197,13 @@ export function useGetSafes() {
       supportedTokens,
     ]
   );
-
+  
+  useEffect(() => {
+    fetchSafes(true);
+  }, [savingsBalance])
   // Add an effect to monitor supportedTokens changes
   useEffect(() => {
-    console.log("supportedTokens changed in useGetSafes:", supportedTokens);
+    // console.log("supportedTokens changed in useGetSafes:", supportedTokens);
     // If we have tokens and safes are already loaded, consider refreshing
     if (supportedTokens.length > 0 && safes.length > 0) {
       // Check if emergency safe has token amounts
@@ -210,7 +212,7 @@ export function useGetSafes() {
         emergencySafe &&
         (!emergencySafe.tokenAmounts || emergencySafe.tokenAmounts.length === 0)
       ) {
-        console.log("Emergency safe has no token amounts, refreshing...");
+        // console.log("Emergency safe has no token amounts, refreshing...");
         fetchSafes(true); // Force refresh to get emergency safe with tokens
       }
     }

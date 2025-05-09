@@ -139,7 +139,11 @@ export default function DepositCard() {
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    {supportedTokens.map(token => <SelectItem value={token} key={token}>{tokenData[token]?.symbol}</SelectItem>)}
+                    {supportedTokens.map((token) => (
+                      <SelectItem value={token} key={token}>
+                        {tokenData[token]?.symbol}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -158,16 +162,27 @@ export default function DepositCard() {
                 <div className="text-sm font-[300] text-gray-300">
                   Wallet balance:{" "}
                   <span className="text-gray-400">
-                    {selectedTokenBalance}{" "}
-                    {tokenData[token]?.symbol}
+                    {selectedTokenBalance} {tokenData[token]?.symbol}
                   </span>
                 </div>
-                <Button
-                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}
-                >
-                  Max
-                </Button>
+                {token &&
+                (selectedTokenBalance == 0 ||
+                  (amount && amount > selectedTokenBalance)) ? (
+                  <Button
+                    variant="link"
+                    className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                    onClick={() => navigate("/dashboard/deposit")}
+                  >
+                    Deposit to save
+                  </Button>
+                ) : (
+                  <Button
+                    className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                    onClick={() => setAmount(selectedTokenBalance)}
+                  >
+                    Max
+                  </Button>
+                )}
               </div>
             </>
           )}
@@ -191,9 +206,7 @@ export default function DepositCard() {
       </div>
       <SuccessfulTxModal
         amount={amount || 0}
-        token={
-          tokenData[token]?.symbol
-        }
+        token={tokenData[token]?.symbol}
         isOpen={isThirdModalOpen}
         onClose={() => setIsThirdModalOpen(false)}
         transactionType="deposit"
@@ -206,9 +219,7 @@ export default function DepositCard() {
         isOpen={approveTxModalOpen}
         onClose={() => setApproveTxModalOpen(false)}
         amount={amount || 0}
-        token={
-          tokenData[token]?.symbol
-        }
+        token={tokenData[token]?.symbol}
         text="To Deposit"
       />
     </main>

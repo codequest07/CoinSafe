@@ -133,17 +133,17 @@ export default function WithdrawEmergencySafe({
                 <input
                   type="number"
                   value={amount}
-                  onChange={(e: any) => setAmount(Number(e.target.value))}
+                  onChange={(e: any) => setAmount(e.target.value)}
                   className="text-2xl font-medium bg-transparent text-white w-16 sm:w-full outline-none"
                   placeholder="0"
                 />
-                <div className="text-sm text-gray-400 mt-1">
+                <div className="text-sm text-left text-gray-400 mt-1">
                   ≈ ${tokenPrice}
                 </div>
               </div>
-              <div className="ml-4">
+              <div className="sm:ml-4">
                 <Select onValueChange={handleTokenSelect} value={token}>
-                  <SelectTrigger className="w-[160px] py-2.5 bg-gray-700  border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
+                  <SelectTrigger className="w-[160px] border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
                     <div className="flex items-center">
                       <MemoRipple className="mr-2" />
                       <SelectValue placeholder="Select Token" />
@@ -178,7 +178,8 @@ export default function WithdrawEmergencySafe({
                 </div>
                 <Button
                   className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}>
+                  onClick={() => setAmount(selectedTokenBalance)}
+                >
                   Max
                 </Button>
               </div>
@@ -190,7 +191,8 @@ export default function WithdrawEmergencySafe({
             <Button
               onClick={() => setIsWithdrawModalOpen(false)}
               className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-              type="submit">
+              type="submit"
+            >
               Cancel
             </Button>
             <Button
@@ -266,7 +268,8 @@ export default function WithdrawEmergencySafe({
                 !amount ||
                 !token ||
                 (amount || 0) > selectedTokenBalance
-              }>
+              }
+            >
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />
               ) : (
@@ -280,9 +283,7 @@ export default function WithdrawEmergencySafe({
       <ApproveTxModal
         isOpen={isApproveModalOpen}
         onClose={() => {
-          if (!isLoading) {
-            setIsApproveModalOpen(false);
-          }
+          setIsApproveModalOpen(false);
         }}
         amount={amount || 0}
         token={tokenData[token]?.symbol || "tokens"}
