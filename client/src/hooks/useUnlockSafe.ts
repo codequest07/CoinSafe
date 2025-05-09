@@ -274,8 +274,7 @@ export const useUnlockSafe = ({
         }, 3000);
 
         return result;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
+      } catch (error: any) {
         setError(error);
 
         console.error("Unlock transaction failed:", error);

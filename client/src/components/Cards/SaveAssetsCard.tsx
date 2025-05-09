@@ -448,17 +448,30 @@ export default function SaveAssetsCard() {
                   {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
                 </span>
               </div>
-              <button
-                className="text-sm text-[#5b8c7b]"
-                onClick={() =>
-                  setSaveState((prev) => ({
-                    ...prev,
-                    amount: selectedTokenBalance,
-                  }))
-                }
-              >
-                Save all
-              </button>
+              {saveState.token &&
+              (selectedTokenBalance == 0 ||
+                (saveState.amount &&
+                  saveState.amount > selectedTokenBalance)) ? (
+                <Button
+                  variant="link"
+                  className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                  onClick={() => navigate("/dashboard/deposit")}
+                >
+                  Deposit to save
+                </Button>
+              ) : (
+                <Button
+                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                  onClick={() =>
+                    setSaveState((prev) => ({
+                      ...prev,
+                      amount: selectedTokenBalance,
+                    }))
+                  }
+                >
+                  Save all
+                </Button>
+              )}
             </div>
 
             <div className="border-t border-[#6a6a6a] my-4"></div>
@@ -667,20 +680,30 @@ export default function SaveAssetsCard() {
                             {tokenData[saveState.token]?.symbol}
                           </span>
                         </div>
-                        <Button
-                          className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                          // onClick={() => setAmount(selectedTokenBalance)}
-                          onClick={() =>
-                            setSaveState((prev) => ({
-                              ...prev,
-                              amount: selectedTokenBalance,
-                            }))
-                          }
-                        >
-                          {/* }
-                                  > */}
-                          Max
-                        </Button>
+                        {saveState.token &&
+                        (selectedTokenBalance == 0 ||
+                          (saveState.amount &&
+                            saveState.amount > selectedTokenBalance)) ? (
+                          <Button
+                            variant="link"
+                            className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                            onClick={() => navigate("/dashboard/deposit")}
+                          >
+                            Deposit to save
+                          </Button>
+                        ) : (
+                          <Button
+                            className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                            onClick={() =>
+                              setSaveState((prev) => ({
+                                ...prev,
+                                amount: selectedTokenBalance,
+                              }))
+                            }
+                          >
+                            Max
+                          </Button>
+                        )}
                       </div>
                     </>
 

@@ -83,7 +83,8 @@ export default function SavingsDetail() {
                 variant="ghost"
                 size="icon"
                 className="rounded-full"
-                onClick={() => navigate(-1)}>
+                onClick={() => navigate(-1)}
+              >
                 <ArrowLeft className="h-6 w-6" />
               </Button>
               <div className="flex items-center gap-2">
@@ -114,7 +115,7 @@ export default function SavingsDetail() {
             <div className="flex gap-2">
               <SavingsCard
                 title="Savings balance"
-                value={safeDetails.totalAmountUSD}
+                value={safeDetails.totalAmountUSD ?? 0.0}
                 unit="USD"
                 text={<>Total value of all tokens in this safe</>}
                 safeId={Number(safeDetails.id)}
@@ -124,7 +125,7 @@ export default function SavingsDetail() {
                   title="Claimable balance"
                   value={
                     safeDetails.unlockTime < new Date()
-                      ? safeDetails.totalAmountUSD
+                      ? safeDetails.totalAmountUSD ?? 0.0
                       : 0.0
                   }
                   unit="USD"

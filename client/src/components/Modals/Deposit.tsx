@@ -13,6 +13,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import { LoaderCircle } from "lucide-react";
@@ -176,12 +177,25 @@ export default function Deposit({
                     {selectedTokenBalance} {tokenData[token]?.symbol}
                   </span>
                 </div>
-                <Button
-                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                  onClick={() => setAmount(selectedTokenBalance)}
-                >
-                  Max
-                </Button>
+                {token &&
+                (selectedTokenBalance == 0 ||
+                  (amount && amount > selectedTokenBalance)) ? (
+                  <Link to={"/dashboard/deposit"}>
+                    <Button
+                      variant="link"
+                      className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                    >
+                      Deposit to save
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button
+                    className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                    onClick={() => setAmount(selectedTokenBalance)}
+                  >
+                    Max
+                  </Button>
+                )}
               </div>
             </>
           )}

@@ -180,8 +180,7 @@ export const useSaveAsset = ({
 
         onSuccess?.();
         return result;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
+      } catch (error: any) {
         setError(error);
 
         toast({
