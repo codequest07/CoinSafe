@@ -24,6 +24,7 @@ import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import ApproveTxModal from "./ApproveTxModal";
 import SuccessfulTxModal from "./SuccessfulTxModal";
+import { getTokenPrice } from "@/lib";
 
 interface UnlockModalProps {
   onClose?: () => void;
@@ -121,7 +122,8 @@ export default function UnlockModal({
   }, [breakingFeePercentage]);
 
   // Calculate the breaking fee based on the amount and token
-  const calculateBreakingFee = useCallback(() => {
+const calculateBreakingFee = useCallback(() => {
+  const run = async () => {
     if (!saveState.amount || !saveState.token) {
       setBreakingFeeAmount(0);
       setBreakingFeeUsd(0);
@@ -132,19 +134,10 @@ export default function UnlockModal({
     const feeAmount = (saveState.amount * breakingFeePercentage) / 100;
     setBreakingFeeAmount(feeAmount);
 
-    // Calculate USD value based on token rates
-    // Simple conversion rates (in a real app, you'd use an API)
+    // Example: Fetch real-time rate (simulate async)
     const tokenSymbol = tokenData[saveState.token]?.symbol?.toUpperCase() || "";
-    const rate =
-      tokenSymbol === "SAFU"
-        ? 0.339
-        : tokenSymbol === "LSK"
-        ? 1.25
-        : tokenSymbol === "USDT"
-        ? 1
-        : 0;
 
-    const usdValue = feeAmount * rate;
+    const usdValue = Number(await getTokenPrice(saveState.token, feeAmount));
     setBreakingFeeUsd(usdValue);
 
     console.log(
@@ -152,7 +145,11 @@ export default function UnlockModal({
         saveState.amount
       }) ≈ $${usdValue.toFixed(2)}`
     );
-  }, [saveState.amount, saveState.token, breakingFeePercentage]);
+  };
+
+  run(); // call the async function
+}, [saveState.amount, saveState.token, breakingFeePercentage, tokenData]);
+
 
   // Fetch breaking fee percentage when component mounts
   useEffect(() => {
@@ -208,7 +205,7 @@ export default function UnlockModal({
         );
 
         if (tokenInfo && typeof tokenInfo.amount === "number") {
-          setSelectedTokenBalance(tokenInfo.amount);
+          setSelectedTokenBalance(Number(tokenInfo.formattedAmount));
           console.log(
             `Token ${value} balance in safe: ${tokenInfo.amount} ${tokenInfo.tokenSymbol}`
           );
@@ -343,21 +340,7 @@ export default function UnlockModal({
             <div className="text-sm text-gray-300">
               Saved balance:{" "}
               <span className="text-gray-400">
-                {(() => {
-                  // Normalize the balance display directly here
-                  let displayBalance = selectedTokenBalance;
-                  const symbol = tokenData[saveState.token]?.symbol;
-
-                  // If it's USDT and the value is very large, normalize it
-                  if (symbol === "USDT" && displayBalance >= 1000000) {
-                    displayBalance = displayBalance / 1000000;
-                  }
-
-                  return displayBalance.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  });
-                })()}{" "}
+                {selectedTokenBalance}{" "}
                 {tokenData[saveState.token]?.symbol}
               </span>
             </div>
