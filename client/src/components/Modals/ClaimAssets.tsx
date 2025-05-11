@@ -8,6 +8,8 @@ import { Skeleton } from "../ui/skeleton";
 import ClaimModal from "./ClaimModal";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
+import { get } from "http";
+import { getTokenPrice } from "@/lib";
 
 export default function ClaimAssets({
   isDepositModalOpen,
@@ -19,6 +21,7 @@ export default function ClaimAssets({
 }) {
   const [selectedSafeId, setSelectedSafeId] = useState<string>("");
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [usdValues, setUsdValues] = useState<Record<string, number>>({});
   const { safes, isLoading, fetchSafes } = useGetSafes();
 
   // Convert bigint timestamp to Date object
@@ -171,51 +174,43 @@ export default function ClaimAssets({
   };
 
   // Calculate USD value for a token amount
-  const calculateUsdValue = (amount: any, tokenAddress: string) => {
+  const calculateUsdValue = async (amount: any, tokenAddress: string) => {
     // Skip tokens with zero or invalid amounts
     if (!amount || amount === 0) return 0;
-
-    // Convert BigInt to number if needed
-    let amountAsNumber;
-    try {
-      // For very large BigInt values, this could throw an error
-      amountAsNumber =
-        typeof amount === "bigint" ? Number(amount) : Number(amount);
-
-      // Check if the conversion resulted in Infinity or NaN
-      if (!isFinite(amountAsNumber) || isNaN(amountAsNumber)) {
-        console.warn(
-          `Token amount too large to convert to number: ${amount.toString()}`
-        );
-        return 0;
-      }
-    } catch (error) {
-      console.error("Error converting token amount to number:", error);
-      return 0;
-    }
-
-    const symbol = tokenData[tokenAddress]?.symbol?.toUpperCase() || "";
-    const rate =
-      symbol === "SAFU"
-        ? 0.339
-        : symbol === "LSK"
-        ? 1.25
-        : symbol === "USDT"
-        ? 1
-        : 0;
-
-    return amountAsNumber * rate;
+    const price = await getTokenPrice(tokenAddress, amount);
+    if (!price) return 0;
+    return Number(price);
   };
 
   // Calculate total USD value for a safe
-  const calculateTotalUsdValue = (safe: any) => {
-    return safe.tokenAmounts.reduce((total: number, token: any) => {
+  const calculateTotalUsdValue = async (safe: any) => {
+    return safe.tokenAmounts.reduce(async (total: number, token: any) => {
       // Skip tokens with zero or invalid amounts
       if (!token.amount || token.amount === 0) return total;
 
-      return total + calculateUsdValue(token.amount, token.token);
+      // Calculate USD value for each token
+    const price = await getTokenPrice(token.token, token.amount);
+    if (!price) return total;
+      return total + price;
     }, 0);
   };
+
+  useEffect(() => {
+  const fetchUsdValues = async () => {
+    const values: Record<string, number> = {};
+
+    for (const safe of maturedSafes) {
+      const usdValue = await calculateTotalUsdValue(safe);
+      values[safe.id.toString()] = usdValue;
+    }
+
+    setUsdValues(values);
+  };
+
+  if (maturedSafes.length > 0) {
+    fetchUsdValues();
+  }
+}, [maturedSafes]);
 
   return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
@@ -252,7 +247,7 @@ export default function ClaimAssets({
         ) : (
           // List of matured safes
           maturedSafes.map((safe, index) => {
-            const totalUsdValue = calculateTotalUsdValue(safe);
+            const totalUsdValue = usdValues[safe.id.toString()] ?? 0;
             const tokenSymbols = safe.tokenAmounts
               .filter((token: any) => token.amount > 0)
               .map((token: any) => tokenData[token.token]?.symbol || "Unknown")
