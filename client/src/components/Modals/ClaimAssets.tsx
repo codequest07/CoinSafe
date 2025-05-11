@@ -3,13 +3,11 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import MemoAvax from "@/icons/Avax";
 import { useGetSafes } from "@/hooks/useGetSafes";
-import { tokenData } from "@/lib/utils";
+import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import ClaimModal from "./ClaimModal";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
-import { get } from "http";
-import { getTokenPrice } from "@/lib";
 
 export default function ClaimAssets({
   isDepositModalOpen,
@@ -173,15 +171,6 @@ export default function ClaimAssets({
     setIsDepositModalOpen(false);
   };
 
-  // Calculate USD value for a token amount
-  const calculateUsdValue = async (amount: any, tokenAddress: string) => {
-    // Skip tokens with zero or invalid amounts
-    if (!amount || amount === 0) return 0;
-    const price = await getTokenPrice(tokenAddress, amount);
-    if (!price) return 0;
-    return Number(price);
-  };
-
   // Calculate total USD value for a safe
   const calculateTotalUsdValue = async (safe: any) => {
     return safe.tokenAmounts.reduce(async (total: number, token: any) => {
@@ -189,28 +178,28 @@ export default function ClaimAssets({
       if (!token.amount || token.amount === 0) return total;
 
       // Calculate USD value for each token
-    const price = await getTokenPrice(token.token, token.amount);
-    if (!price) return total;
+      const price = await convertTokenAmountToUsd(token.token, token.amount);
+      if (!price) return total;
       return total + price;
     }, 0);
   };
 
   useEffect(() => {
-  const fetchUsdValues = async () => {
-    const values: Record<string, number> = {};
+    const fetchUsdValues = async () => {
+      const values: Record<string, number> = {};
 
-    for (const safe of maturedSafes) {
-      const usdValue = await calculateTotalUsdValue(safe);
-      values[safe.id.toString()] = usdValue;
+      for (const safe of maturedSafes) {
+        const usdValue = await calculateTotalUsdValue(safe);
+        values[safe.id.toString()] = usdValue;
+      }
+
+      setUsdValues(values);
+    };
+
+    if (maturedSafes.length > 0) {
+      fetchUsdValues();
     }
-
-    setUsdValues(values);
-  };
-
-  if (maturedSafes.length > 0) {
-    fetchUsdValues();
-  }
-}, [maturedSafes]);
+  }, [maturedSafes]);
 
   return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
@@ -225,7 +214,8 @@ export default function ClaimAssets({
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg">
+                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg"
+              >
                 <div className="flex justify-between items-center">
                   <Skeleton className="h-12 w-24" />
                   <Skeleton className="h-8 w-20" />
@@ -267,7 +257,8 @@ export default function ClaimAssets({
             return (
               <div
                 key={index}
-                className="bg-black border-b border-[#FFFFFF17] text-white p-3 rounded-lg">
+                className="bg-black border-b border-[#FFFFFF17] text-white p-3 rounded-lg"
+              >
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2">
@@ -305,7 +296,8 @@ export default function ClaimAssets({
                           ? "text-[#79E7BA] hover:text-[#79E7BA]"
                           : "text-gray-400 cursor-not-allowed"
                       }`}
-                      disabled={!isClaimable}>
+                      disabled={!isClaimable}
+                    >
                       Claim
                     </Button>
                   </div>
