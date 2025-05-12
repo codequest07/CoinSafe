@@ -15,7 +15,6 @@ const AutoSave = () => {
   const { safeDetails, isLoading, isError, tokenAmounts } =
     useGetSafeById("911");
   const account = useActiveAccount();
-  const isConnected = !!account?.address;
 
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -23,17 +22,7 @@ const AutoSave = () => {
   const userAddress = account?.address;
 
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
-  const {
-    details,
-    isLoading: automatedSafeLoading,
-    error: automatedSafeError,
-  } = useAutomatedSafeForUser(userAddress as `0x${string}`);
-  console.log(
-    "AUTOMED SAVIMGS>>> ",
-    details,
-    automatedSafeLoading,
-    automatedSafeError
-  );
+  const { details } = useAutomatedSafeForUser(userAddress as `0x${string}`);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -61,8 +50,7 @@ const AutoSave = () => {
                 variant="ghost"
                 size="icon"
                 className="rounded-full"
-                onClick={() => navigate(-1)}
-              >
+                onClick={() => navigate(-1)}>
                 <ArrowLeft className="h-6 w-6" />
               </Button>
               <div className="flex items-center gap-2">
@@ -121,21 +109,23 @@ const AutoSave = () => {
                     <div>
                       <div className="pt-2">
                         <p className="text-[#7F7F7F] text-xs">
-                          Total value of all tokens in this safe
+                          sum of all balances
                         </p>
                       </div>
                     </div>
                   </div>
-                  {isConnected && (
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setShowTopUpModal(true)}
-                        className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
-                      >
-                        Top up
-                      </button>
-                    </div>
-                  )}
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowWithdrawModal(true)}
+                      className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
+                      Unlock
+                    </button>
+                    <button
+                      onClick={() => setShowTopUpModal(true)}
+                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
+                      Manage
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -168,8 +158,7 @@ const AutoSave = () => {
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setShowWithdrawModal(true)}
-                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
-                  >
+                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
                     Withdraw
                   </button>
                 </div>
