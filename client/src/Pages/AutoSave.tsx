@@ -87,7 +87,8 @@ const AutoSave = () => {
                 variant="ghost"
                 size="icon"
                 className="rounded-full"
-                onClick={() => navigate(-1)}>
+                onClick={() => navigate(-1)}
+              >
                 <ArrowLeft className="h-6 w-6" />
               </Button>
               <div className="flex items-center gap-2">
@@ -115,7 +116,7 @@ const AutoSave = () => {
           </div>
         )}
 
-        {safeDetails && (
+        {details && (
           <div className="flex gap-4 pr-4 pb-2">
             <div className="flex-1 flex gap-2">
               <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
@@ -131,8 +132,7 @@ const AutoSave = () => {
                         {Number(
                           formatUnits(
                             details?.tokenDetails?.reduce(
-                              (total: any, obj: any) =>
-                                total + obj.amountToSave,
+                              (total: any, obj: any) => total + obj.amountSaved,
                               0n
                             ),
                             18
@@ -154,12 +154,14 @@ const AutoSave = () => {
                   <div className="flex justify-end gap-2">
                     <button
                       onClick={() => setShowWithdrawModal(true)}
-                      className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
+                      className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
+                    >
                       Unlock
                     </button>
                     <button
                       onClick={() => setShowTopUpModal(true)}
-                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
+                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+                    >
                       Manage
                     </button>
                   </div>
@@ -195,7 +197,8 @@ const AutoSave = () => {
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setShowWithdrawModal(true)}
-                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
+                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
+                  >
                     Withdraw
                   </button>
                 </div>
