@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import AssetTable from "./AssetTable";
-import TransactionHistory from "./TransactionHistory";
+// import TransactionHistory from "./TransactionHistory";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 
 interface AssetTabsProps {
@@ -42,7 +42,11 @@ export function AssetTabs({ safeDetails }: AssetTabsProps) {
         ) : (
           <div className="p-4">
             <h3 className="text-lg font-medium">Savings history</h3>
-            <TransactionHistory safeId={safeDetails?.id} />
+            {/* Transaction history temporarily removed */}
+            <p className="text-gray-400 mt-4">
+              Transaction history is currently unavailable.
+            </p>
+            {/* <TransactionHistory safeId={safeDetails?.id} /> */}
           </div>
         )}
       </div>
