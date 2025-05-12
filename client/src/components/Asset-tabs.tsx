@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import AssetTable from "./AssetTable";
+import VaultAssetTable from "./VaultAssetTable";
 // import TransactionHistory from "./TransactionHistory";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
+import { useLocation } from "react-router-dom";
 
 interface AssetTabsProps {
   safeDetails?: FormattedSafeDetails;
@@ -10,6 +12,8 @@ interface AssetTabsProps {
 
 export function AssetTabs({ safeDetails }: AssetTabsProps) {
   const [activeTab, setActiveTab] = useState<"assets" | "savings">("assets");
+  const location = useLocation();
+  const isVaultPage = location.pathname === "/dashboard/vault";
 
   return (
     <div className="w-full max-w-[98%] mx-auto">
@@ -38,7 +42,11 @@ export function AssetTabs({ safeDetails }: AssetTabsProps) {
 
       <div className="py-2 bg-black text-white">
         {activeTab === "assets" ? (
-          <AssetTable safeDetails={safeDetails} />
+          isVaultPage ? (
+            <VaultAssetTable safeDetails={safeDetails} />
+          ) : (
+            <AssetTable safeDetails={safeDetails} />
+          )
         ) : (
           <div className="p-4">
             <h3 className="text-lg font-medium">Savings history</h3>
