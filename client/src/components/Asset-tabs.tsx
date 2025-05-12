@@ -43,9 +43,31 @@ export function AssetTabs({ safeDetails }: AssetTabsProps) {
           <div className="p-4">
             <h3 className="text-lg font-medium">Savings history</h3>
             {/* Transaction history temporarily removed */}
-            <p className="text-gray-400 mt-4">
-              Transaction history is currently unavailable.
-            </p>
+            <div className="flex flex-col items-center justify-center py-10">
+              <div className="animate-pulse flex flex-col items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="64"
+                  height="64"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-gray-400 mb-4 animate-bounce">
+                  <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+                  <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+                  <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+                </svg>
+                <p className="text-gray-400 text-lg font-medium">
+                  Transaction history is currently unavailable
+                </p>
+                <p className="text-gray-500 mt-2 text-sm">
+                  We're working on bringing this feature back soon!
+                </p>
+              </div>
+            </div>
             {/* <TransactionHistory safeId={safeDetails?.id} /> */}
           </div>
         )}
