@@ -2,10 +2,11 @@ import { AssetTabs } from "@/components/Asset-tabs";
 import TopUpEmergencySafe from "@/components/Modals/TopUpEmegencySafe";
 import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { formatUnits } from "ethers";
-import { ArrowLeft, Badge, Loader2 } from "lucide-react";
+import { ArrowLeft, Badge } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActiveAccount } from "thirdweb/react";
@@ -28,9 +29,45 @@ const AutoSave = () => {
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-5xl mx-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-40">
-            <Loader2 className="h-8 w-8 animate-spin text-green-400" />
-            <span className="ml-2 text-lg">Loading safe details...</span>
+          <div className="mb-8">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-40" />
+                <Skeleton className="h-6 w-32 rounded-full" />
+              </div>
+            </div>
+            <div className="flex gap-4 pr-4 pb-2 mt-6">
+              <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+                <div className="flex justify-between items-center pb-4">
+                  <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <Skeleton className="h-8 w-40 mb-2" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Skeleton className="h-10 w-24 rounded-full" />
+                    <Skeleton className="h-10 w-24 rounded-full" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+                <div className="flex justify-between items-center pb-4">
+                  <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <Skeleton className="h-8 w-40 mb-2" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Skeleton className="h-10 w-24 rounded-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : isError ? (
           <div className="text-red-500 text-center py-8">
@@ -167,10 +204,17 @@ const AutoSave = () => {
           </div>
         )}
 
-        {safeDetails && (
-          <div className="py-2">
-            <AssetTabs safeDetails={details} />
+        {isLoading ? (
+          <div className="py-2 mt-4">
+            <Skeleton className="h-10 w-full mb-4" />
+            <Skeleton className="h-64 w-full rounded-lg" />
           </div>
+        ) : (
+          safeDetails && (
+            <div className="py-2">
+              <AssetTabs safeDetails={details} />
+            </div>
+          )
         )}
       </div>
 
