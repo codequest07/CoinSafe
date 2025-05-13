@@ -17,7 +17,7 @@ const UserCard = () => {
   };
 
   return (
-    <div className=" max-w-sm p-5 flex flex-col space-y-2 shadow-lg rounded-lg">
+    <div className=" max-w-sm px-5 flex flex-col space-y-2 shadow-lg rounded-lg">
       <div className="p-1 text-white  flex items-center justify-between space-x-4">
         {/* User Info */}
         <div className="flex items-center space-x-2">
