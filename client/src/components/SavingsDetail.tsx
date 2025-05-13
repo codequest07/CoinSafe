@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ClaimCard from "./Cards/ClaimCard";
@@ -14,8 +14,31 @@ export default function SavingsDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const { safeDetails, isLoading, isError } = useGetSafeById(id);
-  console.log("safeDetails", safeDetails);
+  const { safeDetails, isLoading: apiLoading, isError } = useGetSafeById(id);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Update loading state when API loading state changes or safeDetails is set
+  useEffect(() => {
+    if (!apiLoading && (safeDetails !== null || isError)) {
+      // Add a small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    } else {
+      setIsLoading(true);
+    }
+  }, [apiLoading, safeDetails, isError]);
+
+  console.log(
+    "safeDetails",
+    safeDetails,
+    "isLoading",
+    isLoading,
+    "apiLoading",
+    apiLoading
+  );
 
   // Log detailed information about the safe details
   useEffect(() => {
@@ -44,47 +67,39 @@ export default function SavingsDetail() {
             {/* Skeleton for the header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Skeleton className="h-8 w-8 rounded-full bg-gray-700" />
-                <Skeleton className="h-6 w-32 bg-gray-700" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-6 w-32" />
               </div>
-              <Skeleton className="h-6 w-20 bg-gray-700" />
+              <Skeleton className="h-6 w-20" />
             </div>
 
             {/* Skeleton for the cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Skeleton className="h-40 w-full rounded-lg bg-gray-700" />
-              <Skeleton className="h-40 w-full rounded-lg bg-gray-700" />
+              <Skeleton className="h-40 w-full rounded-[12px] border-[1px] border-[#FFFFFF17] p-6" />
+              <Skeleton className="h-40 w-full rounded-[12px] border-[1px] border-[#FFFFFF17] p-6" />
             </div>
 
             {/* Skeleton for the tabs */}
             <div className="space-y-4">
               <div className="flex space-x-2">
-                <Skeleton className="h-10 w-24 rounded-lg bg-gray-700" />
-                <Skeleton className="h-10 w-24 rounded-lg bg-gray-700" />
+                <Skeleton className="h-10 w-24 rounded-[12px]" />
+                <Skeleton className="h-10 w-24 rounded-[12px]" />
               </div>
-              <Skeleton className="h-60 w-full rounded-lg bg-gray-700" />
+              <Skeleton className="h-60 w-full rounded-[12px] border-[1px] border-[#FFFFFF17] p-6" />
             </div>
           </div>
         ) : isError ? (
           <div className="text-red-500 text-center py-8">
             Error loading safe details. Please try again.
           </div>
-        ) : !safeDetails ? (
-          <div className="text-white text-center py-8">
-            Safe not found.{" "}
-            <Button variant="link" onClick={() => navigate(-1)}>
-              Go back
-            </Button>
-          </div>
-        ) : (
+        ) : safeDetails ? (
           <div className="mb-8">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="icon"
                 className="rounded-full"
-                onClick={() => navigate(-1)}
-              >
+                onClick={() => navigate(-1)}>
                 <ArrowLeft className="h-6 w-6" />
               </Button>
               <div className="flex items-center gap-2">
@@ -107,6 +122,20 @@ export default function SavingsDetail() {
                 ? `Next unlock date: ${safeDetails.nextUnlockDate}`
                 : "Withdraw anytime"}
             </p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12">
+            <img
+              src="/assets/not-found.gif"
+              alt="Safe not found"
+              className="w-full max-w-md h-auto mb-6"
+            />
+            <div className="text-white text-center">
+              Safe not found.{" "}
+              <Button variant="link" onClick={() => navigate(-1)}>
+                Go back
+              </Button>
+            </div>
           </div>
         )}
 
