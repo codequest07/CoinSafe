@@ -136,7 +136,7 @@ const EmergencySafe = () => {
           )
         )}
 
-        {safeDetails && (
+        {safeDetails && !isLoading && (
           <div className="flex gap-4 pr-4 pb-2">
             <div className="flex-1 flex gap-2">
               <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
@@ -216,7 +216,7 @@ const EmergencySafe = () => {
         {isLoading ? (
           <div className="py-2 mt-4">
             <Skeleton className="h-10 w-full mb-4" />
-            <Skeleton className="h-64 w-full rounded-lg" />
+            <Skeleton className="h-64 w-full rounded-[12px] border-[1px] border-[#FFFFFF17] p-6" />
           </div>
         ) : (
           safeDetails && (
