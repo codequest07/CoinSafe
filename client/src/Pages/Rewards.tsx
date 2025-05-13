@@ -6,7 +6,7 @@ import SavingsCalendar from "@/components/SavingsCalendar";
 
 const Rewards = () => {
   return (
-    <div className="flex w-full items-center justify-center overflow-x-hidden ">
+    <div className="flex w-full items-start justify-between overflow-x-hidden ">
       <div className="w-full md:w-2/3 space-y-4">
         <PercentageCard />
         <GasOVerage />
