@@ -35,6 +35,7 @@ import {
   savingsBalanceState,
   supportedTokensState,
 } from "@/store/atoms/balance";
+import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
@@ -409,8 +410,7 @@ export default function SaveAssetsCard() {
               saveType === "one-time"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             One-time save
           </button>
           <button
@@ -420,8 +420,7 @@ export default function SaveAssetsCard() {
               saveType === "auto"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             Autosave
           </button>
         </div>
@@ -455,8 +454,7 @@ export default function SaveAssetsCard() {
                 <Button
                   variant="link"
                   className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                  onClick={() => navigate("/dashboard/deposit")}
-                >
+                  onClick={() => navigate("/dashboard/deposit")}>
                   Deposit to save
                 </Button>
               ) : (
@@ -467,8 +465,7 @@ export default function SaveAssetsCard() {
                       ...prev,
                       amount: selectedTokenBalance,
                     }))
-                  }
-                >
+                  }>
                   Save all
                 </Button>
               )}
@@ -545,8 +542,7 @@ export default function SaveAssetsCard() {
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     {/* }`}
                             > */}
                     <div>
@@ -578,8 +574,7 @@ export default function SaveAssetsCard() {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     {/* }`}
                             > */}
                     <div>
@@ -612,7 +607,8 @@ export default function SaveAssetsCard() {
               {selectedOption === "per-transaction" && (
                 <div className="flex flex-col items-center justify-center space-y-4 py-2 text-white">
                   {/* <MemoComingSoonIcon className="w-[70%] h-[55vh] text-white" /> */}
-                  <img src="/assets/coming-soon-orb.png" alt="coming soon" />
+                  {/* <img src="/assets/coming-soon-orb.png" alt="coming soon" /> */}
+                  <MemoComingSoonIcon className="w-[50%] h-[50vh] text-white" />
                   <h1 className="text-3xl font-bold my-2 text-white leading-tight">
                     We’re in the kitchen!
                   </h1>
@@ -639,11 +635,10 @@ export default function SaveAssetsCard() {
                       plan and added automated savings plans for all our
                       supported tokens.
                     </p>
-                    <Link to={""}>
+                    <Link to={"/dashboard/vault/auto-safe"}>
                       <Button
                         variant="link"
-                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      >
+                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0">
                         View your Automated Safe here
                       </Button>
                     </Link>
@@ -687,8 +682,7 @@ export default function SaveAssetsCard() {
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                            onClick={() => navigate("/dashboard/deposit")}
-                          >
+                            onClick={() => navigate("/dashboard/deposit")}>
                             Deposit to save
                           </Button>
                         ) : (
@@ -699,8 +693,7 @@ export default function SaveAssetsCard() {
                                 ...prev,
                                 amount: selectedTokenBalance,
                               }))
-                            }
-                          >
+                            }>
                             Max
                           </Button>
                         )}
@@ -769,8 +762,7 @@ export default function SaveAssetsCard() {
                     onClick={handleSaveAsset}
                     className="text-black px-8 rounded-[2rem]"
                     variant="outline"
-                    disabled={isLoading || autoSavingsLoading}
-                  >
+                    disabled={isLoading || autoSavingsLoading}>
                     {isLoading || autoSavingsLoading ? (
                       <LoaderCircle className="animate-spin" />
                     ) : hasAutoSafe ? (
@@ -791,8 +783,7 @@ export default function SaveAssetsCard() {
                 onClick={handleSaveAsset}
                 className="text-black px-8 rounded-[2rem]"
                 variant="outline"
-                disabled={isLoading}
-              >
+                disabled={isLoading}>
                 {isLoading ? (
                   <LoaderCircle className="animate-spin" />
                 ) : (
