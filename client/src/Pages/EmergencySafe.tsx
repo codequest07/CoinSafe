@@ -5,19 +5,38 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { ArrowLeft, Badge } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActiveAccount } from "thirdweb/react";
 
 const EmergencySafe = () => {
   const navigate = useNavigate();
-  const { safeDetails, isLoading, isError, tokenAmounts } =
-    useGetSafeById("911");
+  const {
+    safeDetails,
+    isLoading: apiLoading,
+    isError,
+    tokenAmounts,
+  } = useGetSafeById("911");
   const account = useActiveAccount();
   const isConnected = !!account?.address;
 
+  const [isLoading, setIsLoading] = useState(true);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+
+  // Update loading state when API loading state changes or safeDetails is set
+  useEffect(() => {
+    if (!apiLoading && (safeDetails !== null || isError)) {
+      // Add a small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    } else {
+      setIsLoading(true);
+    }
+  }, [apiLoading, safeDetails, isError]);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -68,44 +87,53 @@ const EmergencySafe = () => {
           <div className="text-red-500 text-center py-8">
             Error loading safe details. Please try again.
           </div>
-        ) : !safeDetails ? (
-          <div className="text-white text-center py-8">
-            Safe not found.{" "}
-            <Button variant="link" onClick={() => navigate(-1)}>
-              Go back
-            </Button>
+        ) : !safeDetails && !apiLoading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <img
+              src="/assets/not-found.gif"
+              alt="Safe not found"
+              className="w-full max-w-md h-auto mb-6"
+            />
+            <div className="text-white text-center">
+              Safe not found.{" "}
+              <Button variant="link" onClick={() => navigate(-1)}>
+                Go back
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="mb-8">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full"
-                onClick={() => navigate(-1)}>
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl">{safeDetails.target}</h1>
-                <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
-                  {safeDetails.isLocked
-                    ? safeDetails.unlockTime > new Date()
-                      ? `${Math.ceil(
-                          (safeDetails.unlockTime.getTime() -
-                            new Date().getTime()) /
-                            (1000 * 60 * 60 * 24)
-                        )} days till unlock`
-                      : "Ready to unlock"
-                    : "Flexible"}
-                </Badge>
+          safeDetails && (
+            <div className="mb-8">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={() => navigate(-1)}>
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl">{safeDetails.target}</h1>
+                  <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
+                    {safeDetails.isLocked
+                      ? safeDetails.unlockTime > new Date()
+                        ? `${Math.ceil(
+                            (safeDetails.unlockTime.getTime() -
+                              new Date().getTime()) /
+                              (1000 * 60 * 60 * 24)
+                          )} days till unlock`
+                        : "Ready to unlock"
+                      : "Flexible"}
+                  </Badge>
+                </div>
               </div>
+              <p className="text-base my-1 ml-[3.3rem] text-gray-300">
+                {safeDetails.isLocked
+                  ? `Next unlock date: ${safeDetails.nextUnlockDate}`
+                  : "Withdraw anytime"}
+              </p>
             </div>
-            <p className="text-base my-1 ml-[3.3rem] text-gray-300">
-              {safeDetails.isLocked
-                ? `Next unlock date: ${safeDetails.nextUnlockDate}`
-                : "Withdraw anytime"}
-            </p>
-          </div>
+          )
         )}
 
         {safeDetails && (
