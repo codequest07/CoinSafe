@@ -1,5 +1,5 @@
 import { AssetTabs } from "@/components/Asset-tabs";
-import TopUpEmergencySafe from "@/components/Modals/TopUpEmegencySafe";
+import ManageAutosavings from "@/components/Modals/Manage-autosavings";
 import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,8 +22,8 @@ const AutoSave = () => {
   const account = useActiveAccount();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [manageAutosavings, setManageAutosavings] = useState(false);
 
   const userAddress = account?.address;
 
@@ -94,11 +94,6 @@ const AutoSave = () => {
           </div>
         ) : !details && !isLoading ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <img
-              src="/assets/not-found.gif"
-              alt="Safe not found"
-              className="w-full max-w-md h-auto mb-6"
-            />
             <div className="text-white text-center">
               Safe not found.{" "}
               <Button variant="link" onClick={() => navigate(-1)}>
@@ -186,7 +181,7 @@ const AutoSave = () => {
                       Unlock
                     </button>
                     <button
-                      onClick={() => setShowTopUpModal(true)}
+                      onClick={() => setManageAutosavings(true)}
                       className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
                       Manage
                     </button>
@@ -247,11 +242,8 @@ const AutoSave = () => {
         )}
       </div>
 
-      {showTopUpModal && (
-        <TopUpEmergencySafe
-          onClose={() => setShowTopUpModal(false)}
-          onTopUp={() => setShowTopUpModal(false)}
-        />
+      {manageAutosavings && (
+        <ManageAutosavings onClose={() => setManageAutosavings(false)} />
       )}
 
       {showWithdrawModal && (
