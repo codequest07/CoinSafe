@@ -1,11 +1,11 @@
 import { X } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
-import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { tokens } from "@/lib/contract";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
+import { tokenData } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import {
@@ -20,7 +20,7 @@ interface AddTokenModalProps {
   onClose: () => void;
 }
 
-export default function AddTokenModal({ onClose }: AddTokenModalProps) {
+export default function AddToken({ onClose }: AddTokenModalProps) {
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [supportedTokens] = useRecoilState(supportedTokensState);
@@ -63,10 +63,7 @@ export default function AddTokenModal({ onClose }: AddTokenModalProps) {
       let tokenDecimals = 18;
       if (saveState.token === tokens.usdt) {
         tokenDecimals = 6;
-      } else if (
-        saveState.token === tokens.safu ||
-        saveState.token === tokens.lsk
-      ) {
+      } else {
         tokenDecimals = 18;
       }
 
@@ -97,9 +94,7 @@ export default function AddTokenModal({ onClose }: AddTokenModalProps) {
   };
 
   const handleTokenSelect = (value: string) => {
-    // SAFU & LSK check
-    // SAFU & LSK check
-    // Decimals state removed as it was unused
+    // Update the token in the state
     setSaveState((prevState) => ({ ...prevState, token: value }));
   };
 
@@ -146,17 +141,50 @@ export default function AddTokenModal({ onClose }: AddTokenModalProps) {
           </div>
 
           <div className="mb-4">
-            <AmountInput
-              amount={saveState.amount}
-              handleAmountChange={handleAmountChange}
-              handleTokenSelect={handleTokenSelect}
-              saveState={saveState}
-              tokens={tokens}
-              selectedTokenBalance={selectedTokenBalance}
-              validationErrors={validationErrors}
-              supportedTokens={supportedTokens}
-            />
-            {/* Console log is called in useEffect and handleTokenSelect */}
+            <label className="text-sm text-gray-400">Amount</label>
+            <div className="flex flex-row-reverse justify-between items-center py-7 px-4 bg-transparent border border-[#FFFFFF3D] rounded-xl relative mt-1">
+              <div className="">
+                <div className="ml-4">
+                  <Select
+                    onValueChange={handleTokenSelect}
+                    value={saveState.token}>
+                    <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
+                      <div className="flex items-center">
+                        <SelectValue placeholder="Select Token" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {supportedTokens.map((token) => (
+                        <SelectItem value={token} key={token}>
+                          {tokenData[token]?.symbol}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {validationErrors.token && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {validationErrors.token}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col items-center">
+                <input
+                  type="number"
+                  value={saveState.amount}
+                  onChange={handleAmountChange}
+                  className="text-2xl text-[#B5B5B5] font-medium bg-transparent text-left w-full outline-none"
+                  placeholder="Enter amount"
+                />
+              </div>
+            </div>
+            <div>
+              {saveState.amount > selectedTokenBalance && (
+                <p className="text-red-500 text-[13px] mt-1 text-right">
+                  Amount greater than wallet balance
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Wallet balance */}
@@ -166,11 +194,7 @@ export default function AddTokenModal({ onClose }: AddTokenModalProps) {
                 Wallet balance:{" "}
                 <span className="text-gray-400">
                   {selectedTokenBalance}{" "}
-                  {saveState.token == tokens.safu
-                    ? "SAFU"
-                    : saveState.token === tokens.lsk
-                    ? "LSK"
-                    : "USDT"}
+                  {tokenData[saveState.token]?.symbol || ""}
                 </span>
               </div>
               <Button

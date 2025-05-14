@@ -1,5 +1,5 @@
 import { AssetTabs } from "@/components/Asset-tabs";
-import AddTokenModal from "@/components/Modals/add-token-modal";
+import AddToken from "@/components/Modals/Add-token";
 import DeactivateSafeModal from "@/components/Modals/Deactivate-safe-modal";
 import ManageAutosavings from "@/components/Modals/Manage-autosavings";
 import RemoveTokenModal from "@/components/Modals/Remove-token-modal";
@@ -386,7 +386,7 @@ const AutoSave = () => {
             console.log("About to render AddTokenModal component");
             return null;
           })()}
-          <AddTokenModal onClose={backToManageAutosavings} />
+          <AddToken onClose={backToManageAutosavings} />
         </div>
       )}
 
