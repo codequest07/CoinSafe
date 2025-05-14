@@ -1,5 +1,8 @@
 import { AssetTabs } from "@/components/Asset-tabs";
+import AddTokenModal from "@/components/Modals/add-token-modal";
+import DeactivateSafeModal from "@/components/Modals/Deactivate-safe-modal";
 import ManageAutosavings from "@/components/Modals/Manage-autosavings";
+import RemoveTokenModal from "@/components/Modals/Remove-token-modal";
 import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,9 +26,58 @@ const AutoSave = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [manageAutosavings, setManageAutosavings] = useState(false);
+  const [showManageAutosavings, setShowManageAutosavings] = useState(false);
+  const [showAddTokenModal, setShowAddTokenModal] = useState(false);
+  const [showRemoveTokenModal, setShowRemoveTokenModal] = useState(false);
+  const [showDeactivateSafeModal, setShowDeactivateSafeModal] = useState(false);
 
   const userAddress = account?.address;
+
+  // Function to open the autosavings modal
+  const openManageAutosavings = () => {
+    console.log("Opening manage autosavings modal");
+    setShowManageAutosavings(true);
+    console.log("showManageAutosavings set to:", true);
+  };
+
+  // Functions to handle navigation between modals
+  const handleAddToken = () => {
+    console.log("handleAddToken called");
+    setShowManageAutosavings(false);
+    setShowAddTokenModal(true);
+    console.log("showAddTokenModal set to:", true);
+  };
+
+  const handleRemoveToken = () => {
+    console.log("handleRemoveToken called");
+    setShowManageAutosavings(false);
+    setShowRemoveTokenModal(true);
+    console.log("showRemoveTokenModal set to:", true);
+  };
+
+  const handleDeactivateSafe = () => {
+    console.log("handleDeactivateSafe called");
+    setShowManageAutosavings(false);
+    setShowDeactivateSafeModal(true);
+    console.log("showDeactivateSafeModal set to:", true);
+  };
+
+  // Function to close all modals
+  const closeAllModals = () => {
+    console.log("Closing all modals");
+    setShowManageAutosavings(false);
+    setShowAddTokenModal(false);
+    setShowRemoveTokenModal(false);
+    setShowDeactivateSafeModal(false);
+  };
+
+  // Function to go back to the main autosavings modal
+  const backToManageAutosavings = () => {
+    setShowManageAutosavings(true);
+    setShowAddTokenModal(false);
+    setShowRemoveTokenModal(false);
+    setShowDeactivateSafeModal(false);
+  };
 
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
   const { details } = useAutomatedSafeForUser(userAddress as `0x${string}`);
@@ -43,6 +95,38 @@ const AutoSave = () => {
       setIsLoading(true);
     }
   }, [apiLoading, details, isError]);
+
+  // Log when modal states change
+  useEffect(() => {
+    console.log(
+      "showManageAutosavings state changed to:",
+      showManageAutosavings
+    );
+  }, [showManageAutosavings]);
+
+  useEffect(() => {
+    console.log("showAddTokenModal state changed to:", showAddTokenModal);
+  }, [showAddTokenModal]);
+
+  useEffect(() => {
+    console.log("showRemoveTokenModal state changed to:", showRemoveTokenModal);
+  }, [showRemoveTokenModal]);
+
+  useEffect(() => {
+    console.log(
+      "showDeactivateSafeModal state changed to:",
+      showDeactivateSafeModal
+    );
+  }, [showDeactivateSafeModal]);
+
+  // Log component lifecycle
+  useEffect(() => {
+    console.log("AutoSave component mounted");
+
+    return () => {
+      console.log("AutoSave component unmounted");
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -181,7 +265,11 @@ const AutoSave = () => {
                       Unlock
                     </button>
                     <button
-                      onClick={() => setManageAutosavings(true)}
+                      onClick={(e) => {
+                        console.log("Manage button clicked");
+                        e.stopPropagation(); // Prevent event bubbling
+                        openManageAutosavings();
+                      }}
                       className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
                       Manage
                     </button>
@@ -241,9 +329,121 @@ const AutoSave = () => {
           )
         )}
       </div>
+      {/* Render the appropriate modal based on state */}
+      {(() => {
+        console.log(
+          "Rendering modal section, showManageAutosavings:",
+          showManageAutosavings
+        );
+        return null;
+      })()}
 
-      {manageAutosavings && (
-        <ManageAutosavings onClose={() => setManageAutosavings(false)} />
+      {showManageAutosavings && (
+        <div
+          className="modal-container"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}>
+          {(() => {
+            console.log("About to render ManageAutosavings component");
+            return null;
+          })()}
+          <ManageAutosavings
+            onClose={closeAllModals}
+            onAddToken={handleAddToken}
+            onRemoveToken={handleRemoveToken}
+            onDeactivateSafe={handleDeactivateSafe}
+          />
+        </div>
+      )}
+
+      {/* Add Token Modal */}
+      {(() => {
+        console.log(
+          "Rendering AddTokenModal section, showAddTokenModal:",
+          showAddTokenModal
+        );
+        return null;
+      })()}
+
+      {showAddTokenModal && (
+        <div
+          className="modal-container"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}>
+          {(() => {
+            console.log("About to render AddTokenModal component");
+            return null;
+          })()}
+          <AddTokenModal onClose={backToManageAutosavings} />
+        </div>
+      )}
+
+      {/* Remove Token Modal */}
+      {(() => {
+        console.log(
+          "Rendering RemoveTokenModal section, showRemoveTokenModal:",
+          showRemoveTokenModal
+        );
+        return null;
+      })()}
+
+      {showRemoveTokenModal && (
+        <div
+          className="modal-container"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}>
+          {(() => {
+            console.log("About to render RemoveTokenModal component");
+            return null;
+          })()}
+          <RemoveTokenModal onClose={backToManageAutosavings} />
+        </div>
+      )}
+
+      {/* Deactivate Safe Modal */}
+      {(() => {
+        console.log(
+          "Rendering DeactivateSafeModal section, showDeactivateSafeModal:",
+          showDeactivateSafeModal
+        );
+        return null;
+      })()}
+
+      {showDeactivateSafeModal && (
+        <div
+          className="modal-container"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}>
+          {(() => {
+            console.log("About to render DeactivateSafeModal component");
+            return null;
+          })()}
+          <DeactivateSafeModal onClose={backToManageAutosavings} />
+        </div>
       )}
 
       {showWithdrawModal && (

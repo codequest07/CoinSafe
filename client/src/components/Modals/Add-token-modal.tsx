@@ -1,24 +1,140 @@
+import { X } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
+import AmountInput from "../AmountInput";
+import { useRecoilState } from "recoil";
+import { saveAtom } from "@/store/atoms/save";
+import { tokens } from "@/lib/contract";
+import { balancesState, supportedTokensState } from "@/store/atoms/balance";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { formatUnits } from "viem";
+interface AddTokenModalProps {
+  onClose: () => void;
+}
 
-import { ChevronDown, X } from "lucide-react";
-import { useState } from "react";
+export default function AddTokenModal({ onClose }: AddTokenModalProps) {
+  const [saveState, setSaveState] = useRecoilState(saveAtom);
+  const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
+  const [supportedTokens] = useRecoilState(supportedTokensState);
+  const [balances] = useRecoilState(balancesState);
+  const [decimals, setDecimals] = useState(18);
 
-export default function AddTokenModal({ onClose }: { onClose: () => void }) {
-  const [amount, setAmount] = useState("0.00");
-  const [currency, setCurrency] = useState("LSK");
-  const [frequency, setFrequency] = useState("Monthly");
-  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  // Get available balances
+  const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
 
+  const [validationErrors] = useState<{
+    amount?: string;
+    token?: string;
+    duration?: string;
+    transactionPercentage?: string;
+    frequency?: string;
+  }>({});
+
+  // Initialize token if not set and update token balance
+  useEffect(() => {
+    // Initialize token if not set
+    if (!saveState.token && supportedTokens.length > 0) {
+      console.log("Initializing token to:", supportedTokens[0]);
+      setSaveState((prev) => ({
+        ...prev,
+        token: supportedTokens[0],
+      }));
+    }
+  }, [supportedTokens, saveState.token, setSaveState]);
+
+  // Update token balance when component mounts or token changes
+  useEffect(() => {
+    if (saveState.token && AvailableBalance) {
+      const tokensData = AvailableBalance;
+      if (!tokensData) return;
+
+      console.log("Tokens Data: ", tokensData);
+
+      const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
+
+      // Get the correct decimals for the token
+      let tokenDecimals = 18;
+      if (saveState.token === tokens.usdt) {
+        tokenDecimals = 6;
+      } else if (
+        saveState.token === tokens.safu ||
+        saveState.token === tokens.lsk
+      ) {
+        tokenDecimals = 18;
+      }
+
+      setSelectedTokenBalance(Number(formatUnits(tokenBalance, tokenDecimals)));
+      console.log(
+        "token Balance: ",
+        tokenBalance,
+        "with decimals:",
+        tokenDecimals
+      );
+    }
+  }, [saveState.token, AvailableBalance]);
+
+  const [frequencies] = useState([
+    { value: "86400", label: "Every day" }, // 1 day = 86400 seconds
+    { value: "172800", label: "Every 2 days" }, // 2 days = 172800 seconds
+    { value: "432000", label: "Every 5 days" }, // 5 days = 432000 seconds
+    { value: "604800", label: "Weekly" }, // 1 week = 604800 seconds
+    { value: "2592000", label: "Monthly" }, // 1 month = 2592000 seconds (approx. 30 days)
+  ]);
+
+  const handleFrequencyChange = (value: string) => {
+    const _frequency = Number(value);
+    setSaveState((prevState) => ({
+      ...prevState,
+      frequency: _frequency,
+    }));
+  };
+
+  const handleTokenSelect = (value: string) => {
+    // SAFU & LSK check
+    if (value == tokens.safu || value == tokens.lsk) {
+      setDecimals(18);
+      // USDT check
+    } else if (value == tokens.usdt) {
+      setDecimals(6);
+    }
+
+    setSaveState((prevState) => ({ ...prevState, token: value }));
+  };
+
+  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const _amount = Number(event.target.value);
+    setSaveState((prevState) => ({
+      ...prevState,
+      amount: _amount,
+    }));
+  };
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-black/90 p-4">
-      <div className="absolute inset-0 bg-black/90" onClick={onClose}></div>
-      <div className="relative w-full max-w-md rounded-lg bg-gray-900 text-white shadow-lg">
+    <div className="fixed inset-0 flex items-center justify-center bg-transparent z-50">
+      <div
+        className="absolute inset-0 bg-black/80"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}></div>
+      <div className="relative w-full max-w-md rounded-lg bg-[#17171C] text-white shadow-lg">
         <div className="flex items-center justify-between p-4 pb-2">
           <h2 className="text-lg font-medium">Add token to safe</h2>
           <button
-            onClick={onClose}
-            className="rounded-full p-1 hover:bg-gray-800"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="rounded-full p-1 bg-white "
             aria-label="Close">
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4 text-black" />
           </button>
         </div>
 
@@ -26,9 +142,9 @@ export default function AddTokenModal({ onClose }: { onClose: () => void }) {
           <div className="mb-4">
             <div className="flex items-center justify-between">
               <span className="text-base font-medium">Auto savings</span>
-              <span className="rounded-full bg-gray-700 px-3 py-1 text-xs text-gray-300">
+              <Badge className="bg-[#79E7BA33] rounded-full px-3 py-1 text-xs text-gray-300">
                 Unlocks every 30 days
-              </span>
+              </Badge>
             </div>
             <div className="mt-1 text-sm text-gray-400">
               Next unlock date: 25th December, 2025
@@ -36,83 +152,84 @@ export default function AddTokenModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div className="mb-4">
-            <label className="mb-1 block text-sm text-gray-400">Amount</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full rounded-md bg-gray-800 p-3 text-white"
-              />
-              <div className="absolute bottom-1 left-3 text-xs text-gray-400">
-                +$0.00
-              </div>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <button
-                  className="flex items-center rounded bg-gray-700 px-2 py-1"
-                  onClick={() =>
-                    setShowCurrencyDropdown(!showCurrencyDropdown)
-                  }>
-                  <span className="mr-1 h-4 w-4">{currency}</span>
-                  <ChevronDown className="ml-1 h-4 w-4" />
-                </button>
-                {showCurrencyDropdown && (
-                  <div className="absolute right-0 mt-2 w-32 rounded bg-gray-800 shadow-lg z-10">
-                    <ul>
-                      {["LSK", "XRP", "BTC"].map((cur) => (
-                        <li
-                          key={cur}
-                          className={`px-4 py-2 cursor-pointer hover:bg-gray-700 ${
-                            currency === cur ? "bg-gray-700" : ""
-                          }`}
-                          onClick={() => {
-                            setCurrency(cur);
-                            setShowCurrencyDropdown(false);
-                          }}
-                        >
-                          {cur}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
+            <AmountInput
+              amount={saveState.amount}
+              handleAmountChange={handleAmountChange}
+              handleTokenSelect={handleTokenSelect}
+              saveState={saveState}
+              tokens={tokens}
+              selectedTokenBalance={selectedTokenBalance}
+              validationErrors={validationErrors}
+              supportedTokens={supportedTokens}
+            />
+            {/* Console log is called in useEffect and handleTokenSelect */}
           </div>
 
-          <div className="mb-6 flex items-center justify-between">
-            <span className="text-sm text-gray-400">
-              Wallet balance: <span className="text-white">3000 XRP</span>
-            </span>
-            <button className="text-sm text-green-500 hover:underline">
-              Save all
-            </button>
-          </div>
-
-          <div className="mb-6">
-            <label className="mb-1 block text-sm text-gray-400">
-              Frequency
-            </label>
-            <div className="relative">
-              <select
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-                className="w-full appearance-none rounded-md bg-gray-800 p-3 text-white">
-                <option>Monthly</option>
-                <option>Weekly</option>
-                <option>Daily</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          {/* Wallet balance */}
+          <>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm font-[300] text-gray-300">
+                Wallet balance:{" "}
+                <span className="text-gray-400">
+                  {selectedTokenBalance}{" "}
+                  {saveState.token == tokens.safu
+                    ? "SAFU"
+                    : saveState.token === tokens.lsk
+                    ? "LSK"
+                    : "USDT"}
+                </span>
+              </div>
+              <Button
+                className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-[#79E7BA] cursor-pointer"
+                onClick={() =>
+                  setSaveState((prev) => ({
+                    ...prev,
+                    amount: selectedTokenBalance,
+                  }))
+                }>
+                Save all
+              </Button>
             </div>
+          </>
+          <div className="space-y-4 py-2 text-white">
+            <Label htmlFor="frequencyAmount">Frequency</Label>
+            <Select onValueChange={handleFrequencyChange}>
+              <SelectTrigger className="w-full bg-gray-700 border bg-transparent text-white rounded-lg">
+                <SelectValue placeholder="Select Frequency" />
+              </SelectTrigger>
+              <SelectContent>
+                {frequencies.map((freq) => (
+                  <SelectItem key={freq.value} value={freq.value}>
+                    {freq.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {validationErrors.frequency && (
+              <p className="text-red-500 text-sm mt-1">
+                {validationErrors.frequency}
+              </p>
+            )}
           </div>
 
           <div className="flex justify-between">
             <button
-              onClick={onClose}
+              onClick={(e) => {
+                console.log("AddTokenModal cancel button clicked");
+                e.stopPropagation();
+                onClose();
+              }}
               className="rounded-full bg-gray-800 px-6 py-2 text-white hover:bg-gray-700">
               Cancel
             </button>
-            <button className="rounded-full bg-white px-6 py-2 text-black hover:bg-gray-200">
+            <button
+              onClick={(e) => {
+                console.log("AddTokenModal add token button clicked");
+                e.stopPropagation();
+                // Add token logic here
+                onClose();
+              }}
+              className="rounded-full bg-white px-6 py-2 text-black hover:bg-gray-200">
               Add token
             </button>
           </div>
