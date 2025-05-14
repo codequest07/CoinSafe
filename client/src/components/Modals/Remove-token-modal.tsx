@@ -136,7 +136,7 @@ export default function RemoveTokenModal({ onClose }: RemoveTokenModalProps) {
                 e.stopPropagation();
                 onClose();
               }}
-              className="rounded-full bg-[#FFFFFF2B] px-4 py-2 text-[14px] text-white hover:bg-gray-700">
+              className="rounded-full bg-[#FFFFFF2B] px-4 py-2 text-[14px] text-white">
               Cancel
             </button>
             <button

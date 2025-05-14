@@ -41,7 +41,7 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
   useEffect(() => {
     // Initialize token if not set
     if (!saveState.token && supportedTokens.length > 0) {
-      console.log("Initializing token to:", supportedTokens[0]);
+    
       setSaveState((prev) => ({
         ...prev,
         token: supportedTokens[0],
@@ -55,7 +55,7 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
       const tokensData = AvailableBalance;
       if (!tokensData) return;
 
-      console.log("Tokens Data: ", tokensData);
+    
 
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
 
@@ -68,12 +68,7 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
       }
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, tokenDecimals)));
-      console.log(
-        "token Balance: ",
-        tokenBalance,
-        "with decimals:",
-        tokenDecimals
-      );
+     
     }
   }, [saveState.token, AvailableBalance]);
 
@@ -233,16 +228,16 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
           <div className="flex justify-between">
             <button
               onClick={(e) => {
-                console.log("AddTokenModal cancel button clicked");
+              
                 e.stopPropagation();
                 onClose();
               }}
-              className="rounded-full bg-gray-800 px-6 py-2 text-white hover:bg-gray-700">
+              className="rounded-full bg-[#FFFFFF2B] px-6 py-2 text-white">
               Cancel
             </button>
             <button
               onClick={(e) => {
-                console.log("AddTokenModal add token button clicked");
+                
                 e.stopPropagation();
                 // Add token logic here
                 onClose();
