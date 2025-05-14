@@ -101,6 +101,7 @@ export default function AddTokenModal({ onClose }: AddTokenModalProps) {
     // SAFU & LSK check
     // Decimals state removed as it was unused
     setSaveState((prevState) => ({ ...prevState, token: value }));
+  };
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const _amount = Number(event.target.value);
