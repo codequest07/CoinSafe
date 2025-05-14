@@ -25,7 +25,6 @@ export default function AddTokenModal({ onClose }: AddTokenModalProps) {
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [supportedTokens] = useRecoilState(supportedTokensState);
   const [balances] = useRecoilState(balancesState);
-  const [decimals, setDecimals] = useState(18);
 
   // Get available balances
   const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
@@ -99,15 +98,9 @@ export default function AddTokenModal({ onClose }: AddTokenModalProps) {
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
-    if (value == tokens.safu || value == tokens.lsk) {
-      setDecimals(18);
-      // USDT check
-    } else if (value == tokens.usdt) {
-      setDecimals(6);
-    }
-
+    // SAFU & LSK check
+    // Decimals state removed as it was unused
     setSaveState((prevState) => ({ ...prevState, token: value }));
-  };
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const _amount = Number(event.target.value);
