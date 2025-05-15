@@ -1,96 +1,229 @@
 import { AssetTabs } from "@/components/Asset-tabs";
-import TopUpEmergencySafe from "@/components/Modals/TopUpEmegencySafe";
+import AddToken from "@/components/Modals/Add-token";
+import DeactivateSafeModal from "@/components/Modals/Deactivate-safe-modal";
+import ManageAutosavings from "@/components/Modals/Manage-autosavings";
+import RemoveTokenModal from "@/components/Modals/Remove-token-modal";
 import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { formatUnits } from "ethers";
-import { ArrowLeft, Badge, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Badge } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActiveAccount } from "thirdweb/react";
 
 const AutoSave = () => {
   const navigate = useNavigate();
-  const { safeDetails, isLoading, isError, tokenAmounts } =
-    useGetSafeById("911");
+  const {
+    safeDetails,
+    isLoading: apiLoading,
+    isError,
+    tokenAmounts,
+  } = useGetSafeById("911");
   const account = useActiveAccount();
-  const isConnected = !!account?.address;
 
-  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showManageAutosavings, setShowManageAutosavings] = useState(false);
+  const [showAddTokenModal, setShowAddTokenModal] = useState(false);
+  const [showRemoveTokenModal, setShowRemoveTokenModal] = useState(false);
+  const [showDeactivateSafeModal, setShowDeactivateSafeModal] = useState(false);
 
   const userAddress = account?.address;
 
+  // Function to open the autosavings modal
+  const openManageAutosavings = () => {
+    console.log("Opening manage autosavings modal");
+    setShowManageAutosavings(true);
+    console.log("showManageAutosavings set to:", true);
+  };
+
+  // Functions to handle navigation between modals
+  const handleAddToken = () => {
+    console.log("handleAddToken called");
+    setShowManageAutosavings(false);
+    setShowAddTokenModal(true);
+    console.log("showAddTokenModal set to:", true);
+  };
+
+  const handleRemoveToken = () => {
+    console.log("handleRemoveToken called");
+    setShowManageAutosavings(false);
+    setShowRemoveTokenModal(true);
+    console.log("showRemoveTokenModal set to:", true);
+  };
+
+  const handleDeactivateSafe = () => {
+    console.log("handleDeactivateSafe called");
+    setShowManageAutosavings(false);
+    setShowDeactivateSafeModal(true);
+    console.log("showDeactivateSafeModal set to:", true);
+  };
+
+  // Function to close all modals
+  const closeAllModals = () => {
+    console.log("Closing all modals");
+    setShowManageAutosavings(false);
+    setShowAddTokenModal(false);
+    setShowRemoveTokenModal(false);
+    setShowDeactivateSafeModal(false);
+  };
+
+  // Function to go back to the main autosavings modal
+  const backToManageAutosavings = () => {
+    setShowManageAutosavings(true);
+    setShowAddTokenModal(false);
+    setShowRemoveTokenModal(false);
+    setShowDeactivateSafeModal(false);
+  };
+
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
-  const {
-    details,
-    isLoading: automatedSafeLoading,
-    error: automatedSafeError,
-  } = useAutomatedSafeForUser(userAddress as `0x${string}`);
-  console.log(
-    "AUTOMED SAVIMGS>>> ",
-    details,
-    automatedSafeLoading,
-    automatedSafeError
-  );
+  const { details } = useAutomatedSafeForUser(userAddress as `0x${string}`);
+
+  // Update loading state when API loading state changes or details is set
+  useEffect(() => {
+    if (!apiLoading && (details !== undefined || isError)) {
+      // Add a small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    } else {
+      setIsLoading(true);
+    }
+  }, [apiLoading, details, isError]);
+
+  // Log when modal states change
+  useEffect(() => {
+    console.log(
+      "showManageAutosavings state changed to:",
+      showManageAutosavings
+    );
+  }, [showManageAutosavings]);
+
+  useEffect(() => {
+    console.log("showAddTokenModal state changed to:", showAddTokenModal);
+  }, [showAddTokenModal]);
+
+  useEffect(() => {
+    console.log("showRemoveTokenModal state changed to:", showRemoveTokenModal);
+  }, [showRemoveTokenModal]);
+
+  useEffect(() => {
+    console.log(
+      "showDeactivateSafeModal state changed to:",
+      showDeactivateSafeModal
+    );
+  }, [showDeactivateSafeModal]);
+
+  // Log component lifecycle
+  useEffect(() => {
+    console.log("AutoSave component mounted");
+
+    return () => {
+      console.log("AutoSave component unmounted");
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-5xl mx-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-40">
-            <Loader2 className="h-8 w-8 animate-spin text-green-400" />
-            <span className="ml-2 text-lg">Loading safe details...</span>
+          <div className="mb-8">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-40" />
+                <Skeleton className="h-6 w-32 rounded-full" />
+              </div>
+            </div>
+            <div className="flex gap-4 pr-4 pb-2 mt-6">
+              <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+                <div className="flex justify-between items-center pb-4">
+                  <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <Skeleton className="h-8 w-40 mb-2" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Skeleton className="h-10 w-24 rounded-full" />
+                    <Skeleton className="h-10 w-24 rounded-full" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+                <div className="flex justify-between items-center pb-4">
+                  <Skeleton className="h-4 w-32" />
+                </div>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <Skeleton className="h-8 w-40 mb-2" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Skeleton className="h-10 w-24 rounded-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : isError ? (
           <div className="text-red-500 text-center py-8">
             Error loading safe details. Please try again.
           </div>
-        ) : !details ? (
-          <div className="text-white text-center py-8">
-            Safe not found.{" "}
-            <Button variant="link" onClick={() => navigate(-1)}>
-              Go back
-            </Button>
+        ) : !details && !isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="text-white text-center">
+              Safe not found.{" "}
+              <Button variant="link" onClick={() => navigate(-1)}>
+                Go back
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="mb-8">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl">Auto Savings</h1>
-                {/* formattedDate = unlockDate.toLocaleDateString("en-US", {
+          details && (
+            <div className="mb-8">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={() => navigate(-1)}>
+                  <ArrowLeft className="h-6 w-6" />
+                </Button>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl">Auto Savings</h1>
+                  {/* formattedDate = unlockDate.toLocaleDateString("en-US", {
               day: "numeric",
               month: "long",
               year: "numeric",
             }); */}
-                <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
-                  {details.unlockTime > new Date()
-                    ? `${Math.ceil(
-                        (details.unlockTime.getTime() - new Date().getTime()) /
-                          (1000 * 60 * 60 * 24)
-                      )} days till unlock`
-                    : "Ready to unlock"}
-                </Badge>
+                  <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
+                    {details.unlockTime > new Date()
+                      ? `${Math.ceil(
+                          (details.unlockTime.getTime() -
+                            new Date().getTime()) /
+                            (1000 * 60 * 60 * 24)
+                        )} days till unlock`
+                      : "Ready to unlock"}
+                  </Badge>
+                </div>
               </div>
-            </div>
-            {/* <p className="text-base my-1 ml-[3.3rem] text-gray-300">
+              {/* <p className="text-base my-1 ml-[3.3rem] text-gray-300">
               {safeDetails.isLocked
                 ? `Next unlock date: ${safeDetails.nextUnlockDate}`
                 : "Withdraw anytime"}
             </p> */}
-          </div>
+            </div>
+          )
         )}
 
-        {safeDetails && (
+        {details && !isLoading && (
           <div className="flex gap-4 pr-4 pb-2">
             <div className="flex-1 flex gap-2">
               <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
@@ -106,8 +239,7 @@ const AutoSave = () => {
                         {Number(
                           formatUnits(
                             details?.tokenDetails?.reduce(
-                              (total: any, obj: any) =>
-                                total + obj.amountToSave,
+                              (total: any, obj: any) => total + obj.amountSaved,
                               0n
                             ),
                             18
@@ -121,21 +253,27 @@ const AutoSave = () => {
                     <div>
                       <div className="pt-2">
                         <p className="text-[#7F7F7F] text-xs">
-                          Total value of all tokens in this safe
+                          sum of all balances
                         </p>
                       </div>
                     </div>
                   </div>
-                  {isConnected && (
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setShowTopUpModal(true)}
-                        className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
-                      >
-                        Top up
-                      </button>
-                    </div>
-                  )}
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setShowWithdrawModal(true)}
+                      className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
+                      Unlock
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        console.log("Manage button clicked");
+                        e.stopPropagation(); // Prevent event bubbling
+                        openManageAutosavings();
+                      }}
+                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
+                      Manage
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -168,8 +306,7 @@ const AutoSave = () => {
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setShowWithdrawModal(true)}
-                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
-                  >
+                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
                     Withdraw
                   </button>
                 </div>
@@ -178,18 +315,135 @@ const AutoSave = () => {
           </div>
         )}
 
-        {safeDetails && (
-          <div className="py-2">
-            <AssetTabs safeDetails={details} />
+        {isLoading ? (
+          <div className="py-2 mt-4">
+            <Skeleton className="h-10 w-full mb-4" />
+            <Skeleton className="h-64 w-full rounded-[12px] border-[1px] border-[#FFFFFF17] p-6" />
           </div>
+        ) : (
+          safeDetails &&
+          details && (
+            <div className="py-2">
+              <AssetTabs safeDetails={details} />
+            </div>
+          )
         )}
       </div>
+      {/* Render the appropriate modal based on state */}
+      {(() => {
+        console.log(
+          "Rendering modal section, showManageAutosavings:",
+          showManageAutosavings
+        );
+        return null;
+      })()}
 
-      {showTopUpModal && (
-        <TopUpEmergencySafe
-          onClose={() => setShowTopUpModal(false)}
-          onTopUp={() => setShowTopUpModal(false)}
-        />
+      {showManageAutosavings && (
+        <div
+          className="modal-container"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}>
+          {(() => {
+            console.log("About to render ManageAutosavings component");
+            return null;
+          })()}
+          <ManageAutosavings
+            onClose={closeAllModals}
+            onAddToken={handleAddToken}
+            onRemoveToken={handleRemoveToken}
+            onDeactivateSafe={handleDeactivateSafe}
+          />
+        </div>
+      )}
+
+      {/* Add Token Modal */}
+      {(() => {
+        console.log(
+          "Rendering AddTokenModal section, showAddTokenModal:",
+          showAddTokenModal
+        );
+        return null;
+      })()}
+
+      {showAddTokenModal && (
+        <div
+          className="modal-container"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}>
+          {(() => {
+            console.log("About to render AddTokenModal component");
+            return null;
+          })()}
+          <AddToken onClose={backToManageAutosavings} />
+        </div>
+      )}
+
+      {/* Remove Token Modal */}
+      {(() => {
+        console.log(
+          "Rendering RemoveTokenModal section, showRemoveTokenModal:",
+          showRemoveTokenModal
+        );
+        return null;
+      })()}
+
+      {showRemoveTokenModal && (
+        <div
+          className="modal-container"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}>
+          {(() => {
+            console.log("About to render RemoveTokenModal component");
+            return null;
+          })()}
+          <RemoveTokenModal onClose={backToManageAutosavings} />
+        </div>
+      )}
+
+      {/* Deactivate Safe Modal */}
+      {(() => {
+        console.log(
+          "Rendering DeactivateSafeModal section, showDeactivateSafeModal:",
+          showDeactivateSafeModal
+        );
+        return null;
+      })()}
+
+      {showDeactivateSafeModal && (
+        <div
+          className="modal-container"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}>
+          {(() => {
+            console.log("About to render DeactivateSafeModal component");
+            return null;
+          })()}
+          <DeactivateSafeModal onClose={backToManageAutosavings} />
+        </div>
       )}
 
       {showWithdrawModal && (

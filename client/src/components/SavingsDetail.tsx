@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ClaimCard from "./Cards/ClaimCard";
@@ -9,32 +9,43 @@ import SavingsCard from "./Cards/SavingsCard";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const { safeDetails, isLoading, isError } = useGetSafeById(id);
-  console.log("safeDetails", safeDetails);
+  const { safeDetails, isLoading: apiLoading, isError } = useGetSafeById(id);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Log detailed information about the safe details
+  // Simplified loading state management
   useEffect(() => {
-    if (safeDetails) {
-      console.log("Safe ID:", safeDetails.id);
-      console.log("Target:", safeDetails.target);
-      console.log("Is Locked:", safeDetails.isLocked);
-      console.log("Token Amounts:", safeDetails.tokenAmounts);
-      console.log("Total Amount USD:", safeDetails.totalAmountUSD);
-
-      // Log each token amount in detail
-      safeDetails.tokenAmounts.forEach((token, index) => {
-        console.log(`Token ${index + 1}:`);
-        console.log(`  Symbol: ${token.tokenSymbol}`);
-        console.log(`  Amount: ${token.amount}`);
-        console.log(`  Formatted Amount: ${token.formattedAmount}`);
-      });
+    // If we have data or an error, we can show content after a short delay
+    if (safeDetails || isError) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      // Otherwise, we're still loading
+      setIsLoading(true);
     }
-  }, [safeDetails]);
+  }, [safeDetails, isError]);
+
+  // Debug log for render
+  console.log("Rendering with state:", {
+    isLoading,
+    apiLoading,
+    hasSafeDetails: !!safeDetails,
+    isError,
+  });
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -44,47 +55,116 @@ export default function SavingsDetail() {
             {/* Skeleton for the header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Skeleton className="h-8 w-8 rounded-full bg-gray-700" />
-                <Skeleton className="h-6 w-32 bg-gray-700" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-6 w-32" />
               </div>
-              <Skeleton className="h-6 w-20 bg-gray-700" />
+              <Skeleton className="h-6 w-20" />
             </div>
 
-            {/* Skeleton for the cards */}
+            {/* Skeleton for the cards - styled to match SavingsCard and ClaimCard */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Skeleton className="h-40 w-full rounded-lg bg-gray-700" />
-              <Skeleton className="h-40 w-full rounded-lg bg-gray-700" />
+              <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+                <div className="flex justify-between items-center pb-4">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-6 w-16 rounded-[10px]" />
+                </div>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <div>
+                      <Skeleton className="h-8 w-40" />
+                    </div>
+                    <div className="pt-2">
+                      <Skeleton className="h-4 w-48" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+                <div className="flex justify-between items-center pb-4">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-6 w-16 rounded-[10px]" />
+                </div>
+                <div className="flex justify-between items-end">
+                  <div>
+                    <div>
+                      <Skeleton className="h-8 w-40" />
+                    </div>
+                    <div className="pt-2">
+                      <Skeleton className="h-4 w-48" />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Skeleton className="rounded-[100px] w-28 h-[40px]" />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Skeleton for the tabs */}
             <div className="space-y-4">
-              <div className="flex space-x-2">
-                <Skeleton className="h-10 w-24 rounded-lg bg-gray-700" />
-                <Skeleton className="h-10 w-24 rounded-lg bg-gray-700" />
+              <div className="flex space-x-2 border-b border-[#FFFFFF21] bg-black text-white">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-24" />
               </div>
-              <Skeleton className="h-60 w-full rounded-lg bg-gray-700" />
+              <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+                <div className="flex justify-between items-center mb-4">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+                <Table className="w-full border-collapse">
+                  <TableHeader className="bg-[#1D1D1D73]/40">
+                    <TableRow className="border-b border-[#1D1D1D]">
+                      <TableHead>
+                        <Skeleton className="h-5 w-16" />
+                      </TableHead>
+                      <TableHead>
+                        <Skeleton className="h-5 w-20" />
+                      </TableHead>
+                      <TableHead>
+                        <Skeleton className="h-5 w-20" />
+                      </TableHead>
+                      <TableHead>
+                        <Skeleton className="h-5 w-32" />
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[1, 2, 3].map((i) => (
+                      <TableRow key={i} className="border-b border-[#1D1D1D]">
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-7 w-7 rounded-full" />
+                            <Skeleton className="h-5 w-16" />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-20" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-16" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-24" />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           </div>
         ) : isError ? (
           <div className="text-red-500 text-center py-8">
             Error loading safe details. Please try again.
           </div>
-        ) : !safeDetails ? (
-          <div className="text-white text-center py-8">
-            Safe not found.{" "}
-            <Button variant="link" onClick={() => navigate(-1)}>
-              Go back
-            </Button>
-          </div>
-        ) : (
+        ) : safeDetails ? (
           <div className="mb-8">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="icon"
                 className="rounded-full"
-                onClick={() => navigate(-1)}
-              >
+                onClick={() => navigate(-1)}>
                 <ArrowLeft className="h-6 w-6" />
               </Button>
               <div className="flex items-center gap-2">
@@ -108,44 +188,58 @@ export default function SavingsDetail() {
                 : "Withdraw anytime"}
             </p>
           </div>
-        )}
-
-        {safeDetails && (
-          <div className="flex flex-col gap-4 pr-4 pb-2">
-            <div className="flex gap-2">
-              <SavingsCard
-                title="Savings balance"
-                value={safeDetails.totalAmountUSD ?? 0.0}
-                unit="USD"
-                text={<>Total value of all tokens in this safe</>}
-                safeId={Number(safeDetails.id)}
-              />
-              {safeDetails.isLocked && (
-                <ClaimCard
-                  title="Claimable balance"
-                  value={
-                    safeDetails.unlockTime < new Date()
-                      ? safeDetails.totalAmountUSD ?? 0.0
-                      : 0.0
-                  }
-                  unit="USD"
-                  text={
-                    safeDetails.unlockTime < new Date()
-                      ? "Available to withdraw now"
-                      : `Available in ${formatDistanceToNow(
-                          safeDetails.unlockTime
-                        )}`
-                  }
-                />
-              )}
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12">
+            <img
+              src="/assets/not-found.gif"
+              alt="Safe not found"
+              className="w-full max-w-md h-auto mb-6"
+            />
+            <div className="text-white text-center">
+              Safe not found.{" "}
+              <Button variant="link" onClick={() => navigate(-1)}>
+                Go back
+              </Button>
             </div>
           </div>
         )}
 
-        {safeDetails && (
-          <div className="py-2">
-            <AssetTabs safeDetails={safeDetails} />
-          </div>
+        {!isLoading && safeDetails && (
+          <>
+            <div className="flex flex-col gap-4 pr-4 pb-2">
+              <div className="flex gap-2">
+                <SavingsCard
+                  title="Savings balance"
+                  value={safeDetails.totalAmountUSD ?? 0.0}
+                  unit="USD"
+                  text={<>Total value of all tokens in this safe</>}
+                  safeId={Number(safeDetails.id)}
+                />
+                {safeDetails.isLocked && (
+                  <ClaimCard
+                    title="Claimable balance"
+                    value={
+                      safeDetails.unlockTime < new Date()
+                        ? safeDetails.totalAmountUSD ?? 0.0
+                        : 0.0
+                    }
+                    unit="USD"
+                    text={
+                      safeDetails.unlockTime < new Date()
+                        ? "Available to withdraw now"
+                        : `Available in ${formatDistanceToNow(
+                            safeDetails.unlockTime
+                          )}`
+                    }
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="py-2">
+              <AssetTabs safeDetails={safeDetails} />
+            </div>
+          </>
         )}
       </div>
     </div>

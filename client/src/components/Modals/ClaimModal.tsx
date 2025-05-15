@@ -11,7 +11,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { useClaimAsset } from "@/hooks/useClaimAsset";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { toast } from "@/hooks/use-toast";
-import { tokenData } from "@/lib/utils";
+import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
 import MemoBackIcon from "@/icons/BackIcon";
 import ApproveTxModal from "./ApproveTxModal";
 import SuccessfulTxModal from "./SuccessfulTxModal";
@@ -34,6 +34,8 @@ export default function ClaimModal({
   // State
   const [showApproveTxModal, setShowApproveTxModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [totalUsdValue, setTotalUsdValue] = useState(0);
+  const [totalUsdValues, setTotalUsdValues] = useState<number[]>([]);
   const [selectedToken, setSelectedToken] = useState<string | undefined>(
     tokenAddress
   );
@@ -178,29 +180,34 @@ export default function ClaimModal({
   };
 
   // Calculate total claimable amount in USD
-  const calculateTotalUsdValue = () => {
-    return claimableTokens.reduce((total, token) => {
-      // Skip tokens with zero or invalid amounts
-      if (!token.amount || token.amount === 0) return total;
-
-      const rate =
-        token.symbol === "SAFU"
-          ? 0.339
-          : token.symbol === "LSK"
-          ? 1.25
-          : token.symbol === "USDT"
-          ? 1
-          : 0;
-
-      // Convert amount to number if it's a BigInt
-      const amountAsNumber =
-        typeof token.amount === "bigint"
-          ? Number(token.amount)
-          : Number(token.amount);
-
-      return total + amountAsNumber * rate;
-    }, 0);
+  const calculateTotalUsdValue = async () => {
+    let total = 0;
+    for (const token of claimableTokens) {
+      if (!token.amount || token.amount === 0) continue;
+      const price = await convertTokenAmountToUsd(
+        token.token,
+        BigInt(token.amount)
+      );
+      if (!price) continue;
+      setTotalUsdValues((prev) => {
+        const newValues = [...prev];
+        newValues[claimableTokens.indexOf(token)] = price;
+        return newValues;
+      });
+      total += price;
+    }
+    return total;
   };
+
+  useEffect(() => {
+    const fetchTotalValue = async () => {
+      const totalValue = await calculateTotalUsdValue();
+      setTotalUsdValue(totalValue);
+    };
+
+    // Fetch total value when claimable tokens change
+    fetchTotalValue();
+  }, [claimableTokens]);
 
   // Get the selected token details
   const selectedTokenDetails = claimableTokens.find(
@@ -261,7 +268,8 @@ export default function ClaimModal({
                               ? "border-green-500"
                               : "border-gray-700"
                           } cursor-pointer`}
-                          onClick={() => setSelectedToken(token.token)}>
+                          onClick={() => setSelectedToken(token.token)}
+                        >
                           <div className="flex justify-between items-center">
                             <div>
                               <div className="font-medium">{token.symbol}</div>
@@ -277,16 +285,7 @@ export default function ClaimModal({
                             </div>
                             <div className="text-sm text-gray-400">
                               ≈ $
-                              {(
-                                Number(token.amount) *
-                                (token.symbol === "SAFU"
-                                  ? 0.339
-                                  : token.symbol === "LSK"
-                                  ? 1.25
-                                  : token.symbol === "USDT"
-                                  ? 1
-                                  : 0)
-                              ).toLocaleString(undefined, {
+                              {totalUsdValues[index].toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                               })}
@@ -301,7 +300,7 @@ export default function ClaimModal({
                     <div className="text-sm text-gray-400">Total value</div>
                     <div className="font-medium">
                       ≈ $
-                      {calculateTotalUsdValue().toLocaleString(undefined, {
+                      {totalUsdValue.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
@@ -319,7 +318,8 @@ export default function ClaimModal({
                             ? "bg-green-600 hover:bg-green-700"
                             : "bg-transparent"
                         }`}
-                        onClick={() => setSelectedToken(undefined)}>
+                        onClick={() => setSelectedToken(undefined)}
+                      >
                         Claim all
                       </Button>
                       <Button
@@ -334,7 +334,8 @@ export default function ClaimModal({
                           if (claimableTokens.length > 0 && !selectedToken) {
                             setSelectedToken(claimableTokens[0].token);
                           }
-                        }}>
+                        }}
+                      >
                         Claim specific
                       </Button>
                     </div>
@@ -348,7 +349,8 @@ export default function ClaimModal({
             <Button
               onClick={onClose}
               className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-              type="button">
+              type="button"
+            >
               Cancel
             </Button>
             <Button
@@ -361,7 +363,8 @@ export default function ClaimModal({
                 claimableTokens.length === 0 ||
                 safeDetails?.id?.toString() === "911" ||
                 !isTargetSaving
-              }>
+              }
+            >
               {isLoading ? (
                 <LoaderCircle className="animate-spin mr-2" />
               ) : (

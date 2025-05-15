@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import MemoAvax from "@/icons/Avax";
 import { useGetSafes } from "@/hooks/useGetSafes";
-import { tokenData } from "@/lib/utils";
+import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import ClaimModal from "./ClaimModal";
 import { format } from "date-fns";
@@ -19,6 +19,7 @@ export default function ClaimAssets({
 }) {
   const [selectedSafeId, setSelectedSafeId] = useState<string>("");
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [usdValues, setUsdValues] = useState<Record<string, number>>({});
   const { safes, isLoading, fetchSafes } = useGetSafes();
 
   // Convert bigint timestamp to Date object
@@ -170,52 +171,35 @@ export default function ClaimAssets({
     setIsDepositModalOpen(false);
   };
 
-  // Calculate USD value for a token amount
-  const calculateUsdValue = (amount: any, tokenAddress: string) => {
-    // Skip tokens with zero or invalid amounts
-    if (!amount || amount === 0) return 0;
-
-    // Convert BigInt to number if needed
-    let amountAsNumber;
-    try {
-      // For very large BigInt values, this could throw an error
-      amountAsNumber =
-        typeof amount === "bigint" ? Number(amount) : Number(amount);
-
-      // Check if the conversion resulted in Infinity or NaN
-      if (!isFinite(amountAsNumber) || isNaN(amountAsNumber)) {
-        console.warn(
-          `Token amount too large to convert to number: ${amount.toString()}`
-        );
-        return 0;
-      }
-    } catch (error) {
-      console.error("Error converting token amount to number:", error);
-      return 0;
-    }
-
-    const symbol = tokenData[tokenAddress]?.symbol?.toUpperCase() || "";
-    const rate =
-      symbol === "SAFU"
-        ? 0.339
-        : symbol === "LSK"
-        ? 1.25
-        : symbol === "USDT"
-        ? 1
-        : 0;
-
-    return amountAsNumber * rate;
-  };
-
   // Calculate total USD value for a safe
-  const calculateTotalUsdValue = (safe: any) => {
-    return safe.tokenAmounts.reduce((total: number, token: any) => {
+  const calculateTotalUsdValue = async (safe: any) => {
+    return safe.tokenAmounts.reduce(async (total: number, token: any) => {
       // Skip tokens with zero or invalid amounts
       if (!token.amount || token.amount === 0) return total;
 
-      return total + calculateUsdValue(token.amount, token.token);
+      // Calculate USD value for each token
+      const price = await convertTokenAmountToUsd(token.token, token.amount);
+      if (!price) return total;
+      return total + price;
     }, 0);
   };
+
+  useEffect(() => {
+    const fetchUsdValues = async () => {
+      const values: Record<string, number> = {};
+
+      for (const safe of maturedSafes) {
+        const usdValue = await calculateTotalUsdValue(safe);
+        values[safe.id.toString()] = usdValue;
+      }
+
+      setUsdValues(values);
+    };
+
+    if (maturedSafes.length > 0) {
+      fetchUsdValues();
+    }
+  }, [maturedSafes]);
 
   return (
     <Dialog open={isDepositModalOpen} onOpenChange={setIsDepositModalOpen}>
@@ -230,7 +214,8 @@ export default function ClaimAssets({
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg">
+                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg"
+              >
                 <div className="flex justify-between items-center">
                   <Skeleton className="h-12 w-24" />
                   <Skeleton className="h-8 w-20" />
@@ -252,7 +237,7 @@ export default function ClaimAssets({
         ) : (
           // List of matured safes
           maturedSafes.map((safe, index) => {
-            const totalUsdValue = calculateTotalUsdValue(safe);
+            const totalUsdValue = usdValues[safe.id.toString()] ?? 0;
             const tokenSymbols = safe.tokenAmounts
               .filter((token: any) => token.amount > 0)
               .map((token: any) => tokenData[token.token]?.symbol || "Unknown")
@@ -272,7 +257,8 @@ export default function ClaimAssets({
             return (
               <div
                 key={index}
-                className="bg-black border-b border-[#FFFFFF17] text-white p-3 rounded-lg">
+                className="bg-black border-b border-[#FFFFFF17] text-white p-3 rounded-lg"
+              >
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2">
@@ -310,7 +296,8 @@ export default function ClaimAssets({
                           ? "text-[#79E7BA] hover:text-[#79E7BA]"
                           : "text-gray-400 cursor-not-allowed"
                       }`}
-                      disabled={!isClaimable}>
+                      disabled={!isClaimable}
+                    >
                       Claim
                     </Button>
                   </div>
