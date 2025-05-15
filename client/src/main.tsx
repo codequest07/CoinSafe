@@ -5,43 +5,12 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 
-import "@rainbow-me/rainbowkit/styles.css";
-import { ThirdwebProvider } from "thirdweb/react";
-import {
-  darkTheme,
-  // getDefaultConfig,
-  RainbowKitProvider,
-} from "@rainbow-me/rainbowkit";
-import { WagmiProvider } from "wagmi";
-// import {
-//   mainnet,
-//   polygon,
-//   optimism,
-//   arbitrum,
-//   base,
-//   sepolia,
-//   liskSepolia,
-//   lisk
-// } from 'wagmi/chains';
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { config } from "./lib/config.ts";
 import { ApprovalProvider } from "./contexts/ApprovalContext.tsx";
-
-const queryClient = new QueryClient();
+import { ThirdwebProvider } from "thirdweb/react";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider
-            theme={darkTheme({
-              accentColor: "#FFFFFFE5",
-              accentColorForeground: "#010104",
-              fontStack: "system",
-              borderRadius: "large",
-            })}
-          >
             <RecoilRoot>
               <ApprovalProvider>
                 <ThirdwebProvider>
@@ -49,9 +18,6 @@ createRoot(document.getElementById("root")!).render(
                 </ThirdwebProvider>
               </ApprovalProvider>
             </RecoilRoot>
-          </RainbowKitProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
     </BrowserRouter>
   </StrictMode>
 );

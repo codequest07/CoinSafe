@@ -32,12 +32,10 @@ interface DepositAssetResult {
 }
 
 export const useDepositAsset = ({
-  // address,
   account,
   token,
   amount,
   coinSafeAddress,
-  // coinSafeAbi,
   onSuccess,
   onApprove,
   onError,
@@ -118,12 +116,11 @@ export const useDepositAsset = ({
               transaction: approveTx,
               account,
             });
-          } catch (error) {
+          } catch (error: any) {
             console.error("Approval failed:", error);
-            toast({
-              title: "Error approving token spend",
-              variant: "destructive",
-            });
+            throw new Error(
+              `Approve token spend transaction failed: ${error?.message ?? error}`
+            );
           } finally {
             setIsLoading(false);
           }
@@ -158,7 +155,7 @@ export const useDepositAsset = ({
             title: "No account. Connect an account",
             variant: "destructive",
           });
-          throw new Error("Approve transaction failed");
+          throw new Error(`Approve transaction failed: ${error?.message}`);
         }
       } catch (err) {
         const error =
