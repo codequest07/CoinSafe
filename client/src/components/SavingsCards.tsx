@@ -141,9 +141,27 @@ export default function SavingsCards() {
             <div className="text-red-500 text-center py-8">
               Error loading safes. Please try again.
             </div>
-          ) : displaySafes.length === 0 ? (
+          ) : displaySafes.length === 0 && safes.length === 0 ? (
             <div className="text-white text-center py-8">
               You don't have any safes yet.
+            </div>
+          ) : displaySafes.length === 0 && safes.length > 0 ? (
+            <div className="flex space-x-4 pb-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21]"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-6 w-16 rounded-xl" />
+                  </div>
+                  <div className="flex items-baseline mb-2">
+                    <Skeleton className="h-8 w-32" />
+                  </div>
+                  <Skeleton className="h-4 w-40" />
+                </div>
+              ))}
             </div>
           ) : (
             <>
@@ -180,7 +198,7 @@ export default function SavingsCards() {
                       {Number(
                         formatUnits(
                           details?.tokenDetails?.reduce(
-                            (total: any, obj: any) => total + obj.amountToSave,
+                            (total: any, obj: any) => total + obj.amountSaved,
                             0n
                           ),
                           18
