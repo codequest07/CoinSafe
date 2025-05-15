@@ -1,4 +1,5 @@
 import { inAppWallet, createWallet } from "thirdweb/wallets";
+import { liskSepolia } from "./config";
 
 // Define the wallets you want to support
 export const wallets = [
@@ -10,10 +11,14 @@ export const wallets = [
         "telegram",
         "farcaster",
         "email",
+        // "passkey",
         "x",
-        "passkey",
       ],
     },
+    // smartAccount: {
+    //   chain: liskSepolia,
+    //   sponsorGas: true,
+    // },
   }),
   createWallet("io.metamask"),
   createWallet("com.coinbase.wallet"),
