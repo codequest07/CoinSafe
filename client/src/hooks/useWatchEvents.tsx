@@ -94,7 +94,7 @@ export const useWatchEvents = ({
     },
     {
       event: "TopUpSuccessful",
-      handler: (user: string, token: string, amount: number) =>
+      handler: (user: string, _: number, token: string, amount: number) =>
         handleEvent(user, eventHandlers.save, { token, amount }),
       abi: facetAbis.targetSavingsFacet,
     },
