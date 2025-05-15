@@ -1,5 +1,5 @@
 import { inAppWallet, createWallet } from "thirdweb/wallets";
-import { liskSepolia } from "./config";
+// import { liskSepolia } from "./config";
 
 // Define the wallets you want to support
 export const wallets = [
