@@ -11,8 +11,8 @@ export const wallets = [
         "telegram",
         "farcaster",
         "email",
-        // "passkey",
         "x",
+        "passkey",
       ],
     },
     // smartAccount: {
