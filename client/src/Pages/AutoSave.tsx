@@ -6,6 +6,7 @@ import RemoveTokenModal from "@/components/Modals/Remove-token-modal";
 import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { formatUnits } from "ethers";
@@ -32,6 +33,17 @@ const AutoSave = () => {
   const [showDeactivateSafeModal, setShowDeactivateSafeModal] = useState(false);
 
   const userAddress = account?.address;
+
+  const {
+    balances,
+    // isLoading: isBalanceLoading,
+    // error,
+    // refetch,
+  } = useClaimableBalanceAutomatedSafe();
+  // console.log("first render balances:", balances);
+  // console.log("first render isBalanceLoading:", isBalanceLoading);
+  // console.log("first render error:", error);
+  // console.log("first render refetch:", refetch);
 
   // Function to open the autosavings modal
   const openManageAutosavings = () => {
@@ -193,7 +205,8 @@ const AutoSave = () => {
                   variant="ghost"
                   size="icon"
                   className="rounded-full"
-                  onClick={() => navigate(-1)}>
+                  onClick={() => navigate(-1)}
+                >
                   <ArrowLeft className="h-6 w-6" />
                 </Button>
                 <div className="flex items-center gap-2">
@@ -261,7 +274,8 @@ const AutoSave = () => {
                   <div className="flex justify-end gap-2">
                     <button
                       onClick={() => setShowWithdrawModal(true)}
-                      className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
+                      className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
+                    >
                       Unlock
                     </button>
                     <button
@@ -270,7 +284,8 @@ const AutoSave = () => {
                         e.stopPropagation(); // Prevent event bubbling
                         openManageAutosavings();
                       }}
-                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
+                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+                    >
                       Manage
                     </button>
                   </div>
@@ -289,7 +304,18 @@ const AutoSave = () => {
                 <div>
                   <div>
                     <span className="text-[#F1F1F1] pr-2 text-3xl">
-                      {safeDetails?.totalAmountUSD?.toLocaleString("en-US", {
+                      {/* {safeDetails?.totalAmountUSD?.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })} */}
+                      {Number(
+                        formatUnits(
+                          balances?.reduce(
+                            (total: any, obj: any) => total + obj?.amount,
+                            0n
+                          ),
+                          18
+                        )
+                      ).toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                       })}
                     </span>
@@ -306,7 +332,8 @@ const AutoSave = () => {
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setShowWithdrawModal(true)}
-                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
+                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
+                  >
                     Withdraw
                   </button>
                 </div>
@@ -348,7 +375,8 @@ const AutoSave = () => {
             right: 0,
             bottom: 0,
             zIndex: 9999,
-          }}>
+          }}
+        >
           {(() => {
             console.log("About to render ManageAutosavings component");
             return null;
@@ -381,7 +409,8 @@ const AutoSave = () => {
             right: 0,
             bottom: 0,
             zIndex: 9999,
-          }}>
+          }}
+        >
           {(() => {
             console.log("About to render AddTokenModal component");
             return null;
@@ -409,7 +438,8 @@ const AutoSave = () => {
             right: 0,
             bottom: 0,
             zIndex: 9999,
-          }}>
+          }}
+        >
           {(() => {
             console.log("About to render RemoveTokenModal component");
             return null;
@@ -437,7 +467,8 @@ const AutoSave = () => {
             right: 0,
             bottom: 0,
             zIndex: 9999,
-          }}>
+          }}
+        >
           {(() => {
             console.log("About to render DeactivateSafeModal component");
             return null;
