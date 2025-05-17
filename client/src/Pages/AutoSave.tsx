@@ -10,7 +10,6 @@ import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAut
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { tokenSymbol } from "@/utils/displayTokenSymbol";
-import { formatTimestamp } from "@/utils/formatTimestamp";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
 import { useState, useEffect } from "react";
