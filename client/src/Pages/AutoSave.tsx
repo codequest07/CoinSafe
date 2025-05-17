@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
+import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -139,6 +140,47 @@ const AutoSave = () => {
       console.log("AutoSave component unmounted");
     };
   }, []);
+
+  // const seconds = safeDetails?.duration;
+  // const milliseconds = Number(seconds) * 1000;
+  // const date = new Date(milliseconds);
+
+  function formatDuration(milliseconds: any) {
+    const duration = Number(milliseconds);
+    if (isNaN(duration)) return "Invalid duration";
+
+    const seconds = Math.floor(duration / 1000) % 60;
+    const minutes = Math.floor(duration / (1000 * 60)) % 60;
+    const hours = Math.floor(duration / (1000 * 60 * 60)) % 24;
+    const days = Math.floor(duration / (1000 * 60 * 60 * 24));
+
+    const parts = [];
+    if (days) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+    if (hours) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+    if (minutes) parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
+    if (seconds || !parts.length)
+      parts.push(`${seconds} second${seconds !== 1 ? "s" : ""}`);
+
+    return parts.join(", ");
+  }
+
+  function formatDate(timestamp: any) {
+    const ms = Number(timestamp); // Convert BigInt to Number
+    if (isNaN(ms)) return "Invalid duration";
+
+    const now = new Date("2025-05-17T22:55:00+01:00"); // Current date: May 17, 2025, 10:55 PM WAT
+    const futureDate = new Date(now.getTime() + ms);
+
+    return futureDate.toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+  }
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -356,6 +398,80 @@ const AutoSave = () => {
           )
         )}
       </div>
+
+      <div>
+        <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+          <div className="flex justify-between items-center pb-4">
+            {/* <div className="text-[#CACACA] font-light">Claimable Balance</div> */}
+          </div>
+
+          <div className="flex justify-between items-end mb-4">
+            <div>
+              <div>
+                Duration: <span>{formatDuration(details?.duration)}</span>
+              </div>
+
+              <div>
+                Start Time: <span>{formatDate(details?.startTime)}</span>
+              </div>
+
+              <div>
+                Unlock Time: <span>{formatDate(details?.unlockTime)}</span>
+              </div>
+            </div>
+          </div>
+
+          {details?.tokenDetails?.map((token: any, idx: number) => (
+            <div className="flex justify-between items-end" key={idx}>
+              <div>
+                <div>
+                  Token: <span>{tokenSymbol[token.token]}</span>
+                </div>
+                <div>
+                  Frequency: <span>{formatDuration(token?.frequency)}</span>
+                </div>
+
+                <div>
+                  Amount Saved:{" "}
+                  <span>
+                    {Number(
+                      formatUnits(
+                        token.amountSaved, // Assuming this is in wei
+                        18
+                      )
+                    ).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                <div>
+                  Amount To Save:{" "}
+                  <span>
+                    {Number(
+                      formatUnits(
+                        token.amountToSave, // Assuming this is in wei
+                        18
+                      )
+                    ).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                {/* <div>
+                  Start Time: <span>{formatDate(safeDetails?.startTime)}</span>
+                </div>
+
+                <div>
+                  Unlock Time: <span>{formatDate(safeDetails?.unlockTime)}</span>
+                </div> */}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Render the appropriate modal based on state */}
       {(() => {
         console.log(
