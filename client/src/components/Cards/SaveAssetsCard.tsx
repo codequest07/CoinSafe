@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Loader2, LoaderCircle } from "lucide-react";
+import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { cn, tokenData } from "@/lib/utils";
 import SavingsTargetInput from "../SavingsTargetInput";
 import AmountInput from "../AmountInput";
@@ -10,15 +10,15 @@ import { saveAtom } from "@/store/atoms/save";
 import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { DurationSelector } from "../DurationSelector";
 import { format, addDays, differenceInDays, startOfDay } from "date-fns";
-import { Label } from "../ui/label";
+// import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "../ui/select";
 import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useActiveAccount } from "thirdweb/react";
 import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
@@ -27,7 +27,7 @@ import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import SaveSuccessful from "../Modals/SaveSuccessful";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { SafeDetails, useGetSafes } from "@/hooks/useGetSafes";
 import {
@@ -80,9 +80,9 @@ export default function SaveAssetsCard() {
 
   const [, setDecimals] = useState(1);
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
-  const [checkingAutoSafe, setCheckingAutoSafe] = useState(false);
+  const [_checkingAutoSafe, setCheckingAutoSafe] = useState(false);
   const [hasAutoSafe, setHasAutoSafe] = useState(false);
-  const [autoSafeTokenOptions, setAutoSafeTokenOptions] =
+  const [_autoSafeTokenOptions, setAutoSafeTokenOptions] =
     useState(supportedTokens);
   const [savingsBalance] = useRecoilState(savingsBalanceState);
 
@@ -167,7 +167,7 @@ export default function SaveAssetsCard() {
   const [selectedSavingsTarget, setSelectedSavingsTarget] =
     useState<SafeDetails | null>(null);
 
-  const [selectedOption, setSelectedOption] = useState("by-frequency");
+  const [selectedOption, _setSelectedOption] = useState("by-frequency");
   const [validationErrors, setValidationErrors] = useState<{
     amount?: string;
     token?: string;
@@ -196,13 +196,13 @@ export default function SaveAssetsCard() {
     }));
   };
 
-  const handleFrequencyChange = (value: string) => {
-    const _frequency = Number(value);
-    setSaveState((prevState) => ({
-      ...prevState,
-      frequency: _frequency,
-    }));
-  };
+  // const handleFrequencyChange = (value: string) => {
+  //   const _frequency = Number(value);
+  //   setSaveState((prevState) => ({
+  //     ...prevState,
+  //     frequency: _frequency,
+  //   }));
+  // };
 
   //   Save asset functionality
   const openThirdModal = () => {
@@ -214,7 +214,7 @@ export default function SaveAssetsCard() {
     createAutoSavings,
     addTokenToAutoSafe,
     hasCreatedAutoSafe,
-    isLoading: autoSavingsLoading,
+    // isLoading: autoSavingsLoading,
   } = useCreateAutoSavings({
     address: address as `0x${string}`,
     saveState,
@@ -410,7 +410,8 @@ export default function SaveAssetsCard() {
               saveType === "one-time"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}>
+            )}
+          >
             One-time save
           </button>
           <button
@@ -420,7 +421,8 @@ export default function SaveAssetsCard() {
               saveType === "auto"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}>
+            )}
+          >
             Autosave
           </button>
         </div>
@@ -454,7 +456,8 @@ export default function SaveAssetsCard() {
                 <Button
                   variant="link"
                   className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                  onClick={() => navigate("/dashboard/deposit")}>
+                  onClick={() => navigate("/dashboard/deposit")}
+                >
                   Deposit to save
                 </Button>
               ) : (
@@ -465,7 +468,8 @@ export default function SaveAssetsCard() {
                       ...prev,
                       amount: selectedTokenBalance,
                     }))
-                  }>
+                  }
+                >
                   Save all
                 </Button>
               )}
@@ -531,8 +535,19 @@ export default function SaveAssetsCard() {
 
         {saveType === "auto" && (
           <>
+            <div className="flex flex-col items-center justify-center space-y-4 py-2 text-white">
+              <MemoComingSoonIcon className="w-[50%] h-[50vh] text-white" />
+              <h1 className="text-3xl font-bold my-2 text-white leading-tight">
+                We’re in the kitchen!
+              </h1>
+              <p className="text-center max-w-md text-muted-foreground">
+                We’re in the kitchen, putting the final touches on this feature.
+                We’ll let you know as soon as it’s ready! Continue saving for
+                now.
+              </p>
+            </div>
             {/* Autosave Tab section */}
-            <div className="space-y-4 py-4">
+            {/* <div className="space-y-4 py-4">
               <div className="py-4 pb-6 border-b-[1px] border-[#FFFFFF21]">
                 <p className="font-[200] text-base">Choose savings method</p>
                 <div className="flex gap-2">
@@ -543,8 +558,6 @@ export default function SaveAssetsCard() {
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
                     }`}>
-                    {/* }`}
-                            > */}
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -575,8 +588,6 @@ export default function SaveAssetsCard() {
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
                     }`}>
-                    {/* }`}
-                            > */}
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -603,11 +614,8 @@ export default function SaveAssetsCard() {
                 </div>
               </div>
 
-              {/* Conditionally Rendered Content */}
               {selectedOption === "per-transaction" && (
                 <div className="flex flex-col items-center justify-center space-y-4 py-2 text-white">
-                  {/* <MemoComingSoonIcon className="w-[70%] h-[55vh] text-white" /> */}
-                  {/* <img src="/assets/coming-soon-orb.png" alt="coming soon" /> */}
                   <MemoComingSoonIcon className="w-[50%] h-[50vh] text-white" />
                   <h1 className="text-3xl font-bold my-2 text-white leading-tight">
                     We’re in the kitchen!
@@ -645,9 +653,6 @@ export default function SaveAssetsCard() {
                   </div>
                 ) : (
                   <div>
-                    {/* <label htmlFor="amount" className="text-sm text-gray-400">
-                    Amount
-                  </label> */}
                     <AmountInput
                       amount={saveState.amount}
                       handleAmountChange={handleAmountChange}
@@ -664,8 +669,6 @@ export default function SaveAssetsCard() {
                           : supportedTokens
                       }
                     />
-
-                    {/* Wallet balance */}
                     <>
                       <div className="flex items-center justify-between mb-3">
                         <div className="text-sm font-[300] text-gray-300">
@@ -744,11 +747,11 @@ export default function SaveAssetsCard() {
                     )}
                   </div>
                 ))}
-            </div>
+            </div> */}
           </>
         )}
 
-        {selectedOption === "by-frequency" &&
+        {/* {selectedOption === "by-frequency" &&
           saveType !== "one-time" &&
           (supportedTokens.filter(
             (token) => !autoSafeTokenOptions.includes(token)
@@ -774,7 +777,7 @@ export default function SaveAssetsCard() {
                 </div>
               </div>
             </>
-          ))}
+          ))} */}
 
         {saveType === "one-time" && (
           <div className="flex justify-end mt-5">
@@ -783,7 +786,8 @@ export default function SaveAssetsCard() {
                 onClick={handleSaveAsset}
                 className="text-black px-8 rounded-[2rem]"
                 variant="outline"
-                disabled={isLoading}>
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <LoaderCircle className="animate-spin" />
                 ) : (
