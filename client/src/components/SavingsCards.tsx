@@ -170,7 +170,7 @@ export default function SavingsCards() {
                 className="flex space-x-4 pb-4 overflow-x-auto hide-scrollbar"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
-                <button
+                {/* <button
                   onClick={() => navigate("/dashboard/vault/auto-safe")}
                   className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors"
                 >
@@ -189,12 +189,6 @@ export default function SavingsCards() {
                   <div className="flex items-baseline">
                     <span className="text-2xl font-[400]">$</span>
                     <span className="text-2xl font-[400] ml-1">
-                      {/* {safe.amount.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                      })} */}
-                      {/* const tokenAmount = Number(formatUnits(token.amount, 18));
-                      const usdVal = await getTokenPrice(token.token,
-                      tokenAmount); */}
                       {Number(
                         formatUnits(
                           details?.tokenDetails?.reduce(
@@ -209,10 +203,8 @@ export default function SavingsCards() {
                     </span>
                     <span className="text-sm text-gray-400 ml-2">USD</span>
                   </div>
-                  <span className="text-[12px] text-[#CACACA]">
-                    {/* {safe.unlockDate} */}
-                  </span>
                 </button>
+                 */}
 
                 {displaySafes.map((safe) => (
                   <button

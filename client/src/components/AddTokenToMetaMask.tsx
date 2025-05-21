@@ -28,7 +28,7 @@ const AddTokenToMetaMask = () => {
 
   const handleAddToken = async () => {
     try {
-      if (!window.ethereum) {
+      if (!(window as any).ethereum) {
         throw new Error("MetaMask is not installed");
       }
 
@@ -36,7 +36,7 @@ const AddTokenToMetaMask = () => {
 
       for (const token of tokens) {
         try {
-          await window.ethereum.request({
+          await (window as any).ethereum.request({
             method: "wallet_watchAsset",
             params: {
               type: "ERC20",

@@ -68,6 +68,7 @@ export default function DepositCard() {
       toast({
         title: error.message,
         variant: "destructive",
+        duration: 3000,
       });
     },
     toast,
