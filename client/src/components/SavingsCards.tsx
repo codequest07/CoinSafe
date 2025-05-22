@@ -170,7 +170,7 @@ export default function SavingsCards() {
                 className="flex space-x-4 pb-4 overflow-x-auto hide-scrollbar"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
-                {/* <button
+                <button
                   onClick={() => navigate("/dashboard/vault/auto-safe")}
                   className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors"
                 >
@@ -204,7 +204,6 @@ export default function SavingsCards() {
                     <span className="text-sm text-gray-400 ml-2">USD</span>
                   </div>
                 </button>
-                 */}
 
                 {displaySafes.map((safe) => (
                   <button
