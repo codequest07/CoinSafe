@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { Link } from "react-router-dom";
 import AppLogo from "@/icons/AppLogo";
-// import MemoHandburggerIcon from "@/icons/handburggerIcon";
+import MemoHandburggerIcon from "@/icons/handburggerIcon";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,13 +17,13 @@ export default function Navbar() {
           <AppLogo className="" />
           {/* MemoNavX */}
         </Link>
-        {/* <Button
+        <Button
           className="bg-transparent hover:bg-transparent"
           onClick={toggleMenu}
         >
           <MemoHandburggerIcon className="w-9 h-9" />
           <span className="sr-only">Menu</span>
-        </Button> */}
+        </Button>
       </nav>
 
       {isMenuOpen && (
