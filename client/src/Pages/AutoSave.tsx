@@ -1,4 +1,5 @@
 import { AssetTabs } from "@/components/Asset-tabs";
+import { ExecuteAutomatedSavingsButton } from "@/components/ExecuteAutomatedSavingsButton";
 import AddToken from "@/components/Modals/Add-token";
 import DeactivateSafeModal from "@/components/Modals/Deactivate-safe-modal";
 import ManageAutosavings from "@/components/Modals/Manage-autosavings";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
+import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { formatUnits } from "ethers";
@@ -94,6 +96,9 @@ const AutoSave = () => {
 
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
   const { details } = useAutomatedSafeForUser(userAddress as `0x${string}`);
+  const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
+
+  console.log("Due plans details:", duePlanDetails);
 
   // Update loading state when API loading state changes or details is set
   useEffect(() => {
@@ -401,9 +406,7 @@ const AutoSave = () => {
 
       <div>
         <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
-          <div className="flex justify-between items-center pb-4">
-            {/* <div className="text-[#CACACA] font-light">Claimable Balance</div> */}
-          </div>
+          <div className="flex justify-between items-center pb-4"></div>
 
           <div className="flex justify-between items-end mb-4">
             <div>
@@ -470,6 +473,23 @@ const AutoSave = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="py-2">
+        <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+          <div className="flex flex-col justify-between items-center pb-4">
+            <div className="text-white font-semibold">Addresses</div>
+            {duePlanDetails?.map((plan: any, idx: number) => (
+              <div key={idx} className="text-[#CACACA] font-light">
+                {plan}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <ExecuteAutomatedSavingsButton />
       </div>
 
       {/* Render the appropriate modal based on state */}
