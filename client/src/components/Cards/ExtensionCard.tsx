@@ -142,7 +142,7 @@ export default function ExtensionCardCarousel({
 
     try {
       const response = await fetch(
-        `https://coinsafe-0q0m.onrender.com/api/ai/savings-plan`,
+        `https://save-senseee.vercel.app/savings-plan`,
         {
           method: "POST",
           headers: {
