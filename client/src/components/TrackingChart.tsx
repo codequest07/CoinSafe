@@ -3,10 +3,8 @@
 import { useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import { Button } from "./ui/button";
-import Deposit from "./Modals/Deposit";
 import { getPercentage } from "@/lib/utils";
 import { Skeleton } from "./ui/skeleton";
-import Withdraw from "./Modals/Withdraw";
 import { useActiveAccount } from "thirdweb/react";
 import { Link } from "react-router-dom";
 import { availableBalanceState, loadingState, savingsBalanceState, totalBalanceState } from "@/store/atoms/balance";
@@ -15,8 +13,6 @@ import { useRecoilState } from "recoil";
 const TrackingChart = () => {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
-  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
 
@@ -137,22 +133,11 @@ const TrackingChart = () => {
         </div>
       </div>
 
-      {/* Modals */}
-      <Withdraw
-        isWithdrawModalOpen={isWithdrawModalOpen}
-        setIsWithdrawModalOpen={setIsWithdrawModalOpen}
-        onBack={() => {}}
-      />
       <SavingOption
         isFirstModalOpen={isFirstModalOpen}
         setIsFirstModalOpen={setIsFirstModalOpen}
         isSecondModalOpen={isSecondModalOpen}
         setIsSecondModalOpen={setIsSecondModalOpen}
-      />
-      <Deposit
-        isDepositModalOpen={isDepositModalOpen}
-        setIsDepositModalOpen={setIsDepositModalOpen}
-        onBack={() => {}}
       />
     </div>
   );

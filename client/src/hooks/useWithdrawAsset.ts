@@ -5,7 +5,7 @@ import {
   useConnect,
 } from "thirdweb/react";
 // import { liskSepolia } from 'viem/chains'; // Still used for chain ID reference
-import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import { getContract, prepareContractCall, sendAndConfirmTransaction } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { getTokenDecimals } from "@/lib/utils";
@@ -134,7 +134,7 @@ export const useWithdrawAsset = ({
         });
 
         if (account) {
-          await sendTransaction({
+          await sendAndConfirmTransaction({
             transaction,
             account,
           });
