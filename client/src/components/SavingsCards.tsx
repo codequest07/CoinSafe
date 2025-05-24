@@ -204,7 +204,6 @@ export default function SavingsCards() {
                     <span className="text-sm text-gray-400 ml-2">USD</span>
                   </div>
                 </button>
-                
 
                 {displaySafes.map((safe) => (
                   <button
