@@ -40,9 +40,7 @@ const WalletAvatar = () => {
                 style={{ width: "40px", height: "40px", borderRadius: "50%" }}
               />
             }
-            loadingComponent={
-                <Skeleton className="rounded-full w-10 h-10"/>
-            }
+            loadingComponent={<Skeleton className="rounded-full w-10 h-10" />}
           />
         </AccountProvider>
       ) : (
