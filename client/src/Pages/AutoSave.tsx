@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
-// import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
 import { useState, useEffect } from "react";
