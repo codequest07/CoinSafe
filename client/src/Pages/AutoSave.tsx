@@ -11,9 +11,6 @@ import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAut
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
-// import { tokenSymbol } from "@/utils/displayTokenSymbol";
-// import { formatDate, formatDuration } from "date-fns";
-// import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
 import { useState, useEffect } from "react";

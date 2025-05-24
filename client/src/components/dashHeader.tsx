@@ -113,6 +113,10 @@ const DashHeader = () => {
             </span>
           </Link>
 
+          <div className="flex-1 flex justify-end md:hidden">
+            <ClaimBtn />
+          </div>
+
           {/* Mobile Menu Button */}
           <Sheet>
             <SheetTrigger asChild>
