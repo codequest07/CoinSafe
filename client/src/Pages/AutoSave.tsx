@@ -6,8 +6,10 @@ import RemoveTokenModal from "@/components/Modals/Remove-token-modal";
 import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
+import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -32,6 +34,17 @@ const AutoSave = () => {
   const [showDeactivateSafeModal, setShowDeactivateSafeModal] = useState(false);
 
   const userAddress = account?.address;
+
+  const {
+    balances,
+    // isLoading: isBalanceLoading,
+    // error,
+    // refetch,
+  } = useClaimableBalanceAutomatedSafe();
+  // console.log("first render balances:", balances);
+  // console.log("first render isBalanceLoading:", isBalanceLoading);
+  // console.log("first render error:", error);
+  // console.log("first render refetch:", refetch);
 
   // Function to open the autosavings modal
   const openManageAutosavings = () => {
@@ -128,6 +141,47 @@ const AutoSave = () => {
     };
   }, []);
 
+  // const seconds = safeDetails?.duration;
+  // const milliseconds = Number(seconds) * 1000;
+  // const date = new Date(milliseconds);
+
+  function formatDuration(milliseconds: any) {
+    const duration = Number(milliseconds);
+    if (isNaN(duration)) return "Invalid duration";
+
+    const seconds = Math.floor(duration / 1000) % 60;
+    const minutes = Math.floor(duration / (1000 * 60)) % 60;
+    const hours = Math.floor(duration / (1000 * 60 * 60)) % 24;
+    const days = Math.floor(duration / (1000 * 60 * 60 * 24));
+
+    const parts = [];
+    if (days) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+    if (hours) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+    if (minutes) parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
+    if (seconds || !parts.length)
+      parts.push(`${seconds} second${seconds !== 1 ? "s" : ""}`);
+
+    return parts.join(", ");
+  }
+
+  function formatDate(timestamp: any) {
+    const ms = Number(timestamp); // Convert BigInt to Number
+    if (isNaN(ms)) return "Invalid duration";
+
+    const now = new Date("2025-05-17T22:55:00+01:00"); // Current date: May 17, 2025, 10:55 PM WAT
+    const futureDate = new Date(now.getTime() + ms);
+
+    return futureDate.toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+  }
+
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-5xl mx-auto">
@@ -193,7 +247,8 @@ const AutoSave = () => {
                   variant="ghost"
                   size="icon"
                   className="rounded-full"
-                  onClick={() => navigate(-1)}>
+                  onClick={() => navigate(-1)}
+                >
                   <ArrowLeft className="h-6 w-6" />
                 </Button>
                 <div className="flex items-center gap-2">
@@ -261,7 +316,8 @@ const AutoSave = () => {
                   <div className="flex justify-end gap-2">
                     <button
                       onClick={() => setShowWithdrawModal(true)}
-                      className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
+                      className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
+                    >
                       Unlock
                     </button>
                     <button
@@ -270,7 +326,8 @@ const AutoSave = () => {
                         e.stopPropagation(); // Prevent event bubbling
                         openManageAutosavings();
                       }}
-                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
+                      className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+                    >
                       Manage
                     </button>
                   </div>
@@ -289,7 +346,18 @@ const AutoSave = () => {
                 <div>
                   <div>
                     <span className="text-[#F1F1F1] pr-2 text-3xl">
-                      {safeDetails?.totalAmountUSD?.toLocaleString("en-US", {
+                      {/* {safeDetails?.totalAmountUSD?.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })} */}
+                      {Number(
+                        formatUnits(
+                          balances?.reduce(
+                            (total: any, obj: any) => total + obj?.amount,
+                            0n
+                          ),
+                          18
+                        )
+                      ).toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                       })}
                     </span>
@@ -306,7 +374,8 @@ const AutoSave = () => {
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setShowWithdrawModal(true)}
-                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]">
+                    className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
+                  >
                     Withdraw
                   </button>
                 </div>
@@ -329,6 +398,80 @@ const AutoSave = () => {
           )
         )}
       </div>
+
+      <div>
+        <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+          <div className="flex justify-between items-center pb-4">
+            {/* <div className="text-[#CACACA] font-light">Claimable Balance</div> */}
+          </div>
+
+          <div className="flex justify-between items-end mb-4">
+            <div>
+              <div>
+                Duration: <span>{formatDuration(details?.duration)}</span>
+              </div>
+
+              <div>
+                Start Time: <span>{formatDate(details?.startTime)}</span>
+              </div>
+
+              <div>
+                Unlock Time: <span>{formatDate(details?.unlockTime)}</span>
+              </div>
+            </div>
+          </div>
+
+          {details?.tokenDetails?.map((token: any, idx: number) => (
+            <div className="flex justify-between items-end" key={idx}>
+              <div>
+                <div>
+                  Token: <span>{tokenSymbol[token.token]}</span>
+                </div>
+                <div>
+                  Frequency: <span>{formatDuration(token?.frequency)}</span>
+                </div>
+
+                <div>
+                  Amount Saved:{" "}
+                  <span>
+                    {Number(
+                      formatUnits(
+                        token.amountSaved, // Assuming this is in wei
+                        18
+                      )
+                    ).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                <div>
+                  Amount To Save:{" "}
+                  <span>
+                    {Number(
+                      formatUnits(
+                        token.amountToSave, // Assuming this is in wei
+                        18
+                      )
+                    ).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                {/* <div>
+                  Start Time: <span>{formatDate(safeDetails?.startTime)}</span>
+                </div>
+
+                <div>
+                  Unlock Time: <span>{formatDate(safeDetails?.unlockTime)}</span>
+                </div> */}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Render the appropriate modal based on state */}
       {(() => {
         console.log(
@@ -348,7 +491,8 @@ const AutoSave = () => {
             right: 0,
             bottom: 0,
             zIndex: 9999,
-          }}>
+          }}
+        >
           {(() => {
             console.log("About to render ManageAutosavings component");
             return null;
@@ -381,7 +525,8 @@ const AutoSave = () => {
             right: 0,
             bottom: 0,
             zIndex: 9999,
-          }}>
+          }}
+        >
           {(() => {
             console.log("About to render AddTokenModal component");
             return null;
@@ -409,7 +554,8 @@ const AutoSave = () => {
             right: 0,
             bottom: 0,
             zIndex: 9999,
-          }}>
+          }}
+        >
           {(() => {
             console.log("About to render RemoveTokenModal component");
             return null;
@@ -437,7 +583,8 @@ const AutoSave = () => {
             right: 0,
             bottom: 0,
             zIndex: 9999,
-          }}>
+          }}
+        >
           {(() => {
             console.log("About to render DeactivateSafeModal component");
             return null;
