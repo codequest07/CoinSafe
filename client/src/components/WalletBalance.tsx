@@ -1,9 +1,7 @@
 import { Button } from "./ui/button";
 import SavingOption from "./Modals/SavingOption";
 import { useMemo, useState } from "react";
-import Deposit from "./Modals/Deposit";
 import { getPercentage } from "@/lib/utils";
-import Withdraw from "./Modals/Withdraw";
 import { useActiveAccount } from "thirdweb/react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "./ui/skeleton";
@@ -17,8 +15,6 @@ import { useRecoilState } from "recoil";
 export default function WalletBalance() {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
-  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
 
@@ -181,20 +177,6 @@ export default function WalletBalance() {
         setIsFirstModalOpen={setIsFirstModalOpen}
         isSecondModalOpen={isSecondModalOpen}
         setIsSecondModalOpen={setIsSecondModalOpen}
-      />
-
-      {/* deposit Modal */}
-      <Deposit
-        isDepositModalOpen={isDepositModalOpen}
-        setIsDepositModalOpen={setIsDepositModalOpen}
-        onBack={() => {}}
-      />
-
-      {/* withdraw Modal */}
-      <Withdraw
-        isWithdrawModalOpen={isWithdrawModalOpen}
-        setIsWithdrawModalOpen={setIsWithdrawModalOpen}
-        onBack={() => {}}
       />
     </div>
   );
