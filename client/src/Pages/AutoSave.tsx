@@ -1,5 +1,5 @@
 import { AssetTabs } from "@/components/Asset-tabs";
-import { ExecuteAutomatedSavingsButton } from "@/components/ExecuteAutomatedSavingsButton";
+// import { ExecuteAutomatedSavingsButton } from "@/components/ExecuteAutomatedSavingsButton";
 import AddToken from "@/components/Modals/Add-token";
 import DeactivateSafeModal from "@/components/Modals/Deactivate-safe-modal";
 import ManageAutosavings from "@/components/Modals/Manage-autosavings";
@@ -11,6 +11,8 @@ import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAut
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
+// import { tokenSymbol } from "@/utils/displayTokenSymbol";
+// import { formatDate, formatDuration } from "date-fns";
 // import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
@@ -404,7 +406,7 @@ const AutoSave = () => {
         )}
       </div>
 
-      <div>
+      {/* <div>
         <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
           <div className="flex justify-between items-center pb-4"></div>
 
@@ -461,14 +463,6 @@ const AutoSave = () => {
                     })}
                   </span>
                 </div>
-
-                {/* <div>
-                  Start Time: <span>{formatDate(safeDetails?.startTime)}</span>
-                </div>
-
-                <div>
-                  Unlock Time: <span>{formatDate(safeDetails?.unlockTime)}</span>
-                </div> */}
               </div>
             </div>
           ))}
@@ -490,7 +484,7 @@ const AutoSave = () => {
 
       <div>
         <ExecuteAutomatedSavingsButton />
-      </div>
+      </div> */}
 
       {/* Render the appropriate modal based on state */}
       {(() => {
