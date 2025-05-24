@@ -142,7 +142,7 @@ export default function ExtensionCardCarousel({
 
     try {
       const response = await fetch(
-        `https://save-senseee.vercel.app/savings-plan`,
+        `https://save-senseee.vercel.app/api/ai/savings-plan`,
         {
           method: "POST",
           headers: {
