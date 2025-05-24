@@ -1,4 +1,5 @@
 import { AssetTabs } from "@/components/Asset-tabs";
+// import { ExecuteAutomatedSavingsButton } from "@/components/ExecuteAutomatedSavingsButton";
 import AddToken from "@/components/Modals/Add-token";
 import DeactivateSafeModal from "@/components/Modals/Deactivate-safe-modal";
 import ManageAutosavings from "@/components/Modals/Manage-autosavings";
@@ -8,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
+import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
+// import { tokenSymbol } from "@/utils/displayTokenSymbol";
+// import { formatDate, formatDuration } from "date-fns";
 // import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
@@ -94,6 +98,9 @@ const AutoSave = () => {
 
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
   const { details } = useAutomatedSafeForUser(userAddress as `0x${string}`);
+  const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
+
+  console.log("Due plans details:", duePlanDetails);
 
   // Update loading state when API loading state changes or details is set
   useEffect(() => {
@@ -398,6 +405,86 @@ const AutoSave = () => {
           )
         )}
       </div>
+
+      {/* <div>
+        <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+          <div className="flex justify-between items-center pb-4"></div>
+
+          <div className="flex justify-between items-end mb-4">
+            <div>
+              <div>
+                Duration: <span>{formatDuration(details?.duration)}</span>
+              </div>
+
+              <div>
+                Start Time: <span>{formatDate(details?.startTime)}</span>
+              </div>
+
+              <div>
+                Unlock Time: <span>{formatDate(details?.unlockTime)}</span>
+              </div>
+            </div>
+          </div>
+
+          {details?.tokenDetails?.map((token: any, idx: number) => (
+            <div className="flex justify-between items-end" key={idx}>
+              <div>
+                <div>
+                  Token: <span>{tokenSymbol[token.token]}</span>
+                </div>
+                <div>
+                  Frequency: <span>{formatDuration(token?.frequency)}</span>
+                </div>
+
+                <div>
+                  Amount Saved:{" "}
+                  <span>
+                    {Number(
+                      formatUnits(
+                        token.amountSaved, // Assuming this is in wei
+                        18
+                      )
+                    ).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+
+                <div>
+                  Amount To Save:{" "}
+                  <span>
+                    {Number(
+                      formatUnits(
+                        token.amountToSave, // Assuming this is in wei
+                        18
+                      )
+                    ).toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="py-2">
+        <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
+          <div className="flex flex-col justify-between items-center pb-4">
+            <div className="text-white font-semibold">Addresses</div>
+            {duePlanDetails?.map((plan: any, idx: number) => (
+              <div key={idx} className="text-[#CACACA] font-light">
+                {plan}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <ExecuteAutomatedSavingsButton />
+      </div> */}
 
       {/* Render the appropriate modal based on state */}
       {(() => {
