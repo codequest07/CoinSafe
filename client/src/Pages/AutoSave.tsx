@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
-import { tokenSymbol } from "@/utils/displayTokenSymbol";
+// import { tokenSymbol } from "@/utils/displayTokenSymbol";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -145,42 +145,42 @@ const AutoSave = () => {
   // const milliseconds = Number(seconds) * 1000;
   // const date = new Date(milliseconds);
 
-  function formatDuration(milliseconds: any) {
-    const duration = Number(milliseconds);
-    if (isNaN(duration)) return "Invalid duration";
+  // function formatDuration(milliseconds: any) {
+  //   const duration = Number(milliseconds);
+  //   if (isNaN(duration)) return "Invalid duration";
 
-    const seconds = Math.floor(duration / 1000) % 60;
-    const minutes = Math.floor(duration / (1000 * 60)) % 60;
-    const hours = Math.floor(duration / (1000 * 60 * 60)) % 24;
-    const days = Math.floor(duration / (1000 * 60 * 60 * 24));
+  //   const seconds = Math.floor(duration / 1000) % 60;
+  //   const minutes = Math.floor(duration / (1000 * 60)) % 60;
+  //   const hours = Math.floor(duration / (1000 * 60 * 60)) % 24;
+  //   const days = Math.floor(duration / (1000 * 60 * 60 * 24));
 
-    const parts = [];
-    if (days) parts.push(`${days} day${days > 1 ? "s" : ""}`);
-    if (hours) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
-    if (minutes) parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
-    if (seconds || !parts.length)
-      parts.push(`${seconds} second${seconds !== 1 ? "s" : ""}`);
+  //   const parts = [];
+  //   if (days) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+  //   if (hours) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
+  //   if (minutes) parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
+  //   if (seconds || !parts.length)
+  //     parts.push(`${seconds} second${seconds !== 1 ? "s" : ""}`);
 
-    return parts.join(", ");
-  }
+  //   return parts.join(", ");
+  // }
 
-  function formatDate(timestamp: any) {
-    const ms = Number(timestamp); // Convert BigInt to Number
-    if (isNaN(ms)) return "Invalid duration";
+  // function formatDate(timestamp: any) {
+  //   const ms = Number(timestamp); // Convert BigInt to Number
+  //   if (isNaN(ms)) return "Invalid duration";
 
-    const now = new Date("2025-05-17T22:55:00+01:00"); // Current date: May 17, 2025, 10:55 PM WAT
-    const futureDate = new Date(now.getTime() + ms);
+  //   const now = new Date("2025-05-17T22:55:00+01:00"); // Current date: May 17, 2025, 10:55 PM WAT
+  //   const futureDate = new Date(now.getTime() + ms);
 
-    return futureDate.toLocaleString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    });
-  }
+  //   return futureDate.toLocaleString("en-US", {
+  //     year: "numeric",
+  //     month: "long",
+  //     day: "numeric",
+  //     hour: "numeric",
+  //     minute: "2-digit",
+  //     second: "2-digit",
+  //     hour12: true,
+  //   });
+  // }
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
