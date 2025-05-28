@@ -7,7 +7,7 @@ const ClaimBtn = () => {
     <div>
       <Button
         onClick={() => navigate("/faucet")}
-        className="rounded-[2rem] bg-[#092324] hover:bg-[#092324] text-[#F1F1F1]">
+        className="rounded-[2rem] px-5 sm:px-6 py-1 sm:py-2 leading-tight text-[11px] sm:text-sm bg-[#092324] hover:bg-[#092324] text-[#F1F1F1]">
         Claim faucet
       </Button>
     </div>

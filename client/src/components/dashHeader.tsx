@@ -16,6 +16,7 @@ import { useStreakSystem } from "@/hooks/useStreakSystem";
 import { useRecoilValue } from "recoil";
 import { userCurrentStreakState } from "@/store/atoms/streak";
 import { useActiveAccount } from "thirdweb/react";
+import WalletAvatar from "./WalletAvatar";
 
 const getRandomMessage = () => {
   const messages = [
@@ -112,6 +113,11 @@ const DashHeader = () => {
               Beta
             </span>
           </Link>
+
+          <div className="flex-1 gap-2 flex justify-end md:hidden">
+            <ClaimBtn />
+            <WalletAvatar />
+          </div>
 
           {/* Mobile Menu Button */}
           <Sheet>

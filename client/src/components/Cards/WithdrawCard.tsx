@@ -66,6 +66,13 @@ export default function WithdrawCard() {
     setToken(value);
   };
 
+  const resetState = () => {
+    setAmount(1-1);
+    // setToken("");
+    // setTokenPrice("0.00");
+    // setSelectedTokenBalance(0);
+  };
+
   useEffect(() => {
     const updatePrice = async () => {
       const price: string = await getTokenPrice(token, amount);
@@ -133,7 +140,7 @@ export default function WithdrawCard() {
           {/* Wallet Balance Section */}
           {token && (
             <>
-              {amount && amount > selectedTokenBalance && (
+              {amount! > 0 && amount! > selectedTokenBalance && (
                 <p className="text-red-500 text-[13px] mt-1 text-right">
                   Amount greater than available balance
                 </p>
@@ -142,8 +149,7 @@ export default function WithdrawCard() {
                 <div className="text-sm font-[300] text-gray-300">
                   Available balance:{" "}
                   <span className="text-gray-400">
-                    {selectedTokenBalance}{" "}
-                    {tokenData[token]?.symbol}
+                    {selectedTokenBalance} {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button
@@ -182,7 +188,10 @@ export default function WithdrawCard() {
         amount={amount || 0}
         token={tokenData[token]?.symbol}
         isOpen={isThirdModalOpen}
-        onClose={() => setIsThirdModalOpen(false)}
+        onClose={() => {
+          setIsThirdModalOpen(false);
+          resetState();
+        }}
         additionalDetails={{
           subText: "Assets will be available in your wallet.",
         }}
