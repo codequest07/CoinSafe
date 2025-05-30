@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getTokenPrice } from "@/lib";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useActiveAccount } from "thirdweb/react";
-import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
+// import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
 // import { tokenData } from "@/lib/utils";
 
 interface DisplaySafe {
@@ -26,10 +26,10 @@ export default function SavingsCards() {
   const account = useActiveAccount();
   const userAddress = account?.address;
 
-  const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
+  // const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
 
-  const hasActiveAutoSavings =
-    duePlanDetails?.includes(userAddress as `0x${string}`) || false;
+  // const hasActiveAutoSavings =
+  //   duePlanDetails?.includes(userAddress as `0x${string}`) || false;
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { safes, isLoading, isError, fetchSafes } = useGetSafes();
@@ -38,6 +38,12 @@ export default function SavingsCards() {
     isLoading: automatedSafeLoading,
     error: automatedSafeError,
   } = useAutomatedSafeForUser(userAddress as `0x${string}`);
+
+  const hasActiveAutoSavings =
+    details?.tokenDetails?.some(
+      (token: { amountToSave: number }) => token.amountToSave > 0n
+    ) ?? false;
+
   console.log(
     "AUTOMED SAVIMGS>>> ",
     details,
