@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { vaultAssets } from "@/lib/data";
+import { useNavigate } from 'react-router-dom';
 
 export default function AssetVaultTable() {
   return (
@@ -57,6 +58,33 @@ export default function AssetVaultTable() {
 }
 
 function AssetTableContent({ assets }: { assets: any[] }) {
+  const navigate = useNavigate();
+  const hasNonZeroAssets = assets.some(
+    (asset) => Number.parseFloat(asset.amount) > 0
+  );
+
+  if (!assets || assets.length === 0 || !hasNonZeroAssets) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="mb-4 rounded-full p-6">
+          <MemoAvax className="w-20 h-20" />
+        </div>
+        <h3 className="mb-2 text-sm font-[400] text-white">
+          No assets found in your vault
+        </h3>
+        <p className="text-sm text-gray-400">
+          Assets that you save will appear here
+        </p>
+        <Button
+          className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+          onClick={() => navigate('/dashboard/deposit')}
+        >
+          Save Assets
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#010104] w-full rounded-lg">
       <CardContent>
