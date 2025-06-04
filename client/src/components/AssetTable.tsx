@@ -26,7 +26,7 @@ import { tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
@@ -149,6 +149,9 @@ function AssetTableContent({
   const account = useActiveAccount();
   const isConnected = !!account?.address;
   const address = account?.address;
+
+  const location = useLocation();
+  const isAutoSavePage = location.pathname === "/dashboard/vault/auto-safe";
 
   const hasNonZeroAssets = assets.some(
     (asset) => Number.parseFloat(asset.balance) > 0
@@ -295,139 +298,277 @@ function AssetTableContent({
             </TableRow>
           </TableHeader>
           <TableBody className="text-white">
-            {updatedAssets
-              .filter((item: any) => item.autosaved === true)
-              .map((asset: any, index: number) => (
-                <TableRow key={index} className="border-b border-[#1D1D1D]">
-                  <TableCell className="py-4 px-4">
-                    {/* THIS LINK BELOW IS GOING TO BE USEFUL FOR FETCHING TOKEN ICON INFO */}
-                    {/* https://portal.thirdweb.com/references/typescript/v5/TokenIcon */}
-                    <div className="flex items-center gap-2">
-                      {asset.tokenInfo?.image ? (
-                        <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
-                          <img
-                            src={asset.tokenInfo?.image}
-                            width={30}
-                            height={30}
-                            className="w-full h-full"
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
-                        >
-                          {asset.tokenInfo.symbol?.charAt(0)}
-                        </div>
-                      )}
-                      <div className="flex flex-col">
-                        <p className="font-medium text-white">
-                          {asset.tokenInfo.symbol}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {asset.tokenInfo.chain}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  {safeDetails ? (
-                    <>
+            {isAutoSavePage ? (
+              <>
+                {updatedAssets
+                  .filter((item: any) => item.autosaved === true)
+                  .map((asset: any, index: number) => (
+                    <TableRow key={index} className="border-b border-[#1D1D1D]">
                       <TableCell className="py-4 px-4">
-                        <div className="flex flex-col">
-                          <p className="text-white">
-                            {asset.saved} {asset.tokenInfo.symbol}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-4 px-4">
-                        <div className="flex flex-col">
-                          <p className="text-white">
-                            $
-                            {asset.saved_usd !== null
-                              ? asset.saved_usd
-                              : "Loading..."}
-                          </p>
-                        </div>
-                      </TableCell>
-                    </>
-                  ) : (
-                    <>
-                      <TableCell className="py-4 px-4">
-                        <div className="flex flex-col">
-                          <p className="text-white">
-                            {asset.balance} {asset.tokenInfo.symbol}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            ≈ $
-                            {asset.balance_usd !== null
-                              ? asset.balance_usd
-                              : "Loading..."}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-4 px-4">
-                        <div className="flex flex-col">
-                          <p className="text-white">
-                            {asset.saved} {asset.tokenInfo.symbol}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            ≈ $
-                            {asset.saved_usd !== null
-                              ? asset.saved_usd
-                              : "Loading..."}
-                          </p>
-                        </div>
-                      </TableCell>
-                    </>
-                  )}
-                  <TableCell className="py-4 px-4">
-                    <div className="flex items-center gap-2">
-                      {asset.autosaved ? (
-                        <>
-                          <span className="text-[#48FF91]">Yes</span>
-                          <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
-                            <Check className="w-4 h-4 text-white" />
+                        {/* THIS LINK BELOW IS GOING TO BE USEFUL FOR FETCHING TOKEN ICON INFO */}
+                        {/* https://portal.thirdweb.com/references/typescript/v5/TokenIcon */}
+                        <div className="flex items-center gap-2">
+                          {asset.tokenInfo?.image ? (
+                            <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
+                              <img
+                                src={asset.tokenInfo?.image}
+                                width={30}
+                                height={30}
+                                className="w-full h-full"
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                            >
+                              {asset.tokenInfo.symbol?.charAt(0)}
+                            </div>
+                          )}
+                          <div className="flex flex-col">
+                            <p className="font-medium text-white">
+                              {asset.tokenInfo.symbol}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {asset.tokenInfo.chain}
+                            </p>
                           </div>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-white">No</span>
-                          <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
-                            <X className="w-3 h-3 text-white" />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4 px-4 text-right">
-                    <div className="flex justify-end gap-4">
-                      <Button
-                        variant="link"
-                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                        onClick={() => navigate("/dashboard/deposit")}
-                      >
-                        Deposit
-                      </Button>
+                        </div>
+                      </TableCell>
                       {safeDetails ? (
-                        <Button
-                          variant="link"
-                          className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                          onClick={() => setIsFirstModalOpen(true)}
-                        >
-                          Top Up
-                        </Button>
+                        <>
+                          <TableCell className="py-4 px-4">
+                            <div className="flex flex-col">
+                              <p className="text-white">
+                                {asset.saved} {asset.tokenInfo.symbol}
+                              </p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4 px-4">
+                            <div className="flex flex-col">
+                              <p className="text-white">
+                                $
+                                {asset.saved_usd !== null
+                                  ? asset.saved_usd
+                                  : "Loading..."}
+                              </p>
+                            </div>
+                          </TableCell>
+                        </>
                       ) : (
+                        <>
+                          <TableCell className="py-4 px-4">
+                            <div className="flex flex-col">
+                              <p className="text-white">
+                                {asset.balance} {asset.tokenInfo.symbol}
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                ≈ $
+                                {asset.balance_usd !== null
+                                  ? asset.balance_usd
+                                  : "Loading..."}
+                              </p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4 px-4">
+                            <div className="flex flex-col">
+                              <p className="text-white">
+                                {asset.saved} {asset.tokenInfo.symbol}
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                ≈ $
+                                {asset.saved_usd !== null
+                                  ? asset.saved_usd
+                                  : "Loading..."}
+                              </p>
+                            </div>
+                          </TableCell>
+                        </>
+                      )}
+                      <TableCell className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          {asset.autosaved ? (
+                            <>
+                              <span className="text-[#48FF91]">Yes</span>
+                              <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
+                                <Check className="w-4 h-4 text-white" />
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-white">No</span>
+                              <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
+                                <X className="w-3 h-3 text-white" />
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-4 px-4 text-right">
+                        <div className="flex justify-end gap-4">
+                          <Button
+                            variant="link"
+                            className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                            onClick={() => navigate("/dashboard/deposit")}
+                          >
+                            Deposit
+                          </Button>
+                          {safeDetails ? (
+                            <Button
+                              variant="link"
+                              className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                              onClick={() => setIsFirstModalOpen(true)}
+                            >
+                              Top Up
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="link"
+                              className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                              onClick={() => setIsFirstModalOpen(true)}
+                            >
+                              Save
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </>
+            ) : (
+              <>
+                {updatedAssets.map((asset: any, index: number) => (
+                  <TableRow key={index} className="border-b border-[#1D1D1D]">
+                    <TableCell className="py-4 px-4">
+                      {/* THIS LINK BELOW IS GOING TO BE USEFUL FOR FETCHING TOKEN ICON INFO */}
+                      {/* https://portal.thirdweb.com/references/typescript/v5/TokenIcon */}
+                      <div className="flex items-center gap-2">
+                        {asset.tokenInfo?.image ? (
+                          <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
+                            <img
+                              src={asset.tokenInfo?.image}
+                              width={30}
+                              height={30}
+                              className="w-full h-full"
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                          >
+                            {asset.tokenInfo.symbol?.charAt(0)}
+                          </div>
+                        )}
+                        <div className="flex flex-col">
+                          <p className="font-medium text-white">
+                            {asset.tokenInfo.symbol}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {asset.tokenInfo.chain}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    {safeDetails ? (
+                      <>
+                        <TableCell className="py-4 px-4">
+                          <div className="flex flex-col">
+                            <p className="text-white">
+                              {asset.saved} {asset.tokenInfo.symbol}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4 px-4">
+                          <div className="flex flex-col">
+                            <p className="text-white">
+                              $
+                              {asset.saved_usd !== null
+                                ? asset.saved_usd
+                                : "Loading..."}
+                            </p>
+                          </div>
+                        </TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell className="py-4 px-4">
+                          <div className="flex flex-col">
+                            <p className="text-white">
+                              {asset.balance} {asset.tokenInfo.symbol}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              ≈ $
+                              {asset.balance_usd !== null
+                                ? asset.balance_usd
+                                : "Loading..."}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4 px-4">
+                          <div className="flex flex-col">
+                            <p className="text-white">
+                              {asset.saved} {asset.tokenInfo.symbol}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              ≈ $
+                              {asset.saved_usd !== null
+                                ? asset.saved_usd
+                                : "Loading..."}
+                            </p>
+                          </div>
+                        </TableCell>
+                      </>
+                    )}
+                    <TableCell className="py-4 px-4">
+                      <div className="flex items-center gap-2">
+                        {asset.autosaved ? (
+                          <>
+                            <span className="text-[#48FF91]">Yes</span>
+                            <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
+                              <Check className="w-4 h-4 text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-white">No</span>
+                            <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
+                              <X className="w-3 h-3 text-white" />
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 px-4 text-right">
+                      <div className="flex justify-end gap-4">
                         <Button
                           variant="link"
                           className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                          onClick={() => setIsFirstModalOpen(true)}
+                          onClick={() => navigate("/dashboard/deposit")}
                         >
-                          Save
+                          Deposit
                         </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        {safeDetails ? (
+                          <Button
+                            variant="link"
+                            className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                            onClick={() => setIsFirstModalOpen(true)}
+                          >
+                            Top Up
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="link"
+                            className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                            onClick={() => setIsFirstModalOpen(true)}
+                          >
+                            Save
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
+            )}
           </TableBody>
         </Table>
       </CardContent>
