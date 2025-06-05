@@ -591,7 +591,7 @@ const AutoSave = () => {
             console.log("About to render DeactivateSafeModal component");
             return null;
           })()}
-          <DeactivateSafeModal onClose={backToManageAutosavings} />
+          <DeactivateSafeModal details={details} onClose={backToManageAutosavings} />
         </div>
       )}
 
