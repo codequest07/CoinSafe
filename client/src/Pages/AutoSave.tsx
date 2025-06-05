@@ -534,26 +534,8 @@ const AutoSave = () => {
         );
         return null;
       })()}
-
-      {showAddTokenModal && (
-        <div
-          className="modal-container"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 9999,
-          }}
-        >
-          {(() => {
-            console.log("About to render AddTokenModal component");
-            return null;
-          })()}
-          <AddToken onClose={backToManageAutosavings} />
-        </div>
-      )}
+      
+      <AddToken open={showAddTokenModal} onClose={backToManageAutosavings} />
 
       {/* Remove Token Modal */}
       {(() => {
@@ -609,7 +591,7 @@ const AutoSave = () => {
             console.log("About to render DeactivateSafeModal component");
             return null;
           })()}
-          <DeactivateSafeModal onClose={backToManageAutosavings} />
+          <DeactivateSafeModal details={details} onClose={backToManageAutosavings} />
         </div>
       )}
 
