@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { WaitlistModal } from "./Modals/Waitlist-modal";
-import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function LandingFeatures() {
-  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   return (
     <div className="  px-4 py-12 md:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -20,17 +18,17 @@ export default function LandingFeatures() {
             <br className="hidden sm:block" /> crypto simple, secure, and
             rewarding.
           </h1>
-
-          <Button
-            onClick={() => setShowWaitlistModal(true)}
-            variant="secondary"
-            className="whitespace-nowrap rounded-full mt-8 sm:mt-0 px-6 py-2">
-            Join waitlist
-          </Button>
+          <Link to="/dashboard">
+            <Button
+              variant="secondary"
+              className="whitespace-nowrap rounded-full mt-8 sm:mt-0 px-6 py-2">
+              Start saving
+            </Button>
+          </Link>
         </div>
 
         {/* Features Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
           <div className="relative overflow-hidden border border-[#FFFFFF21] sm:rounded-3xl rounded-md bg-[#1D1D1D73] p-6 md:p-8">
             <div className="mb-4 h-16 w-16">
               <img src="/assets/Mask.svg" alt="Mask" className="w-16 h-16" />
@@ -78,10 +76,6 @@ export default function LandingFeatures() {
           </div>
         </div>
       </div>
-      <WaitlistModal
-        open={showWaitlistModal}
-        onOpenChange={setShowWaitlistModal}
-      />
     </div>
   );
 }
