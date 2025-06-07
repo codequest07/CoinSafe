@@ -12,7 +12,7 @@ import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { formatUnits } from "ethers";
-import { ArrowLeft, Badge } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActiveAccount } from "thirdweb/react";
@@ -258,19 +258,28 @@ const AutoSave = () => {
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl">Auto Savings</h1>
                   {/* formattedDate = unlockDate.toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            }); */}
-                  <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
-                    {details.unlockTime > new Date()
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                  }); */}
+
+                  {/* <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
+                    <div>{`${details.unlockTime}`}</div>
+                  </Badge> */}
+                  {/* {Number(details.unlockTime) * 1000 > Date.now()
                       ? `${Math.ceil(
-                          (details.unlockTime.getTime() -
-                            new Date().getTime()) /
+                          (Number(details.unlockTime) * 1000 - Date.now()) /
+                            (1000 * 60 * 60 * 24)
+                        )} days till unlock`
+                      : "Ready to unlock"} */}
+                  <div className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
+                    {Number(details.unlockTime) * 1000 > Date.now()
+                      ? `${Math.ceil(
+                          (Number(details.unlockTime) * 1000 - Date.now()) /
                             (1000 * 60 * 60 * 24)
                         )} days till unlock`
                       : "Ready to unlock"}
-                  </Badge>
+                  </div>
                 </div>
               </div>
               {/* <p className="text-base my-1 ml-[3.3rem] text-gray-300">
@@ -525,26 +534,8 @@ const AutoSave = () => {
         );
         return null;
       })()}
-
-      {showAddTokenModal && (
-        <div
-          className="modal-container"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 9999,
-          }}
-        >
-          {(() => {
-            console.log("About to render AddTokenModal component");
-            return null;
-          })()}
-          <AddToken onClose={backToManageAutosavings} />
-        </div>
-      )}
+      
+      <AddToken open={showAddTokenModal} onClose={backToManageAutosavings} />
 
       {/* Remove Token Modal */}
       {(() => {
@@ -600,7 +591,7 @@ const AutoSave = () => {
             console.log("About to render DeactivateSafeModal component");
             return null;
           })()}
-          <DeactivateSafeModal onClose={backToManageAutosavings} />
+          <DeactivateSafeModal details={details} onClose={backToManageAutosavings} />
         </div>
       )}
 
