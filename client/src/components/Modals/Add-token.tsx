@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { tokens } from "@/lib/contract";
+import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 import { tokenData } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -16,8 +16,17 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { formatUnits } from "viem";
+import { useAddTokenToAutomatedPlan } from "@/hooks/useAddTokenToAutomatedPlan";
+import { Account } from "thirdweb/wallets";
+import { useActiveAccount } from "thirdweb/react";
+// interface AddTokenModalProps {
+//   onClose: () => void;
+// }
+
 interface AddTokenModalProps {
   onClose: () => void;
+  account?: Account | undefined;
+  coinSafeAddress?: `0x${string}`;
 }
 
 export default function AddToken({ onClose }: AddTokenModalProps) {
@@ -26,8 +35,28 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
   const [supportedTokens] = useRecoilState(supportedTokensState);
   const [balances] = useRecoilState(balancesState);
 
+  const smartAccount = useActiveAccount();
+
   // Get available balances
   const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
+
+  const { addTokenToPlan, isLoading } = useAddTokenToAutomatedPlan({
+    account: smartAccount,
+    token: saveState.token as `0x${string}`,
+    amount: saveState.amount,
+    frequency: saveState.frequency,
+    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    toast: ({ title, variant }) => {
+      console.log(`${variant.toUpperCase()}: ${title}`);
+      // Replace with your preferred toast library (e.g., react-toastify)
+    },
+    onSuccess: () => {
+      console.log("Token added successfully");
+      onClose(); // Close modal on success
+    },
+    onApprove: () => console.log("Token approval completed"),
+    onError: (err) => console.error("Transaction error:", err),
+  });
 
   const [validationErrors] = useState<{
     amount?: string;
@@ -41,7 +70,6 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
   useEffect(() => {
     // Initialize token if not set
     if (!saveState.token && supportedTokens.length > 0) {
-    
       setSaveState((prev) => ({
         ...prev,
         token: supportedTokens[0],
@@ -55,8 +83,6 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
       const tokensData = AvailableBalance;
       if (!tokensData) return;
 
-    
-
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
 
       // Get the correct decimals for the token
@@ -68,7 +94,6 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
       }
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, tokenDecimals)));
-     
     }
   }, [saveState.token, AvailableBalance]);
 
@@ -107,7 +132,8 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
         onClick={(e) => {
           e.stopPropagation();
           onClose();
-        }}></div>
+        }}
+      ></div>
       <div className="relative w-full max-w-md rounded-lg bg-[#17171C] text-white shadow-lg">
         <div className="flex items-center justify-between p-4 pb-2">
           <h2 className="text-lg font-medium">Add token to safe</h2>
@@ -117,7 +143,8 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
               onClose();
             }}
             className="rounded-full p-1 bg-white "
-            aria-label="Close">
+            aria-label="Close"
+          >
             <X className="h-4 w-4 text-black" />
           </button>
         </div>
@@ -142,7 +169,8 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
                 <div className="ml-4">
                   <Select
                     onValueChange={handleTokenSelect}
-                    value={saveState.token}>
+                    value={saveState.token}
+                  >
                     <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
                       <div className="flex items-center">
                         <SelectValue placeholder="Select Token" />
@@ -199,7 +227,8 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
                     ...prev,
                     amount: selectedTokenBalance,
                   }))
-                }>
+                }
+              >
                 Save all
               </Button>
             </div>
@@ -228,21 +257,24 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
           <div className="flex justify-between">
             <button
               onClick={(e) => {
-              
                 e.stopPropagation();
                 onClose();
               }}
-              className="rounded-full bg-[#FFFFFF2B] px-6 py-2 text-white">
+              className="rounded-full bg-[#FFFFFF2B] px-6 py-2 text-white"
+            >
               Cancel
             </button>
             <button
-              onClick={(e) => {
-                
-                e.stopPropagation();
-                // Add token logic here
-                onClose();
-              }}
-              className="rounded-full bg-white px-6 py-2 text-black hover:bg-gray-200">
+              // onClick={(e) => {
+
+              //   e.stopPropagation();
+              //   // Add token logic here
+              //   onClose();
+              // }}
+              onClick={addTokenToPlan}
+              disabled={isLoading}
+              className="rounded-full bg-white px-6 py-2 text-black hover:bg-gray-200"
+            >
               Add token
             </button>
           </div>
