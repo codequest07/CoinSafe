@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { WaitlistModal } from "./Modals/Waitlist-modal";
+import { Link } from "react-router-dom";
 const PoweredBy = () => {
-  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   return (
     <div className="flex flex-col items-center px-4 pb-28 sm:px-6 md:px-8 lg:px-16">
       <div className="flex flex-col items-center pt-12 md:pt-[100px] text-center">
@@ -19,11 +17,11 @@ const PoweredBy = () => {
             className="bg-[#1E1E1E99] text-[#F1F1F1] px-5 py-2 sm:px-8 sm:py-3 rounded-full">
             Download extension
           </button> */}
-          <button
-            onClick={() => setShowWaitlistModal(true)}
-            className="bg-[#FFFFFFE5] text-[#010104] px-5 py-2 sm:px-8 sm:py-3 rounded-full">
-            Join waitlist
-          </button>
+          <Link to={"/dashboard"}>
+            <button className="bg-[#FFFFFFE5] text-[#010104] px-5 py-2 sm:px-8 sm:py-3 rounded-full">
+              Start saving
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -34,11 +32,6 @@ const PoweredBy = () => {
           className="w-full max-w-[550px] animate-spinEarth"
         />
       </div> */}
-
-      <WaitlistModal
-        open={showWaitlistModal}
-        onOpenChange={setShowWaitlistModal}
-      />
     </div>
   );
 };

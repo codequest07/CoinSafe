@@ -24,12 +24,14 @@ import { useActiveAccount } from "thirdweb/react";
 // }
 
 interface AddTokenModalProps {
+  open: boolean;
   onClose: () => void;
   account?: Account | undefined;
   coinSafeAddress?: `0x${string}`;
 }
 
-export default function AddToken({ onClose }: AddTokenModalProps) {
+export default function AddToken({ open, onClose }: AddTokenModalProps) {
+  if (!open) return null; // If the modal is not open, return null
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [supportedTokens] = useRecoilState(supportedTokensState);
@@ -171,7 +173,7 @@ export default function AddToken({ onClose }: AddTokenModalProps) {
                     onValueChange={handleTokenSelect}
                     value={saveState.token}
                   >
-                    <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg">
+                    <SelectTrigger className="w-[140px] bg-gray-700 border-0 bg-[#1E1E1E99] text-white rounded-lg z-[9999]">
                       <div className="flex items-center">
                         <SelectValue placeholder="Select Token" />
                       </div>
