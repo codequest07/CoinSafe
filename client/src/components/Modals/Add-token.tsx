@@ -1,9 +1,9 @@
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { tokens } from "@/lib/contract";
+import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 import { tokenData } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -16,9 +16,19 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { formatUnits } from "viem";
+import { useAddTokenToAutomatedPlan } from "@/hooks/useAddTokenToAutomatedPlan";
+import { Account } from "thirdweb/wallets";
+import { useActiveAccount } from "thirdweb/react";
+import { toast } from "sonner";
+// interface AddTokenModalProps {
+//   onClose: () => void;
+// }
+
 interface AddTokenModalProps {
   open: boolean;
   onClose: () => void;
+  account?: Account | undefined;
+  coinSafeAddress?: `0x${string}`;
 }
 
 export default function AddToken({ open, onClose }: AddTokenModalProps) {
@@ -28,8 +38,29 @@ export default function AddToken({ open, onClose }: AddTokenModalProps) {
   const [supportedTokens] = useRecoilState(supportedTokensState);
   const [balances] = useRecoilState(balancesState);
 
+  const smartAccount = useActiveAccount();
+
   // Get available balances
   const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
+
+  const { addTokenToPlan, isLoading } = useAddTokenToAutomatedPlan({
+    account: smartAccount,
+    token: saveState.token as `0x${string}`,
+    amount: saveState.amount,
+    frequency: saveState.frequency,
+    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    toast: ({ title, variant }) => {
+      console.log(`${variant.toUpperCase()}: ${title}`);
+      toast(title);
+      // Replace with your preferred toast library (e.g., react-toastify)
+    },
+    onSuccess: () => {
+      console.log("Token added successfully");
+      onClose(); // Close modal on success
+    },
+    onApprove: () => console.log("Token approval completed"),
+    onError: (err) => console.error("Transaction error:", err),
+  });
 
   const [validationErrors] = useState<{
     amount?: string;
@@ -238,14 +269,17 @@ export default function AddToken({ open, onClose }: AddTokenModalProps) {
               Cancel
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                // Add token logic here
-                onClose();
-              }}
+              // onClick={(e) => {
+
+              //   e.stopPropagation();
+              //   // Add token logic here
+              //   onClose();
+              // }}
+              onClick={addTokenToPlan}
+              disabled={isLoading}
               className="rounded-full bg-white px-6 py-2 text-black hover:bg-gray-200"
             >
-              Add token
+              {isLoading ? <Loader2 /> : "Add token"}
             </button>
           </div>
         </div>
