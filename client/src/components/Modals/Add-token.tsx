@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useRecoilState } from "recoil";
@@ -19,6 +19,7 @@ import { formatUnits } from "viem";
 import { useAddTokenToAutomatedPlan } from "@/hooks/useAddTokenToAutomatedPlan";
 import { Account } from "thirdweb/wallets";
 import { useActiveAccount } from "thirdweb/react";
+import { toast } from "sonner";
 // interface AddTokenModalProps {
 //   onClose: () => void;
 // }
@@ -50,6 +51,7 @@ export default function AddToken({ open, onClose }: AddTokenModalProps) {
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
     toast: ({ title, variant }) => {
       console.log(`${variant.toUpperCase()}: ${title}`);
+      toast(title);
       // Replace with your preferred toast library (e.g., react-toastify)
     },
     onSuccess: () => {
@@ -277,7 +279,7 @@ export default function AddToken({ open, onClose }: AddTokenModalProps) {
               disabled={isLoading}
               className="rounded-full bg-white px-6 py-2 text-black hover:bg-gray-200"
             >
-              Add token
+              {isLoading ? <Loader2 /> : "Add token"}
             </button>
           </div>
         </div>
