@@ -16,6 +16,7 @@ import { TransactionModel } from "./Models/TransactionModel";
 import { GeminiService } from "./services/GeminiService";
 import { SavingsPlanController } from "./controllers/SavingsPlanController";
 import { savingsPlanRoutes } from "./Routes/SavingsAiRoutes";
+import profileRoutes from "./Routes/ProfileRoutes";
 
 dotenv.config();
 const app = express();
@@ -49,6 +50,7 @@ app.use("/api/ai/", savingsPlanRoutes(savingsPlanController));
 app.use("/api/waitlist", WaitlistRouter);
 app.use("/api/faucet", faucetRouter);
 app.use("/api/coingecko", CoinGeckoApiRouter);
+app.use("/api/profile", profileRoutes);
 
 // MongoDB Connection
 const mongodbUri =
