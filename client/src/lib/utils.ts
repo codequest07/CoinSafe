@@ -75,6 +75,62 @@ export const convertTokenAmountToUsd = async (
   }
 };
 
+export const convertFrequency = (frequency: number, inputUnit: 'milliseconds' | 'seconds' | 'minutes' | 'hours' = 'seconds') => {
+  // Validate input
+  if (typeof frequency !== 'number' || frequency <= 0) {
+    throw new Error('Frequency must be a positive number');
+  }
+
+  // Conversion factors to seconds
+  const unitConversions = {
+    milliseconds: 0.001,
+    seconds: 1,
+    minutes: 60,
+    hours: 3600,
+  };
+
+  if (!unitConversions[inputUnit]) {
+    throw new Error(`Unsupported unit: ${inputUnit}. Use milliseconds, seconds, minutes, or hours.`);
+  }
+
+  // Convert frequency to seconds
+  const frequencyInSeconds = frequency * unitConversions[inputUnit];
+
+  // Time periods in seconds
+  const secondsInDay = 24 * 60 * 60; // 86,400 seconds
+  const secondsInMonth = 30.4167 * secondsInDay; // Approx 2,627,998.08 seconds
+  const secondsInYear = 365.25 * secondsInDay; // Approx 31,557,600 seconds
+
+  // Calculate events per period
+  const eventsPerDay = secondsInDay / frequencyInSeconds;
+  const eventsPerMonth = secondsInMonth / frequencyInSeconds;
+  const eventsPerYear = secondsInYear / frequencyInSeconds;
+
+  // Determine the best period based on the number of events
+  if (eventsPerDay >= 1 && eventsPerDay <= 30) {
+    return 'per day';
+  } else if (eventsPerMonth >= 1 && eventsPerMonth <= 12) {
+    return 'per month';
+  } else if (eventsPerYear >= 1 && eventsPerYear <= 12) {
+    return 'per year';
+  } else if (eventsPerDay > 30) {
+    return 'per day'; // High frequency, best expressed per day
+  } else if (eventsPerMonth > 12 && eventsPerDay < 1) {
+    return 'per month'; // Moderate frequency, better as per month
+  } else {
+    return 'per year'; // Low frequency, better as per year
+  }
+};
+
+export function convertTokenToUSD(tokenValue: any, decimals: number, usdPrice: number) {
+  // Convert BigInt to a regular number by dividing by 10^decimals
+  const tokenAmount = Number(tokenValue) / Math.pow(10, decimals);
+  // Calculate USD value
+  const usdValue = tokenAmount * usdPrice;
+  // Format to 2 decimal places for USD
+  return usdValue.toFixed(2);
+}
+
 export const tokenData = {
   "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
     symbol: "SAFU",
