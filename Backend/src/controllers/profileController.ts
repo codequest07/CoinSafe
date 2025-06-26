@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
 import User from "../Models/UserModel";
-import { sendEmail } from "../services/email"; // Your existing sendEmail function
+import { sendEmail } from "../services/email"; 
 import validator from "validator";
 import crypto from "crypto";
 
 // Helper function to generate verification link and HTML
 const generateVerificationContent = (email: string, token: string) => {
-  // Current date and time is Thursday, June 26, 2025 at 2:13:47 PM WAT.
-  // Ensure this link matches your frontend's verification route
+
   const verificationLink = `http://localhost:3000/verify-email?token=${token}&email=${encodeURIComponent(
     email
   )}`;
@@ -22,7 +21,7 @@ const generateVerificationContent = (email: string, token: string) => {
   return { subject, htmlContent };
 };
 
-// NEW: Controller for POST /api/notifications/update-email
+//  Controller for POST /api/profile/update-email
 export const updateEmail = async (req: Request, res: Response) => {
   const { walletAddress, email } = req.body;
 
@@ -59,7 +58,7 @@ export const updateEmail = async (req: Request, res: Response) => {
       { walletAddress: walletAddress.toLowerCase() },
       {
         email: email.toLowerCase(),
-        emailVerified: false, // Set to false to re-trigger verification if email changed
+        emailVerified: false, 
         verificationToken: verificationToken,
         verificationTokenExpires: new Date(Date.now() + 3600 * 1000), // Token valid for 1 hour
       },
@@ -95,7 +94,7 @@ export const updateEmail = async (req: Request, res: Response) => {
   }
 };
 
-// NEW: Controller for POST /api/notifications/update-twitter
+//  Controller for POST /api/profile/update-twitter
 export const updateTwitter = async (req: Request, res: Response) => {
   const { walletAddress, twitterHandle } = req.body;
 
@@ -107,7 +106,6 @@ export const updateTwitter = async (req: Request, res: Response) => {
       .status(400)
       .json({ message: "Invalid Ethereum wallet address format." });
   }
-  // Optional: Add more specific validation for twitterHandle format if needed (e.g., regex)
 
   try {
     const user = await User.findOneAndUpdate(
@@ -134,7 +132,7 @@ export const updateTwitter = async (req: Request, res: Response) => {
   }
 };
 
-// NEW: Controller for POST /api/notifications/update-discord
+// Controller for POST /api/profile/update-discord
 export const updateDiscord = async (req: Request, res: Response) => {
   const { walletAddress, discordHandle } = req.body;
 
@@ -173,7 +171,7 @@ export const updateDiscord = async (req: Request, res: Response) => {
   }
 };
 
-// EXISTING: Controller for GET /api/notifications/verify-email
+//  Controller for GET /api/notifications/verify-email
 export const verifyEmail = async (req: Request, res: Response) => {
   const { token, email } = req.query;
 
@@ -221,7 +219,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
   }
 };
 
-// EXISTING: Controller for POST /api/notifications/update-preferences
+//  Controller for POST /api/notifications/update-preferences
 export const updatePreferences = async (req: Request, res: Response) => {
   const { walletAddress, preferences } = req.body;
 
@@ -254,7 +252,7 @@ export const updatePreferences = async (req: Request, res: Response) => {
   }
 };
 
-// EXISTING: Controller for GET /api/notifications/profile/:walletAddress
+//  Controller for GET /api/profile/:walletAddress
 export const getProfile = async (req: Request, res: Response) => {
   try {
     const walletAddress = req.params.walletAddress.toLowerCase();
