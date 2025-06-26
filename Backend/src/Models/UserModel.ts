@@ -2,63 +2,59 @@ import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
   walletAddress: string;
-  emailAddress?: string;
-  isEmailVerified: boolean;
-  twitter?: {
-    id: string;
-    username: string;
-    accessToken: string;
-    refreshToken: string;
-  };
-  discord?: {
-    id: string;
-    username: string;
-    accessToken: string;
-    refreshToken: string;
+  email: string;
+  emailVerified: boolean;
+  twitterHandle?: string;
+  discordHandle?: string;
+  verificationToken?: string;
+  verificationTokenExpires?: Date;
+  notificationPreferences: {
+    deposit: boolean;
+    withdrawal: boolean;
+    safeMaturing: boolean;
   };
   createdAt: Date;
   updatedAt: Date;
 }
 
-const UserSchema: Schema = new Schema(
-  {
-    walletAddress: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    emailAddress: {
-      type: String,
-      unique: true, 
-      sparse: true, // Allows multiple documents to have null emailAddress
-      lowercase: true,
-      trim: true,
-    },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    twitter: {
-      id: { type: String },
-      username: { type: String },
-      accessToken: { type: String },
-      refreshToken: { type: String },
-    },
-    discord: {
-      id: { type: String },
-      username: { type: String },
-      accessToken: { type: String },
-      refreshToken: { type: String },
-    },
+const UserSchema: Schema = new Schema({
+  walletAddress: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
   },
-  {
-    timestamps: true,
-  }
-);
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+  },
+  emailVerified: { type: Boolean, default: false },
+  twitterHandle: { type: String, trim: true },
+  discordHandle: { type: String, trim: true },
+  verificationToken: { type: String },
+  verificationTokenExpires: { type: Date },
+  notificationPreferences: {
+    deposit: { type: Boolean, default: true },
+    withdrawal: { type: Boolean, default: true },
+    safeMaturing: { type: Boolean, default: true },
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
 
-// Create and export the Mongoose model
-const User = mongoose.model<IUser>("User", UserSchema);
+// Update `updatedAt` on save
+UserSchema.pre("save", function (next) {
+  this.updatedAt = new Date();
+  next();
+});
 
-export default User;
+// For `findOneAndUpdate` or `updateOne`
+UserSchema.pre(["findOneAndUpdate", "updateOne"], function (next) {
+  this.set({ updatedAt: new Date() });
+  next();
+});
+
+export default mongoose.model<IUser>("User", UserSchema);
