@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
 import User from "../Models/UserModel";
-import { sendEmail } from "../services/email"; 
+import { sendEmail } from "../services/email";
 import validator from "validator";
 import crypto from "crypto";
 
 // Helper function to generate verification link and HTML
 const generateVerificationContent = (email: string, token: string) => {
-
-  const verificationLink = `http://localhost:3000/verify-email?token=${token}&email=${encodeURIComponent(
+  const verificationLink = `https://www.coinsafe.network/dashboard/profile?token=${token}&email=${encodeURIComponent(
     email
   )}`;
   const subject = "CoinSafe: Please Verify Your Email Address";
@@ -58,7 +57,7 @@ export const updateEmail = async (req: Request, res: Response) => {
       { walletAddress: walletAddress.toLowerCase() },
       {
         email: email.toLowerCase(),
-        emailVerified: false, 
+        emailVerified: false,
         verificationToken: verificationToken,
         verificationTokenExpires: new Date(Date.now() + 3600 * 1000), // Token valid for 1 hour
       },
