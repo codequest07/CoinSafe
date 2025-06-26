@@ -174,13 +174,19 @@ export const updateDiscord = async (req: Request, res: Response) => {
 export const verifyEmail = async (req: Request, res: Response) => {
   const { token, email } = req.query;
 
+  // Log incoming request details
+  console.log("--- Email Verification Attempt ---");
+  console.log("Received Token:", token);
+  console.log("Received Email:", email);
+  console.log("Current Time (for expiry check):", new Date());
+
   if (
     !token ||
     !email ||
     typeof token !== "string" ||
     typeof email !== "string"
   ) {
-    // Send JSON response for invalid link
+    console.log("Validation failed: Missing or invalid token/email params.");
     return res.status(400).json({
       success: false,
       message: "Invalid verification link parameters.",
@@ -188,14 +194,37 @@ export const verifyEmail = async (req: Request, res: Response) => {
   }
 
   try {
+    // Log query parameters before database lookup
+    const queryEmail = email.toLowerCase();
+    console.log("Querying DB with:", {
+      email: queryEmail,
+      verificationToken: token,
+      verificationTokenExpires: { $gt: new Date() },
+    });
+
     const user = await User.findOne({
-      email: email.toLowerCase(),
+      email: queryEmail,
       verificationToken: token,
       verificationTokenExpires: { $gt: new Date() }, // Token must not be expired
     });
 
+    // Log user lookup result
     if (!user) {
-      // Send JSON response for failed verification conditions
+      console.log("User NOT found or token expired/invalid.");
+      // Optional: Log more details about why it failed to find
+      const checkUserByEmail = await User.findOne({ email: queryEmail });
+      if (checkUserByEmail) {
+        console.log("User found by email, but token/expiry mismatch:");
+        console.log("  DB Token:", checkUserByEmail.verificationToken);
+        console.log("  DB Expiry:", checkUserByEmail.verificationTokenExpires);
+        console.log(
+          "  Is Email Verified in DB:",
+          checkUserByEmail.emailVerified
+        );
+      } else {
+        console.log("No user found at all with this email in DB.");
+      }
+
       return res.status(400).json({
         success: false,
         message:
@@ -203,18 +232,26 @@ export const verifyEmail = async (req: Request, res: Response) => {
       });
     }
 
+    // Log successful user lookup
+    console.log("User FOUND for verification:", user.walletAddress);
+    console.log("User initial emailVerified status:", user.emailVerified);
+
     user.emailVerified = true;
     user.verificationToken = undefined;
     user.verificationTokenExpires = undefined;
     await user.save();
+
+    console.log(
+      "User updated successfully in DB. New emailVerified status:",
+      user.emailVerified
+    );
 
     // SUCCESS: Send JSON response
     res
       .status(200)
       .json({ success: true, message: "Email verified successfully!" });
   } catch (error) {
-    console.error("Error verifying email:", error);
-    // Send JSON response for server error
+    console.error("Error verifying email (Caught exception):", error);
     res.status(500).json({
       success: false,
       message: "Server error during email verification. Please try again.",
