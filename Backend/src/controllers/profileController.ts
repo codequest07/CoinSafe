@@ -170,7 +170,7 @@ export const updateDiscord = async (req: Request, res: Response) => {
   }
 };
 
-//  Controller for GET /api/notifications/verify-email
+//  Controller for GET /api/profile/verify-email
 export const verifyEmail = async (req: Request, res: Response) => {
   const { token, email } = req.query;
 
@@ -180,7 +180,11 @@ export const verifyEmail = async (req: Request, res: Response) => {
     typeof token !== "string" ||
     typeof email !== "string"
   ) {
-    return res.status(400).send("Invalid verification link.");
+    // Send JSON response for invalid link
+    return res.status(400).json({
+      success: false,
+      message: "Invalid verification link parameters.",
+    });
   }
 
   try {
@@ -191,30 +195,30 @@ export const verifyEmail = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res
-        .status(400)
-        .send(
-          "Verification failed: Invalid or expired token, or email already verified."
-        );
+      // Send JSON response for failed verification conditions
+      return res.status(400).json({
+        success: false,
+        message:
+          "Verification failed: Invalid or expired token, or email already verified.",
+      });
     }
 
     user.emailVerified = true;
-    user.verificationToken = undefined; // Clear the token after use
+    user.verificationToken = undefined;
     user.verificationTokenExpires = undefined;
     await user.save();
 
+    // SUCCESS: Send JSON response
     res
       .status(200)
-      .send(
-        "<h1>Email Verified!</h1><p>Your CoinSafe email address has been successfully verified. You can now close this tab.</p>"
-      );
+      .json({ success: true, message: "Email verified successfully!" });
   } catch (error) {
     console.error("Error verifying email:", error);
-    res
-      .status(500)
-      .send(
-        "<h1>Server Error</h1><p>An error occurred during email verification. Please try again.</p>"
-      );
+    // Send JSON response for server error
+    res.status(500).json({
+      success: false,
+      message: "Server error during email verification. Please try again.",
+    });
   }
 };
 
