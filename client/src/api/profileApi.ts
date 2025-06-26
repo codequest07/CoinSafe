@@ -1,6 +1,6 @@
 import axios from "axios";
 const api = axios.create({
-  baseURL: "https://coinsafe-0q0m.onrender.com/api",
+  baseURL: "https://coinsafe-0q0m.onrender.com/api/profile",
 });
 
 interface NotificationPreferences {
@@ -30,7 +30,7 @@ interface UpdatePreferencesPayload {
 
 export const updateEmailApi = async (data: UpdateEmailPayload) => {
   try {
-    const response = await api.post("/profile/update-email", data);
+    const response = await api.post("/update-email", data);
     return response.data;
   } catch (error: any) {
     // Axios errors provide `error.response` for server responses
@@ -53,7 +53,7 @@ export const updateTwitterApi = async (
   twitterHandle: string
 ) => {
   try {
-    const response = await api.post("/profile/update-twitter", {
+    const response = await api.post("/update-twitter", {
       walletAddress,
       twitterHandle,
     });
@@ -68,7 +68,7 @@ export const updateDiscordApi = async (
   discordHandle: string
 ) => {
   try {
-    const response = await api.post("/profile/update-discord", {
+    const response = await api.post("/update-discord", {
       walletAddress,
       discordHandle,
     });
@@ -82,7 +82,7 @@ export const updateNotificationPreferences = async (
   data: UpdatePreferencesPayload
 ) => {
   try {
-    const response = await api.post("/profile/update-preferences", data);
+    const response = await api.post("/update-preferences", data);
     return response.data;
   } catch (error: any) {
     throw error.response?.data?.message || "Failed to update preferences.";
@@ -93,14 +93,12 @@ export const getNotificationProfile = async (
   walletAddress: string
 ): Promise<UserProfile | null> => {
   try {
-    const response = await api.get(`/profile/profile/${walletAddress}`);
-    // Backend returns { profile: null } if not found, or { profile: data }
+    const response = await api.get(`/${walletAddress}`);
     if (response.data.profile) {
       return response.data.profile as UserProfile;
     }
-    return null; // Explicitly return null if profile is not found
+    return null;
   } catch (error: any) {
-    // Log errors but return null for cases where profile isn't found
     console.error(
       "Failed to fetch profile:",
       error.response?.data?.message || error
