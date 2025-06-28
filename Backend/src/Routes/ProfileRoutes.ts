@@ -1,4 +1,6 @@
 import { Router } from "express";
+import express from "express";
+import { Request, Response } from "express";
 import {
   updateEmail,
   updateTwitter,
@@ -6,6 +8,7 @@ import {
   verifyEmail,
   updatePreferences,
   getProfile,
+  testUserStatus,
 } from "../controllers/profileController";
 
 const router = Router();
@@ -18,5 +21,7 @@ router.post("/update-discord", updateDiscord);
 router.get("/verify-email", verifyEmail);
 router.post("/update-preferences", updatePreferences);
 router.get("/:walletAddress", getProfile);
+
+router.get("/test/:walletAddress", testUserStatus);
 
 export default router;
