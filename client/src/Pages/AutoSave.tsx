@@ -4,10 +4,13 @@ import AddToken from "@/components/Modals/Add-token";
 import DeactivateSafeModal from "@/components/Modals/Deactivate-safe-modal";
 import ManageAutosavings from "@/components/Modals/Manage-autosavings";
 import RemoveTokenModal from "@/components/Modals/Remove-token-modal";
-import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
+import UnlockAutoSafeModal from "@/components/Modals/UnlockAutoSafeModal";
+// import UnlockModal from "@/components/Modals/UnlockModal";
+// import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
+import { useClaimAllAutoSafe } from "@/hooks/useClaimAllAutoSafe";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
@@ -16,14 +19,16 @@ import { ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActiveAccount } from "thirdweb/react";
+import { toast } from "sonner";
+import { CoinsafeDiamondContract } from "@/lib/contract";
 
 const AutoSave = () => {
   const navigate = useNavigate();
   const {
-    safeDetails,
+    // safeDetails,
     isLoading: apiLoading,
     isError,
-    tokenAmounts,
+    // tokenAmounts,
   } = useGetSafeById("911");
   const account = useActiveAccount();
 
@@ -96,6 +101,26 @@ const AutoSave = () => {
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
   const { details } = useAutomatedSafeForUser(userAddress as `0x${string}`);
   const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
+
+  const {
+    claimAllAutoSafe,
+    isLoading: claimAllIsLoading,
+    error: claimAllError,
+  } = useClaimAllAutoSafe({
+    account,
+    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    toast,
+    onSuccess: () => {
+      console.log("Successfully claimed autosafe");
+    },
+    onError: (err) => {
+      console.error("claim error:", err);
+    },
+  });
+
+  useEffect(() => {
+    console.log("Claim Error", claimAllError);
+  }, [claimAllError]);
 
   console.log("Due plans details:", duePlanDetails);
 
@@ -386,8 +411,19 @@ const AutoSave = () => {
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
-                    onClick={() => setShowWithdrawModal(true)}
+                    onClick={claimAllAutoSafe}
                     className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
+                    disabled={
+                      Number(
+                        formatUnits(
+                          balances?.reduce(
+                            (total: any, obj: any) => total + obj?.amount,
+                            0n
+                          ),
+                          18
+                        )
+                      ) == 0 || claimAllIsLoading
+                    }
                   >
                     Withdraw
                   </button>
@@ -403,7 +439,6 @@ const AutoSave = () => {
             <Skeleton className="h-64 w-full rounded-[12px] border-[1px] border-[#FFFFFF17] p-6" />
           </div>
         ) : (
-          safeDetails &&
           details && (
             <div className="py-2">
               <AssetTabs safeDetails={details} />
@@ -534,7 +569,7 @@ const AutoSave = () => {
         );
         return null;
       })()}
-      
+
       <AddToken open={showAddTokenModal} onClose={backToManageAutosavings} />
 
       {/* Remove Token Modal */}
@@ -591,15 +626,23 @@ const AutoSave = () => {
             console.log("About to render DeactivateSafeModal component");
             return null;
           })()}
-          <DeactivateSafeModal details={details} onClose={backToManageAutosavings} />
+          <DeactivateSafeModal
+            details={details}
+            onClose={backToManageAutosavings}
+          />
         </div>
       )}
 
       {showWithdrawModal && (
-        <WithdrawEmergencySafe
-          isWithdrawModalOpen={showWithdrawModal}
-          setIsWithdrawModalOpen={setShowWithdrawModal}
-          AvailableBalance={tokenAmounts}
+        // <WithdrawEmergencySafe
+        //   isWithdrawModalOpen={showWithdrawModal}
+        //   setIsWithdrawModalOpen={setShowWithdrawModal}
+        //   AvailableBalance={tokenAmounts}
+        // />
+        // <UnlockModal onClose={() => setShowWithdrawModal(false)} />
+        <UnlockAutoSafeModal
+          account={account}
+          onClose={() => setShowWithdrawModal(false)}
         />
       )}
     </div>
