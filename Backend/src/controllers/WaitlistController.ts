@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Waitlist from "../Models/WaitlistModel";
 import { waitlistValidationSchema } from "../Validation";
-import { sendEmail } from "../email";
+import { sendEmail } from "../services/email";
 
 export const addToWaitlist = async (
   req: Request,
