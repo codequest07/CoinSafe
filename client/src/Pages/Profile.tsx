@@ -10,8 +10,11 @@ import { useActiveAccount } from "thirdweb/react";
 import { useProfile } from "../hooks/useProfile";
 import { profileAPI } from "../services/api";
 import ConnectModal from "@/components/Modals/ConnectModal";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const account = useActiveAccount();
   const address = account?.address || "";
   const {
@@ -201,7 +204,10 @@ export default function ProfilePage() {
     <div className="min-h bg-transparent flex items-center justify-center p-4">
       <Card className="w-full max-w-xl bg-transparent border-[#FFFFFF21] rounded-3xl p-8 space-y-6">
         {/* Header */}
-        <div className="">
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigate(-1)}>
+            <ArrowLeft className="text-white" size={20} />
+          </button>
           <h1 className="text-[15px] font-medium text-[#F1F1F1]">My profile</h1>
         </div>
 
