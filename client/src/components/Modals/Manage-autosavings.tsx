@@ -46,11 +46,7 @@ export default function ManageAutosavings({
               onAddToken();
             }}>
             <span>Add token to safe</span>
-            <img
-              src="/src/icons/arrow-down.svg"
-              alt="close"
-              className="w-4 h-4"
-            />
+            <img src="/assets/arrow-down.svg" alt="close" className="w-4 h-4" />
           </button>
 
           <button
@@ -61,11 +57,7 @@ export default function ManageAutosavings({
               onRemoveToken();
             }}>
             <span>Remove token from safe</span>
-            <img
-              src="/src/icons/arrow-down.svg"
-              alt="close"
-              className="w-4 h-4"
-            />
+            <img src="/assets/arrow-down.svg" alt="close" className="w-4 h-4" />
           </button>
 
           <button
@@ -76,11 +68,7 @@ export default function ManageAutosavings({
               onDeactivateSafe();
             }}>
             <span>Deactivate safe</span>
-            <img
-              src="/src/icons/arrow-down.svg"
-              alt="close"
-              className="w-4 h-4"
-            />
+            <img src="/assets/arrow-down.svg" alt="close" className="w-4 h-4" />
           </button>
         </div>
       </div>
