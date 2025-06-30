@@ -28,6 +28,7 @@ import {
 } from "./store/atoms/balance";
 import { useWatchEvents } from "./hooks/useWatchEvents";
 import Profile from "./Pages/Profile";
+import ContactUs from "./Pages/Contact-Us";
 
 const App = () => {
   const [, setAvailableBalance] = useRecoilState(availableBalanceState);
@@ -75,7 +76,7 @@ const App = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/extension" element={<Extension />} />
         <Route path="/testnet" element={<Navigate to={"/dashboard"} />} />
-        <Route path="/contact" element={<Navigate to={"/"} />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="/faucet" element={<Faucet />} />
         <Route path="/dashboard" element={<Layout />}>
           <Route path="/dashboard/" element={<Home />} />
