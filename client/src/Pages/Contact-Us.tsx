@@ -4,8 +4,60 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 export default function ContactUs() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError("");
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("https://formspree.io/f/mgvydlna", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        form.reset();
+      } else {
+        throw new Error("Failed to send message");
+      }
+    } catch {
+      setError("Failed to send message. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-black text-white p-8 md:p-16 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-3xl font-light">Thank you!</h2>
+          <p className="text-gray-300">
+            Your message has been sent successfully. We'll get back to you soon!
+          </p>
+          <Button
+            onClick={() => setIsSubmitted(false)}
+            className="bg-white text-black hover:bg-gray-200 px-8 py-3 h-auto">
+            Send Another Message
+          </Button>
+        </div>
+      </div>
+    );
+  }
   return (
     <>
       <Navbar />
@@ -29,13 +81,14 @@ export default function ContactUs() {
               </div>
             </div>
             <div className="space-y-8">
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm text-gray-300">
                     Name
                   </Label>
                   <Input
                     id="name"
+                    name="name"
                     placeholder="Nwamaka"
                     className="bg-transparent border-[#FFFFFF3D] border-2 text-white placeholder:text-gray-400 focus:border-gray-400 h-12"
                   />
@@ -47,6 +100,7 @@ export default function ContactUs() {
                   </Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     placeholder="akah.nwamaka.d@gmail.com"
                     className="bg-transparent border-[#FFFFFF3D] border-2 text-white placeholder:text-gray-400 focus:border-[#FFFFFF3D] h-12"
@@ -59,6 +113,7 @@ export default function ContactUs() {
                   </Label>
                   <Textarea
                     id="message"
+                    name="message"
                     placeholder="akah.nwamaka.d@gmail.com"
                     className="bg-transparent border-[#FFFFFF3D] border-2 text-white placeholder:text-gray-400 focus:border-[#FFFFFF3D] min-h-32 resize-none"
                   />
@@ -66,15 +121,16 @@ export default function ContactUs() {
 
                 <Button
                   type="submit"
-                  className="bg-[#FFFFFFE5] rounded-[2rem] text-black hover:bg-gray-200 px-8 py-3 h-auto">
-                  Submit
+                  disabled={isSubmitting}
+                  className="bg-[#FFFFFFE5] rounded-[2rem] text-black hover:bg-gray-200 px-8 py-3 h-auto disabled:disabled:opacity-50">
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </div>
           </div>
         </div>
       </div>
-       <Footer />
+      <Footer />
     </>
   );
 }
