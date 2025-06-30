@@ -14,6 +14,7 @@ export function AssetTabs({ safeDetails }: AssetTabsProps) {
   const [activeTab, setActiveTab] = useState<"assets" | "savings">("assets");
   const location = useLocation();
   const isVaultPage = location.pathname === "/dashboard/vault";
+  const isAutoSafePage = location.pathname === "/dashboard/vault/auto-safe";
 
   return (
     <div className="w-full max-w-[98%] mx-auto">
@@ -25,7 +26,8 @@ export function AssetTabs({ safeDetails }: AssetTabsProps) {
             activeTab === "assets"
               ? "border-b-2 border-[#79E7BA]"
               : "text-gray-400 hover:text-gray-200"
-          )}>
+          )}
+        >
           Assets
         </button>
         <button
@@ -35,7 +37,8 @@ export function AssetTabs({ safeDetails }: AssetTabsProps) {
             activeTab === "savings"
               ? "border-b-2 border-[#79E7BA]"
               : "text-gray-400 hover:text-gray-200"
-          )}>
+          )}
+        >
           Savings history
         </button>
       </div>
@@ -44,6 +47,8 @@ export function AssetTabs({ safeDetails }: AssetTabsProps) {
         {activeTab === "assets" ? (
           isVaultPage ? (
             <VaultAssetTable safeDetails={safeDetails} />
+          ) : isAutoSafePage ? (
+            <AssetTable safeDetails={safeDetails} />
           ) : (
             <AssetTable safeDetails={safeDetails} />
           )
@@ -63,7 +68,8 @@ export function AssetTabs({ safeDetails }: AssetTabsProps) {
                   strokeWidth="1"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="text-gray-400 mb-4 animate-bounce">
+                  className="text-gray-400 mb-4 animate-bounce"
+                >
                   <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
                   <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
                   <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>

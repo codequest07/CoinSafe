@@ -27,6 +27,7 @@ import {
   totalBalanceState,
 } from "./store/atoms/balance";
 import { useWatchEvents } from "./hooks/useWatchEvents";
+import Profile from "./Pages/Profile";
 
 const App = () => {
   const [, setAvailableBalance] = useRecoilState(availableBalanceState);
@@ -81,6 +82,7 @@ const App = () => {
           <Route path="/dashboard/wallet" element={<Portfolio />} />
           <Route path="/dashboard/vault" element={<Vault />} />
           <Route path="/dashboard/vault/:id" element={<SavingsDetail />} />
+          <Route path="/dashboard/profile" element={<Profile />} />
           <Route
             path="/dashboard/vault/emergency-safe"
             element={<EmergencySafe />}

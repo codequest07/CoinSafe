@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { WaitlistModal } from "./Modals/Waitlist-modal";
+import { Link } from "react-router-dom";
 
 export default function Hero() {
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
@@ -20,16 +21,16 @@ export default function Hero() {
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight">
-                Save smarter
+                className="text-4xl sm:text-5xl md:text-[50px] lg:text-[50px] font-[500]  text-white tracking-tight">
+                Build better saving habits,
                 <br />
-                Earn effortlessly
+                one step at a time.
               </h1>
-              <p className="text-base sm:text-lg text-gray-400 md:max-w-2xl">
-                Transform your spending into effortless savings. With
-                personalized insights, high-yield vaults, and rewards built
-                around your goals, Coinsafe makes growing your crypto simple and
-                exciting.
+
+              <p className="text-base font-[400] sm:text-base text-gray-400 md:max-w-2xl">
+                Whether you prefer to automate or save manually, Coinsafe helps
+                you understand your money and make smarter choices, without the
+                pressure.
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
@@ -39,20 +40,21 @@ export default function Hero() {
                 className="bg-[#262628] text-[#F1F1F1] rounded-[2rem]  sm:w-auto">
                 Download extension
               </Button> */}
-              <Button
-                onClick={() => setShowWaitlistModal(true)}
-                size="lg"
-                variant="outline"
-                className="border-white text-[#010104] rounded-[2rem]  sm:w-auto">
-                Join waitlist
-              </Button>
+              <Link to="/dashboard">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-[#010104] rounded-[2rem]  sm:w-auto">
+                  Start saving
+                </Button>
+              </Link>
             </div>
           </div>
 
           {/* Right column - Cards */}
           <div className="relative">
             {/* Top floating card */}
-            <div className="">
+            <div className="transform rotate-3 hover:rotate-0 transition-transform duration-300">
               <img
                 src="/assets/heroIma.png"
                 alt="Claimable Card"
