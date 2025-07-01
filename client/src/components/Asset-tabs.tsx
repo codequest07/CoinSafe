@@ -5,12 +5,14 @@ import VaultAssetTable from "./VaultAssetTable";
 // import TransactionHistory from "./TransactionHistory";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useLocation } from "react-router-dom";
+import AutoSavedAssetTable from "./AutoSavedAssetTable";
 
 interface AssetTabsProps {
   safeDetails?: FormattedSafeDetails;
+  isLoading?: boolean;
 }
 
-export function AssetTabs({ safeDetails }: AssetTabsProps) {
+export function AssetTabs({ safeDetails, isLoading }: AssetTabsProps) {
   const [activeTab, setActiveTab] = useState<"assets" | "savings">("assets");
   const location = useLocation();
   const isVaultPage = location.pathname === "/dashboard/vault";
@@ -48,7 +50,7 @@ export function AssetTabs({ safeDetails }: AssetTabsProps) {
           isVaultPage ? (
             <VaultAssetTable safeDetails={safeDetails} />
           ) : isAutoSafePage ? (
-            <AssetTable safeDetails={safeDetails} />
+            <AutoSavedAssetTable assets={safeDetails} isLoading={isLoading} />
           ) : (
             <AssetTable safeDetails={safeDetails} />
           )
