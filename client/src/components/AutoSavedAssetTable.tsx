@@ -126,7 +126,7 @@ export default function AutoSavedAssetTable({
                   AUTOSAVE DETAILS
                 </TableHead>
                 <TableHead className="text-[#CACACA] font-normal text-xs h-12 px-6">
-                  AMOUNT
+                  AMOUNT SAVED
                 </TableHead>
                 <TableHead className="text-[#CACACA] font-normal text-xs h-12 px-6">
                   AUTOSAVED
