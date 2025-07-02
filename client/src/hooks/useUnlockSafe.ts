@@ -1,6 +1,10 @@
 import { useCallback } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import {
+  getContract,
+  prepareContractCall,
+  sendAndConfirmTransaction,
+} from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { toast } from "./use-toast";
@@ -252,7 +256,7 @@ export const useUnlockSafe = ({
           acceptFee: currentState.acceptEarlyWithdrawalFee,
         });
 
-        const result = await sendTransaction({
+        const result = await sendAndConfirmTransaction({
           transaction,
           account: account!,
         });

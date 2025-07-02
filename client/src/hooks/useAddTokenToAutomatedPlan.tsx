@@ -7,7 +7,7 @@ import {
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
-import { erc20Abi, Abi } from "viem";
+import { Abi } from "viem";
 import { getTokenDecimals } from "@/lib/utils";
 import { facetAbis } from "@/lib/contract";
 
@@ -91,13 +91,6 @@ export const useAddTokenToAutomatedPlan = ({
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
 
-        const tokenContract = getContract({
-          client,
-          address: token,
-          chain: liskSepolia,
-          abi: erc20Abi,
-        });
-
         // Convert amount to uint256 (considering ERC-20 decimals)
         const decimals = getTokenDecimals(token);
         const amountStr = amount.toString();
@@ -111,27 +104,6 @@ export const useAddTokenToAutomatedPlan = ({
           amountWithDecimals = BigInt(whole + paddedFraction);
         } else {
           amountWithDecimals = BigInt(amountStr + "0".repeat(decimals));
-        }
-
-        // Approve token spend
-        try {
-          const approveTx = prepareContractCall({
-            contract: tokenContract,
-            method: "approve",
-            params: [coinSafeAddress, amountWithDecimals],
-          });
-
-          onApprove?.();
-          await sendAndConfirmTransaction({
-            transaction: approveTx,
-            account,
-          });
-        } catch (approveError: any) {
-          const errorMsg = `Token approval failed: ${
-            approveError?.message ?? "Unknown error"
-          }`;
-          toast({ title: errorMsg, variant: "destructive" });
-          throw new Error(errorMsg);
         }
 
         // Call addTokenToAutomatedPlan

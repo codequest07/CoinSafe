@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "sonner";
 import { CoinsafeDiamondContract } from "@/lib/contract";
+import ExtendSafeModal from "@/components/Modals/extend-safe-modal";
 
 const AutoSave = () => {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ const AutoSave = () => {
   const [showAddTokenModal, setShowAddTokenModal] = useState(false);
   const [showRemoveTokenModal, setShowRemoveTokenModal] = useState(false);
   const [showDeactivateSafeModal, setShowDeactivateSafeModal] = useState(false);
+  const [showExtendSafeModal, setShowExtendSafeModal] = useState(false);
 
   const userAddress = account?.address;
 
@@ -81,6 +83,13 @@ const AutoSave = () => {
     console.log("showDeactivateSafeModal set to:", true);
   };
 
+  const handleExtendSafe = () => {
+    console.log("handleExtendSafe called");
+    setShowManageAutosavings(false);
+    setShowExtendSafeModal(true);
+    console.log("showExtendSafeModal set to:", true);
+  };
+
   // Function to close all modals
   const closeAllModals = () => {
     console.log("Closing all modals");
@@ -88,6 +97,7 @@ const AutoSave = () => {
     setShowAddTokenModal(false);
     setShowRemoveTokenModal(false);
     setShowDeactivateSafeModal(false);
+    setShowExtendSafeModal(false);
   };
 
   // Function to go back to the main autosavings modal
@@ -96,6 +106,7 @@ const AutoSave = () => {
     setShowAddTokenModal(false);
     setShowRemoveTokenModal(false);
     setShowDeactivateSafeModal(false);
+    setShowExtendSafeModal(false);
   };
 
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
@@ -557,6 +568,7 @@ const AutoSave = () => {
             onAddToken={handleAddToken}
             onRemoveToken={handleRemoveToken}
             onDeactivateSafe={handleDeactivateSafe}
+            onExtendSafe={handleExtendSafe}
           />
         </div>
       )}
@@ -570,7 +582,12 @@ const AutoSave = () => {
         return null;
       })()}
 
-      <AddToken open={showAddTokenModal} onClose={backToManageAutosavings} />
+      <AddToken
+        details={details}
+        open={showAddTokenModal}
+        onClose={backToManageAutosavings}
+        onSuccess={closeAllModals}
+      />
 
       {/* Remove Token Modal */}
       {(() => {
@@ -581,25 +598,11 @@ const AutoSave = () => {
         return null;
       })()}
 
-      {showRemoveTokenModal && (
-        <div
-          className="modal-container"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 9999,
-          }}
-        >
-          {(() => {
-            console.log("About to render RemoveTokenModal component");
-            return null;
-          })()}
-          <RemoveTokenModal onClose={backToManageAutosavings} />
-        </div>
-      )}
+      <RemoveTokenModal
+        onClose={backToManageAutosavings}
+        open={showRemoveTokenModal}
+        closeAllModals={closeAllModals}
+      />
 
       {/* Deactivate Safe Modal */}
       {(() => {
@@ -627,6 +630,38 @@ const AutoSave = () => {
             return null;
           })()}
           <DeactivateSafeModal
+            details={details}
+            onClose={backToManageAutosavings}
+          />
+        </div>
+      )}
+
+      {/* Extend Safe Modal */}
+      {(() => {
+        console.log(
+          "Rendering ExtendSafeModal section, showExtendSafeModal:",
+          showExtendSafeModal
+        );
+        return null;
+      })()}
+
+      {showExtendSafeModal && (
+        <div
+          className="modal-container"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}
+        >
+          {(() => {
+            console.log("About to render DeactivateSafeModal component");
+            return null;
+          })()}
+          <ExtendSafeModal
             details={details}
             onClose={backToManageAutosavings}
           />

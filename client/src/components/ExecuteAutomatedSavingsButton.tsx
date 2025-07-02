@@ -28,8 +28,8 @@ export function ExecuteAutomatedSavingsButton() {
     []
   );
 
-  // Use Thirdweb's useSendTransaction hook for executing the transaction
-  //   const { mutate: sendTransaction, error } = useSendTransaction();
+  // Use Thirdweb's usesendAndConfirmTransaction hook for executing the transaction
+  //   const { mutate: sendAndConfirmTransaction, error } = usesendAndConfirmTransaction();
 
   // Handle button click to execute the function
   const handleExecute = async () => {

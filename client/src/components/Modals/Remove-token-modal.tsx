@@ -2,7 +2,7 @@
 
 import { Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useActiveAccount } from "thirdweb/react";
 import {
@@ -14,6 +14,8 @@ import { formatUnits } from "ethers"; // Added for amount formatting
 import { useRemoveTokenFromAutomatedPlan } from "@/hooks/useRemoveTokenFromAutomatedPlan";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import SuccessfulTxModal from "./SuccessfulTxModal";
 
 interface Token {
   token: string; // Token address
@@ -24,12 +26,16 @@ interface Token {
 
 interface RemoveTokenModalProps {
   onClose: () => void;
+  closeAllModals?: () => void; // Optional success callback
+  open: boolean;
 }
 
-export default function RemoveTokenModal({ onClose }: RemoveTokenModalProps) {
+export default function RemoveTokenModal({ open, onClose, closeAllModals }: RemoveTokenModalProps) {
+  if (!open) return null; // If the modal is not open, return null
   const account = useActiveAccount();
   const userAddress = account?.address;
   const [tokens, setTokens] = useState<Token[]>([]); // Initialize empty, populated from details
+  const [showSuccessModal, setShowSucessModal] = useState(false);
   // const [selectedTokenAddress, setSelectedTokenAddress] = useState<
   //   string | null
   // >(null); // Track selected token address
@@ -97,6 +103,15 @@ export default function RemoveTokenModal({ onClose }: RemoveTokenModalProps) {
     );
   };
 
+  const onSuccess = () => {
+    setShowSucessModal(true);
+
+    setTimeout(() => {
+      setShowSucessModal(false);
+      closeAllModals?.();
+    }, 5000); // Close success modal after 3 seconds
+  };
+
   const { removeTokenFromPlan, isLoading } = useRemoveTokenFromAutomatedPlan({
     account,
     token: tokens.find((token) => token.selected)?.token! as `0x${string}`,
@@ -107,8 +122,8 @@ export default function RemoveTokenModal({ onClose }: RemoveTokenModalProps) {
       // Replace with your preferred toast library (e.g., react-toastify)
     },
     onSuccess: () => {
-      console.log("Token added successfully");
-      onClose(); // Close modal on success
+      console.log("Token removed successfully");
+      onSuccess();
     },
     onError: (err) => console.error("Transaction error:", err),
   });
@@ -130,7 +145,7 @@ export default function RemoveTokenModal({ onClose }: RemoveTokenModalProps) {
           onClose();
         }}
       ></div>
-      <div className="relative w-full max-w-md rounded-lg bg-[#17171C] text-white shadow-lg">
+      <div className="relative w-full max-w-md rounded-xl border border-white/15 p-2 bg-[#17171C] text-white shadow-lg">
         <div className="flex items-center justify-between px-5 py-3">
           <h2 className="text-xl font-medium">Remove token from safe</h2>
           <button
@@ -153,12 +168,15 @@ export default function RemoveTokenModal({ onClose }: RemoveTokenModalProps) {
           <div className="mb-2">
             <div className="flex items-center justify-between">
               <span className="text-lg font-medium">Auto savings</span>
-              <Badge className="bg-[#79E7BA33] hover:bg-[#79E7BA33] rounded-full px-3 py-1 text-sm text-gray-300">
+              {/* <Badge className="bg-[#79E7BA33] hover:bg-[#79E7BA33] rounded-full px-3 py-1 text-sm text-gray-300">
                 Unlocks every 30 days
-              </Badge>
+              </Badge> */}
             </div>
             <div className="mt-1 text-[13px] text-gray-400">
-              Next unlock date: 25th December, 2025
+              Next unlock date:{" "}
+              {details?.unlockTime
+                ? format(new Date(Number(details.unlockTime) * 1000), "PPP")
+                : "N/A"}
             </div>
           </div>
 
@@ -262,11 +280,49 @@ export default function RemoveTokenModal({ onClose }: RemoveTokenModalProps) {
               disabled={isLoading}
               aria-label="Remove token"
             >
-              {isLoading ? <Loader2 /> : "Remove token"}
+              {isLoading ? <Loader2 className="animate-spin"/> : "Remove token"}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Successful Transaction modal */}
+      {showSuccessModal && (
+        <div
+          className="modal-container z-[9999]"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+          }}
+        >
+          {/* Successful Transaction Modal */}
+          <SuccessfulTxModal
+            isOpen={showSuccessModal}
+            onClose={() => setShowSucessModal(false)}
+            transactionType="remove-token"
+            token={
+              tokenData[tokens.find((token) => token.selected)?.token || ""]
+                ?.symbol || "Unknown"
+            }
+            additionalDetails={{
+              subText: `Effective immediately, we will stop autosaving ${formatUnits(
+                details.tokenDetails.find(
+                  ({ token }: { token: string }) =>
+                    token == tokens.find((token) => token.selected)?.token
+                )?.amountToSave ?? 0n,
+                18
+              )} ${
+                tokenData[tokens.find((token) => token.selected)?.token || ""]
+                  ?.symbol || "Unknown"
+              } per month`,
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

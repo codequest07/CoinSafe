@@ -67,10 +67,10 @@ export default function DeactivateSafeModal({
         account,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Deactivate Safe failed:", error);
       toast({
-        title: `Deactivate Safe failed:", ${error}`,
+        title: `Deactivate Safe failed:", ${error?.message || ""}`,
         variant: "destructive",
       });
     } finally {
@@ -86,7 +86,7 @@ export default function DeactivateSafeModal({
           onClose();
         }}
       ></div>
-      <div className="relative w-full max-w-md rounded-lg bg-[#17171C] text-white shadow-lg">
+      <div className="relative w-full max-w-md rounded-xl border border-white/15 p-2 bg-[#17171C] text-white shadow-lg">
         <div className="flex items-center justify-between p-5">
           <h2 className="text-xl font-[500]">Deactivate autosavings</h2>
           <button
@@ -131,7 +131,7 @@ export default function DeactivateSafeModal({
                 handleDeactivateSafe();
               }}
               disabled={!isSafeEmpty || deactivating}
-              className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-red-500 px-5 text-[14px] py-3 transition text-white hover:bg-red-600"
+              className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-3 transition text-black px-6"
             >
               {deactivating ? "Deactivating" : "Deactivate"}
               

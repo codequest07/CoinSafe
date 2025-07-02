@@ -1,6 +1,10 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount, useConnect } from "thirdweb/react";
-import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import {
+  getContract,
+  prepareContractCall,
+  sendAndConfirmTransaction,
+} from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { toBigInt } from "ethers";
@@ -83,7 +87,7 @@ export const useClaimAsset = ({
         });
 
         if (account) {
-          await sendTransaction({
+          await sendAndConfirmTransaction({
             transaction,
             account,
           });
@@ -168,7 +172,7 @@ export const useClaimAsset = ({
         });
 
         if (account) {
-          await sendTransaction({
+          await sendAndConfirmTransaction({
             transaction,
             account,
           });

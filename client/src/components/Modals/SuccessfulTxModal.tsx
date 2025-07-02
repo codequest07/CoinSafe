@@ -12,7 +12,8 @@ export interface SuccessfulTxModalProps {
     | "save"
     | "setup-recurring-save"
     | "top-up"
-    | "claim";
+    | "claim"
+    | "remove-token";
   amount?: number | string | bigint;
   token?: string;
   title?: string;
@@ -84,6 +85,12 @@ const SuccessfulTxModal = ({
         break;
       case "setup-recurring-save":
         transactionTitle = "Create Automated Savings Successful";
+        break;
+      case "remove-token":
+        transactionTitle = "Remove Token Successful";
+        break;
+      default:
+        transactionTitle = "Transaction Successful";
         break;
     }
   }
@@ -167,6 +174,17 @@ const SuccessfulTxModal = ({
           </>
         );
         break;
+      case "remove-token":
+        descriptionContent = (
+          <>
+            You have successfully removed{" "}
+            <span className="text-[#20FFAF] font-semibold">
+              {token}
+            </span>{" "}
+            from your autosavings
+          </>
+        );
+        break;
       default:
         descriptionContent = (
           <>
@@ -188,7 +206,7 @@ const SuccessfulTxModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className="max-w-[360px] sm:max-w-[410px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg"
+        className="max-w-[360px] sm:max-w-[410px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg z-50"
         noX={true}>
         <DialogTitle className="text-center">{transactionTitle}</DialogTitle>
 
