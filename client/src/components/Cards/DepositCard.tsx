@@ -131,6 +131,7 @@ export default function DepositCard() {
                 <input
                   type="number"
                   value={amount}
+                  disabled={isLoading}
                   onChange={(e: any) => setAmount(e.target.value)}
                   className="text-2xl font-medium bg-transparent text-white w-16 sm:w-full outline-none"
                   placeholder="0"
@@ -141,7 +142,7 @@ export default function DepositCard() {
                 </div>
               </div>
               <div className="sm:ml-4">
-                <Select onValueChange={handleTokenSelect} value={token}>
+                <Select onValueChange={handleTokenSelect} value={token} disabled={isLoading}>
                   <SelectTrigger className="w-[160px] border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
                     <div className="flex items-center">
                       <MemoRipple className="mr-2" />
