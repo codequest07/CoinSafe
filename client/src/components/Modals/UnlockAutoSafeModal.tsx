@@ -58,6 +58,8 @@ export default function UnlockAutoSafeModal({
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [supportedTokens] = useRecoilState(supportedTokensState);
 
+  console.log("Selected token balance", selectedTokenBalance);
+
   // Hooks
   //   const { safeDetails, isLoading: isSafeLoading } = useGetSafeById(safeId);
   const { details, isLoading: autoSafeIsLoading } = useAutomatedSafeForUser(
@@ -160,7 +162,10 @@ export default function UnlockAutoSafeModal({
           (t: any) => t?.token?.toLowerCase() === saveState.token?.toLowerCase()
         );
 
-        if (tokenInfo && typeof tokenInfo.amountSaved === "number") {
+        console.log("TOKEN INFO", tokenInfo);
+        console.log("TYPE OF AMOUNT", typeof tokenInfo.amountSaved);
+
+        if (tokenInfo && typeof tokenInfo.amountSaved === "bigint") {
           setSelectedTokenBalance(Number(tokenInfo.amountSaved));
           console.log(
             `Token ${saveState.token} balance in safe: ${tokenInfo.amount} ${tokenInfo.tokenSymbol}`
