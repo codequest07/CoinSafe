@@ -6,6 +6,7 @@
     "start": "node build/server.js",
     "dev": "cross-env NODE_OPTIONS='--max-old-space-size=2048' ts-node src/server.ts",
     "test": "nodemon src/server.ts",
+     "test-batch": "ts-node src/testBatch.ts",
     "build": "tsc"
   },
   "keywords": [],
@@ -37,6 +38,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.4",
+    "node-cron": "^4.2.0",
     "nodemailer": "^6.9.16",
     "validator": "^13.15.15"
   },
