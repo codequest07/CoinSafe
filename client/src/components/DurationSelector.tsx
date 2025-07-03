@@ -20,6 +20,8 @@ interface PillSelectorProps {
   disablePastDates?: boolean;
   className?: string;
   isDisabled?: boolean;
+  label?: string;
+  unlockDate?: string; 
 }
 
 export function DurationSelector({
@@ -32,6 +34,8 @@ export function DurationSelector({
   isCustomSelected,
   disablePastDates = true,
   isDisabled,
+  label,
+  unlockDate,
 }: PillSelectorProps) {
   // // if a date should be disabled
   // const isDateDisabled = (date: Date) => {
@@ -56,7 +60,13 @@ export function DurationSelector({
   return (
     <div className={`flex flex-col space-y-3 `}>
       <div className="flex justify-between items-center text-white">
-        <Label htmlFor="duration">Duration</Label>
+        <Label htmlFor="duration">{label ? label : "Duration"}</Label>
+
+        {unlockDate && (
+          <p className="text-xs text-[#CACACA]">
+            Unlocks on <span className="text-[#79E7BA]">{unlockDate}</span>
+          </p>
+        )}
       </div>
 
       <div className={`flex space-x-2 ${className}`}>
