@@ -49,6 +49,18 @@ const AmountInput = ({
     }
   };
 
+  // Enhanced token select handler that clears amount
+  const handleTokenSelectWithClear = (value: string) => {
+    // Clear the amount by triggering a change event with empty value
+    const clearEvent = {
+      target: { value: "" },
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleAmountChange(clearEvent);
+
+    // Then handle the token selection
+    handleTokenSelect(value);
+  };
+
   return (
     <div className="mb-1">
       <label className="text-sm text-gray-400">Amount</label>
@@ -68,7 +80,9 @@ const AmountInput = ({
             {/* <div className="text-xs text-gray-300">≈ 400.58</div> */}
           </div>
           <div className="relative">
-            <Select onValueChange={handleTokenSelect} value={saveState.token}>
+            <Select
+              onValueChange={handleTokenSelectWithClear}
+              value={saveState.token}>
               <SelectTrigger className="w-[140px] bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                 <div className="flex items-center">
                   <MemoRipple className="mr-2" />
