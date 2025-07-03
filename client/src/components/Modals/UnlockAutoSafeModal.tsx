@@ -15,7 +15,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 // import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { getContract, readContract } from "thirdweb";
-import { Abi } from "viem";
+import { Abi, formatUnits } from "viem";
 import { client, liskSepolia } from "@/lib/config";
 import { useWithdrawAutomatedSafe } from "@/hooks/useWithdrawAutomatedSafe";
 import { format } from "date-fns";
@@ -57,6 +57,8 @@ export default function UnlockAutoSafeModal({
   // Recoil state
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [supportedTokens] = useRecoilState(supportedTokensState);
+
+  console.log("Selected token balance", selectedTokenBalance);
 
   // Hooks
   //   const { safeDetails, isLoading: isSafeLoading } = useGetSafeById(safeId);
@@ -160,7 +162,10 @@ export default function UnlockAutoSafeModal({
           (t: any) => t?.token?.toLowerCase() === saveState.token?.toLowerCase()
         );
 
-        if (tokenInfo && typeof tokenInfo.amountSaved === "number") {
+        console.log("TOKEN INFO", tokenInfo);
+        console.log("TYPE OF AMOUNT", typeof tokenInfo.amountSaved);
+
+        if (tokenInfo && typeof tokenInfo.amountSaved === "bigint") {
           setSelectedTokenBalance(Number(tokenInfo.amountSaved));
           console.log(
             `Token ${saveState.token} balance in safe: ${tokenInfo.amount} ${tokenInfo.tokenSymbol}`
@@ -237,13 +242,14 @@ export default function UnlockAutoSafeModal({
               <div className="text-sm text-gray-300">
                 Saved balance:{" "}
                 <span className="text-gray-400">
-                  {selectedTokenBalance}{" "}
+                  {formatUnits(BigInt(selectedTokenBalance), 18)}{" "}
                   {tokenData[saveState.token]?.symbol || ""}
                 </span>
               </div>
               <button
                 className="text-sm text-[#5b8c7b] hover:text-[#79E7BA] transition-colors"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (selectedTokenBalance > 0) {
                     let maxAmount = selectedTokenBalance;
                     const symbol = tokenData[saveState.token]?.symbol;

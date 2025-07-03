@@ -110,7 +110,9 @@ const AutoSave = () => {
   };
 
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
-  const { details } = useAutomatedSafeForUser(userAddress as `0x${string}`);
+  const { details, isLoading: autoSafeIsLoading } = useAutomatedSafeForUser(
+    userAddress as `0x${string}`
+  );
   const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
 
   const {
@@ -452,7 +454,7 @@ const AutoSave = () => {
         ) : (
           details && (
             <div className="py-2">
-              <AssetTabs safeDetails={details} />
+              <AssetTabs safeDetails={details} isLoading={autoSafeIsLoading} />
             </div>
           )
         )}

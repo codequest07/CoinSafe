@@ -83,18 +83,16 @@ const AmountInput = ({
                 ))}
               </SelectContent>
             </Select>
-            {validationErrors.token && (
-              <p className="text-red-500 text-sm mt-1">
-                {validationErrors.token}
-              </p>
-            )}
           </div>
         </div>
+        {validationErrors.token && (
+          <p className="text-red-500 text-sm mt-1">{validationErrors.token}</p>
+        )}
         {/* error message section */}
         <div>
           {saveState.amount > selectedTokenBalance && (
             <p className="text-red-500 text-[13px] mt-1 text-right">
-              Insufficient Funds       
+              Insufficient Funds
             </p>
           )}
         </div>
