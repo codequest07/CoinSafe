@@ -1,6 +1,10 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
+import {
+  getContract,
+  prepareContractCall,
+  sendAndConfirmTransaction,
+} from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { toast } from "./use-toast";
@@ -57,7 +61,7 @@ export const useTopUpEmergencySafe = ({
   const topUpSafe = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      setError(null); 
+      setError(null);
 
       if (!topUpState.token) {
         const error = new Error("Token is required");
@@ -90,13 +94,10 @@ export const useTopUpEmergencySafe = ({
           contract,
           method:
             "function saveToEmergencySafe(address _token, uint256 _amount)",
-          params: [
-            topUpState.token,
-            amountWithDecimals,
-          ],
+          params: [topUpState.token, amountWithDecimals],
         });
 
-        const result = await sendTransaction({
+        const result = await sendAndConfirmTransaction({
           transaction,
           account: account!,
         });
@@ -109,7 +110,6 @@ export const useTopUpEmergencySafe = ({
         onSuccess?.();
         return result;
       } catch (error: any) {
-
         setError(error);
 
         toast({

@@ -1,11 +1,15 @@
 import { useCallback, useState } from "react";
 import {
-  useSendTransaction,
+  useSendAndConfirmTransaction,
   useActiveAccount,
   useConnect,
 } from "thirdweb/react";
 // import { liskSepolia } from 'viem/chains'; // Still used for chain ID reference
-import { getContract, prepareContractCall, sendAndConfirmTransaction } from "thirdweb";
+import {
+  getContract,
+  prepareContractCall,
+  sendAndConfirmTransaction,
+} from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { getTokenDecimals } from "@/lib/utils";
@@ -51,7 +55,7 @@ export const useWithdrawAsset = ({
   // const wallet = useWallet(); // Reference to the wallet (e.g., smart account)
   // const { contract } = useContract({ address: coinSafeAddress, abi: coinSafeAbi });
   const { mutateAsync: writeContractAsync, isPending: writeLoading } =
-    useSendTransaction();
+    useSendAndConfirmTransaction();
 
   const contract = getContract({
     client,

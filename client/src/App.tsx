@@ -99,7 +99,7 @@ const App = () => {
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <Toaster />
+      <Toaster/>
     </div>
   );
 };
