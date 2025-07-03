@@ -664,6 +664,7 @@ const AutoSave = () => {
           <ExtendSafeModal
             details={details}
             onClose={backToManageAutosavings}
+            closeAllModals={closeAllModals}
           />
         </div>
       )}

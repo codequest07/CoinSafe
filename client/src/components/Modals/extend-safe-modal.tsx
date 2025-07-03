@@ -2,22 +2,17 @@
 
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-// import {
-//   getContract,
-//   prepareContractCall,
-//   sendAndConfirmTransaction,
-// } from "thirdweb";
-// import { client } from "@/lib/config";
-// import { liskSepolia } from "@/lib/config";
-// import { Abi } from "viem";
-// import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
-// import { useActiveAccount } from "thirdweb/react";
-// import { toast } from "@/hooks/use-toast";
-import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+import { useActiveAccount } from "thirdweb/react";
+import { DurationSelector } from "../DurationSelector";
+import { addDays, differenceInDays, format, startOfDay } from "date-fns";
+import { useRecoilState } from "recoil";
+import { saveAtom } from "@/store/atoms/save";
+import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 
 interface ExtendSafeModalProps {
   details: any;
   onClose: () => void;
+  closeAllModals: () => void;
 }
 
 // this is to show a modal to seactivate a autosafe will check if all tokens are removed from the safe
@@ -25,10 +20,43 @@ interface ExtendSafeModalProps {
 export default function ExtendSafeModal({
   details,
   onClose,
+  closeAllModals,
 }: ExtendSafeModalProps) {
-  const [_isSafeEmpty, setIsSafeEmpty] = useState(true);
-  //   const [_extending, setExtending] = useState(false);
-  //   const account = useActiveAccount();
+  const [isSafeEmpty, setIsSafeEmpty] = useState(true);
+  const account = useActiveAccount();
+
+  const [saveState, setSaveState] = useRecoilState(saveAtom);
+
+  //   Duration state
+  const [savingsDuration, setSavingsDuration] = useState(30);
+  const [endDate, setEndDate] = useState("");
+  const [, setUnlockDate] = useState<Date | null>(null);
+
+  const [isDurationDisabled] = useState(false);
+
+  // Custom date state
+  const [customDate, setCustomDate] = useState<Date | undefined>(undefined);
+  const [isCustomSelected, setIsCustomSelected] = useState(false);
+  const today = startOfDay(new Date());
+
+  // Handle custom date selection
+  const handleCustomDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+
+    setCustomDate(date);
+    setIsCustomSelected(true);
+
+    const daysDiff = differenceInDays(date, today);
+    setSavingsDuration(daysDiff);
+    setEndDate(format(date, "dd MMMM yyyy"));
+    setUnlockDate(date);
+
+    const durationInSeconds = daysDiff * 24 * 60 * 60;
+    setSaveState((prevState) => ({
+      ...prevState,
+      duration: durationInSeconds,
+    }));
+  };
 
   useEffect(() => {
     const checkSafeStatus = async () => {
@@ -46,37 +74,48 @@ export default function ExtendSafeModal({
     checkSafeStatus();
   }, []);
 
-  //   const handleExtendSafe = async () => {
-  //     if (!isSafeEmpty || !account) return;
-  //     const contract = getContract({
-  //       client,
-  //       chain: liskSepolia,
-  //       address: CoinsafeDiamondContract.address,
-  //       abi: facetAbis.automatedSavingsFacet as Abi,
-  //     });
+  const { extendAutoSafe, isLoading: extending } = useCreateAutoSavings({
+    address: account?.address as `0x${string}`,
+    saveState,
+    onSuccess: () => {
+      closeAllModals();
+    },
+    onError: (error) => {
+      console.error("Extend Safe failed:", error);
+      // Handle error, e.g., show a toast notification
+    }
+  });
 
-  //     setExtending(true);
-  //     try {
-  //       const extendTx = prepareContractCall({
-  //         contract,
-  //         method: "function terminateAutomatedPlan() external",
-  //         params: [],
-  //       });
+  const savingsDurationOptions = [
+    { value: 30, label: "30 days" },
+    { value: 60, label: "60 days" },
+    { value: 120, label: "120 days" },
+  ];
 
-  //       await sendAndConfirmTransaction({
-  //         transaction: extendTx,
-  //         account,
-  //       });
-  //     } catch (error) {
-  //       console.error("Deactivate Safe failed:", error);
-  //       toast({
-  //         title: `Deactivate Safe failed:", ${error}`,
-  //         variant: "destructive",
-  //       });
-  //     } finally {
-  //       setExtending(false);
-  //     }
-  //   };
+  const calculateEndDate = (days: number) => {
+    const currentDate = new Date(details?.unlockTime ? Number(details.unlockTime) * 1000 : Date.now());
+    const futureDate = addDays(currentDate, days);
+    return format(futureDate, "dd MMMM yyyy");
+  };
+
+  const handleDurationChange = (duration: number) => {
+    setSavingsDuration(duration);
+    setEndDate(calculateEndDate(duration));
+    setIsCustomSelected(false);
+
+    const durationInSeconds = duration * 24 * 60 * 60;
+
+    setSaveState((prevState) => ({
+      ...prevState,
+      duration: durationInSeconds,
+    }));
+
+    const calculatedUnlockDate = addDays(new Date(), duration);
+    setUnlockDate(calculatedUnlockDate);
+
+    // console.log(`Savings duration changed to ${duration} days`);
+  };
+
   return (
     <>
       <div></div>
@@ -88,8 +127,8 @@ export default function ExtendSafeModal({
             onClose();
           }}
         ></div>
-        <div className="relative w-full max-w-md rounded-xl bg-[#17171C] text-white shadow-lg p-3 border border-white/15">
-          <div className="flex items-center justify-between p-5">
+        <div className="relative w-full max-w-md rounded-xl bg-[#17171C] text-white shadow-lg p-5 border border-white/15">
+          <div className="flex items-center justify-between">
             <h2 className="text-xl font-[500]">Extend autosavings</h2>
             <button
               onClick={(e) => {
@@ -103,16 +142,58 @@ export default function ExtendSafeModal({
             </button>
           </div>
 
-          <div className="flex flex-col items-center justify-center space-y-4 py-2 text-white relative">
-            <MemoComingSoonIcon className="w-44 h-44 text-white" />
-            <h1 className="text-3xl font-bold my-2 text-white leading-tight">
-              We’re in the kitchen!
-            </h1>
-            <p className="text-center max-w-md text-muted-foreground">
-              We’re in the kitchen, putting the final touches on this feature.
-              We’ll let you know as soon as it’s ready! Continue saving for now.
+          <div className="mt-8">
+            <div className="text-[14px] mt-4 mb-3 flex justify-between items-center">
+              <p className="">Current Duration</p>
+              <p className="">
+                Unlocks on{" "}
+                {details?.unlockTime
+                  ? format(new Date(Number(details.unlockTime) * 1000), "PPP")
+                  : "N/A"}
+              </p>
+            </div>
+            <p className="text-[#7F7F7F]/80 text-[15px] font-light border border-[#7F7F7F]/80 rounded-lg px-4 py-2 w-full bg-transparent">
+              {Number(details?.duration ?? 0n) / 86400} days
             </p>
           </div>
+
+          <div className="mt-8">
+            <DurationSelector
+              options={savingsDurationOptions}
+              selectedValue={savingsDuration}
+              onChange={handleDurationChange}
+              onCustomDateSelect={handleCustomDateSelect}
+              customDate={customDate}
+              isCustomSelected={isCustomSelected}
+              className="mb-4"
+              isDisabled={isDurationDisabled}
+              label="New Duration"
+              unlockDate={endDate}
+            />
+          </div>
+
+          <div className="mt-8 flex justify-between">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white "
+            >
+              Cancel
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                extendAutoSafe(e);
+              }}
+              disabled={!isSafeEmpty || extending}
+              className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
+            >
+              {extending ? "Extending" : "Extend"}
+            </button>
+          </div>
+
           {/* 
 
           <div className="px-5 pb-5">

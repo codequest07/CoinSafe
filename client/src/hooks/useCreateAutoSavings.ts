@@ -33,6 +33,7 @@ interface CreateAutoSavingsParams {
 interface CreateAutoSavingsResult {
   createAutoSavings: (e: React.FormEvent) => Promise<void>;
   addTokenToAutoSafe: (e: React.FormEvent) => Promise<void>;
+  extendAutoSafe: (e: React.FormEvent) => Promise<void>;
   hasCreatedAutoSafe: (
     supportedTokens: string[]
   ) => Promise<{ hasAutoSafe: boolean; tokens: string[] }>;
@@ -224,6 +225,75 @@ export const useCreateAutoSavings = ({
     [address, saveState, onSuccess, onError]
   );
 
+  const extendAutoSafe = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
+      try {
+        setIsLoading(true);
+
+        const contract = getContract({
+          client,
+          chain: liskSepolia,
+          address: CoinsafeDiamondContract.address,
+          abi: facetAbis.automatedSavingsFacet as Abi,
+        });
+
+        const transaction = prepareContractCall({
+          contract,
+          method: resolveMethod("extendAutomatedPlanDuration"),
+          params: [
+            toBigInt(saveState.duration),
+          ],
+        });
+
+        if (account) {
+          await sendAndConfirmTransaction({
+            transaction,
+            account,
+          });
+
+          toast({
+            title: "Extend Automated plan successful!",
+            className: "bg-[#79E7BA]",
+          });
+        }
+
+        onSuccess?.();
+      } catch (err) {
+        let errorMessage = "An unknown error occurred";
+
+        // Handle specific error cases
+        if (err instanceof Error) {
+          if (err.message.includes("Plan is Archived")) {
+            errorMessage =
+              "Automated savings plan is archived. Please create a new one.";
+          } else if (
+            err.message.includes("DurationTooShort()")
+          ) {
+            errorMessage =
+              "Duration is too short, choose a longer timeline!";
+          } else {
+            errorMessage = err.message;
+          }
+        }
+
+        console.error("Error writing data to contract:", err);
+        toast({
+          title: "Error writing data to contract",
+          variant: "destructive",
+        });
+
+        const error = new Error(errorMessage);
+        setError(error);
+        onError?.(error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [address, saveState, onSuccess, onError]
+  );
+
   const hasCreatedAutoSafe = async (supportedTokens: string[]) => {
     const rawTxs = supportedTokens.map((token) => ({
       address: CoinsafeDiamondContract.address,
@@ -264,6 +334,7 @@ export const useCreateAutoSavings = ({
   return {
     createAutoSavings,
     addTokenToAutoSafe,
+    extendAutoSafe,
     hasCreatedAutoSafe,
     isLoading,
     error,
