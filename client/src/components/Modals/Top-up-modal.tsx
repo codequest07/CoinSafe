@@ -14,6 +14,7 @@ import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatUnits } from "viem";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
+import { useNavigate } from "react-router-dom";
 interface TopUpModalProps {
   onClose: () => void;
   onTopUp?: (amount: number, currency: string) => void;
@@ -25,6 +26,7 @@ export default function TopUpModal({
   onTopUp,
   safeId,
 }: TopUpModalProps) {
+  const navigate = useNavigate();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
@@ -189,24 +191,34 @@ export default function TopUpModal({
 
         {/* Wallet balance */}
         <>
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-[300] text-gray-300">
+          <div className="flex justify-between items-center mb-6">
+            <div className="text-sm text-gray-300">
               Wallet balance:{" "}
               <span className="text-gray-400">
                 {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
               </span>
             </div>
-            <Button
-              className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-[#79E7BA] cursor-pointer"
-              // onClick={() => setAmount(selectedTokenBalance)}
-              onClick={() =>
-                setSaveState((prev) => ({
-                  ...prev,
-                  amount: selectedTokenBalance,
-                }))
-              }>
-              Save all
-            </Button>
+            {saveState.token &&
+            (selectedTokenBalance == 0 ||
+              (saveState.amount && saveState.amount > selectedTokenBalance)) ? (
+              <Button
+                variant="link"
+                className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                onClick={() => navigate("/dashboard/deposit")}>
+                Deposit to save
+              </Button>
+            ) : (
+              <Button
+                className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                onClick={() =>
+                  setSaveState((prev) => ({
+                    ...prev,
+                    amount: selectedTokenBalance,
+                  }))
+                }>
+                Save all
+              </Button>
+            )}
           </div>
         </>
 
