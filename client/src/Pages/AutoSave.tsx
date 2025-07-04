@@ -22,6 +22,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { toast } from "sonner";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import ExtendSafeModal from "@/components/Modals/extend-safe-modal";
+import { getTokenDecimals } from "@/lib/utils";
 
 const AutoSave = () => {
   const navigate = useNavigate();
@@ -348,7 +349,9 @@ const AutoSave = () => {
                               (total: any, obj: any) => total + obj.amountSaved,
                               0n
                             ),
-                            18
+                            getTokenDecimals(
+                              details?.tokenDetails[0]?.token || ""
+                            )
                           )
                         ).toLocaleString("en-US", {
                           minimumFractionDigits: 2,
@@ -406,7 +409,9 @@ const AutoSave = () => {
                             (total: any, obj: any) => total + obj?.amount,
                             0n
                           ),
-                          18
+                          balances && balances.length > 0
+                            ? getTokenDecimals(balances[0]?.token || "")
+                            : 18 // fallback to 18 decimals if no balances
                         )
                       ).toLocaleString("en-US", {
                         minimumFractionDigits: 2,
@@ -433,7 +438,9 @@ const AutoSave = () => {
                             (total: any, obj: any) => total + obj?.amount,
                             0n
                           ),
-                          18
+                          balances && balances.length > 0
+                            ? getTokenDecimals(balances[0]?.token || "")
+                            : 18 // fallback to 18 decimals if no balances
                         )
                       ) == 0 || claimAllIsLoading
                     }

@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
 import { DurationSelector } from "../DurationSelector";
 import { addDays, differenceInDays, format, startOfDay } from "date-fns";
@@ -15,14 +15,11 @@ interface ExtendSafeModalProps {
   closeAllModals: () => void;
 }
 
-// this is to show a modal to seactivate a autosafe will check if all tokens are removed from the safe
-
 export default function ExtendSafeModal({
   details,
   onClose,
   closeAllModals,
 }: ExtendSafeModalProps) {
-  const [isSafeEmpty, setIsSafeEmpty] = useState(true);
   const account = useActiveAccount();
 
   const [saveState, setSaveState] = useRecoilState(saveAtom);
@@ -58,22 +55,6 @@ export default function ExtendSafeModal({
     }));
   };
 
-  useEffect(() => {
-    const checkSafeStatus = async () => {
-      if (!details || !details.tokenDetails) {
-        setIsSafeEmpty(false);
-        return;
-      }
-      details?.tokenDetails?.map((td: { amountSaved: bigint }) => {
-        if (td.amountSaved > 0) {
-          setIsSafeEmpty(false);
-        }
-      });
-    };
-
-    checkSafeStatus();
-  }, []);
-
   const { extendAutoSafe, isLoading: extending } = useCreateAutoSavings({
     address: account?.address as `0x${string}`,
     saveState,
@@ -81,7 +62,7 @@ export default function ExtendSafeModal({
       closeAllModals();
     },
     onError: (error) => {
-      console.error("Extend Safe failed:", error);
+      console.error("Extend Safe failed:", error?.message);
       // Handle error, e.g., show a toast notification
     }
   });
@@ -187,7 +168,7 @@ export default function ExtendSafeModal({
                 e.stopPropagation();
                 extendAutoSafe(e);
               }}
-              disabled={!isSafeEmpty || extending}
+              disabled={extending}
               className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
             >
               {extending ? "Extending" : "Extend"}

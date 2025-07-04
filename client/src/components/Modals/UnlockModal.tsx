@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
@@ -122,34 +122,34 @@ export default function UnlockModal({
   }, [breakingFeePercentage]);
 
   // Calculate the breaking fee based on the amount and token
-const calculateBreakingFee = useCallback(() => {
-  const run = async () => {
-    if (!saveState.amount || !saveState.token) {
-      setBreakingFeeAmount(0);
-      setBreakingFeeUsd(0);
-      return;
-    }
+  const calculateBreakingFee = useCallback(() => {
+    const run = async () => {
+      if (!saveState.amount || !saveState.token) {
+        setBreakingFeeAmount(0);
+        setBreakingFeeUsd(0);
+        return;
+      }
 
-    // Calculate fee amount based on the percentage
-    const feeAmount = (saveState.amount * breakingFeePercentage) / 100;
-    setBreakingFeeAmount(feeAmount);
+      // Calculate fee amount based on the percentage
+      const feeAmount = (saveState.amount * breakingFeePercentage) / 100;
+      setBreakingFeeAmount(feeAmount);
 
-    // Example: Fetch real-time rate (simulate async)
-    const tokenSymbol = tokenData[saveState.token]?.symbol?.toUpperCase() || "";
+      // Example: Fetch real-time rate (simulate async)
+      const tokenSymbol =
+        tokenData[saveState.token]?.symbol?.toUpperCase() || "";
 
-    const usdValue = Number(await getTokenPrice(saveState.token, feeAmount));
-    setBreakingFeeUsd(usdValue);
+      const usdValue = Number(await getTokenPrice(saveState.token, feeAmount));
+      setBreakingFeeUsd(usdValue);
 
-    console.log(
-      `Breaking fee: ${feeAmount} ${tokenSymbol} (${breakingFeePercentage}% of ${
-        saveState.amount
-      }) ≈ $${usdValue.toFixed(2)}`
-    );
-  };
+      console.log(
+        `Breaking fee: ${feeAmount} ${tokenSymbol} (${breakingFeePercentage}% of ${
+          saveState.amount
+        }) ≈ $${usdValue.toFixed(2)}`
+      );
+    };
 
-  run(); // call the async function
-}, [saveState.amount, saveState.token, breakingFeePercentage, tokenData]);
-
+    run(); // call the async function
+  }, [saveState.amount, saveState.token, breakingFeePercentage, tokenData]);
 
   // Fetch breaking fee percentage when component mounts
   useEffect(() => {
@@ -183,12 +183,7 @@ const calculateBreakingFee = useCallback(() => {
       return;
     }
 
-    // SAFU & LSK check
-    if (value == tokens.safu || value == tokens.lsk) {
-      setDecimals(18);
-    } else if (value == tokens.usdt) {
-      setDecimals(18);
-    }
+    setDecimals(getTokenDecimals(value));
 
     // Update the token in both states to ensure synchronization
     setSaveState((prevState) => ({ ...prevState, token: value }));
@@ -318,7 +313,8 @@ const calculateBreakingFee = useCallback(() => {
           if (!open && onClose) {
             onClose();
           }
-        }}>
+        }}
+      >
         <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C] max-h-[90vh] overflow-y-auto">
           <DialogTitle className="text-white flex items-center space-x-3">
             <MemoBackIcon className="w-6 h-6 cursor-pointer" />
@@ -340,8 +336,7 @@ const calculateBreakingFee = useCallback(() => {
             <div className="text-sm text-gray-300">
               Saved balance:{" "}
               <span className="text-gray-400">
-                {selectedTokenBalance}{" "}
-                {tokenData[saveState.token]?.symbol}
+                {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
               </span>
             </div>
             <button
@@ -376,7 +371,8 @@ const calculateBreakingFee = useCallback(() => {
                     variant: "destructive",
                   });
                 }
-              }}>
+              }}
+            >
               Max
             </button>
           </div>
@@ -464,7 +460,8 @@ const calculateBreakingFee = useCallback(() => {
             <Button
               onClick={() => onClose && onClose()}
               className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-              type="submit">
+              type="submit"
+            >
               Cancel
             </Button>
             <div>
@@ -472,7 +469,8 @@ const calculateBreakingFee = useCallback(() => {
                 onClick={handleUnlockClick}
                 className="text-black px-8 rounded-[2rem]"
                 variant="outline"
-                disabled={isPending || !saveState.amount || !saveState.token}>
+                disabled={isPending || !saveState.amount || !saveState.token}
+              >
                 {isPending ? (
                   <LoaderCircle className="animate-spin mr-2" />
                 ) : (

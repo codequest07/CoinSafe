@@ -6,7 +6,7 @@ import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { tokens, CoinsafeDiamondContract } from "@/lib/contract";
 import AmountInput from "../AmountInput";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
 import { useTopUpEmergencySafe } from "@/hooks/useTopUpEmergencySafe";
 import SuccessfulTxModal from "./SuccessfulTxModal";
@@ -14,6 +14,7 @@ import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatUnits } from "viem";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
+import { useNavigate } from "react-router-dom";
 interface TopUpEmergencyProps {
   onClose: () => void;
   onTopUp?: (amount: number, currency: string) => void;
@@ -21,8 +22,9 @@ interface TopUpEmergencyProps {
 
 export default function TopUpEmergencySafe({
   onClose,
-  onTopUp
+  onTopUp,
 }: TopUpEmergencyProps) {
+  const navigate = useNavigate();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [saveState, setSaveState] = useRecoilState(saveAtom);
@@ -36,9 +38,7 @@ export default function TopUpEmergencySafe({
   }>({});
 
   // Fetch safe details
-  const { safeDetails, isLoading: isSafeLoading } = useGetSafeById(
-    "911"
-  );
+  const { safeDetails, isLoading: isSafeLoading } = useGetSafeById("911");
   const account = useActiveAccount();
   const address = account?.address;
 
@@ -63,13 +63,7 @@ export default function TopUpEmergencySafe({
   }, [safeDetails, saveState.token, setSaveState]);
 
   const handleTokenSelect = (value: string) => {
-    // SAFU & LSK check
-    if (value == tokens.safu || value == tokens.lsk) {
-      setDecimals(18);
-      // USDT check
-    } else if (value == tokens.usdt) {
-      setDecimals(18);
-    }
+    setDecimals(getTokenDecimals(value));
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
 
@@ -77,7 +71,7 @@ export default function TopUpEmergencySafe({
     if (AvailableBalance && value) {
       const tokenBalance = (AvailableBalance[value] as bigint) || 0n;
       const decimals =
-        value.toLowerCase() === tokens.usdt.toLowerCase() ? 18 : 18;
+        value.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   };
@@ -95,11 +89,11 @@ export default function TopUpEmergencySafe({
     if (AvailableBalance && saveState.token) {
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
       const decimals =
-        saveState.token.toLowerCase() === tokens.usdt.toLowerCase() ? 18 : 18;
+        saveState.token.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   }, [AvailableBalance, saveState.token]);
-  
+
   // Initialize the topUpSafe hook
   const { topUpSafe, isPending } = useTopUpEmergencySafe({
     address: address as `0x${string}`,
@@ -128,7 +122,9 @@ export default function TopUpEmergencySafe({
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
       <div className="bg-[#1A1A1A] rounded-2xl max-w-xl w-full p-8 relative">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-white text-[20px] font-medium">Top up emergency savings</h2>
+          <h2 className="text-white text-[20px] font-medium">
+            Top up emergency savings
+          </h2>
           <button
             onClick={onClose}
             className="rounded-full p-2  bg-[#FFFFFF] transition-colors">
@@ -186,24 +182,35 @@ export default function TopUpEmergencySafe({
 
         {/* Wallet balance */}
         <>
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-[300] text-gray-300">
-              Available balance:{" "}
+          {/* Wallet Balance */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="text-sm text-gray-300">
+              Wallet balance:{" "}
               <span className="text-gray-400">
                 {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
               </span>
             </div>
-            <Button
-              className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-[#79E7BA] cursor-pointer"
-              // onClick={() => setAmount(selectedTokenBalance)}
-              onClick={() =>
-                setSaveState((prev) => ({
-                  ...prev,
-                  amount: selectedTokenBalance,
-                }))
-              }>
-              Save all
-            </Button>
+            {saveState.token &&
+            (selectedTokenBalance == 0 ||
+              (saveState.amount && saveState.amount > selectedTokenBalance)) ? (
+              <Button
+                variant="link"
+                className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                onClick={() => navigate("/dashboard/deposit")}>
+                Deposit to save
+              </Button>
+            ) : (
+              <Button
+                className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                onClick={() =>
+                  setSaveState((prev) => ({
+                    ...prev,
+                    amount: selectedTokenBalance,
+                  }))
+                }>
+                Save all
+              </Button>
+            )}
           </div>
         </>
 

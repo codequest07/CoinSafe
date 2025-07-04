@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getTokenPrice } from "@/lib";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useActiveAccount } from "thirdweb/react";
+import { getTokenDecimals } from "@/lib/utils";
 // import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
 // import { tokenData } from "@/lib/utils";
 
@@ -86,7 +87,9 @@ export default function SavingsCards() {
         safes?.map(async (safe) => {
           const totalAmount = await Promise.all(
             safe.tokenAmounts.map(async (token) => {
-              const tokenAmount = Number(formatUnits(token.amount, 18));
+              const tokenAmount = Number(
+                formatUnits(token.amount, getTokenDecimals(token.token))
+              );
               const usdVal = await getTokenPrice(token.token, tokenAmount);
               return Number(usdVal);
             })
@@ -208,7 +211,9 @@ export default function SavingsCards() {
                               (total: any, obj: any) => total + obj.amountSaved,
                               0n
                             ),
-                            18
+                            getTokenDecimals(
+                              details?.tokenDetails?.[0]?.token || "0x"
+                            )
                           )
                         ).toLocaleString("en-US", {
                           minimumFractionDigits: 2,

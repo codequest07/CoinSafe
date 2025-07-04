@@ -194,7 +194,7 @@ export default function StatsCards() {
           </>
         </p>
         <p className="text-[#7F7F7F] text-sm mt-2">
-          <Link to="/points" className="text-[#79E7BA]">
+          <Link to="#" className="text-[#79E7BA]">
             find out
           </Link>{" "}
           how points will be used
@@ -218,7 +218,7 @@ export default function StatsCards() {
           </>
         </p>
         <p className="text-[#7F7F7F] text-sm mt-2">
-          <Link to="/points" className="text-[#79E7BA]">
+          <Link to="#" className="text-[#79E7BA]">
             maintain
           </Link>{" "}
           your streak for points multipliers

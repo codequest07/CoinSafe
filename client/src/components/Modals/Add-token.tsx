@@ -5,7 +5,7 @@ import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import {
@@ -78,7 +78,7 @@ export default function AddToken({
     onSuccess: () => {
       console.log("Token added successfully");
       setShowSuccessModal(true);
-      
+
       setTimeout(() => {
         setShowSuccessModal(false); // Close success modal after 5 seconds
         onSuccess?.();
@@ -140,12 +140,7 @@ export default function AddToken({
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
 
       // Get the correct decimals for the token
-      let tokenDecimals = 18;
-      if (saveState.token === tokens.usdt) {
-        tokenDecimals = 18;
-      } else {
-        tokenDecimals = 18;
-      }
+      let tokenDecimals = getTokenDecimals(saveState.token);
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, tokenDecimals)));
     }
@@ -263,10 +258,9 @@ export default function AddToken({
               <div className="flex flex-col items-center">
                 <input
                   type="number"
-                  value={saveState.amount}
+                  value={saveState.amount || ""}
                   onChange={handleAmountChange}
                   className="text-2xl text-[#B5B5B5] font-medium bg-transparent text-left w-full outline-none"
-                  placeholder="Enter amount"
                 />
               </div>
             </div>

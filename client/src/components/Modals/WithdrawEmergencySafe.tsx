@@ -24,7 +24,7 @@ import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
 import MemoRipple from "@/icons/Ripple";
 import { getTokenPrice } from "@/lib";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { supportedTokensState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
 import { useWithdrawEmergencySafe } from "@/hooks/useWithdrawEmergencySafe";
@@ -115,7 +115,7 @@ export default function WithdrawEmergencySafe({
 
       const tokenBalance = (AvailableBalance[token] as bigint) || 0n;
 
-      setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+      setSelectedTokenBalance(Number(formatUnits(tokenBalance, getTokenDecimals(token))));
     }
   }, [token, address, AvailableBalance]);
 

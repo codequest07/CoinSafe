@@ -39,6 +39,22 @@ export const getUsdtToUsd = async (usdt: number) => {
   }
 };
 
+export const getUsdcToUsd = async (usdc: number) => {
+  try {
+    const res = await fetch(`${base_uri}/api-cg/usd-coin`);
+    const data = await res.json();
+
+    if (data?.["usd-coin"]?.usd) {
+      return data["usd-coin"].usd * usdc;
+    } else {
+      throw new Error("USDC data or USD price not available");
+    }
+  } catch (err) {
+    console.error(err);
+    return 0;
+  }
+};
+
 export async function getTokenPrice(token: string, amount: number | undefined) {
     if (!token || !amount) return "0.00";
 
@@ -55,6 +71,10 @@ export async function getTokenPrice(token: string, amount: number | undefined) {
         case tokens.usdt: {
           const usdtPrice = await getUsdtToUsd(amount);
           return usdtPrice.toFixed(2);
+        }
+        case tokens.usdc: {
+          const usdcPrice = await getUsdcToUsd(amount);
+          return usdcPrice.toFixed(2);
         }
         default:
           return "0.00";

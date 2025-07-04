@@ -6,7 +6,7 @@ import { useReadContract } from "thirdweb/react";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Abi, formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
-import { convertTokenAmountToUsd } from "@/lib/utils";
+import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
 
 export interface ScheduledSaving {
   token: string;
@@ -28,7 +28,7 @@ export async function transformArrayData(
   return Promise.all(
     data.map(async (item) => ({
       token: item.token,
-      amount: formatUnits(item.amount, 18),
+      amount: formatUnits(item.amount, getTokenDecimals(item.token)),
       scheduledDate: Number(item.scheduledDate) * 1000,
       value: await convertTokenAmountToUsd(item.token, item.amount),
     }))
