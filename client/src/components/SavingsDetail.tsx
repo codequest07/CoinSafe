@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import DeleteSafeModal from "./Modals/DeleteSafeModal";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
@@ -24,6 +25,14 @@ export default function SavingsDetail() {
 
   const { safeDetails, isLoading: apiLoading, isError } = useGetSafeById(id);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleDelete = () => {
+    console.log("Safe deleted!");
+    setIsDeleteModalOpen(false);
+    // Add your delete logic here
+  };
 
   // Simplified loading state management
   useEffect(() => {
@@ -46,6 +55,8 @@ export default function SavingsDetail() {
     hasSafeDetails: !!safeDetails,
     isError,
   });
+
+  console.log("Safe details", safeDetails);
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
@@ -160,26 +171,40 @@ export default function SavingsDetail() {
         ) : safeDetails ? (
           <div className="mb-8">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full"
-                onClick={() => navigate(-1)}>
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl">{safeDetails.target}</h1>
-                <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
-                  {safeDetails.isLocked
-                    ? safeDetails.unlockTime > new Date()
-                      ? `${Math.ceil(
-                          (safeDetails.unlockTime.getTime() -
-                            new Date().getTime()) /
-                            (1000 * 60 * 60 * 24)
-                        )} days till unlock`
-                      : "Ready to unlock"
-                    : "Flexible"}
-                </Badge>
+              <div className="flex justify-between w-full items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full"
+                    onClick={() => navigate(-1)}
+                  >
+                    <ArrowLeft className="h-6 w-6" />
+                  </Button>
+                  <h1 className="text-2xl">{safeDetails.target}</h1>
+                  <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
+                    {safeDetails.isLocked
+                      ? safeDetails.unlockTime > new Date()
+                        ? `${Math.ceil(
+                            (safeDetails.unlockTime.getTime() -
+                              new Date().getTime()) /
+                              (1000 * 60 * 60 * 24)
+                          )} days till unlock`
+                        : "Ready to unlock"
+                      : "Flexible"}
+                  </Badge>
+                </div>
+
+                <div>
+                  {safeDetails.totalAmountUSD <= 0 && (
+                    <button
+                      onClick={() => setIsDeleteModalOpen(true)}
+                      className="bg-[#FF6058]/99 inline-block px-4 py-2 rounded-[2rem] text-[#FF6058] text-sm"
+                    >
+                      Delete Safe
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
             <p className="text-base my-1 ml-[3.3rem] text-gray-300">
@@ -214,6 +239,7 @@ export default function SavingsDetail() {
                   unit="USD"
                   text={<>Total value of all tokens in this safe</>}
                   safeId={Number(safeDetails.id)}
+                  safeDetails={safeDetails}
                 />
                 {safeDetails.isLocked && (
                   <ClaimCard
@@ -239,6 +265,13 @@ export default function SavingsDetail() {
             <div className="py-2">
               <AssetTabs safeDetails={safeDetails} />
             </div>
+
+            <DeleteSafeModal
+              id={Number(id)}
+              isOpen={isDeleteModalOpen}
+              onClose={() => setIsDeleteModalOpen(false)}
+              onDelete={handleDelete}
+            />
           </>
         )}
       </div>

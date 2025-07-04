@@ -72,7 +72,7 @@ export default function ClaimAssets({
   // Fetch safes when component mounts
   useEffect(() => {
     fetchSafes();
-  }, [fetchSafes]);
+  }, []);
 
   const openClaimModal = (safeId: string) => {
     // Find the safe by ID
