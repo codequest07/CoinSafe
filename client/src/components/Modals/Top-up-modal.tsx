@@ -6,7 +6,7 @@ import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { tokens, CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import AmountInput from "../AmountInput";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
 import { useTopUpSafe } from "@/hooks/useTopUpSafe";
 import SuccessfulTxModal from "./SuccessfulTxModal";
@@ -68,12 +68,7 @@ export default function TopUpModal({
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
-    if (value == tokens.safu || value == tokens.lsk) {
-      setDecimals(18);
-      // USDT check
-    } else if (value == tokens.usdt) {
-      setDecimals(18);
-    }
+    setDecimals(getTokenDecimals(value));
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
 
@@ -81,7 +76,7 @@ export default function TopUpModal({
     if (AvailableBalance && value) {
       const tokenBalance = (AvailableBalance[value] as bigint) || 0n;
       const decimals =
-        value.toLowerCase() === tokens.usdt.toLowerCase() ? 18 : 18;
+        value.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   };
@@ -99,7 +94,7 @@ export default function TopUpModal({
     if (AvailableBalance && saveState.token) {
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
       const decimals =
-        saveState.token.toLowerCase() === tokens.usdt.toLowerCase() ? 18 : 18;
+        saveState.token.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   }, [AvailableBalance, saveState.token]);
@@ -136,7 +131,8 @@ export default function TopUpModal({
           <h2 className="text-white text-[20px] font-medium">Top up savings</h2>
           <button
             onClick={onClose}
-            className="rounded-full p-2  bg-[#FFFFFF] transition-colors">
+            className="rounded-full p-2  bg-[#FFFFFF] transition-colors"
+          >
             <X className="h-5 w-5 text-black" />
           </button>
         </div>
@@ -204,7 +200,8 @@ export default function TopUpModal({
               <Button
                 variant="link"
                 className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                onClick={() => navigate("/dashboard/deposit")}>
+                onClick={() => navigate("/dashboard/deposit")}
+              >
                 Deposit to save
               </Button>
             ) : (
@@ -215,7 +212,8 @@ export default function TopUpModal({
                     ...prev,
                     amount: selectedTokenBalance,
                   }))
-                }>
+                }
+              >
                 Save all
               </Button>
             )}
@@ -225,13 +223,15 @@ export default function TopUpModal({
         <div className="flex justify-between my-5">
           <Button
             onClick={onClose}
-            className="px-8 py-3 rounded-full bg-[#2A2A2A] text-white font-medium hover:bg-[#333333] border-0">
+            className="px-8 py-3 rounded-full bg-[#2A2A2A] text-white font-medium hover:bg-[#333333] border-0"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleTopUp}
             disabled={isPending || !saveState.amount || !saveState.token}
-            className="px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-gray-200 border-0 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-gray-200 border-0 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

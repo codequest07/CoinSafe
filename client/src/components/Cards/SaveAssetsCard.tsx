@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Loader2, LoaderCircle } from "lucide-react";
-import { cn, tokenData } from "@/lib/utils";
+import { cn, getTokenDecimals, tokenData } from "@/lib/utils";
 import SavingsTargetInput from "../SavingsTargetInput";
 import AmountInput from "../AmountInput";
 import { useRecoilState, useResetRecoilState } from "recoil";
@@ -178,12 +178,7 @@ export default function SaveAssetsCard() {
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
-    if (value == tokens.safu || value == tokens.lsk) {
-      setDecimals(18);
-      // USDT check
-    } else if (value == tokens.usdt) {
-      setDecimals(18);
-    }
+    setDecimals(getTokenDecimals(value))
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
   };
@@ -366,7 +361,7 @@ export default function SaveAssetsCard() {
 
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
 
-      setSelectedTokenBalance(Number(formatUnits(tokenBalance, 18)));
+      setSelectedTokenBalance(Number(formatUnits(tokenBalance, getTokenDecimals(saveState.token))));
       // console.log("token Balance: ", tokenBalance);
     }
   }, [saveState.token, address, AvailableBalance]);

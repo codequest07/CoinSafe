@@ -10,7 +10,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
@@ -22,7 +22,7 @@ import { getContract, readContract } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
@@ -100,12 +100,17 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
     const allAssetsRes = tokens.map((token) => {
       return {
         token,
-        balance: formatEther(
-          BigInt((totalTokenBalances[token] as bigint) || 0)
+        balance: formatUnits(
+          BigInt((totalTokenBalances[token] as bigint) || 0),
+          getTokenDecimals(token)
         ),
-        saved: formatEther(BigInt((savedTokenBalances[token] as bigint) || 0)),
-        available: formatEther(
-          BigInt((availableTokenBalances[token] as bigint) || 0)
+        saved: formatUnits(
+          BigInt((savedTokenBalances[token] as bigint) || 0),
+          getTokenDecimals(token)
+        ),
+        available: formatUnits(
+          BigInt((availableTokenBalances[token] as bigint) || 0),
+          getTokenDecimals(token)
         ),
       };
     });
