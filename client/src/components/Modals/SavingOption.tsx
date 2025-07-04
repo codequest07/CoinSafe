@@ -10,7 +10,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import SaveAsset from "./SaveAsset";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { SaveSenseModalManager } from "./SaveSenseModalManager";
@@ -27,7 +26,6 @@ interface SavingOptionProps {
 export default function SavingOption({
   isFirstModalOpen,
   setIsFirstModalOpen,
-  isSecondModalOpen,
   setIsSecondModalOpen,
   tab,
 }: SavingOptionProps) {
@@ -98,14 +96,16 @@ export default function SavingOption({
                 ? "bg-[#3F3F3F99] border border-[#FFFFFF29]"
                 : "bg-[#272727B2]"
             }`}
-            onClick={() => handleOptionSelect("manual")}>
+            onClick={() => handleOptionSelect("manual")}
+          >
             <div className="flex items-center gap-3">
               <div
                 className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                   selectedOption === "manual"
                     ? "border-[#79E7BA]"
                     : "border-[#FFFFFF3D]"
-                }`}>
+                }`}
+              >
                 {selectedOption === "manual" && (
                   <div className="w-2.5 h-2.5 rounded-full bg-[#79E7BA]"></div>
                 )}
@@ -125,14 +125,16 @@ export default function SavingOption({
                 ? "bg-[#3F3F3F99] border border-[#FFFFFF29]"
                 : "bg-[#272727B2]"
             }`}
-            onClick={() => handleOptionSelect("personalized-ai")}>
+            onClick={() => handleOptionSelect("personalized-ai")}
+          >
             <div className="flex items-center gap-3">
               <div
                 className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                   selectedOption === "personalized-ai"
                     ? "border-[#79E7BA]"
                     : "border-[#FFFFFF3D]"
-                }`}>
+                }`}
+              >
                 {selectedOption === "personalized-ai" && (
                   <div className="w-2.5 h-2.5 rounded-full bg-[#79E7BA]"></div>
                 )}
@@ -153,30 +155,21 @@ export default function SavingOption({
             <Button
               className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] px-8 rounded-[2rem]"
               type="button"
-              onClick={() => setIsFirstModalOpen(false)}>
+              onClick={() => setIsFirstModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button
               className="bg-white hover:bg-white px-8 text-black rounded-[2rem]"
               type="button"
-              onClick={handleSaveAssetOption}>
+              onClick={handleSaveAssetOption}
+            >
               Proceed
             </Button>
           </div>
         </DialogFooter>
       </DialogContent>
-      <SaveAsset
-        isOpen={isSecondModalOpen}
-        onClose={() => {
-          setIsSecondModalOpen(false);
-          setIsFirstModalOpen(false);
-        }}
-        onBack={() => {
-          setIsSecondModalOpen(false);
-          setIsFirstModalOpen(true);
-        }}
-        tab={tab}
-      />
+
       {/* Modal Manager Component */}
       <SaveSenseModalManager
         trigger={modalManagerRef}

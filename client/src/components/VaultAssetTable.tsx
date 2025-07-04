@@ -8,7 +8,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import MemoMoney from "@/icons/Money";
@@ -19,7 +19,7 @@ import { getContract, readContract } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
@@ -100,15 +100,18 @@ export default function VaultAssetTable({ safeDetails }: VaultAssetTableProps) {
       .map((token) => {
         return {
           token,
-          balance: formatEther(
-            BigInt((savedTokenBalances[token] as bigint) || 0n)
+          balance: formatUnits(
+            BigInt((savedTokenBalances[token] as bigint) || 0n),
+            getTokenDecimals(token)
           ),
-          saved: formatEther(
-            BigInt((savedTokenBalances[token] as bigint) || 0n)
+          saved: formatUnits(
+            BigInt((savedTokenBalances[token] as bigint) || 0n),
+            getTokenDecimals(token)
           ),
 
-          available: formatEther(
-            BigInt((availableTokenBalances[token] as bigint) || 0n)
+          available: formatUnits(
+            BigInt((availableTokenBalances[token] as bigint) || 0n),
+            getTokenDecimals(token)
           ),
         };
       });
@@ -251,13 +254,15 @@ function VaultAssetTableContent({
           {safeDetails ? (
             <Button
               onClick={() => setIsFirstModalOpen(true)}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+            >
               Top Up Safe
             </Button>
           ) : isConnected ? (
             <Button
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-              onClick={() => navigate("/dashboard/deposit")}>
+              onClick={() => navigate("/dashboard/deposit")}
+            >
               Deposit
             </Button>
           ) : (
@@ -315,7 +320,8 @@ function VaultAssetTableContent({
                       </div>
                     ) : (
                       <div
-                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
+                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                      >
                         {asset.tokenInfo.symbol?.charAt(0)}
                       </div>
                     )}

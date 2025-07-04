@@ -12,6 +12,7 @@ import {
 import {
   convertFrequency,
   convertTokenAmountToUsd,
+  getTokenDecimals,
   tokenData,
 } from "@/lib/utils";
 import { Check, Loader2 } from "lucide-react";
@@ -170,8 +171,8 @@ export default function AutoSavedAssetTable({
                       {isLoading ? (
                         <Loader2 />
                       ) : (
-                        `${
-                          formatUnits(asset.amountToSave, 18) +
+                        `${(
+                          formatUnits(asset.amountToSave, getTokenDecimals(asset.token))) +
                           " " +
                           tokenData[asset.token].symbol
                         }`
@@ -185,7 +186,7 @@ export default function AutoSavedAssetTable({
                   {/* Amount */}
                   <TableCell className="px-6 py-4">
                     <div className="text-white">
-                      {formatUnits(asset.amountSaved, 18) +
+                      {formatUnits(asset.amountSaved, getTokenDecimals(asset.token)) +
                         " " +
                         tokenData[asset.token].symbol}
                     </div>

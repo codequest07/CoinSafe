@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatEther, formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
-import { getLskToUsd, getSafuToUsd, getUsdtToUsd } from "@/lib";
+import { getLskToUsd, getSafuToUsd, getUsdcToUsd, getUsdtToUsd } from "@/lib";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,7 +26,7 @@ export function formatNumberToMax7Dp(num: number, maxDecimals = 7) {
 }
 
 export const tokenDecimals: Record<string, number> = {
-  USDT: 18,
+  "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83": 6,
   DEFAULT: 18,
 };
 
@@ -69,16 +69,21 @@ export const convertTokenAmountToUsd = async (
       return getSafuToUsd(Number(formatUnits(amount, 18)));
     case tokens.lsk:
       return await getLskToUsd(Number(formatUnits(amount, 18)));
+    case tokens.usdc:
+      return await getUsdcToUsd(Number(formatUnits(amount, 6)));
     default:
       console.error("Unknown token address:", token);
       return 0;
   }
 };
 
-export const convertFrequency = (frequency: number, inputUnit: 'milliseconds' | 'seconds' | 'minutes' | 'hours' = 'seconds') => {
+export const convertFrequency = (
+  frequency: number,
+  inputUnit: "milliseconds" | "seconds" | "minutes" | "hours" = "seconds"
+) => {
   // Validate input
-  if (typeof frequency !== 'number' || frequency <= 0) {
-    throw new Error('Frequency must be a positive number');
+  if (typeof frequency !== "number" || frequency <= 0) {
+    throw new Error("Frequency must be a positive number");
   }
 
   // Conversion factors to seconds
@@ -90,7 +95,9 @@ export const convertFrequency = (frequency: number, inputUnit: 'milliseconds' | 
   };
 
   if (!unitConversions[inputUnit]) {
-    throw new Error(`Unsupported unit: ${inputUnit}. Use milliseconds, seconds, minutes, or hours.`);
+    throw new Error(
+      `Unsupported unit: ${inputUnit}. Use milliseconds, seconds, minutes, or hours.`
+    );
   }
 
   // Convert frequency to seconds
@@ -108,21 +115,25 @@ export const convertFrequency = (frequency: number, inputUnit: 'milliseconds' | 
 
   // Determine the best period based on the number of events
   if (eventsPerDay >= 1 && eventsPerDay <= 30) {
-    return 'per day';
+    return "per day";
   } else if (eventsPerMonth >= 1 && eventsPerMonth <= 12) {
-    return 'per month';
+    return "per month";
   } else if (eventsPerYear >= 1 && eventsPerYear <= 12) {
-    return 'per year';
+    return "per year";
   } else if (eventsPerDay > 30) {
-    return 'per day'; // High frequency, best expressed per day
+    return "per day"; // High frequency, best expressed per day
   } else if (eventsPerMonth > 12 && eventsPerDay < 1) {
-    return 'per month'; // Moderate frequency, better as per month
+    return "per month"; // Moderate frequency, better as per month
   } else {
-    return 'per year'; // Low frequency, better as per year
+    return "per year"; // Low frequency, better as per year
   }
 };
 
-export function convertTokenToUSD(tokenValue: any, decimals: number, usdPrice: number) {
+export function convertTokenToUSD(
+  tokenValue: any,
+  decimals: number,
+  usdPrice: number
+) {
   // Convert BigInt to a regular number by dividing by 10^decimals
   const tokenAmount = Number(tokenValue) / Math.pow(10, decimals);
   // Calculate USD value
@@ -149,5 +160,11 @@ export const tokenData = {
     chain: "Lisk",
     color: "bg-[#55e]",
     image: "/assets/tokens/lsk.jpg",
+  },
+  "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83": {
+    symbol: "USDC",
+    chain: "Lisk",
+    color: "bg-[#2775ca]",
+    image: "/assets/tokens/usdc.png",
   },
 } as any;

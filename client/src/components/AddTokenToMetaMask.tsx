@@ -7,19 +7,25 @@ export const tokens = [
     address: "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a",
     symbol: "SAFU",
     decimals: 18,
-    image: "https://your-image-url.com/safu-logo.png",
+    image: "https://coinsafe.network/assets/tokens/safu.png",
   },
   {
     address: "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda",
-    symbol: "USD",
+    symbol: "USDT",
     decimals: 18,
-    image: "https://your-image-url.com/usd-logo.png",
+    image: "https://coinsafe.network/assets/tokens/usdt.jpg",
   },
   {
     address: "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D",
     symbol: "LSK",
     decimals: 18,
-    image: "https://your-image-url.com/lsk-logo.png",
+    image: "https://coinsafe.network/assets/tokens/lsk.jpg",
+  },
+  {
+    address: "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83",
+    symbol: "USDC",
+    decimals: 6,
+    image: "https://coinsafe.network/assets/tokens/usdc.png",
   },
 ];
 const AddTokenToMetaMask = () => {

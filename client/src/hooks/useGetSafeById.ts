@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
-import { convertTokenAmountToUsd } from "@/lib/utils";
+import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
 
 export interface FormattedSafeDetails {
   id: string;
@@ -102,7 +102,7 @@ export function useGetSafeById(id: string | undefined) {
           token: token.token,
           tokenSymbol: symbol,
           amount: Number(token.amount),
-          formattedAmount: Number(formatUnits(token.amount, 18)).toLocaleString(
+          formattedAmount: Number(formatUnits(token.amount, getTokenDecimals(token.token))).toLocaleString(
             "en-US",
             {
               minimumFractionDigits: 2,

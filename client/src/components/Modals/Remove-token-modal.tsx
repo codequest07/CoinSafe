@@ -8,6 +8,7 @@ import { useActiveAccount } from "thirdweb/react";
 import {
   convertFrequency,
   convertTokenAmountToUsd,
+  getTokenDecimals,
   tokenData,
 } from "@/lib/utils";
 import { formatUnits } from "ethers"; // Added for amount formatting
@@ -30,7 +31,11 @@ interface RemoveTokenModalProps {
   open: boolean;
 }
 
-export default function RemoveTokenModal({ open, onClose, closeAllModals }: RemoveTokenModalProps) {
+export default function RemoveTokenModal({
+  open,
+  onClose,
+  closeAllModals,
+}: RemoveTokenModalProps) {
   if (!open) return null; // If the modal is not open, return null
   const account = useActiveAccount();
   const userAddress = account?.address;
@@ -222,7 +227,8 @@ export default function RemoveTokenModal({ open, onClose, closeAllModals }: Remo
                     <div className="font-medium">
                       {formatUnits(
                         token.amountToSave,
-                        tokenData[token.token]?.decimals || 18
+                        tokenData[token.token]?.decimals ||
+                          getTokenDecimals(token.token)
                       )}{" "}
                       {tokenData[token.token]?.symbol}
                     </div>
@@ -280,7 +286,11 @@ export default function RemoveTokenModal({ open, onClose, closeAllModals }: Remo
               disabled={isLoading}
               aria-label="Remove token"
             >
-              {isLoading ? <Loader2 className="animate-spin"/> : "Remove token"}
+              {isLoading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                "Remove token"
+              )}
             </button>
           </div>
         </div>
@@ -314,7 +324,9 @@ export default function RemoveTokenModal({ open, onClose, closeAllModals }: Remo
                   ({ token }: { token: string }) =>
                     token == tokens.find((token) => token.selected)?.token
                 )?.amountToSave ?? 0n,
-                18
+                getTokenDecimals(
+                  tokens.find((token) => token.selected)?.token || ""
+                )
               )} ${
                 tokenData[tokens.find((token) => token.selected)?.token || ""]
                   ?.symbol || "Unknown"

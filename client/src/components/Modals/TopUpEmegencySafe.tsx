@@ -6,7 +6,7 @@ import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { tokens, CoinsafeDiamondContract } from "@/lib/contract";
 import AmountInput from "../AmountInput";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
 import { useTopUpEmergencySafe } from "@/hooks/useTopUpEmergencySafe";
 import SuccessfulTxModal from "./SuccessfulTxModal";
@@ -63,13 +63,7 @@ export default function TopUpEmergencySafe({
   }, [safeDetails, saveState.token, setSaveState]);
 
   const handleTokenSelect = (value: string) => {
-    // SAFU & LSK check
-    if (value == tokens.safu || value == tokens.lsk) {
-      setDecimals(18);
-      // USDT check
-    } else if (value == tokens.usdt) {
-      setDecimals(18);
-    }
+    setDecimals(getTokenDecimals(value));
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
 
@@ -77,7 +71,7 @@ export default function TopUpEmergencySafe({
     if (AvailableBalance && value) {
       const tokenBalance = (AvailableBalance[value] as bigint) || 0n;
       const decimals =
-        value.toLowerCase() === tokens.usdt.toLowerCase() ? 18 : 18;
+        value.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   };
@@ -95,7 +89,7 @@ export default function TopUpEmergencySafe({
     if (AvailableBalance && saveState.token) {
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
       const decimals =
-        saveState.token.toLowerCase() === tokens.usdt.toLowerCase() ? 18 : 18;
+        saveState.token.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   }, [AvailableBalance, saveState.token]);

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
@@ -198,6 +198,8 @@ export default function UnlockAutoSafeModal({
       value === tokens.usdt
     ) {
       setDecimals(18);
+    } else if (value == tokens.usdc) {
+      setDecimals(6);
     }
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
@@ -242,7 +244,7 @@ export default function UnlockAutoSafeModal({
               <div className="text-sm text-gray-300">
                 Saved balance:{" "}
                 <span className="text-gray-400">
-                  {formatUnits(BigInt(selectedTokenBalance), 18)}{" "}
+                  {formatUnits(BigInt(selectedTokenBalance), getTokenDecimals(saveState.token))}{" "}
                   {tokenData[saveState.token]?.symbol || ""}
                 </span>
               </div>
