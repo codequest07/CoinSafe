@@ -6,7 +6,8 @@
     "start": "node build/server.js",
     "dev": "cross-env NODE_OPTIONS='--max-old-space-size=2048' ts-node src/server.ts",
     "test": "nodemon src/server.ts",
-     "test-batch": "ts-node src/testBatch.ts",
+    "test-batch": "ts-node src/testBatch.ts",
+    "test-comprehensive": "ts-node src/testBatchComprehensive.ts",
     "build": "tsc"
   },
   "keywords": [],
@@ -24,6 +25,7 @@
     "@types/express-validator": "^3.0.0",
     "@types/joi": "^17.2.3",
     "@types/mongoose": "^5.11.97",
+    "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",
     "alchemy-sdk": "^3.4.1",
     "axios": "^1.7.7",

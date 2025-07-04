@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { ConnectOptions } from "mongoose";
 import dotenv from "dotenv";
+import cron from "node-cron";
 
 // Routes
 import AiRouter from "./Routes/AiRouter";
@@ -17,6 +18,7 @@ import { GeminiService } from "./services/GeminiService";
 import { SavingsPlanController } from "./controllers/SavingsPlanController";
 import { savingsPlanRoutes } from "./Routes/SavingsAiRoutes";
 import profileRoutes from "./Routes/ProfileRoutes";
+import { batchAutomatedSavingsProcessor } from "./services/batchProcessor";
 
 dotenv.config();
 const app = express();
@@ -63,6 +65,18 @@ mongoose
   } as ConnectOptions)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
+
+// Schedule automated savings batch processing
+// Run every hour at minute 0
+cron.schedule("0 * * * *", async () => {
+  console.log("🕐 Running scheduled automated savings batch processing...");
+  try {
+    await batchAutomatedSavingsProcessor();
+    console.log("✅ Scheduled batch processing completed");
+  } catch (error) {
+    console.error("❌ Scheduled batch processing failed:", error);
+  }
+});
 
 // Start server
 app.listen(port, () => {

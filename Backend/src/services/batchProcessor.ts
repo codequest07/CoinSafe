@@ -25,7 +25,11 @@ export async function batchAutomatedSavingsProcessor() {
     const { dueAddresses: successful, skippedAddresses: failed } =
       await executeBatch(startIndex, currentBatchSize);
 
-    await sendBatchEmails(successful, failed);
+    // Since the contract event doesn't provide specific addresses,
+    // we'll send emails to all due addresses with a generic message
+    if (allDueAddresses.length > 0) {
+      await sendBatchEmails(allDueAddresses, []);
+    }
 
     startIndex += currentBatchSize;
 
