@@ -17,6 +17,7 @@ import {
 } from "@/lib/utils";
 import { Check, Loader2 } from "lucide-react";
 import { formatUnits } from "viem";
+import { getTokenPrice } from "@/lib";
 // import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
 
 interface AssetData {
@@ -50,15 +51,38 @@ interface Token {
   selected?: boolean; // Added for selection state
 }
 
+export interface ITokenDetails {
+  amountSaved: bigint;
+  amountToSave: bigint;
+  frequency: bigint;
+  token: string;
+}
+
 export default function AutoSavedAssetTable({
   assets = defaultAssets,
   isLoading = false,
 }: any) {
-  console.log("Assets in auto safe table", assets);
-
   // State for USD values and errors, keyed by token address
-  const [usdValues, setUsdValues] = useState<{ [key: string]: string }>({});
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  // const [usdValues, setUsdValues] = useState<{ [key: string]: string }>({});
+  // const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [tokenDetails, setTokenDetails] = useState<ITokenDetails[]>([]);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      const _tokenDetails = [];
+      for (const asset of assets.tokenDetails) {
+        const amountSaved = formatUnits(BigInt(asset.amountSaved), 18);
+        const price = await getTokenPrice(asset.token, Number(amountSaved));
+        // prices[asset.token] = price;
+        // console.log("TOKEN PRICE AUTOSAFE", price);
+        _tokenDetails.push({ ...asset, amountSaved: price });
+      }
+      setTokenDetails(_tokenDetails);
+
+      // console.log("TOKEN DETAILS", _tokenDetails);
+    };
+    fetchPrices();
+  }, [assets]); // Re-run if assets change
 
   //   const {
   //     balances,
@@ -67,7 +91,7 @@ export default function AutoSavedAssetTable({
   //     // refetch,
   //   } = useClaimableBalanceAutomatedSafe();
 
-  console.log("Error", errors, usdValues);
+  // console.log("Error", errors, usdValues);
 
   // Fetch USD values for each token
   useEffect(() => {
@@ -79,6 +103,7 @@ export default function AutoSavedAssetTable({
 
       await Promise.all(
         assets.tokenDetails.map(async (item: Token) => {
+          // tokenDetails.map(async (item: Token) => {
           try {
             const usdValue = await convertTokenAmountToUsd(
               item.token,
@@ -93,12 +118,12 @@ export default function AutoSavedAssetTable({
         })
       );
 
-      setUsdValues(newUsdValues);
-      setErrors(newErrors);
+      // setUsdValues(newUsdValues);
+      // setErrors(newErrors);
     };
 
     fetchUsdValues();
-  }, [assets?.tokenDetails]); // Depend on tokenDetails, not tokenData
+  }, [assets, tokenDetails]); // Depend on tokenDetails, not tokenData
 
   return (
     <div className="w-full bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg">
@@ -136,7 +161,7 @@ export default function AutoSavedAssetTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {assets.tokenDetails.map((asset: any, index: any) => (
+              {tokenDetails.map((asset: any, index: any) => (
                 <TableRow
                   key={asset.token}
                   className={`border-gray-600 hover:bg-[#1D1D1D73]/20 ${
@@ -171,8 +196,11 @@ export default function AutoSavedAssetTable({
                       {isLoading ? (
                         <Loader2 />
                       ) : (
-                        `${(
-                          formatUnits(asset.amountToSave, getTokenDecimals(asset.token))) +
+                        `${
+                          formatUnits(
+                            asset.amountToSave,
+                            getTokenDecimals(asset.token)
+                          ) +
                           " " +
                           tokenData[asset.token].symbol
                         }`
@@ -186,9 +214,14 @@ export default function AutoSavedAssetTable({
                   {/* Amount */}
                   <TableCell className="px-6 py-4">
                     <div className="text-white">
-                      {formatUnits(asset.amountSaved, getTokenDecimals(asset.token)) +
+                      {`$${asset.amountSaved}`}
+                      {/* {formatUnits(asset.amountSaved, getTokenDecimals(asset.token)) +
                         " " +
-                        tokenData[asset.token].symbol}
+                        tokenData[asset.token].symbol} */}
+                      {/* {`${await getTokenPrice(
+                        asset.token,
+                        Number(asset.amountSaved)
+                      )}`} */}
                     </div>
                     {/* <div className="text-gray-400 text-sm">
                       {asset.amount.split(" ").slice(1).join(" ")}
@@ -288,9 +321,9 @@ export default function AutoSavedAssetTable({
                           <div className="text-white font-medium text-sm truncate">
                             {asset.ticker}
                           </div>
-                          <div className="text-gray-400 text-xs truncate">
+                          {/* <div className="text-gray-400 text-xs truncate">
                             Avalanche
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </TableCell>
