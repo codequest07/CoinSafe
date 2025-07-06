@@ -37,6 +37,18 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to CoinSafe!");
 });
 
+// Test endpoint to manually trigger batch processing
+app.get("/api/test-batch", async (req: Request, res: Response) => {
+  console.log("🧪 Manual batch processing triggered via API");
+  try {
+    await batchAutomatedSavingsProcessor();
+    res.json({ success: true, message: "Batch processing completed" });
+  } catch (error) {
+    console.error("❌ Manual batch processing failed:", error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
 // Initialize services
 const transactionModel = new TransactionModel(etherscanApiKey);
 const geminiService = new GeminiService(geminiApiKey);
@@ -68,7 +80,10 @@ mongoose
 
 // Schedule automated savings batch processing
 // Run every hour at minute 0
-cron.schedule("0 * * * *", async () => {
+console.log(
+  "⏰ Setting up cron job for automated savings (every hour at minute 0)"
+);
+const cronJob = cron.schedule("0 * * * *", async () => {
   console.log("🕐 Running scheduled automated savings batch processing...");
   try {
     await batchAutomatedSavingsProcessor();
@@ -78,7 +93,13 @@ cron.schedule("0 * * * *", async () => {
   }
 });
 
+// Log cron job status
+console.log("�� Cron job scheduled successfully");
+
 // Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+  console.log(
+    "🔗 Test batch processing endpoint: http://localhost:${port}/api/test-batch"
+  );
 });
