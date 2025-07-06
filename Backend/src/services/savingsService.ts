@@ -16,10 +16,8 @@ export async function executeBatch(
   startIndex: number,
   count: number
 ): Promise<{ dueAddresses: string[]; skippedAddresses: string[] }> {
-  const tx = await contract.getAndExecuteAutomatedSavingsPlansDue(
-    startIndex,
-    count
-  );
+  // The contract function doesn't take parameters, so we call it without them
+  const tx = await contract.getAndExecuteAutomatedSavingsPlansDue();
   const receipt = await tx.wait();
 
   // Find the BatchAutomatedSavingsExecuted event
@@ -38,9 +36,20 @@ export async function executeBatch(
         log.data,
         log.topics
       );
-      const dueAddresses = decoded.dueAddresses as string[];
-      const skippedAddresses = decoded.skippedAddresses as string[];
-      return { dueAddresses, skippedAddresses };
+      // The event only contains counts, not arrays
+      const executedCount = decoded.executedCount as number;
+      const skippedCount = decoded.skippedCount as number;
+
+      // Since we can't get the actual addresses from the event, we'll return empty arrays
+      // but include the counts in the response for debugging
+      console.log(
+        `Batch executed: ${executedCount} successful, ${skippedCount} skipped`
+      );
+
+      return {
+        dueAddresses: [], // We can't get the actual addresses from the event
+        skippedAddresses: [], // We can't get the actual addresses from the event
+      };
     }
   }
 
