@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import { ConnectOptions } from "mongoose";
 import dotenv from "dotenv";
+import cron from "node-cron";
 
 // Routes
 import AiRouter from "./Routes/AiRouter";
@@ -17,6 +18,7 @@ import { GeminiService } from "./services/GeminiService";
 import { SavingsPlanController } from "./controllers/SavingsPlanController";
 import { savingsPlanRoutes } from "./Routes/SavingsAiRoutes";
 import profileRoutes from "./Routes/ProfileRoutes";
+import { batchAutomatedSavingsProcessor } from "./services/batchProcessor";
 
 dotenv.config();
 const app = express();
@@ -33,6 +35,18 @@ const geminiApiKey = process.env.GEMINI_API_KEY || "";
 // Root route
 app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to CoinSafe!");
+});
+
+// Test endpoint to manually trigger batch processing
+app.get("/api/test-batch", async (req: Request, res: Response) => {
+  console.log("🧪 Manual batch processing triggered via API");
+  try {
+    await batchAutomatedSavingsProcessor();
+    res.json({ success: true, message: "Batch processing completed" });
+  } catch (error) {
+    console.error("❌ Manual batch processing failed:", error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
 });
 
 // Initialize services
@@ -64,7 +78,28 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
+// Schedule automated savings batch processing
+// Run every hour at minute 0
+console.log(
+  "⏰ Setting up cron job for automated savings (every hour at minute 0)"
+);
+const cronJob = cron.schedule("0 * * * *", async () => {
+  console.log("🕐 Running scheduled automated savings batch processing...");
+  try {
+    await batchAutomatedSavingsProcessor();
+    console.log("✅ Scheduled batch processing completed");
+  } catch (error) {
+    console.error("❌ Scheduled batch processing failed:", error);
+  }
+});
+
+// Log cron job status
+console.log("�� Cron job scheduled successfully");
+
 // Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+  console.log(
+    "🔗 Test batch processing endpoint: http://localhost:${port}/api/test-batch"
+  );
 });

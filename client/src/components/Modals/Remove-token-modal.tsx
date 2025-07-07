@@ -17,10 +17,12 @@ import { CoinsafeDiamondContract } from "@/lib/contract";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import SuccessfulTxModal from "./SuccessfulTxModal";
+// import { ITokenDetails } from "../AutoSavedAssetTable";
 
 interface Token {
   token: string; // Token address
   amountToSave: bigint; // Amount as BigInt
+  amountSaved: bigint; // Amount as BigInt
   frequency?: any; // Optional period (e.g., "per month")
   selected?: boolean; // Added for selection state
 }
@@ -28,7 +30,7 @@ interface Token {
 interface RemoveTokenModalProps {
   onClose: () => void;
   closeAllModals?: () => void; // Optional success callback
-  open: boolean;
+  open?: boolean;
 }
 
 export default function RemoveTokenModal({
@@ -37,6 +39,7 @@ export default function RemoveTokenModal({
   closeAllModals,
 }: RemoveTokenModalProps) {
   if (!open) return null; // If the modal is not open, return null
+
   const account = useActiveAccount();
   const userAddress = account?.address;
   const [tokens, setTokens] = useState<Token[]>([]); // Initialize empty, populated from details
@@ -54,6 +57,8 @@ export default function RemoveTokenModal({
   // State for USD values and errors, keyed by token address
   const [usdValues, setUsdValues] = useState<{ [key: string]: string }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const [selectedToken, setSelectedToken] = useState<string | null>(null);
 
   // Sync tokens state with details.tokenDetails and manage selection
   useEffect(() => {
@@ -98,14 +103,22 @@ export default function RemoveTokenModal({
     fetchUsdValues();
   }, [details?.tokenDetails]); // Depend on tokenDetails, not tokenData
 
+  useEffect(() => {
+    console.log("DETAILS COMING", details);
+  }, [details]);
+
   // Select a token by token address
+  // const selectToken = (tokenAddress: string) => {
+  //   setTokens(
+  //     tokens.map((token) => ({
+  //       ...token,
+  //       selected: token.token === tokenAddress,
+  //     }))
+  //   );
+  // };
+
   const selectToken = (tokenAddress: string) => {
-    setTokens(
-      tokens.map((token) => ({
-        ...token,
-        selected: token.token === tokenAddress,
-      }))
-    );
+    setSelectedToken(tokenAddress);
   };
 
   const onSuccess = () => {
@@ -119,7 +132,9 @@ export default function RemoveTokenModal({
 
   const { removeTokenFromPlan, isLoading } = useRemoveTokenFromAutomatedPlan({
     account,
-    token: tokens.find((token) => token.selected)?.token! as `0x${string}`,
+    // token: (tokens.find((token) => token.selected)?.token ||
+    //   "") as `0x${string}`,
+    token: selectedToken as `0x${string}`,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
     toast: ({ title, variant }) => {
       console.log(`${variant.toUpperCase()}: ${title}`);
@@ -138,7 +153,7 @@ export default function RemoveTokenModal({
   //   setSelectedTokenAddress(tokenAddress);
   // };
 
-  console.log("TOKEN DETAILS:", details);
+  // console.log("TOKEN DETAILS:", details.tokens);
   console.log("RemoveTokenModal component rendered");
 
   return (
@@ -198,7 +213,107 @@ export default function RemoveTokenModal({
             )
           )}
 
+          {/* new implementation from token instead of tokenDetails */}
           <div className="mt-10 space-y-4">
+            {!automatedSafeLoading &&
+              details.tokens.map((token: string) => {
+                // const _details_ = tokens.find(
+                //   (detail: Token) => detail.token === token
+                // );
+                console.log("FIRST TOKENS", tokens);
+                console.log("How about details", details);
+                const _details = {
+                  ...tokens.find((detail) => detail.token === token),
+                  selected: token === selectedToken,
+                };
+
+                if (!_details) {
+                  console.warn(`Token details not found for address: ${token}`);
+                  return null;
+                }
+
+                console.log("Details coming", _details.amountSaved);
+                console.log("TOKEN DATA", tokenData[token]);
+                return (
+                  <div
+                    key={token} // Use token address as key
+                    className="flex items-center justify-between border-b border-gray-800 pb-4"
+                    onClick={() => selectToken(token)}
+                  >
+                    <div className="flex items-center">
+                      <div className="mr-3 h-8 w-8 rounded-full flex items-center justify-center">
+                        <img
+                          src={tokenData[token]?.image}
+                          alt={tokenData[token]?.symbol}
+                          className="h-8 w-8 rounded-full"
+                        />
+                      </div>
+                      <div>
+                        <div className="font-medium">
+                          {tokenData[token]?.symbol}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          {tokenData[token]?.chain}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="mr-4 text-right">
+                        <div className="font-medium">
+                          {/* {_details ? (
+                          formatUnits(
+                            Number(_details && _details.amountToSave),
+                            18
+                          )
+                        ) : (
+                          <Loader2 size={8} />
+                        )}{" "}
+                        {tokenData[token]?.symbol} */}
+                          {_details.amountToSave !== undefined &&
+                          _details.amountToSave !== null
+                            ? formatUnits(
+                                _details.amountSaved!, // Pass bigint directly
+                                tokenData[token]?.decimals ||
+                                  getTokenDecimals(token)
+                              )
+                            : "0.00"}{" "}
+                          {tokenData[token]?.symbol || "Unknown"}
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="text-sm text-gray-400">
+                            $
+                            {usdValues[token] !== undefined
+                              ? usdValues[token]
+                              : "Loading..."}
+                            {errors[token] && (
+                              <span className="text-red-500 text-xs ml-1">
+                                {errors[token]}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-400">{`${convertFrequency(
+                            Number(_details!.frequency)!
+                          )}`}</div>
+                        </div>
+                      </div>
+                      <div
+                        className={`h-5 w-5 rounded-full border-2 ${
+                          _details!.selected
+                            ? "border-[#79E7BA] bg-gray-900 flex items-center justify-center"
+                            : "border-gray-600"
+                        }`}
+                      >
+                        {_details!.selected && (
+                          <div className="h-2 w-2 rounded-full bg-[#79E7BA]"></div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+
+          {/* <div className="mt-10 space-y-4">
             {tokens.map((token) => (
               <div
                 key={token.token} // Use token address as key
@@ -263,7 +378,7 @@ export default function RemoveTokenModal({
                 </div>
               </div>
             ))}
-          </div>
+          </div> */}
 
           <div className="mt-8 flex justify-between">
             <button

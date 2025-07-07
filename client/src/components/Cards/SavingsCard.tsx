@@ -4,6 +4,10 @@ import { ReactNode } from "react";
 import { useActiveAccount } from "thirdweb/react";
 import TopUpModal from "../Modals/Top-up-modal";
 import UnlockModal from "../Modals/UnlockModal";
+import ManageSavingsTarget from "../Modals/ManageSavingsTarget";
+import ExtendTargetSafeModal from "../Modals/ExtendTargetSafe";
+import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
+// import { useExtendSavingsTarget } from "@/hooks/useExtendSavingsTarget";
 
 const SavingsCard = ({
   title,
@@ -14,6 +18,7 @@ const SavingsCard = ({
   emphasize,
   text,
   safeId = 1, // Default to 1 if not provided
+  safeDetails,
 }: {
   title: string;
   icon?: any;
@@ -23,6 +28,7 @@ const SavingsCard = ({
   emphasize?: string;
   text?: ReactNode;
   safeId?: number;
+  safeDetails?: FormattedSafeDetails | null;
 }) => {
   // Only log in development mode to avoid console spam
   if (process.env.NODE_ENV === "development") {
@@ -34,11 +40,26 @@ const SavingsCard = ({
   const isConnected = !!account?.address;
 
   const [showModal, setShowModal] = useState(false);
+  const [showManageModal, setShowManageModal] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [showExtendModal, setShowExtendModal] = useState(false);
 
   const handleTopUp = () => {
     // Close the modal - the refresh will be handled by the TopUpModal component
-    setShowModal(false);
+    setShowModal(true);
+    setShowManageModal(false);
+  };
+
+  const handleExtendSafe = () => {
+    // Close the modal - the refresh will be handled by the TopUpModal component
+    setShowExtendModal(true);
+    setShowManageModal(false);
+  };
+
+  const handleManageTargetSafe = () => {
+    // Close the modal - the refresh will be handled by the TopUpModal component
+    handleExtendSafe();
+    setShowManageModal(false);
   };
 
   const handleUnlock = () => {
@@ -87,13 +108,20 @@ const SavingsCard = ({
                 console.log("Opening unlock modal for safeId:", safeId);
                 setShowUnlockModal(true);
               }}
-              className="rounded-[100px] px-8 py-[8px] bg-[#1E1E1E99] h-[40px] text-sm text-[#F1F1F1]">
+              className="rounded-[100px] px-8 py-[8px] bg-[#1E1E1E99] h-[40px] text-sm text-[#F1F1F1]"
+            >
               Unlock
             </button>
-            <button
+            {/* <button
               onClick={() => setShowModal(true)}
               className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
               Top up
+            </button> */}
+            <button
+              onClick={() => setShowManageModal(true)}
+              className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+            >
+              Manage
             </button>
           </div>
         )}
@@ -104,6 +132,19 @@ const SavingsCard = ({
           onClose={() => setShowModal(false)}
           onTopUp={() => handleTopUp()}
           safeId={safeId}
+        />
+      )}
+      {showExtendModal && (
+        <ExtendTargetSafeModal
+          details={safeDetails}
+          onClose={() => setShowExtendModal(false)}
+        />
+      )}
+      {showManageModal && (
+        <ManageSavingsTarget
+          onClose={() => setShowManageModal(false)}
+          onTopUpSafe={handleTopUp}
+          onExtendSafe={handleManageTargetSafe}
         />
       )}
       {/* Only render the UnlockModal when showUnlockModal is true */}
