@@ -639,7 +639,7 @@ const AutoSave = () => {
             return null;
           })()}
           <DeactivateSafeModal
-            details={details}
+            // details={details}
             onClose={backToManageAutosavings}
           />
         </div>
