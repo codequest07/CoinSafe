@@ -22,7 +22,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { toast } from "sonner";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import ExtendSafeModal from "@/components/Modals/extend-safe-modal";
-import { getTokenDecimals } from "@/lib/utils";
+import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
 
 const AutoSave = () => {
   const navigate = useNavigate();
@@ -131,6 +131,91 @@ const AutoSave = () => {
       console.error("claim error:", err);
     },
   });
+
+  const [totalUsdValue, setTotalUsdValue] = useState<string>("0.00");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTotalUsdValue = async () => {
+      if (!details?.tokenDetails || details.tokenDetails.length === 0) {
+        setTotalUsdValue("0.00");
+        setError(null);
+        return;
+      }
+
+      try {
+        // Convert each token's amountSaved to USD and sum
+        const usdValues = await Promise.all(
+          details.tokenDetails.map(async (item: any) => {
+            try {
+              const usdValue = await convertTokenAmountToUsd(
+                item.token,
+                item.amountSaved
+              );
+              return usdValue;
+            } catch (err) {
+              console.error(`Error for token ${item.token}:`, err);
+              return 0; // Return 0 for failed conversions
+            }
+          })
+        );
+
+        // Sum all USD values
+        const totalUsd = usdValues.reduce((sum, value) => sum + value, 0);
+        setTotalUsdValue(totalUsd.toFixed(2));
+        setError(null);
+      } catch (err) {
+        console.error("Error converting tokens to USD:", err);
+        setTotalUsdValue("0.00");
+        setError("Failed to load USD value");
+      }
+    };
+
+    fetchTotalUsdValue();
+  }, [details]);
+
+  // useEffect(() => {
+  //   const fetchTotalUsdValue = async () => {
+  //     console.log("IN FETCHTOTALUSD", details?.tokenDetails);
+  //     if (!details?.tokenDetails) {
+  //       setTotalUsdValue("0.00");
+  //       setError(null);
+  //       return;
+  //     }
+
+  //     try {
+  //       // Calculate total amountSaved across all tokens
+  //       const totalAmountSaved = details.tokenDetails.reduce(
+  //         (total: bigint, obj: any) => total + obj.amountSaved,
+  //         0n
+  //       );
+
+  //       console.log("TOTAL AMOUNT SAVED", totalAmountSaved);
+
+  //       // Assuming the first token's type is representative for conversion
+  //       // If tokens have different types, you may need a different approach
+  //       const representativeToken = details.tokenDetails[0]?.token;
+  //       if (!representativeToken) {
+  //         throw new Error("No tokens available for conversion");
+  //       }
+
+  //       // Convert the total amount to USD
+  //       const usdValue = await convertTokenAmountToUsd(
+  //         representativeToken,
+  //         totalAmountSaved
+  //       );
+
+  //       setTotalUsdValue(usdValue.toFixed(2));
+  //       setError(null);
+  //     } catch (err) {
+  //       console.error("Error converting total to USD:", err);
+  //       setTotalUsdValue("0.00");
+  //       setError("Failed to load USD value");
+  //     }
+  //   };
+
+  //   fetchTotalUsdValue();
+  // }, [details]);
 
   useEffect(() => {
     console.log("Claim Error", claimAllError);
@@ -343,7 +428,7 @@ const AutoSave = () => {
                   <div>
                     <div>
                       <span className="text-[#F1F1F1] pr-2 text-3xl">
-                        {Number(
+                        {/* {Number(
                           formatUnits(
                             details?.tokenDetails?.reduce(
                               (total: any, obj: any) => total + obj.amountSaved,
@@ -355,7 +440,9 @@ const AutoSave = () => {
                           )
                         ).toLocaleString("en-US", {
                           minimumFractionDigits: 2,
-                        })}
+                        })} */}
+                        {totalUsdValue}
+                        {error && error}
                       </span>
                       <span className="text-[#CACACA] text-xs">USD</span>
                     </div>
