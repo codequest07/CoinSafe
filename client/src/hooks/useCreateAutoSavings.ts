@@ -1,10 +1,5 @@
 import { useCallback, useState } from "react";
-import {
-  getContract,
-  prepareContractCall,
-  resolveMethod,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall, resolveMethod } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { useActiveAccount } from "thirdweb/react";
@@ -13,6 +8,7 @@ import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Abi } from "viem";
 import { publicClient } from "@/lib/client";
 import { tokenDecimals } from "@/lib/utils";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 interface SaveState {
   token: string;
@@ -49,6 +45,7 @@ export const useCreateAutoSavings = ({
 }: CreateAutoSavingsParams): CreateAutoSavingsResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const account = useActiveAccount();
 
@@ -102,10 +99,7 @@ export const useCreateAutoSavings = ({
         });
 
         if (account) {
-          await sendAndConfirmTransaction({
-            transaction,
-            account,
-          });
+          await sendTransaction(transaction);
 
           toast({
             title: "Save successful! Tx Hash",
@@ -179,10 +173,7 @@ export const useCreateAutoSavings = ({
         });
 
         if (account) {
-          await sendAndConfirmTransaction({
-            transaction,
-            account,
-          });
+          await sendTransaction(transaction);
 
           toast({
             title: "Add token to Auto Safe successful!",
@@ -242,16 +233,11 @@ export const useCreateAutoSavings = ({
         const transaction = prepareContractCall({
           contract,
           method: resolveMethod("extendAutomatedPlanDuration"),
-          params: [
-            toBigInt(saveState.duration),
-          ],
+          params: [toBigInt(saveState.duration)],
         });
 
         if (account) {
-          await sendAndConfirmTransaction({
-            transaction,
-            account,
-          });
+          await sendTransaction(transaction);
 
           toast({
             title: "Extend Automated plan successful!",
@@ -268,11 +254,8 @@ export const useCreateAutoSavings = ({
           if (err.message.includes("Plan is Archived")) {
             errorMessage =
               "Automated savings plan is archived. Please create a new one.";
-          } else if (
-            err.message.includes("DurationTooShort()")
-          ) {
-            errorMessage =
-              "Duration is too short, choose a longer timeline!";
+          } else if (err.message.includes("DurationTooShort()")) {
+            errorMessage = "Duration is too short, choose a longer timeline!";
           } else {
             errorMessage = err.message;
           }
@@ -319,7 +302,7 @@ export const useCreateAutoSavings = ({
       .map(
         (
           { result }: { result?: any; status: string; error?: Error },
-          idx: number,
+          idx: number
         ) => {
           if (result) {
             hasAutoSafe = true;

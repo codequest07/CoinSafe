@@ -60,11 +60,6 @@ export function useGetSafes() {
 
   // Define fetchEmergencySafe inside the callback
   const fetchEmergencySafe = async () => {
-    console.log(
-      "Fetching emergency safe with supported tokens:",
-      supportedTokens
-    );
-
     // // Create a contract instance specifically for emergency savings
     // const emergencyContract = getContract({
     //   client,

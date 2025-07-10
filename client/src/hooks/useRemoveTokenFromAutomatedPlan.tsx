@@ -1,14 +1,11 @@
 import { useCallback, useState } from "react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { Abi } from "viem";
 import { facetAbis } from "@/lib/contract";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 interface UseRemoveTokenFromAutomatedPlanParams {
   account: Account | undefined;
@@ -35,6 +32,7 @@ export const useRemoveTokenFromAutomatedPlan = ({
 }: UseRemoveTokenFromAutomatedPlanParams): RemoveTokenFromAutomatedPlanResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const removeTokenFromPlan = useCallback(
     async (e: React.FormEvent) => {
@@ -75,10 +73,7 @@ export const useRemoveTokenFromAutomatedPlan = ({
             params: [token],
           });
 
-          await sendAndConfirmTransaction({
-            transaction: removeTokenTx,
-            account,
-          });
+          await sendTransaction(removeTokenTx);
 
           toast({
             title: "Token removed from plan successfully",

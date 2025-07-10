@@ -29,6 +29,7 @@ import {
 import { useWatchEvents } from "./hooks/useWatchEvents";
 import Profile from "./Pages/Profile";
 import ContactUs from "./Pages/Contact-Us";
+import { SmartAccountTransactionProvider } from "./hooks/useSmartAccountTransactionInterceptor";
 
 const App = () => {
   const [, setAvailableBalance] = useRecoilState(availableBalanceState);
@@ -72,34 +73,36 @@ const App = () => {
 
   return (
     <div className="bg-[#010104]">
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/extension" element={<Extension />} />
-        <Route path="/testnet" element={<Navigate to={"/dashboard"} />} />
-        <Route path="/contact" element={<ContactUs />} />
-        <Route path="/faucet" element={<Faucet />} />
-        <Route path="/dashboard" element={<Layout />}>
-          <Route path="/dashboard/" element={<Home />} />
-          <Route path="/dashboard/wallet" element={<Portfolio />} />
-          <Route path="/dashboard/vault" element={<Vault />} />
-          <Route path="/dashboard/vault/:id" element={<SavingsDetail />} />
-          <Route path="/dashboard/profile" element={<Profile />} />
-          <Route
-            path="/dashboard/vault/emergency-safe"
-            element={<EmergencySafe />}
-          />
-          <Route path="/dashboard/vault/auto-safe" element={<AutoSave />} />
-          <Route path="/dashboard/staking" element={<Staking />} />
-          <Route path="/dashboard/rewards" element={<Rewards />} />
-          <Route path="/dashboard/SaveSense" element={<SaveSense />} />
-          {/* Test */}
-          <Route path="/dashboard/save-assets" element={<SaveAssets />} />
-          <Route path="/dashboard/deposit" element={<Deposit />} />
-          <Route path="/dashboard/withdraw-assets" element={<Withdraw />} />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster/>
+      <SmartAccountTransactionProvider>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/extension" element={<Extension />} />
+          <Route path="/testnet" element={<Navigate to={"/dashboard"} />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/faucet" element={<Faucet />} />
+          <Route path="/dashboard" element={<Layout />}>
+            <Route path="/dashboard/" element={<Home />} />
+            <Route path="/dashboard/wallet" element={<Portfolio />} />
+            <Route path="/dashboard/vault" element={<Vault />} />
+            <Route path="/dashboard/vault/:id" element={<SavingsDetail />} />
+            <Route path="/dashboard/profile" element={<Profile />} />
+            <Route
+              path="/dashboard/vault/emergency-safe"
+              element={<EmergencySafe />}
+            />
+            <Route path="/dashboard/vault/auto-safe" element={<AutoSave />} />
+            <Route path="/dashboard/staking" element={<Staking />} />
+            <Route path="/dashboard/rewards" element={<Rewards />} />
+            <Route path="/dashboard/SaveSense" element={<SaveSense />} />
+            {/* Test */}
+            <Route path="/dashboard/save-assets" element={<SaveAssets />} />
+            <Route path="/dashboard/deposit" element={<Deposit />} />
+            <Route path="/dashboard/withdraw-assets" element={<Withdraw />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </SmartAccountTransactionProvider>
+      <Toaster />
     </div>
   );
 };

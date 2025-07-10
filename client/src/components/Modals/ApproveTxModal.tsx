@@ -21,7 +21,7 @@ export default function ApproveTxModal({
     if (isOpen && !disableAutoClose) {
       const timer = setTimeout(() => {
         onClose();
-      }, 5000); // Close modal after 5 seconds
+      }, 2000); // Close modal after 5 seconds
 
       return () => clearTimeout(timer); // Cleanup timer on unmount
     }

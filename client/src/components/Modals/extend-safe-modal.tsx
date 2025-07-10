@@ -99,7 +99,6 @@ export default function ExtendSafeModal({
 
   return (
     <>
-      <div></div>
       <div className="fixed inset-0 flex items-center justify-center bg-transparent z-50">
         <div
           className="absolute inset-0 bg-black/80"

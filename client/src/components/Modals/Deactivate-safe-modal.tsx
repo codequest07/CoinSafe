@@ -2,17 +2,14 @@
 
 import { X } from "lucide-react";
 import { useState } from "react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Abi } from "viem";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "@/hooks/use-toast";
+import { useSmartAccountTransactionInterceptorContext } from "@/hooks/useSmartAccountTransactionInterceptor";
 
 interface DeactivateSafeModalProps {
   details?: any;
@@ -28,6 +25,7 @@ export default function DeactivateSafeModal({
   // const [isSafeEmpty, setIsSafeEmpty] = useState(true);
   const [deactivating, setDeactivating] = useState(false);
   const account = useActiveAccount();
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   // useEffect(() => {
   //   const checkSafeStatus = async () => {
@@ -62,10 +60,7 @@ export default function DeactivateSafeModal({
         params: [account.address as `0x${string}`],
       });
 
-      await sendAndConfirmTransaction({
-        transaction: deactivateTx,
-        account,
-      });
+      await sendTransaction(deactivateTx);
     } catch (error: any) {
       console.error("Deactivate Safe failed:", error);
       toast({

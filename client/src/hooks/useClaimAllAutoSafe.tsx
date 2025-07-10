@@ -1,15 +1,12 @@
 import { useCallback, useState } from "react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { Abi } from "viem";
 // import { getTokenDecimals } from "@/lib/utils";
 import { facetAbis } from "@/lib/contract";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 interface UseClaimAllAutomatedSafeParams {
   account: Account | undefined;
@@ -34,6 +31,7 @@ export const useClaimAllAutoSafe = ({
 }: UseClaimAllAutomatedSafeParams): ClaimAllAutomatedSafeResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const claimAllAutoSafe = useCallback(
     async (e: React.FormEvent) => {
@@ -68,10 +66,7 @@ export const useClaimAllAutoSafe = ({
             params: [],
           });
 
-          await sendAndConfirmTransaction({
-            transaction: claimAllTx,
-            account,
-          });
+          await sendTransaction(claimAllTx);
 
           toast({ title: "Claim all successful", variant: "default" });
           onSuccess?.();
