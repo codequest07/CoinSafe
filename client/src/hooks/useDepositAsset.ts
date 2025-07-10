@@ -110,7 +110,7 @@ export const useDepositAsset = ({
               params: [coinSafeAddress, amountWithDecimals], // Use the same amount with decimals
             });
 
-            if (!(wallet?.id === "io.metamask")) onApprove?.();
+            if (!(wallet?.id === "inApp")) onApprove?.();
 
             await sendTransaction(approveTx);
           } catch (error: any) {
