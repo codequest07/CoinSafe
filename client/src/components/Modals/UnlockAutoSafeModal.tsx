@@ -15,7 +15,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 // import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { getContract, readContract } from "thirdweb";
-import { Abi, formatUnits } from "viem";
+import { Abi, formatEther, formatUnits } from "viem";
 import { client, liskSepolia } from "@/lib/config";
 import { useWithdrawAutomatedSafe } from "@/hooks/useWithdrawAutomatedSafe";
 import { format } from "date-fns";
@@ -244,20 +244,26 @@ export default function UnlockAutoSafeModal({
               <div className="text-sm text-gray-300">
                 Saved balance:{" "}
                 <span className="text-gray-400">
-                  {formatUnits(BigInt(selectedTokenBalance), getTokenDecimals(saveState.token))}{" "}
+                  {formatUnits(
+                    BigInt(selectedTokenBalance),
+                    getTokenDecimals(saveState.token)
+                  )}{" "}
                   {tokenData[saveState.token]?.symbol || ""}
                 </span>
               </div>
               <button
                 className="text-sm text-[#5b8c7b] hover:text-[#79E7BA] transition-colors"
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (selectedTokenBalance > 0) {
-                    let maxAmount = selectedTokenBalance;
-                    const symbol = tokenData[saveState.token]?.symbol;
-                    if (symbol === "USDT" && maxAmount >= 1000000) {
-                      maxAmount = maxAmount / 1000000;
-                    }
+                    const maxAmount = selectedTokenBalance;
+                    console.log("Max before all that", maxAmount);
+                    // const symbol = tokenData[saveState.token]?.symbol;
+                    // if (symbol === "USDT" && maxAmount >= 1000000) {
+                    //   maxAmount = maxAmount / 1000000;
+                    // }
+                    console.log("Max after all that", maxAmount);
                     setSaveState((prev) => ({
                       ...prev,
                       amount: maxAmount,
@@ -274,7 +280,6 @@ export default function UnlockAutoSafeModal({
                 Max
               </button>
             </div>
-
             {autoSafeIsLoading ? (
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -369,7 +374,6 @@ export default function UnlockAutoSafeModal({
                 )}
               </>
             ) : null}
-
             <DialogFooter>
               <Button
                 type="button"
@@ -400,7 +404,7 @@ export default function UnlockAutoSafeModal({
         onClose={() => {
           if (!isLoading) setShowApproveTxModal(false);
         }}
-        amount={saveState.amount}
+        amount={formatEther(BigInt(saveState.amount))}
         token={tokenData[saveState.token]?.symbol || ""}
         text="To Unlock"
       />
@@ -412,7 +416,7 @@ export default function UnlockAutoSafeModal({
           if (onClose) onClose();
         }}
         transactionType="withdraw"
-        amount={saveState.amount}
+        amount={formatEther(BigInt(saveState.amount))}
         token={tokenData[saveState.token]?.symbol || ""}
         additionalDetails={{
           subText: "Assets will be available in your wallet.",

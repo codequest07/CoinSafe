@@ -7,8 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import MemoRipple from "@/icons/Ripple";
+import { formatUnits } from "viem";
 
 interface ISaveState {
   target: string;
@@ -70,7 +71,14 @@ const AmountInput = ({
           <div>
             <input
               type="number"
-              value={amount === 0 ? "" : amount}
+              value={
+                amount === 0
+                  ? ""
+                  : formatUnits(
+                      BigInt(amount),
+                      getTokenDecimals(saveState.token)
+                    )
+              }
               onChange={handleAmountChange}
               ref={inputRef}
               onFocus={handleFocus}
@@ -82,7 +90,8 @@ const AmountInput = ({
           <div className="relative">
             <Select
               onValueChange={handleTokenSelectWithClear}
-              value={saveState.token}>
+              value={saveState.token}
+            >
               <SelectTrigger className="w-[140px] bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                 <div className="flex items-center">
                   <MemoRipple className="mr-2" />
