@@ -13,8 +13,8 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the application with memory optimization
+RUN NODE_OPTIONS='--max-old-space-size=512' npm run build
 
 # Production stage
 FROM nginx:alpine
