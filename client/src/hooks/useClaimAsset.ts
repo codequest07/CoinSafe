@@ -1,13 +1,10 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount, useConnect } from "thirdweb/react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { toBigInt } from "ethers";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 interface UseClaimAssetParams {
   address?: `0x${string}`;
@@ -44,6 +41,7 @@ export const useClaimAsset = ({
 
   const { connect } = useConnect();
   const activeAccount = useActiveAccount();
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
   const address = activeAccount?.address || providedAddress;
 
   // Initialize contract
@@ -87,10 +85,7 @@ export const useClaimAsset = ({
         });
 
         if (account) {
-          await sendAndConfirmTransaction({
-            transaction,
-            account,
-          });
+          await sendTransaction(transaction);
         } else {
           throw new Error("No account connected");
         }
@@ -172,10 +167,7 @@ export const useClaimAsset = ({
         });
 
         if (account) {
-          await sendAndConfirmTransaction({
-            transaction,
-            account,
-          });
+          await sendTransaction(transaction);
         } else {
           throw new Error("No account connected");
         }

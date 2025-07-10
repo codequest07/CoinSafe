@@ -1,15 +1,12 @@
 import { useCallback, useState } from "react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { Abi } from "viem";
 import { getTokenDecimals } from "@/lib/utils";
 import { facetAbis } from "@/lib/contract";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 interface UseAddTokenToAutomatedPlanParams {
   account: Account | undefined;
@@ -42,6 +39,7 @@ export const useAddTokenToAutomatedPlan = ({
 }: UseAddTokenToAutomatedPlanParams): AddTokenToAutomatedPlanResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const addTokenToPlan = useCallback(
     async (e: React.FormEvent) => {
@@ -115,10 +113,7 @@ export const useAddTokenToAutomatedPlan = ({
             params: [token, amountWithDecimals, BigInt(frequency)],
           });
 
-          await sendAndConfirmTransaction({
-            transaction: addTokenTx,
-            account,
-          });
+          await sendTransaction(addTokenTx);
 
           toast({
             title: "Token added to plan successfully",

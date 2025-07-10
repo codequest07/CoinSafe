@@ -1,15 +1,13 @@
 import { useCallback, useState } from "react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { erc20Abi, Abi } from "viem";
 import { getTokenDecimals } from "@/lib/utils";
 import { facetAbis } from "@/lib/contract";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
+import { useActiveWallet } from "thirdweb/react";
 
 interface UseDepositAssetParams {
   address?: `0x${string}`;
@@ -43,6 +41,8 @@ export const useDepositAsset = ({
 }: UseDepositAssetParams): DepositAssetResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const wallet = useActiveWallet();
 
   const depositAsset = useCallback(
     async (e: React.FormEvent) => {
@@ -110,16 +110,15 @@ export const useDepositAsset = ({
               params: [coinSafeAddress, amountWithDecimals], // Use the same amount with decimals
             });
 
-            onApprove?.();
+            if (!(wallet?.id === "io.metamask")) onApprove?.();
 
-            await sendAndConfirmTransaction({
-              transaction: approveTx,
-              account,
-            });
+            await sendTransaction(approveTx);
           } catch (error: any) {
             console.error("Approval failed:", error);
             throw new Error(
-              `Approve token spend transaction failed: ${error?.message ?? error}`
+              `Approve token spend transaction failed: ${
+                error?.message ?? error
+              }`
             );
           } finally {
             setIsLoading(false);
@@ -134,10 +133,7 @@ export const useDepositAsset = ({
               params: [amountWithDecimals, token as `0x${string}`],
             });
 
-            await sendAndConfirmTransaction({
-              transaction: depositTx,
-              account,
-            });
+            await sendTransaction(depositTx);
 
             onSuccess?.();
           } catch (error) {

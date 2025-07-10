@@ -1,18 +1,11 @@
 import { useCallback, useState } from "react";
-import {
-  useSendAndConfirmTransaction,
-  useActiveAccount,
-  useConnect,
-} from "thirdweb/react";
+import { useActiveAccount, useConnect } from "thirdweb/react";
 // import { liskSepolia } from 'viem/chains'; // Still used for chain ID reference
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { getTokenDecimals } from "@/lib/utils";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 // import { toast } from './use-toast';
 // import { config } from '@/lib/config'; // Assuming this contains Thirdweb client config
 
@@ -54,8 +47,7 @@ export const useWithdrawAsset = ({
   // const account = useActiveAccount();
   // const wallet = useWallet(); // Reference to the wallet (e.g., smart account)
   // const { contract } = useContract({ address: coinSafeAddress, abi: coinSafeAbi });
-  const { mutateAsync: writeContractAsync, isPending: writeLoading } =
-    useSendAndConfirmTransaction();
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const contract = getContract({
     client,
@@ -138,10 +130,7 @@ export const useWithdrawAsset = ({
         });
 
         if (account) {
-          await sendAndConfirmTransaction({
-            transaction,
-            account,
-          });
+          await sendTransaction(transaction);
         }
 
         onSuccess?.();
@@ -165,14 +154,13 @@ export const useWithdrawAsset = ({
       onError,
       toast,
       connect,
-      writeContractAsync,
       contract,
     ]
   );
 
   return {
     withdrawAsset,
-    isLoading: isLoading || writeLoading,
+    isLoading: isLoading,
     error,
   };
 };

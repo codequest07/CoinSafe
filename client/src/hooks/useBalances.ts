@@ -36,7 +36,7 @@ export const useBalances = (address: string) => {
 
     async function fetchSupportedTokens() {
       try {
-        console.log("Fetching supported tokens for address:", address);
+        // console.log("Fetching supported tokens for address:", address);
         const fundingFacetContract = getContract({
           client,
           address: CoinsafeDiamondContract.address,
@@ -53,11 +53,11 @@ export const useBalances = (address: string) => {
           params: [],
         })) as string[];
 
-        console.log("Supported tokens fetched:", tokens);
+        // console.log("Supported tokens fetched:", tokens);
 
         // Only set tokens if we actually got some from the contract
         if (tokens && tokens.length > 0) {
-          console.log("Setting supported tokens:", tokens);
+          // console.log("Setting supported tokens:", tokens);
           setSupportedTokens(tokens);
         } else {
           console.warn("No supported tokens returned from contract");

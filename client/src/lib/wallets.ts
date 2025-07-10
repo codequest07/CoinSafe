@@ -22,11 +22,5 @@ export const wallets = [
   }),
   createWallet("io.metamask"),
   createWallet("com.coinbase.wallet"),
-  createWallet("me.rainbow"),
   createWallet("io.rabby"),
-  createWallet("io.zerion.wallet"),
-  createWallet("com.trustwallet.app"),
-  createWallet("org.uniswap"),
-  createWallet("com.okex.wallet"),
-  createWallet("com.bitget.web3"),
 ];

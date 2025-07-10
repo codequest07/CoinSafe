@@ -1,10 +1,6 @@
 import { useCallback } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { toast } from "./use-toast";
@@ -17,6 +13,7 @@ import {
   UnlockState,
 } from "@/store/atoms/unlock";
 import { tokenDecimals } from "@/lib/utils";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 // Using the UnlockState interface from the Recoil atom
 
@@ -50,6 +47,7 @@ export const useUnlockSafe = ({
   const [error, setError] = useRecoilState(unlockErrorState);
   const [isSuccess, setIsSuccess] = useRecoilState(unlockSuccessState);
   const account = useActiveAccount();
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     // Ensure amount is greater than zero
@@ -256,10 +254,7 @@ export const useUnlockSafe = ({
           acceptFee: currentState.acceptEarlyWithdrawalFee,
         });
 
-        const result = await sendAndConfirmTransaction({
-          transaction,
-          account: account!,
-        });
+        const result = await sendTransaction(transaction);
 
         toast({
           title: "Unlock successful!",
