@@ -1,14 +1,11 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { toast } from "./use-toast";
 import { tokenDecimals } from "@/lib/utils";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 interface TopUpState {
   token: string;
@@ -39,6 +36,7 @@ export const useTopUpEmergencySafe = ({
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const account = useActiveAccount();
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     const decimals = tokenDecimals[token] || tokenDecimals.DEFAULT;
@@ -97,10 +95,7 @@ export const useTopUpEmergencySafe = ({
           params: [topUpState.token, amountWithDecimals],
         });
 
-        const result = await sendAndConfirmTransaction({
-          transaction,
-          account: account!,
-        });
+        const result = await sendTransaction(transaction);
 
         toast({
           title: "Top-up successful!",

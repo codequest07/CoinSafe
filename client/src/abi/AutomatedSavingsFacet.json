@@ -401,6 +401,15 @@
   },
   {
     "inputs": [
+      { "internalType": "address", "name": "_user", "type": "address" }
+    ],
+    "name": "activateSafe",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "address", "name": "_token", "type": "address" },
       { "internalType": "uint256", "name": "_amountToSave", "type": "uint256" },
       { "internalType": "uint256", "name": "_frequency", "type": "uint256" }
@@ -451,6 +460,15 @@
       { "internalType": "uint256", "name": "_duration", "type": "uint256" }
     ],
     "name": "createAutomatedSavingsPlan",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_user", "type": "address" }
+    ],
+    "name": "deactivateSafe",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

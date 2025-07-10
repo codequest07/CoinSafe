@@ -1,16 +1,13 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall } from "thirdweb";
 import { liskSepolia } from "@/lib/config";
 import { client } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { toast } from "./use-toast";
 import { tokenDecimals } from "@/lib/utils";
 import { Abi } from "viem";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 // import { liskSepolia } from 'viem/chains';
 
 interface SaveState {
@@ -51,6 +48,7 @@ export const useSaveAsset = ({
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const account = useActiveAccount();
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     const decimals = tokenDecimals[token] || tokenDecimals.DEFAULT;
@@ -104,10 +102,7 @@ export const useSaveAsset = ({
         });
 
         if (account) {
-          const { transactionHash } = await sendAndConfirmTransaction({
-            transaction,
-            account,
-          });
+          const { transactionHash } = await sendTransaction(transaction);
 
           if (!transactionHash) {
             toast({
@@ -168,10 +163,7 @@ export const useSaveAsset = ({
           params: [toBigInt(id), token, amountWithDecimals],
         });
 
-        const result = await sendAndConfirmTransaction({
-          transaction,
-          account: account!,
-        });
+        const result = await sendTransaction(transaction);
 
         toast({
           title: "Top-up successful!",

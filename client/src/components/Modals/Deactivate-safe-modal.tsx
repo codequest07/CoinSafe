@@ -1,52 +1,50 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { useState } from "react";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
 import { liskSepolia } from "@/lib/config";
 import { Abi } from "viem";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "@/hooks/use-toast";
+import { useSmartAccountTransactionInterceptorContext } from "@/hooks/useSmartAccountTransactionInterceptor";
 
 interface DeactivateSafeModalProps {
-  details: any;
+  details?: any;
   onClose: () => void;
 }
 
 // this is to show a modal to seactivate a autosafe will check if all tokens are removed from the safe
 
 export default function DeactivateSafeModal({
-  details,
+  // details,
   onClose,
 }: DeactivateSafeModalProps) {
-  const [isSafeEmpty, setIsSafeEmpty] = useState(true);
+  // const [isSafeEmpty, setIsSafeEmpty] = useState(true);
   const [deactivating, setDeactivating] = useState(false);
   const account = useActiveAccount();
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
-  useEffect(() => {
-    const checkSafeStatus = async () => {
-      if (!details || !details.tokenDetails) {
-        setIsSafeEmpty(false);
-        return;
-      }
-      details?.tokenDetails?.map((td: { amountSaved: bigint }) => {
-        if (td.amountSaved > 0) {
-          setIsSafeEmpty(false);
-        }
-      });
-    };
+  // useEffect(() => {
+  //   const checkSafeStatus = async () => {
+  //     if (!details || !details.tokenDetails) {
+  //       setIsSafeEmpty(false);
+  //       return;
+  //     }
+  //     details?.tokenDetails?.map((td: { amountSaved: bigint }) => {
+  //       if (td.amountSaved > 0) {
+  //         setIsSafeEmpty(false);
+  //       }
+  //     });
+  //   };
 
-    checkSafeStatus();
-  }, []);
+  //   checkSafeStatus();
+  // }, []);
 
   const handleDeactivateSafe = async () => {
-    if (!isSafeEmpty || !account) return;
+    if (!account) return;
     const contract = getContract({
       client,
       chain: liskSepolia,
@@ -58,15 +56,11 @@ export default function DeactivateSafeModal({
     try {
       const deactivateTx = prepareContractCall({
         contract,
-        method: "function terminateAutomatedPlan() external",
-        params: [],
+        method: "function deactivateSafe(address _user) public",
+        params: [account.address as `0x${string}`],
       });
 
-      await sendAndConfirmTransaction({
-        transaction: deactivateTx,
-        account,
-      });
-
+      await sendTransaction(deactivateTx);
     } catch (error: any) {
       console.error("Deactivate Safe failed:", error);
       toast({
@@ -102,17 +96,10 @@ export default function DeactivateSafeModal({
         </div>
 
         <div className="px-5 pb-5">
-          {isSafeEmpty ? (
-            <p className="mb-8 text-[14px] text-[#CACACA]">
-              Are you sure you want to deactivate autosavings? This will stop
-              all autosavings on all the tokens you have saved
-            </p>
-          ) : (
-            <p className="bg-[#FF484B24] text-[#FF484B] p-4 text-sm rounded-md">
-              Your Safe isn't empty you cannot deactivate your safe yet. To
-              deactivate your safe empty it first.
-            </p>
-          )}
+          <p className="mb-8 text-[14px] text-[#CACACA]">
+            Are you sure you want to deactivate autosavings? This will stop all
+            autosavings on all the tokens you have saved
+          </p>
 
           <div className="mt-8 flex justify-between">
             <button
@@ -130,11 +117,10 @@ export default function DeactivateSafeModal({
                 console.log("meeee");
                 handleDeactivateSafe();
               }}
-              disabled={!isSafeEmpty || deactivating}
+              disabled={deactivating}
               className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-3 transition text-black px-6"
             >
               {deactivating ? "Deactivating" : "Deactivate"}
-              
             </button>
           </div>
         </div>

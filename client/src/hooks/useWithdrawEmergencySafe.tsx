@@ -1,21 +1,11 @@
 import { useCallback, useState } from "react";
-import {
-  useSendAndConfirmTransaction,
-  useActiveAccount,
-  useConnect,
-} from "thirdweb/react";
-// import { liskSepolia } from 'viem/chains'; // Still used for chain ID reference
-import {
-  getContract,
-  prepareContractCall,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { useActiveAccount, useConnect } from "thirdweb/react";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { parseUnits } from "ethers";
 import { getTokenDecimals } from "@/lib/utils";
-// import { toast } from './use-toast';
-// import { config } from '@/lib/config'; // Assuming this contains Thirdweb client config
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 interface UseWithdrawEmergencySafeParams {
   address?: `0x${string}`;
@@ -57,8 +47,7 @@ export const useWithdrawEmergencySafe = ({
   // const account = useActiveAccount();
   // const wallet = useWallet(); // Reference to the wallet (e.g., smart account)
   // const { contract } = useContract({ address: coinSafeAddress, abi: coinSafeAbi });
-  const { mutateAsync: writeContractAsync, isPending: writeLoading } =
-    useSendAndConfirmTransaction();
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const contract = getContract({
     client,
@@ -132,10 +121,7 @@ export const useWithdrawEmergencySafe = ({
         console.log("Transaction prepared:", transaction);
 
         if (account) {
-          const result = await sendAndConfirmTransaction({
-            transaction,
-            account,
-          });
+          const result = await sendTransaction(transaction);
 
           console.log("Transaction sent successfully:", result);
 
@@ -167,14 +153,13 @@ export const useWithdrawEmergencySafe = ({
       onError,
       toast,
       connect,
-      writeContractAsync,
       contract,
     ]
   );
 
   return {
     withdrawFromEmergencySafe,
-    isLoading: isLoading || writeLoading,
+    isLoading: isLoading,
     error,
   };
 };

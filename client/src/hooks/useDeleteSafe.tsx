@@ -1,15 +1,11 @@
 import { useCallback, useState } from "react";
-import {
-  getContract,
-  prepareContractCall,
-  resolveMethod,
-  sendAndConfirmTransaction,
-} from "thirdweb";
+import { getContract, prepareContractCall, resolveMethod } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { Abi } from "viem";
 import { toast } from "./use-toast";
+import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 // interface SaveState {
 //   token: string;
@@ -30,6 +26,8 @@ interface DeleteSafeParams {
 export const useDeleteSafe = ({ id, onSuccess, onError }: DeleteSafeParams) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+
 
   const account = useActiveAccount();
 
@@ -54,10 +52,7 @@ export const useDeleteSafe = ({ id, onSuccess, onError }: DeleteSafeParams) => {
         });
 
         if (account) {
-          await sendAndConfirmTransaction({
-            transaction,
-            account,
-          });
+          await sendTransaction(transaction);
 
           toast({
             title: "Delete safe successful!",
