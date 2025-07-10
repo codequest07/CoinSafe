@@ -1,4 +1,4 @@
-# Build stage
+# Use a multi-stage build with more memory
 FROM node:18-alpine as build
 
 # Set working directory
@@ -13,8 +13,9 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application with memory optimization
-RUN NODE_OPTIONS='--max-old-space-size=512' npm run build
+# Build with increased memory and optimizations
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+RUN npm run build
 
 # Production stage
 FROM nginx:alpine
