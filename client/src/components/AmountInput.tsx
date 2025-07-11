@@ -7,8 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { getTokenDecimals, tokenData } from "@/lib/utils";
-import { formatUnits } from "viem";
+import { tokenData } from "@/lib/utils";
 
 interface ISaveState {
   target: string;
@@ -73,14 +72,7 @@ const AmountInput = ({
           <div>
             <input
               type="number"
-              value={
-                amount === 0
-                  ? ""
-                  : formatUnits(
-                      BigInt(amount),
-                      getTokenDecimals(saveState.token)
-                    )
-              }
+              value={amount === 0 ? "" : amount}
               onChange={handleAmountChange}
               ref={inputRef}
               onFocus={handleFocus}

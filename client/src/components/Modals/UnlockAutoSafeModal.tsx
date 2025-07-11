@@ -231,7 +231,12 @@ export default function UnlockAutoSafeModal({
           </DialogTitle>
           <form onSubmit={withdrawFromSafe} className="space-y-2">
             <AmountInput
-              amount={saveState.amount || ""}
+              amount={
+                formatUnits(
+                  BigInt(saveState.amount),
+                  getTokenDecimals(saveState.token)
+                ) || ""
+              }
               handleAmountChange={handleAmountChange}
               handleTokenSelect={handleTokenSelect}
               saveState={saveState}
