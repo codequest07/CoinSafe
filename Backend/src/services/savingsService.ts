@@ -23,6 +23,27 @@ export async function getDuePlans(): Promise<string[]> {
   }
 }
 
+export async function getAutomatedSavingsDetails(
+  userAddress: string
+): Promise<any> {
+  console.log(
+    `🔍 [getAutomatedSavingsDetails] Getting details for user: ${userAddress}`
+  );
+  try {
+    const details = await contract.getAutomatedSafeForUser(userAddress);
+    console.log(
+      `✅ [getAutomatedSavingsDetails] Retrieved details for user: ${userAddress}`
+    );
+    return details;
+  } catch (error) {
+    console.error(
+      `❌ [getAutomatedSavingsDetails] Error for user ${userAddress}:`,
+      error
+    );
+    throw error;
+  }
+}
+
 export async function executeBatch(
   startIndex: number,
   count: number
