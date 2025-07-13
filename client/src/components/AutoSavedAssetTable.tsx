@@ -15,10 +15,33 @@ import {
   getTokenDecimals,
   tokenData,
 } from "@/lib/utils";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 import { formatUnits } from "viem";
 import { getTokenPrice } from "@/lib";
+import { getContract, readContract } from "thirdweb";
+import { client, liskSepolia } from "@/lib/config";
+import { CoinsafeDiamondContract } from "@/lib/contract";
+import { useActiveAccount } from "thirdweb/react";
 // import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
+
+async function checkIsTokenAutoSaved(
+  userAddress: `0x${string}`,
+  tokenAddress: string
+) {
+  const contract = getContract({
+    client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskSepolia,
+  });
+
+  const balance = await readContract({
+    contract: contract,
+    method:
+      "function isAutosaveEnabledForToken(address _user, address _token) external view returns (bool)",
+    params: [userAddress, tokenAddress],
+  });
+  return balance;
+}
 
 interface AssetData {
   id: string;
@@ -56,6 +79,7 @@ export interface ITokenDetails {
   amountToSave: bigint;
   frequency: bigint;
   token: string;
+  amountSavedInUSD?: bigint | number;
 }
 
 export default function AutoSavedAssetTable({
@@ -65,6 +89,10 @@ export default function AutoSavedAssetTable({
   // State for USD values and errors, keyed by token address
   // const [usdValues, setUsdValues] = useState<{ [key: string]: string }>({});
   // const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const account = useActiveAccount();
+  // const isConnected = !!account?.address;
+  const address = account?.address;
+
   const [tokenDetails, setTokenDetails] = useState<ITokenDetails[]>([]);
 
   useEffect(() => {
@@ -73,9 +101,14 @@ export default function AutoSavedAssetTable({
       for (const asset of assets.tokenDetails) {
         const amountSaved = formatUnits(BigInt(asset.amountSaved), 18);
         const price = await getTokenPrice(asset.token, Number(amountSaved));
+
+        const autosaved = await checkIsTokenAutoSaved(
+          address! as `0x${string}`,
+          asset.token
+        );
         // prices[asset.token] = price;
         // console.log("TOKEN PRICE AUTOSAFE", price);
-        _tokenDetails.push({ ...asset, amountSaved: price });
+        _tokenDetails.push({ ...asset, amountSavedInUSD: price, autosaved });
       }
       setTokenDetails(_tokenDetails);
 
@@ -213,8 +246,23 @@ export default function AutoSavedAssetTable({
 
                   {/* Amount */}
                   <TableCell className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <p className="text-white">
+                        {formatUnits(
+                          asset.amountSaved,
+                          getTokenDecimals(asset.token)
+                        )}{" "}
+                        {tokenData[asset.token].symbol}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        ≈ $
+                        {asset.amountSavedInUSD !== null
+                          ? asset.amountSavedInUSD
+                          : "Loading..."}
+                      </p>
+                    </div>
                     <div className="text-white">
-                      {`$${asset.amountSaved}`}
+                      {/* {`$${asset.amountSaved}`} */}
                       {/* {formatUnits(asset.amountSaved, getTokenDecimals(asset.token)) +
                         " " +
                         tokenData[asset.token].symbol} */}
@@ -245,10 +293,25 @@ export default function AutoSavedAssetTable({
                       </>
                     )} */}
                     <div className="flex items-center gap-1">
-                      <span className="text-[#48FF91]">Yes</span>
+                      {/* <span className="text-[#48FF91]">Yes</span>
                       <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
                         <Check className="w-3 h-3 text-white" />
-                      </div>
+                      </div> */}
+                      {asset.autosaved ? (
+                        <>
+                          <span className="text-[#48FF91]">Yes</span>
+                          <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
+                            <Check className="w-4 h-4 text-white" />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-white">No</span>
+                          <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
+                            <X className="w-3 h-3 text-white" />
+                          </div>
+                        </>
+                      )}
                     </div>
                   </TableCell>
 
