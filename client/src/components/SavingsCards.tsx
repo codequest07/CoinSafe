@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getTokenPrice } from "@/lib";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useActiveAccount } from "thirdweb/react";
-import { getTokenDecimals } from "@/lib/utils";
+import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
 // import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
 // import { tokenData } from "@/lib/utils";
 
@@ -52,6 +52,48 @@ export default function SavingsCards() {
     automatedSafeError
   );
   const [displaySafes, setDisplaySafes] = useState<DisplaySafe[]>([]);
+
+  const [totalUsdValue, setTotalUsdValue] = useState<string>("0.00");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTotalUsdValue = async () => {
+      if (!details?.tokenDetails || details.tokenDetails.length === 0) {
+        setTotalUsdValue("0.00");
+        setError(null);
+        return;
+      }
+
+      try {
+        // Convert each token's amountSaved to USD and sum
+        const usdValues = await Promise.all(
+          details.tokenDetails.map(async (item: any) => {
+            try {
+              const usdValue = await convertTokenAmountToUsd(
+                item.token,
+                item.amountSaved
+              );
+              return usdValue;
+            } catch (err) {
+              console.error(`Error for token ${item.token}:`, err);
+              return 0; // Return 0 for failed conversions
+            }
+          })
+        );
+
+        // Sum all USD values
+        const totalUsd = usdValues.reduce((sum, value) => sum + value, 0);
+        setTotalUsdValue(totalUsd.toFixed(2));
+        setError(null);
+      } catch (err) {
+        console.error("Error converting tokens to USD:", err);
+        setTotalUsdValue("0.00");
+        setError("Failed to load USD value");
+      }
+    };
+
+    fetchTotalUsdValue();
+  }, [details]);
 
   // Force refresh safes when component mounts
   useEffect(() => {
@@ -205,7 +247,7 @@ export default function SavingsCards() {
                     <div className="flex items-baseline">
                       <span className="text-2xl font-[400]">$</span>
                       <span className="text-2xl font-[400] ml-1">
-                        {Number(
+                        {/* {Number(
                           formatUnits(
                             details?.tokenDetails?.reduce(
                               (total: any, obj: any) => total + obj.amountSaved,
@@ -217,7 +259,9 @@ export default function SavingsCards() {
                           )
                         ).toLocaleString("en-US", {
                           minimumFractionDigits: 2,
-                        }) || 0.0}
+                        }) || 0.0} */}
+                        {totalUsdValue}
+                        {error ? ` (${error})` : ""}
                       </span>
                       <span className="text-sm text-gray-400 ml-2">USD</span>
                     </div>
