@@ -8,7 +8,6 @@ import {
   SelectValue,
 } from "./ui/select";
 import { tokenData } from "@/lib/utils";
-import MemoRipple from "@/icons/Ripple";
 
 interface ISaveState {
   target: string;
@@ -61,6 +60,9 @@ const AmountInput = ({
     handleTokenSelect(value);
   };
 
+  // Get the selected token info
+  const selectedTokenInfo = saveState.token ? tokenData[saveState.token] : null;
+
   return (
     <div className="mb-1">
       <label className="text-sm text-gray-400">Amount</label>
@@ -82,19 +84,68 @@ const AmountInput = ({
           <div className="relative">
             <Select
               onValueChange={handleTokenSelectWithClear}
-              value={saveState.token}>
+              value={saveState.token}
+            >
               <SelectTrigger className="w-[140px] bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                 <div className="flex items-center">
-                  <MemoRipple className="mr-2" />
-                  <SelectValue placeholder="Select Token" />
+                  {saveState.token && selectedTokenInfo?.image ? (
+                    <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center mr-2">
+                      <img
+                        src={selectedTokenInfo.image}
+                        width={20}
+                        height={20}
+                        className="w-full h-full"
+                        alt={selectedTokenInfo.symbol}
+                      />
+                    </div>
+                  ) : saveState.token && selectedTokenInfo ? (
+                    <div
+                      className={`w-5 h-5 rounded-full ${
+                        selectedTokenInfo?.color || "bg-gray-600"
+                      } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                    >
+                      {selectedTokenInfo?.symbol?.charAt(0) || "?"}
+                    </div>
+                  ) : null}
+                  {saveState.token ? (
+                    <span className="text-white">
+                      {selectedTokenInfo?.symbol}
+                    </span>
+                  ) : (
+                    <SelectValue placeholder="Select Token" />
+                  )}
                 </div>
               </SelectTrigger>
               <SelectContent>
-                {supportedTokens.map((token) => (
-                  <SelectItem value={token} key={token}>
-                    {tokenData[token]?.symbol}
-                  </SelectItem>
-                ))}
+                {supportedTokens.map((token) => {
+                  const tokenInfo = tokenData[token];
+                  return (
+                    <SelectItem value={token} key={token}>
+                      <div className="flex items-center">
+                        {tokenInfo?.image ? (
+                          <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center mr-2">
+                            <img
+                              src={tokenInfo.image}
+                              width={20}
+                              height={20}
+                              className="w-full h-full"
+                              alt={tokenInfo.symbol}
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className={`w-5 h-5 rounded-full ${
+                              tokenInfo?.color || "bg-gray-600"
+                            } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                          >
+                            {tokenInfo?.symbol?.charAt(0) || "?"}
+                          </div>
+                        )}
+                        <span>{tokenInfo?.symbol || token}</span>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
