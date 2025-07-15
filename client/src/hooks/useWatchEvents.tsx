@@ -143,6 +143,7 @@ export const useWatchEvents = ({
         handleEvent(user, eventHandlers.withdraw, { token, amount }),
       abi: facetAbis.emergencySavingsFacet,
     },
+  
   ];
 
   useEffect(() => {
