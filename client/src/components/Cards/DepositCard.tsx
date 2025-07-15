@@ -8,22 +8,24 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
-import { CoinsafeDiamondContract } from "@/lib/contract";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
-import { useActiveAccount } from "thirdweb/react";
-import { getContract } from "thirdweb";
+import { TransactionButton, useActiveAccount } from "thirdweb/react";
+import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskSepolia } from "@/lib/config";
 import { getBalance } from "thirdweb/extensions/erc20";
 import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import ApproveTxModal from "../Modals/ApproveTxModal";
 import { useNavigate } from "react-router-dom";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { getTokenPrice } from "@/lib";
 import { supportedTokensState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
+import { Abi } from "viem";
+import { parseUnits } from "ethers";
 
 export default function DepositCard() {
   const navigate = useNavigate();
@@ -81,6 +83,13 @@ export default function DepositCard() {
     // setTokenPrice("0.00");
     // setSelectedTokenBalance(0);
   };
+
+  const contract = getContract({
+    client,
+    chain: liskSepolia,
+    address: CoinsafeDiamondContract.address,
+    abi: facetAbis.fundingFacet as Abi,
+  });
 
   useEffect(() => {
     const updatePrice = async () => {
@@ -142,7 +151,11 @@ export default function DepositCard() {
                 </div>
               </div>
               <div className="sm:ml-4">
-                <Select onValueChange={handleTokenSelect} value={token} disabled={isLoading}>
+                <Select
+                  onValueChange={handleTokenSelect}
+                  value={token}
+                  disabled={isLoading}
+                >
                   <SelectTrigger className="w-[160px] border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
                     <div className="flex items-center">
                       <MemoRipple className="mr-2" />
