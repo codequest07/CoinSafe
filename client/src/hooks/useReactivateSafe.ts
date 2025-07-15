@@ -17,7 +17,7 @@ interface SaveState {
   frequency: number;
 }
 
-interface ExtendTargetSavingsParams {
+interface ReactivateTargetSavingsParams {
   // address?: `0x${string}`;
   safeId: number;
   saveState: SaveState;
@@ -25,20 +25,20 @@ interface ExtendTargetSavingsParams {
   onError?: (error: Error) => void;
 }
 
-export const useExtendSavingsTarget = ({
+export const useReactivateSavingsTarget = ({
   // address,
   safeId,
   saveState,
   onSuccess,
   onError,
-}: ExtendTargetSavingsParams) => {
+}: ReactivateTargetSavingsParams) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   const account = useActiveAccount();
 
-  const extendTargetSafe = useCallback(
+  const reactivateTargetSafe = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
@@ -52,17 +52,24 @@ export const useExtendSavingsTarget = ({
           abi: facetAbis.targetSavingsFacet as Abi,
         });
 
+        console.log(saveState);
+
         const transaction = prepareContractCall({
           contract,
-          method: resolveMethod("extendSafeDuration"),
-          params: [safeId, toBigInt(saveState.duration)],
+          method: resolveMethod("reactivateSafe"),
+          params: [
+            safeId,
+            saveState.token,
+            toBigInt(saveState.amount),
+            toBigInt(saveState.duration),
+          ],
         });
 
         if (account) {
           await sendTransaction(transaction);
 
           toast({
-            title: "Extend Savings plan successful!",
+            title: "Reactivate Safe successful!",
             className: "bg-[#79E7BA]",
           });
         }
@@ -73,11 +80,8 @@ export const useExtendSavingsTarget = ({
 
         // Handle specific error cases
         if (err instanceof Error) {
-          if (err.message.includes("Plan is Archived")) {
-            errorMessage =
-              "Automated savings plan is archived. Please create a new one.";
-          } else if (err.message.includes("DurationTooShort()")) {
-            errorMessage = "Duration is too short, choose a longer timeline!";
+          if (err.message.includes("SafeDoesNotExist()")) {
+            errorMessage = "Unexpected error, Safe doesn't exist!";
           } else {
             errorMessage = err.message;
           }
@@ -100,7 +104,7 @@ export const useExtendSavingsTarget = ({
   );
 
   return {
-    extendTargetSafe,
+    reactivateTargetSafe,
     isLoading,
     error,
   };

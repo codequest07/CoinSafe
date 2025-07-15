@@ -64,7 +64,7 @@ export default function ExtendSafeModal({
     onError: (error) => {
       console.error("Extend Safe failed:", error?.message);
       // Handle error, e.g., show a toast notification
-    }
+    },
   });
 
   const savingsDurationOptions = [
@@ -74,7 +74,9 @@ export default function ExtendSafeModal({
   ];
 
   const calculateEndDate = (days: number) => {
-    const currentDate = new Date(details?.unlockTime ? Number(details.unlockTime) * 1000 : Date.now());
+    const currentDate = new Date(
+      details?.unlockTime ? Number(details.unlockTime) * 1000 : Date.now()
+    );
     const futureDate = addDays(currentDate, days);
     return format(futureDate, "dd MMMM yyyy");
   };
@@ -173,45 +175,6 @@ export default function ExtendSafeModal({
               {extending ? "Extending" : "Extend"}
             </button>
           </div>
-
-          {/* 
-
-          <div className="px-5 pb-5">
-            {isSafeEmpty ? (
-              <p className="mb-8 text-[14px] text-[#CACACA]">
-                Are you sure you want to deactivate autosavings? This will stop
-                all autosavings on all the tokens you have saved
-              </p>
-            ) : (
-              <p className="bg-[#FF484B24] text-[#FF484B] p-4 text-sm rounded-md">
-                Your Safe isn't empty you cannot deactivate your safe yet. To
-                deactivate your safe empty it first.
-              </p>
-            )}
-
-            <div className="mt-8 flex justify-between">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClose();
-                }}
-                className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-3 text-white "
-              >
-                Cancel
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  console.log("extend safe clicked.");
-                  handleExtendSafe();
-                }}
-                disabled={!isSafeEmpty || extending}
-                className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-red-500 px-5 text-[14px] py-3 transition text-white hover:bg-red-600"
-              >
-                {extending ? "extending" : "Deactivate"}
-              </button>
-            </div>
-          </div>*/}
         </div>
       </div>
     </>
