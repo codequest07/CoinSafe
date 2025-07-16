@@ -164,7 +164,7 @@ ExtendTargetSafeModalProps) {
               <p className="">
                 Unlocks on{" "}
                 {details?.unlockTime
-                  ? format(new Date(Number(details.unlockTime) * 1000), "PPP")
+                  ? format(new Date(Number(details.unlockTime)), "PPP")
                   : "N/A"}
               </p>
             </div>

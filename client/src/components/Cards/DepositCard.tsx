@@ -142,7 +142,11 @@ export default function DepositCard() {
                 </div>
               </div>
               <div className="sm:ml-4">
-                <Select onValueChange={handleTokenSelect} value={token} disabled={isLoading}>
+                <Select
+                  onValueChange={handleTokenSelect}
+                  value={token}
+                  disabled={isLoading}
+                >
                   <SelectTrigger className="w-[160px] border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
                     <div className="flex items-center">
                       <MemoRipple className="mr-2" />

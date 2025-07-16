@@ -57,6 +57,8 @@ export default function UnlockAutoSafeModal({
   // Recoil state
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [supportedTokens] = useRecoilState(supportedTokensState);
+  const [isMaxClicked, setIsMaxClicked] = useState(false);
+  const [unlockError, setUnlockError] = useState<string>("");
 
   console.log("Selected token balance", selectedTokenBalance);
 
@@ -67,6 +69,7 @@ export default function UnlockAutoSafeModal({
   );
 
   console.log("Details:", details);
+  console.log("Details unlockTime", details.unlockTime);
 
   const { withdrawFromSafe, isLoading, error } = useWithdrawAutomatedSafe({
     account,
@@ -126,11 +129,17 @@ export default function UnlockAutoSafeModal({
     }
 
     const feeAmount = (saveState.amount * breakingFeePercentage) / 100;
-    setBreakingFeeAmount(feeAmount);
+    const formattedFeeAmount = Number(
+      formatUnits(BigInt(feeAmount), getTokenDecimals(saveState.token))
+    );
+    setBreakingFeeAmount(formattedFeeAmount);
 
     const tokenSymbol = tokenData[saveState.token]?.symbol?.toUpperCase() || "";
     const usdValue = Number(await getTokenPrice(saveState.token, feeAmount));
-    setBreakingFeeUsd(usdValue);
+    const formattedUsdValue = Number(
+      formatUnits(BigInt(usdValue), getTokenDecimals(saveState.token))
+    );
+    setBreakingFeeUsd(formattedUsdValue);
 
     console.log(
       `Breaking fee: ${feeAmount} ${tokenSymbol} (${breakingFeePercentage}% of ${
@@ -207,6 +216,7 @@ export default function UnlockAutoSafeModal({
 
   const handleAmountChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      setIsMaxClicked(false);
       const _amount = Number(event.target.value);
       setSaveState((prevState) => ({
         ...prevState,
@@ -232,10 +242,12 @@ export default function UnlockAutoSafeModal({
           <form onSubmit={withdrawFromSafe} className="space-y-2">
             <AmountInput
               amount={
-                formatUnits(
-                  BigInt(saveState.amount),
-                  getTokenDecimals(saveState.token)
-                ) || ""
+                isMaxClicked
+                  ? formatUnits(
+                      BigInt(saveState.amount),
+                      getTokenDecimals(saveState.token)
+                    )
+                  : saveState.amount || ""
               }
               handleAmountChange={handleAmountChange}
               handleTokenSelect={handleTokenSelect}
@@ -245,6 +257,9 @@ export default function UnlockAutoSafeModal({
               validationErrors={{ token: error?.message }}
               supportedTokens={supportedTokens}
             />
+            {unlockError && (
+              <div className="text-sm text-red-500 py-2">{unlockError}</div>
+            )}
             <div className="flex justify-between items-center mb-6">
               <div className="text-sm text-gray-300">
                 Saved balance:{" "}
@@ -261,6 +276,7 @@ export default function UnlockAutoSafeModal({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  setIsMaxClicked(true);
                   if (selectedTokenBalance > 0) {
                     const maxAmount = selectedTokenBalance;
                     console.log("Max before all that", maxAmount);
@@ -269,6 +285,19 @@ export default function UnlockAutoSafeModal({
                     //   maxAmount = maxAmount / 1000000;
                     // }
                     console.log("Max after all that", maxAmount);
+                    // console.log(
+                    //   "Formatted max amount",
+                    //   formatUnits(
+                    //     BigInt(maxAmount),
+                    //     getTokenDecimals(saveState.token)
+                    //   )
+                    // );
+                    // const formattedMaxAmount = Number(
+                    //   formatUnits(
+                    //     BigInt(maxAmount),
+                    //     getTokenDecimals(saveState.token)
+                    //   )
+                    // );
                     setSaveState((prev) => ({
                       ...prev,
                       amount: maxAmount,
@@ -279,6 +308,14 @@ export default function UnlockAutoSafeModal({
                     //   description: "You don't have any tokens to unlock in this safe",
                     // });
                     toast.error("No balance to unlock");
+                  }
+
+                  if (!saveState.token) {
+                    setUnlockError("Please select a token");
+
+                    setTimeout(() => {
+                      setUnlockError("");
+                    }, 4000);
                   }
                 }}
               >
@@ -313,14 +350,21 @@ export default function UnlockAutoSafeModal({
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="font-medium">
-                      {details.unlockTime > new Date()
-                        ? format(details.unlockTime, "dd MMM, yyyy • HH:mm")
+                      {/* new Date(Number(safe.unlockTime) * 1000) */}
+                      {new Date(Number(details.unlockTime) * 1000) > new Date()
+                        ? format(
+                            new Date(Number(details.unlockTime) * 1000),
+                            "dd MMM, yyyy • HH:mm"
+                          )
                         : "Ready to unlock"}
                     </div>
-                    {details.unlockTime > new Date() && (
+                    {new Date(Number(details.unlockTime) * 1000) >
+                      new Date() && (
                       <Badge className="bg-[#2a2a2a] text-white hover:bg-[#2a2a2a] rounded-full text-xs py-1">
                         {Math.ceil(
-                          (details.unlockTime.getTime() -
+                          (new Date(
+                            Number(details.unlockTime) * 1000
+                          ).getTime() -
                             new Date().getTime()) /
                             (1000 * 60 * 60 * 24)
                         )}{" "}
@@ -330,7 +374,7 @@ export default function UnlockAutoSafeModal({
                   </div>
                 </div>
 
-                {details.unlockTime > new Date() && (
+                {new Date(Number(details.unlockTime) * 1000) > new Date() && (
                   <>
                     <div className="space-y-2">
                       <div className="text-sm text-gray-400">Breaking fee</div>
@@ -389,7 +433,12 @@ export default function UnlockAutoSafeModal({
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading || !saveState.amount || !saveState.token}
+                disabled={
+                  isLoading ||
+                  !saveState.amount ||
+                  !saveState.token ||
+                  !acceptEarlyWithdrawalFee
+                }
                 className="text-black px-8 rounded-[2rem]"
                 variant="outline"
               >

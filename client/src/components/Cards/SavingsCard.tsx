@@ -7,6 +7,7 @@ import UnlockModal from "../Modals/UnlockModal";
 import ManageSavingsTarget from "../Modals/ManageSavingsTarget";
 import ExtendTargetSafeModal from "../Modals/ExtendTargetSafe";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
+import ReactivateModal from "../Modals/ReactivateModal";
 // import { useExtendSavingsTarget } from "@/hooks/useExtendSavingsTarget";
 
 const SavingsCard = ({
@@ -43,6 +44,10 @@ const SavingsCard = ({
   const [showManageModal, setShowManageModal] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [showExtendModal, setShowExtendModal] = useState(false);
+  const [showReactivateWithTopUpModal, setShowReactivateWithTopUpModal] =
+    useState(false);
+  const [showReactivateWithTokensModal, setShowReactivateWithTokensModal] =
+    useState(false);
 
   const handleTopUp = () => {
     // Close the modal - the refresh will be handled by the TopUpModal component
@@ -112,17 +117,26 @@ const SavingsCard = ({
             >
               Unlock
             </button>
-            {/* <button
-              onClick={() => setShowModal(true)}
-              className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
-              Top up
-            </button> */}
-            <button
-              onClick={() => setShowManageModal(true)}
-              className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
-            >
-              Manage
-            </button>
+            {safeDetails &&
+            new Date().getTime() > safeDetails?.unlockTime.getTime() ? (
+              <button
+                onClick={() => {
+                  safeDetails.totalAmountUSD <= 0
+                    ? setShowReactivateWithTopUpModal(true)
+                    : setShowReactivateWithTokensModal(true);
+                }}
+                className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+              >
+                Reactivate
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowManageModal(true)}
+                className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+              >
+                Manage
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -159,6 +173,34 @@ const SavingsCard = ({
             // Don't close the modal here - the UnlockModal will handle it
           }}
           safeId={safeId.toString()}
+        />
+      )}
+
+      {/* Only render the UnlockModal when showUnlockModal is true */}
+      {showReactivateWithTokensModal && (
+        <ReactivateModal
+          onClose={() => {
+            console.log("Closing reactivate with tokens modal");
+            setShowReactivateWithTokensModal(false);
+          }}
+          isOpen={showReactivateWithTokensModal}
+          type="with-tokens"
+          safeId={safeId.toString()}
+          details={safeDetails}
+        />
+      )}
+
+      {/* Only render the UnlockModal when showUnlockModal is true */}
+      {showReactivateWithTopUpModal && (
+        <ReactivateModal
+          onClose={() => {
+            console.log("Closing reactivate with top up modal");
+            setShowReactivateWithTopUpModal(false);
+          }}
+          isOpen={showReactivateWithTopUpModal}
+          type="with-top-up"
+          safeId={safeId.toString()}
+          details={safeDetails}
         />
       )}
     </div>
