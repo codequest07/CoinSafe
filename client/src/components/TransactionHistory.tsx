@@ -326,7 +326,7 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
           })}
         </div>
 
-        {(totalPages > 1 || totalTransactions > 0) && (
+        {totalPages > 1 && (
           <div className="flex justify-between items-center mt-6 pt-4 border-t border-white/10">
             <span className="text-sm text-gray-400">{getShowingText()}</span>
             <div className="flex items-center space-x-2">
