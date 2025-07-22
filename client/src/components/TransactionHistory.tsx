@@ -8,20 +8,17 @@ import {
   type Transaction,
   useTransactionHistory,
 } from "@/hooks/useTransactionHistory";
-import { formatUnits } from "viem";
+import { formatEther } from "viem";
 import { capitalize } from "@/utils/capitalize";
 import { Button } from "./ui/button";
 import MemoStory from "@/icons/Story";
 import SavingOption from "./Modals/SavingOption";
+
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { useActiveAccount } from "thirdweb/react";
 // import { ChevronDown, ExternalLink } from "lucide-react";
-import {
-  convertTokenAmountToUsd,
-  getTokenDecimals,
-  tokenData,
-} from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
+import Deposit from "@/Pages/Deposit";
 
 enum TxStatus {
   Completed = 0,
@@ -86,13 +83,16 @@ interface TransactionHistoryProps {
 }
 
 const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
-  const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+
+  const openFirstModal = () => setIsFirstModalOpen(true);
+  const openDepositModal = () => {
+    setIsDepositModalOpen(true);
+  };
 
   const { transactions } = useTransactionHistory({
     safeId: safeId ? Number(safeId) : undefined,
@@ -118,50 +118,15 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
     return grouped;
   };
 
-  const totalTransactions = transactions?.length || 0;
-  const totalPages = Math.ceil(totalTransactions / itemsPerPage);
-
-  // Debug logging
-  console.log("Debug pagination:", {
-    totalTransactions,
-    itemsPerPage,
-    totalPages,
-    currentPage,
-    hasTransactions: !!transactions && transactions.length > 0,
-  });
-
-  const openFirstModal = () => setIsFirstModalOpen(true);
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-
-  // Apply pagination to individual transactions first
-  const paginatedTransactions = transactions?.slice(startIndex, endIndex) || [];
-
-  // Then group the paginated transactions by date
-  const groupedTransactions = groupTransactionsByDate(paginatedTransactions);
+  const groupedTransactions = groupTransactionsByDate(transactions || []);
 
   const [usdValues, setUsdValues] = useState<number[]>([]);
 
-  const handlePreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
-  };
-
-  const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  };
-
-  const getShowingText = () => {
-    const start = totalTransactions === 0 ? 0 : startIndex + 1;
-    const end = Math.min(endIndex, totalTransactions);
-    return `Showing ${start} to ${end} of ${totalTransactions} entries`;
-  };
-
   useEffect(() => {
     const fetchUsdValues = async () => {
-      if (!paginatedTransactions) return;
+      if (!transactions) return;
       const values = await Promise.all(
-        paginatedTransactions.map((transaction) =>
+        transactions.map((transaction) =>
           convertTokenAmountToUsd(transaction.token, transaction.amount)
         )
       );
@@ -169,7 +134,7 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
     };
 
     fetchUsdValues();
-  }, [paginatedTransactions]);
+  }, [transactions]);
 
   if (!transactions || transactions.length === 0) {
     return (
@@ -191,7 +156,7 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
           {isConnected ? (
             <div className="flex gap-4">
               <Button
-                onClick={() => navigate("/dashboard/deposit")}
+                onClick={openDepositModal}
                 className="bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#2a2a2a]">
                 Deposit
               </Button>
@@ -206,6 +171,11 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
             <ThirdwebConnectButton />
           )}
         </div>
+        <Deposit
+          isDepositModalOpen={isDepositModalOpen}
+          setIsDepositModalOpen={setIsDepositModalOpen}
+          onBack={() => {}}
+        />
         <SavingOption
           isFirstModalOpen={isFirstModalOpen}
           setIsFirstModalOpen={setIsFirstModalOpen}
@@ -246,117 +216,72 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
 
                 <Table>
                   <TableBody>
-                    {txs.map((transaction, index) => {
-                      // Find the index of this transaction in the original paginated transactions
-                      const originalIndex = paginatedTransactions.findIndex(
-                        (tx) =>
-                          tx.timestamp === transaction.timestamp &&
-                          tx.amount === transaction.amount &&
-                          tx.token === transaction.token
-                      );
+                    {txs.map((transaction, index) => (
+                      <TableRow
+                        className="border-b border-white/10 my-1"
+                        key={index}>
+                        <TableCell className="">
+                          <span className="font-medium">
+                            {capitalize(transaction.typeOfTransaction)}
+                          </span>
+                        </TableCell>
 
-                      return (
-                        <TableRow
-                          className="border-b border-white/10 my-1"
-                          key={index}>
-                          <TableCell className="">
-                            <span className="font-medium">
-                              {capitalize(transaction.typeOfTransaction)}
-                            </span>
-                          </TableCell>
-
-                          <TableCell className="">
-                            <div className="flex flex-col">
-                              <span className="flex items-center gap-2 text-sm text-gray-400">
-                                <span>
-                                  {formatUnits(
-                                    transaction.amount,
-                                    getTokenDecimals(transaction.token)
-                                  )}{" "}
-                                  {tokenData[transaction.token]?.symbol}
-                                </span>
-                                <img
-                                  src={tokenData[transaction.token]?.image}
-                                  width={12}
-                                  height={12}
-                                  className="w-[14px] h-[14px] rounded-full"
-                                />
+                        <TableCell className="">
+                          <div className="flex flex-col">
+                            <span className="flex items-center gap-2 text-sm text-gray-400">
+                              <span>
+                                {formatEther(transaction.amount)}{" "}
+                                {tokenData[transaction.token]?.symbol}
                               </span>
-                              <div className="text-sm text-gray-400 mt-1">
-                                ≈{" "}
-                                {usdValues[originalIndex] !== undefined
-                                  ? `$${usdValues[originalIndex]?.toFixed(2)}`
-                                  : "Loading..."}
-                              </div>
-                            </div>
-                          </TableCell>
-
-                          {/* <TableCell className="hidden md:table-cell">
-                            <div className="flex items-center space-x-1">
-                              <span className="text-sm text-gray-400">
-                                {shortenAddress(transaction.user)}
-                              </span>
-                              <ExternalLink className="h-4 w-4 text-[#22c55e]" />
-                            </div>
-                          </TableCell> */}
-
-                          <TableCell className="text-right">
-                            <span className="text-sm">
-                              {formatDate(Number(transaction.timestamp))}
-                              {"  -  "}
-                              {formatTime(Number(transaction.timestamp))}
+                              <img
+                                src={tokenData[transaction.token]?.image}
+                                width={12}
+                                height={12}
+                                className="w-[14px] h-[14px] rounded-full"
+                              />
                             </span>
-                          </TableCell>
+                            <div className="text-sm text-gray-400 mt-1">
+                              ≈{" "}
+                              {usdValues[index] !== undefined
+                                ? `$${usdValues[index]?.toFixed(2)}`
+                                : "Loading..."}
+                            </div>
+                          </div>
+                        </TableCell>
 
-                          <TableCell className="text-right pr-0">
-                            <Badge
-                              className={`border-0 ${getColorClass(
-                                0
-                              )} px-3 py-1 rounded-full`}>
-                              {getStatusText(0)}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                        {/* <TableCell className="hidden md:table-cell">
+                          <div className="flex items-center space-x-1">
+                            <span className="text-sm text-gray-400">
+                              {shortenAddress(transaction.user)}
+                            </span>
+                            <ExternalLink className="h-4 w-4 text-[#22c55e]" />
+                          </div>
+                        </TableCell> */}
+
+                        <TableCell className="text-right">
+                          <span className="text-sm">
+                            {formatDate(Number(transaction.timestamp))}
+                            {"  -  "}
+                            {formatTime(Number(transaction.timestamp))}
+                          </span>
+                        </TableCell>
+
+                        <TableCell className="text-right pr-0">
+                          <Badge
+                            className={`border-0 ${getColorClass(
+                              0
+                            )} px-3 py-1 rounded-full`}>
+                            {getStatusText(0)}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </div>
             );
           })}
         </div>
-
-        {(totalPages > 1 || totalTransactions > 0) && (
-          <div className="flex justify-between items-center mt-6 pt-4 border-t border-white/10">
-            <span className="text-sm text-gray-400">{getShowingText()}</span>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handlePreviousPage}
-                disabled={currentPage === 1}
-                className="disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed">
-                <img
-                  src="/assets/arrow-left.svg"
-                  className="cursor-pointer w-5 h-5"
-                  alt="arrow-left"
-                />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-                className="rounded-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-                <img
-                  src="/assets/arrow-right.svg"
-                  className="cursor-pointer w-5 h-5"
-                  alt="arrow-right"
-                />
-              </Button>
-            </div>
-          </div>
-        )}
       </Card>
     </div>
   );
