@@ -18,7 +18,7 @@ import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { useActiveAccount } from "thirdweb/react";
 // import { ChevronDown, ExternalLink } from "lucide-react";
 import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
-import Deposit from "@/Pages/Deposit";
+import Deposit from "@/components/Depositt";
 
 enum TxStatus {
   Completed = 0,
