@@ -30,11 +30,15 @@ import { useWatchEvents } from "./hooks/useWatchEvents";
 import Profile from "./Pages/Profile";
 import ContactUs from "./Pages/Contact-Us";
 import { SmartAccountTransactionProvider } from "./hooks/useSmartAccountTransactionInterceptor";
+import { userCurrentStreakState, userLongestStreakState } from "./store/atoms/streak";
 
 const App = () => {
   const [, setAvailableBalance] = useRecoilState(availableBalanceState);
   const [, setSavingsBalance] = useRecoilState(savingsBalanceState);
   const [, setTotalBalance] = useRecoilState(totalBalanceState);
+  const [, setUserCurrentStreak] = useRecoilState(userCurrentStreakState);
+  const [, setUserLongestStreak] = useRecoilState(userLongestStreakState);
+
   const account = useActiveAccount();
 
   useWatchEvents({
@@ -58,6 +62,10 @@ const App = () => {
     onSavingsWithdrawn: (amountInUsdToDeduct, amountInUsdToAdd) => {
       setSavingsBalance((prev) => prev - amountInUsdToDeduct);
       setAvailableBalance((prev) => prev + amountInUsdToAdd);
+    },
+    onStreakUpdate: (streak) => {
+      setUserCurrentStreak((prev) => prev + BigInt(streak));
+      setUserLongestStreak((prev) => prev + BigInt(streak));
     },
   });
 
