@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useActiveAccount } from "thirdweb/react";
 import {
-  convertFrequency,
+  // convertFrequency,
   convertTokenAmountToUsd,
   formatTimeFrequency,
   getTokenDecimals,
