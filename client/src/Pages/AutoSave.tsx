@@ -23,6 +23,8 @@ import { toast } from "sonner";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import ExtendSafeModal from "@/components/Modals/extend-safe-modal";
 import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
+import { savingsBalanceState } from "@/store/atoms/balance";
+import { useRecoilState } from "recoil";
 
 const AutoSave = () => {
   const navigate = useNavigate();
@@ -111,10 +113,11 @@ const AutoSave = () => {
   };
 
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
-  const { details, isLoading: autoSafeIsLoading } = useAutomatedSafeForUser(
+  const { details, isLoading: autoSafeIsLoading, refetch } = useAutomatedSafeForUser(
     userAddress as `0x${string}`
   );
   const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
+  const [savingsBalance] = useRecoilState(savingsBalanceState);
 
   const {
     claimAllAutoSafe,
@@ -309,6 +312,10 @@ const AutoSave = () => {
   //     hour12: true,
   //   });
   // }
+
+  useEffect(() => {
+    refetch()
+  }, [savingsBalance])
 
   return (
     <div className="min-h-screen bg-black text-white p-6">

@@ -184,6 +184,7 @@ export default function SavingsDetail() {
                   <h1 className="text-2xl">{safeDetails.target}</h1>
                   <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
                     {safeDetails.isLocked
+                      // remove this after work amd
                       ? safeDetails.unlockTime > new Date()
                         ? `${Math.ceil(
                             (safeDetails.unlockTime.getTime() -

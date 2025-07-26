@@ -8,16 +8,17 @@ import {
   type Transaction,
   useTransactionHistory,
 } from "@/hooks/useTransactionHistory";
-import { formatUnits } from "viem";
+import { formatEther } from "viem";
 import { capitalize } from "@/utils/capitalize";
 import { Button } from "./ui/button";
 import MemoStory from "@/icons/Story";
 import SavingOption from "./Modals/SavingOption";
+
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { useActiveAccount } from "thirdweb/react";
 // import { ChevronDown, ExternalLink } from "lucide-react";
-import { convertTokenAmountToUsd, getTokenDecimals, tokenData } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
+import Deposit from "@/components/Depositt";
 
 enum TxStatus {
   Completed = 0,
@@ -82,13 +83,16 @@ interface TransactionHistoryProps {
 }
 
 const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
-  const navigate = useNavigate();
 
   const openFirstModal = () => setIsFirstModalOpen(true);
+  const openDepositModal = () => {
+    setIsDepositModalOpen(true);
+  };
 
   const { transactions } = useTransactionHistory({
     safeId: safeId ? Number(safeId) : undefined,
@@ -152,7 +156,7 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
           {isConnected ? (
             <div className="flex gap-4">
               <Button
-                onClick={() => navigate("/dashboard/deposit")}
+                onClick={openDepositModal}
                 className="bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#2a2a2a]">
                 Deposit
               </Button>
@@ -167,6 +171,11 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
             <ThirdwebConnectButton />
           )}
         </div>
+        <Deposit
+          isDepositModalOpen={isDepositModalOpen}
+          setIsDepositModalOpen={setIsDepositModalOpen}
+          onBack={() => {}}
+        />
         <SavingOption
           isFirstModalOpen={isFirstModalOpen}
           setIsFirstModalOpen={setIsFirstModalOpen}
@@ -208,7 +217,9 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                 <Table>
                   <TableBody>
                     {txs.map((transaction, index) => (
-                      <TableRow className="border-b border-white/10 my-1" key={index}>
+                      <TableRow
+                        className="border-b border-white/10 my-1"
+                        key={index}>
                         <TableCell className="">
                           <span className="font-medium">
                             {capitalize(transaction.typeOfTransaction)}
@@ -219,7 +230,7 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                           <div className="flex flex-col">
                             <span className="flex items-center gap-2 text-sm text-gray-400">
                               <span>
-                                {formatUnits(transaction.amount, getTokenDecimals(transaction.token))}{" "}
+                                {formatEther(transaction.amount)}{" "}
                                 {tokenData[transaction.token]?.symbol}
                               </span>
                               <img

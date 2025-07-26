@@ -220,13 +220,15 @@ function AssetTableContent({
           {safeDetails ? (
             <Button
               onClick={() => setShowTopUpModal(true)}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+            >
               Top Up Safe
             </Button>
           ) : isConnected ? (
             <Button
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-              onClick={() => navigate("/dashboard/deposit")}>
+              onClick={() => navigate("/dashboard/deposit")}
+            >
               Deposit
             </Button>
           ) : (
@@ -289,7 +291,8 @@ function AssetTableContent({
                       </div>
                     ) : (
                       <div
-                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
+                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                      >
                         {asset.tokenInfo.symbol?.charAt(0)}
                       </div>
                     )}
@@ -335,13 +338,15 @@ function AssetTableContent({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setShowTopUpModal(true)}>
+                      onClick={() => setShowTopUpModal(true)}
+                    >
                       Top Up
                     </Button>
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => navigate("/dashboard/deposit")}>
+                      onClick={() => navigate("/dashboard/deposit")}
+                    >
                       Withdraw
                     </Button>
                   </div>
