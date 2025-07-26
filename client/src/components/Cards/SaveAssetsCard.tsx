@@ -364,7 +364,7 @@ export default function SaveAssetsCard() {
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, getTokenDecimals(saveState.token))));
       // console.log("token Balance: ", tokenBalance);
     }
-  }, [saveState.token, address, AvailableBalance]);
+  }, [saveState.token, address, AvailableBalance, savingsBalance]);
 
   useEffect(() => {
     async function run() {
@@ -383,7 +383,7 @@ export default function SaveAssetsCard() {
       }
     }
     run();
-  }, [supportedTokens]);
+  }, [supportedTokens, savingsBalance]);
 
   return (
     <div className="flex justify-center min-h-fit bg-[#010104] p-4">

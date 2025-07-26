@@ -20,7 +20,7 @@ export function useAutomatedSafeForUser(userAddress: `0x${string}`) {
     );
   
     // Call getAutomatedSafeForUser using useReadContract
-    const { data, isLoading, error } = useReadContract({
+    const { data, isLoading, error, refetch } = useReadContract({
       contract,
       method: "getAutomatedSafeForUser",
       params: [userAddress],
@@ -31,5 +31,6 @@ export function useAutomatedSafeForUser(userAddress: `0x${string}`) {
         | any | undefined,
       isLoading,
       error,
+      refetch
     };
   }
