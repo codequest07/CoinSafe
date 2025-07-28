@@ -15,10 +15,11 @@ export const wallets = [
         "passkey",
       ],
     },
-    // smartAccount: {
-    //   chain: liskSepolia,
-    //   sponsorGas: true,
-    // },
+    // enable gasless transactions for the wallet
+    executionMode: {
+      mode: "EIP7702",
+      sponsorGas: true,
+    },
   }),
   createWallet("io.metamask"),
   createWallet("com.coinbase.wallet"),
