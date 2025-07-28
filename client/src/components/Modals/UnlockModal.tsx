@@ -286,9 +286,6 @@ export default function UnlockModal({
       // Ensure states are synchronized before proceeding
       await validateAndSyncState();
 
-      // Show the approval modal
-      setShowApproveTxModal(true);
-
       // Call unlockSafe
       await unlockSafe({
         preventDefault: () => {}, // Mock preventDefault method
