@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableHead,
+  TableHeader,
+} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   type Transaction,
@@ -214,70 +221,81 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                   {dateDisplay}
                 </div>
 
-                <Table>
-                  <TableBody>
-                    {txs.map((transaction, index) => (
-                      <TableRow
-                        className="border-b border-white/10 my-1"
-                        key={index}>
-                        <TableCell className="">
-                          <span className="font-medium">
-                            {capitalize(transaction.typeOfTransaction)}
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="">
-                          <div className="flex flex-col">
-                            <span className="flex items-center gap-2 text-sm text-gray-400">
-                              <span>
-                                {formatEther(transaction.amount)}{" "}
-                                {tokenData[transaction.token]?.symbol}
+                <div className="w-full overflow-x-auto">
+                  <CardContent className="p-0">
+                    <Table className="w-full border-collapse min-w-[600px]">
+                      <TableHeader className="bg-[#1D1D1D73]/40">
+                        <TableRow className="border-b border-[#1D1D1D]">
+                          <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                            TRANSACTION
+                          </TableHead>
+                          <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                            AMOUNT
+                          </TableHead>
+                          <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                            DATE
+                          </TableHead>
+                          <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                            STATUS
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody className="text-white">
+                        {txs.map((transaction, index) => (
+                          <TableRow
+                            className="border-b border-[#1D1D1D]"
+                            key={index}>
+                            <TableCell className="py-4 px-4">
+                              <span className="font-medium text-white">
+                                {capitalize(transaction.typeOfTransaction)}
                               </span>
-                              <img
-                                src={tokenData[transaction.token]?.image}
-                                width={12}
-                                height={12}
-                                className="w-[14px] h-[14px] rounded-full"
-                              />
-                            </span>
-                            <div className="text-sm text-gray-400 mt-1">
-                              ≈{" "}
-                              {usdValues[index] !== undefined
-                                ? `$${usdValues[index]?.toFixed(2)}`
-                                : "Loading..."}
-                            </div>
-                          </div>
-                        </TableCell>
+                            </TableCell>
 
-                        {/* <TableCell className="hidden md:table-cell">
-                          <div className="flex items-center space-x-1">
-                            <span className="text-sm text-gray-400">
-                              {shortenAddress(transaction.user)}
-                            </span>
-                            <ExternalLink className="h-4 w-4 text-[#22c55e]" />
-                          </div>
-                        </TableCell> */}
+                            <TableCell className="py-4 px-4">
+                              <div className="flex flex-col">
+                                <span className="flex items-center gap-2 text-sm text-gray-400">
+                                  <span>
+                                    {formatEther(transaction.amount)}{" "}
+                                    {tokenData[transaction.token]?.symbol}
+                                  </span>
+                                  <img
+                                    src={tokenData[transaction.token]?.image}
+                                    width={12}
+                                    height={12}
+                                    className="w-[14px] h-[14px] rounded-full"
+                                  />
+                                </span>
+                                <div className="text-sm text-gray-400 mt-1">
+                                  ≈{" "}
+                                  {usdValues[index] !== undefined
+                                    ? `$${usdValues[index]?.toFixed(2)}`
+                                    : "Loading..."}
+                                </div>
+                              </div>
+                            </TableCell>
 
-                        <TableCell className="text-right">
-                          <span className="text-sm">
-                            {formatDate(Number(transaction.timestamp))}
-                            {"  -  "}
-                            {formatTime(Number(transaction.timestamp))}
-                          </span>
-                        </TableCell>
+                            <TableCell className="py-4 px-4">
+                              <span className="text-sm text-gray-400">
+                                {formatDate(Number(transaction.timestamp))}
+                                {"  -  "}
+                                {formatTime(Number(transaction.timestamp))}
+                              </span>
+                            </TableCell>
 
-                        <TableCell className="text-right pr-0">
-                          <Badge
-                            className={`border-0 ${getColorClass(
-                              0
-                            )} px-3 py-1 rounded-full`}>
-                            {getStatusText(0)}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                            <TableCell className="py-4 px-4">
+                              <Badge
+                                className={`border-0 ${getColorClass(
+                                  0
+                                )} px-3 py-1 rounded-full`}>
+                                {getStatusText(0)}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </div>
               </div>
             );
           })}

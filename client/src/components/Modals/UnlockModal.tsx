@@ -310,8 +310,7 @@ export default function UnlockModal({
           if (!open && onClose) {
             onClose();
           }
-        }}
-      >
+        }}>
         <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C] max-h-[90vh] overflow-y-auto">
           <DialogTitle className="text-white flex items-center space-x-3">
             <MemoBackIcon className="w-6 h-6 cursor-pointer" />
@@ -368,8 +367,7 @@ export default function UnlockModal({
                     variant: "destructive",
                   });
                 }
-              }}
-            >
+              }}>
               Max
             </button>
           </div>
@@ -453,28 +451,27 @@ export default function UnlockModal({
             </>
           ) : null}
 
-          <DialogFooter>
+          <DialogFooter className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
             <Button
               onClick={() => onClose && onClose()}
-              className="bg-[#1E1E1E99] px-8 rounded-[2rem] hover:bg-[#1E1E1E99]"
-              type="submit"
-            >
+              className="bg-[#1E1E1E99] px-8 py-3 sm:py-2 rounded-[2rem] hover:bg-[#1E1E1E99] w-full sm:w-auto text-sm sm:text-base"
+              type="submit">
               Cancel
             </Button>
-            <div>
-              <Button
-                onClick={handleUnlockClick}
-                className="text-black px-8 rounded-[2rem]"
-                variant="outline"
-                disabled={isPending || !saveState.amount || !saveState.token}
-              >
-                {isPending ? (
-                  <LoaderCircle className="animate-spin mr-2" />
-                ) : (
-                  "Unlock savings"
-                )}
-              </Button>
-            </div>
+            <Button
+              onClick={handleUnlockClick}
+              className="text-black px-8 py-3 sm:py-2 rounded-[2rem] w-full sm:w-auto text-sm sm:text-base bg-white hover:bg-gray-100"
+              variant="outline"
+              disabled={isPending || !saveState.amount || !saveState.token}>
+              {isPending ? (
+                <>
+                  <LoaderCircle className="animate-spin mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                  Processing...
+                </>
+              ) : (
+                "Unlock savings"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
