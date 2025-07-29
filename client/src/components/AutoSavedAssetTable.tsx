@@ -159,126 +159,112 @@ export default function AutoSavedAssetTable({
   }, [assets, tokenDetails]); // Depend on tokenDetails, not tokenData
 
   return (
-    <div className="w-full bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-white text-lg font-medium">Assets</h2>
-        {/* <Button
-          variant="secondary"
-          className="bg-gray-500 hover:bg-gray-400 text-white border-0 rounded-full px-4 py-2"
-        >
-          All assets
-          <ChevronDown className="ml-2 h-4 w-4" />
-        </Button> */}
-      </div>
-
-      {/* Desktop Table */}
-      <div className="hidden lg:block">
-        <div className="bg-[#1D1D1D73]/40 overflow-hidden rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-[#1D1D1D73]/40 border-none hover:bg-[#1D1D1D73]/40">
-                <TableHead className="text-[#CACACA] font-normal text-xs h-12 px-6">
-                  TICKER
-                </TableHead>
-                <TableHead className="text-[#CACACA] font-normal text-xs h-12 px-6">
-                  AUTOSAVE DETAILS
-                </TableHead>
-                <TableHead className="text-[#CACACA] font-normal text-xs h-12 px-6">
-                  AMOUNT SAVED
-                </TableHead>
-                <TableHead className="text-[#CACACA] font-normal text-xs h-12 px-6">
-                  AUTOSAVED
-                </TableHead>
-                <TableHead className="text-[#CACACA] font-normal text-xs h-12 px-6"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tokenDetails.map((asset: any, index: any) => (
-                <TableRow
-                  key={asset.token}
-                  className={`border-gray-600 hover:bg-[#1D1D1D73]/20 ${
-                    index === assets.length - 1 ? "border-b-0" : ""
-                  }`}
-                >
-                  {/* Ticker */}
-                  <TableCell className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs font-bold rounded-full">
-                          <img
-                            src={`${tokenData[asset.token].image}`}
-                            className="rounded-full"
-                          />
-                        </span>
-                      </div>
-                      <div>
-                        {/* <div className="text-white font-medium">
+    <div className="w-full overflow-x-auto">
+      <Table className="w-full border-collapse min-w-[600px]">
+        <TableHeader className="bg-[#1D1D1D73]/40">
+          <TableRow className="border-b border-[#1D1D1D]">
+            <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+              TICKER
+            </TableHead>
+            <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+              AMOUNT
+            </TableHead>
+            <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+              IN VAULT
+            </TableHead>
+            <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+              AUTOSAVED
+            </TableHead>
+            <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+              <span className="sr-only">Actions</span>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {tokenDetails.map((asset: any, index: any) => (
+            <TableRow
+              key={asset.token}
+              className={`border-gray-600 hover:bg-[#1D1D1D73]/20 ${
+                index === assets.length - 1 ? "border-b-0" : ""
+              }`}>
+              {/* Ticker */}
+              <TableCell className="px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold rounded-full">
+                      <img
+                        src={`${tokenData[asset.token].image}`}
+                        className="rounded-full"
+                      />
+                    </span>
+                  </div>
+                  <div>
+                    {/* <div className="text-white font-medium">
                           <img src={`${tokenData[asset.token].image}`} />
                         </div> */}
-                        <div className="text-gray-400 text-sm">
-                          {tokenData[asset.token].symbol}
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  {/* Autosave Details */}
-                  <TableCell className="px-6 py-4">
-                    <div className="text-white">
-                      {isLoading ? (
-                        <Loader2 />
-                      ) : (
-                        `${
-                          formatUnits(
-                            asset.amountToSave,
-                            getTokenDecimals(asset.token)
-                          ) +
-                          " " +
-                          tokenData[asset.token].symbol
-                        }`
-                      )}
-                    </div>
                     <div className="text-gray-400 text-sm">
-                      {convertFrequency(Number(asset.frequency))}
+                      {tokenData[asset.token].symbol}
                     </div>
-                  </TableCell>
+                  </div>
+                </div>
+              </TableCell>
 
-                  {/* Amount */}
-                  <TableCell className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <p className="text-white">
-                        {formatUnits(
-                          asset.amountSaved,
-                          getTokenDecimals(asset.token)
-                        )}{" "}
-                        {tokenData[asset.token].symbol}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        ≈ $
-                        {asset.amountSavedInUSD !== null
-                          ? asset.amountSavedInUSD
-                          : "Loading..."}
-                      </p>
-                    </div>
-                    <div className="text-white">
-                      {/* {`$${asset.amountSaved}`} */}
-                      {/* {formatUnits(asset.amountSaved, getTokenDecimals(asset.token)) +
+              {/* Autosave Details */}
+              <TableCell className="px-6 py-4">
+                <div className="text-white">
+                  {isLoading ? (
+                    <Loader2 />
+                  ) : (
+                    `${
+                      formatUnits(
+                        asset.amountToSave,
+                        getTokenDecimals(asset.token)
+                      ) +
+                      " " +
+                      tokenData[asset.token].symbol
+                    }`
+                  )}
+                </div>
+                <div className="text-gray-400 text-sm">
+                  {convertFrequency(Number(asset.frequency))}
+                </div>
+              </TableCell>
+
+              {/* Amount */}
+              <TableCell className="px-6 py-4">
+                <div className="flex flex-col">
+                  <p className="text-white">
+                    {formatUnits(
+                      asset.amountSaved,
+                      getTokenDecimals(asset.token)
+                    )}{" "}
+                    {tokenData[asset.token].symbol}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    ≈ $
+                    {asset.amountSavedInUSD !== null
+                      ? asset.amountSavedInUSD
+                      : "Loading..."}
+                  </p>
+                </div>
+                <div className="text-white">
+                  {/* {`$${asset.amountSaved}`} */}
+                  {/* {formatUnits(asset.amountSaved, getTokenDecimals(asset.token)) +
                         " " +
                         tokenData[asset.token].symbol} */}
-                      {/* {`${await getTokenPrice(
+                  {/* {`${await getTokenPrice(
                         asset.token,
                         Number(asset.amountSaved)
                       )}`} */}
-                    </div>
-                    {/* <div className="text-gray-400 text-sm">
+                </div>
+                {/* <div className="text-gray-400 text-sm">
                       {asset.amount.split(" ").slice(1).join(" ")}
                     </div> */}
-                  </TableCell>
+              </TableCell>
 
-                  {/* Autosaved */}
-                  <TableCell className="px-6 py-4">
-                    {/* {asset.claimableAmount.amount === "-" ? (
+              {/* Autosaved */}
+              <TableCell className="px-6 py-4">
+                {/* {asset.claimableAmount.amount === "-" ? (
                       <div className="text-white">-</div>
                     ) : (
                       <>
@@ -292,31 +278,31 @@ export default function AutoSavedAssetTable({
                         )}
                       </>
                     )} */}
-                    <div className="flex items-center gap-1">
-                      {/* <span className="text-[#48FF91]">Yes</span>
+                <div className="flex items-center gap-1">
+                  {/* <span className="text-[#48FF91]">Yes</span>
                       <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
                         <Check className="w-3 h-3 text-white" />
                       </div> */}
-                      {asset.autosaved ? (
-                        <>
-                          <span className="text-[#48FF91]">Yes</span>
-                          <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
-                            <Check className="w-4 h-4 text-white" />
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-white">No</span>
-                          <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
-                            <X className="w-3 h-3 text-white" />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+                  {asset.autosaved ? (
+                    <>
+                      <span className="text-[#48FF91]">Yes</span>
+                      <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-white">No</span>
+                      <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
+                        <X className="w-3 h-3 text-white" />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </TableCell>
 
-                  {/* Actions */}
-                  {/* <TableCell className="px-6 py-4">
+              {/* Actions */}
+              {/* <TableCell className="px-6 py-4">
                     <div className="flex gap-2 justify-end">
                       {asset.actions.map((action, actionIndex) => (
                         <Button
@@ -330,144 +316,10 @@ export default function AutoSavedAssetTable({
                       ))}
                     </div>
                   </TableCell> */}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-
-      {/* Mobile/Tablet Horizontal Scrolling Table */}
-      <div className="lg:hidden">
-        <div className="overflow-x-auto">
-          <div className="bg-[#1D1D1D73]/40 rounded-lg min-w-[800px]">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-[#1D1D1D73]/40 border-none hover:bg-[#1D1D1D73]/40">
-                  <TableHead className="text-[#CACACA] font-normal text-xs h-10 px-4">
-                    TICKER
-                  </TableHead>
-                  <TableHead className="text-[#CACACA] font-normal text-xs h-10 px-4">
-                    AUTOSAVE DETAILS
-                  </TableHead>
-                  <TableHead className="text-[#CACACA] font-normal text-xs h-10 px-4">
-                    AMOUNT
-                  </TableHead>
-                  {/* <TableHead className="text-[#CACACA] font-normal text-xs h-10 px-4">
-                    YIELD ON SAVINGS
-                  </TableHead> */}
-                  <TableHead className="text-[#CACACA] font-normal text-xs h-10 px-4">
-                    CLAIMABLE AMOUNT
-                  </TableHead>
-                  <TableHead className="text-[#CACACA] font-normal text-xs h-10 px-4">
-                    ACTIONS
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assets.tokenDetails.map((asset: any, index: any) => (
-                  <TableRow
-                    key={asset.id}
-                    className={`border-gray-600 hover:bg-[#1D1D1D73]/20 ${
-                      index === assets.length - 1 ? "border-b-0" : ""
-                    }`}
-                  >
-                    {/* Ticker */}
-                    <TableCell className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-xs font-bold">
-                            {asset.icon}
-                          </span>
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-white font-medium text-sm truncate">
-                            {asset.ticker}
-                          </div>
-                          {/* <div className="text-gray-400 text-xs truncate">
-                            Avalanche
-                          </div> */}
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    {/* Autosave Details */}
-                    {/* <TableCell className="px-4 py-3">
-                      <div className="text-white text-sm">
-                        {asset.autosaveDetails.amount}
-                      </div>
-                      <div className="text-gray-400 text-xs">
-                        {asset.autosaveDetails.period}
-                      </div>
-                    </TableCell> */}
-
-                    {/* Amount */}
-                    {/* <TableCell className="px-4 py-3">
-                      <div className="text-white text-sm">
-                        {asset.amount.split(" ")[0]}
-                      </div>
-                      <div className="text-gray-400 text-xs">
-                        {asset.amount.split(" ").slice(1).join(" ")}
-                      </div>
-                    </TableCell> */}
-
-                    {/* Yield on Savings */}
-                    {/* <TableCell className="px-4 py-3">
-                      <div className="text-white text-sm">
-                        {asset.yieldOnSavings.amount}
-                      </div>
-                      <div className="text-gray-400 text-xs">
-                        {asset.yieldOnSavings.period}
-                      </div>
-                    </TableCell> */}
-
-                    {/* Claimable Amount */}
-                    {/* <TableCell className="px-4 py-3">
-                      {asset.claimableAmount.amount === "-" ? (
-                        <div className="text-white text-sm">-</div>
-                      ) : (
-                        <>
-                          <div className="text-white text-sm">
-                            {asset.claimableAmount.amount}
-                          </div>
-                          {asset.claimableAmount.value && (
-                            <div className="text-gray-400 text-xs">
-                              {asset.claimableAmount.value}
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </TableCell> */}
-
-                    {/* Actions */}
-                    {/* <TableCell className="px-4 py-3">
-                      <div className="flex flex-col gap-1">
-                        {asset.actions.map((action, actionIndex) => (
-                          <Button
-                            key={actionIndex}
-                            variant="ghost"
-                            size="sm"
-                            className="text-green-400 hover:text-green-300 hover:bg-gray-600 px-2 py-1 h-auto text-xs justify-start"
-                          >
-                            {action}
-                          </Button>
-                        ))}
-                      </div>
-                    </TableCell> */}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="text-center mt-2">
-          <span className="text-gray-400 text-xs">
-            ← Scroll horizontally to view all details →
-          </span>
-        </div>
-      </div>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

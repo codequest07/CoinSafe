@@ -105,16 +105,16 @@ const DashHeader = () => {
     <main>
       <header className="flex items-center h-14 shadow-xl border-b border-b-[#000000] lg:h-[70px] w-full bg-black text-white">
         {/* Mobile View */}
-        <div className="w-full flex items-center justify-between md:hidden md:px-4">
+        <div className="w-full flex items-center justify-between md:hidden px-2">
           {/* Logo for mobile */}
           <Link to="/" className="flex items-center">
-            <MemoLogo className="w-24 h-8" />
+            <MemoLogo className="w-20 h-6" />
             <span className="text-xs bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded ml-1">
               Beta
             </span>
           </Link>
 
-          <div className="flex-1 gap-2 flex justify-end md:hidden">
+          <div className="flex items-center gap-2 md:hidden">
             <ClaimBtn />
             <WalletAvatar />
           </div>

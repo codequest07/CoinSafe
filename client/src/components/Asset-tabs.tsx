@@ -19,12 +19,12 @@ export function AssetTabs({ safeDetails, isLoading }: AssetTabsProps) {
   const isAutoSafePage = location.pathname === "/dashboard/vault/auto-safe";
 
   return (
-    <div className="w-full max-w-[98%] mx-auto">
-      <div className="flex  max-w-[100%] mx-auto border-b border-[#FFFFFF21] bg-black text-white">
+    <div className="w-full mx-auto">
+      <div className="flex w-full mx-auto border-b border-[#FFFFFF21] bg-black text-white overflow-x-auto">
         <button
           onClick={() => setActiveTab("assets")}
           className={cn(
-            "px-4 py-2 text-sm font-medium transition-colors",
+            "px-4 py-2 text-sm font-medium transition-colors flex-shrink-0",
             activeTab === "assets"
               ? "border-b-2 border-[#79E7BA]"
               : "text-gray-400 hover:text-gray-200"
@@ -34,7 +34,7 @@ export function AssetTabs({ safeDetails, isLoading }: AssetTabsProps) {
         <button
           onClick={() => setActiveTab("savings")}
           className={cn(
-            "px-4 py-2 text-sm font-medium transition-colors",
+            "px-4 py-2 text-sm font-medium transition-colors flex-shrink-0",
             activeTab === "savings"
               ? "border-b-2 border-[#79E7BA]"
               : "text-gray-400 hover:text-gray-200"
