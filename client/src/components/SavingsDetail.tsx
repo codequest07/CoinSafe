@@ -59,7 +59,7 @@ export default function SavingsDetail() {
   console.log("Safe details", safeDetails);
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-black text-white p-2 lg:p-6">
       <div className="max-w-5xl mx-auto">
         {isLoading ? (
           <div className="space-y-6 p-4">
@@ -181,11 +181,11 @@ export default function SavingsDetail() {
                   >
                     <ArrowLeft className="h-6 w-6" />
                   </Button>
-                  <h1 className="text-2xl">{safeDetails.target}</h1>
+                  <h1 className="text-lg lg:text-2xl">{safeDetails.target}</h1>
                   <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
                     {safeDetails.isLocked
-                      // remove this after work amd
-                      ? safeDetails.unlockTime > new Date()
+                      ? // remove this after work amd
+                        safeDetails.unlockTime > new Date()
                         ? `${Math.ceil(
                             (safeDetails.unlockTime.getTime() -
                               new Date().getTime()) /
@@ -208,7 +208,7 @@ export default function SavingsDetail() {
                 </div>
               </div>
             </div>
-            <p className="text-base my-1 ml-[3.3rem] text-gray-300">
+            <p className="text-sm lg:text-base my-1 ml-[3.3rem] text-gray-300">
               {safeDetails.isLocked
                 ? `Next unlock date: ${safeDetails.nextUnlockDate}`
                 : "Withdraw anytime"}
@@ -233,7 +233,7 @@ export default function SavingsDetail() {
         {!isLoading && safeDetails && (
           <>
             <div className="flex flex-col gap-4 pr-4 pb-2">
-              <div className="flex gap-2">
+              <div className="flex flex-col lg:flex-row gap-2">
                 <SavingsCard
                   title="Savings balance"
                   value={safeDetails.totalAmountUSD ?? 0.0}
