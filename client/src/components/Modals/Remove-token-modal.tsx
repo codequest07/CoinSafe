@@ -6,8 +6,9 @@ import { useEffect, useState } from "react";
 import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
 import { useActiveAccount } from "thirdweb/react";
 import {
-  convertFrequency,
+  // convertFrequency,
   convertTokenAmountToUsd,
+  formatTimeFrequency,
   getTokenDecimals,
   tokenData,
 } from "@/lib/utils";
@@ -291,8 +292,11 @@ export default function RemoveTokenModal({
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-gray-400">{`${convertFrequency(
+                          {/* <div className="text-sm text-gray-400">{`${convertFrequency(
                             Number(_details!.frequency)!
+                          )}`}</div> */}
+                          <div className="text-sm text-gray-400">{`${formatTimeFrequency(
+                            _details!.frequency
                           )}`}</div>
                         </div>
                       </div>

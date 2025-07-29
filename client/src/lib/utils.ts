@@ -129,6 +129,24 @@ export const convertFrequency = (
   }
 };
 
+export function formatTimeFrequency(frequency:any) {
+  const frequencyMap = [
+    { value: 86400n, label: 'Every day' },
+    { value: 172800n, label: 'Every 2 days' },
+    { value: 432000n, label: 'Every 5 days' },
+    { value: 604800n, label: 'Weekly' },
+    { value: 2592000n, label: 'Monthly' }
+  ];
+
+  const match = frequencyMap.find(item => item.value === frequency);
+  return match ? match.label : `Every ${frequency} seconds`;
+}
+
+// Example usage
+// console.log(formatTimeFrequency(172800n)); // Output: "Every 2 days"
+// console.log(formatTimeFrequency(86400n));  // Output: "Every day"
+// console.log(formatTimeFrequency(23n));     // Output: "Every 23 seconds"
+
 export function convertTokenToUSD(
   tokenValue: any,
   decimals: number,

@@ -2,7 +2,7 @@ import { useConnectModal } from "thirdweb/react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { useEffect, useState } from "react";
-import { client } from "@/lib/config";
+import { client, liskSepolia } from "@/lib/config";
 import { darkTheme } from "thirdweb/react";
 import { wallets } from "@/lib/wallets";
 
@@ -22,6 +22,7 @@ const ConnectModal = ({
       await connect({
         client,
         wallets,
+        chain: liskSepolia,
         theme: darkTheme({
           colors: { accentText: "hsl(144, 100%, 39%)" },
         }),
