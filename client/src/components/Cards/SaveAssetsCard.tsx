@@ -116,11 +116,11 @@ export default function SaveAssetsCard() {
     refetch();
   }, [savingsBalance]);
 
-    const calculateEndDate = (days: number) => {
-      const currentDate = new Date();
-      const futureDate = addDays(currentDate, days);
-      return format(futureDate, "dd MMMM yyyy");
-    };
+  const calculateEndDate = (days: number) => {
+    const currentDate = new Date();
+    const futureDate = addDays(currentDate, days);
+    return format(futureDate, "dd MMMM yyyy");
+  };
 
   const handleDurationChange = (duration: number) => {
     setSavingsDuration(duration);
@@ -178,7 +178,7 @@ export default function SaveAssetsCard() {
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
-    setDecimals(getTokenDecimals(value))
+    setDecimals(getTokenDecimals(value));
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
   };
@@ -361,7 +361,9 @@ export default function SaveAssetsCard() {
 
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
 
-      setSelectedTokenBalance(Number(formatUnits(tokenBalance, getTokenDecimals(saveState.token))));
+      setSelectedTokenBalance(
+        Number(formatUnits(tokenBalance, getTokenDecimals(saveState.token)))
+      );
       // console.log("token Balance: ", tokenBalance);
     }
   }, [saveState.token, address, AvailableBalance, savingsBalance]);
@@ -386,8 +388,8 @@ export default function SaveAssetsCard() {
   }, [supportedTokens, savingsBalance]);
 
   return (
-    <div className="flex justify-center min-h-fit bg-[#010104] p-4">
-      <div className="w-full max-w-[600px] rounded-xl border-[1px] border-[#FFFFFF21] bg-[#1D1D1D73] p-6 text-white">
+    <div className="min-h-screen md:min-h-fit flex items-center justify-center md:justify-center bg-[#010104] p-4">
+      <div className="w-full max-w-md md:max-w-[600px] rounded-xl border-[1px] border-[#FFFFFF21] bg-[#1D1D1D73] p-6 text-white">
         {/* Header */}
         <div className="flex items-center gap-2 mb-6">
           <button className="rounded-full" onClick={() => navigate(-1)}>
@@ -405,8 +407,7 @@ export default function SaveAssetsCard() {
               saveType === "one-time"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             One-time save
           </button>
           <button
@@ -416,8 +417,7 @@ export default function SaveAssetsCard() {
               saveType === "auto"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             Autosave
           </button>
         </div>
@@ -451,8 +451,7 @@ export default function SaveAssetsCard() {
                 <Button
                   variant="link"
                   className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                  onClick={() => navigate("/dashboard/deposit")}
-                >
+                  onClick={() => navigate("/dashboard/deposit")}>
                   Deposit to save
                 </Button>
               ) : (
@@ -463,8 +462,7 @@ export default function SaveAssetsCard() {
                       ...prev,
                       amount: selectedTokenBalance,
                     }))
-                  }
-                >
+                  }>
                   Save all
                 </Button>
               )}
@@ -534,7 +532,7 @@ export default function SaveAssetsCard() {
             <div className="space-y-4 py-4">
               <div className="py-4 pb-6 border-b-[1px] border-[#FFFFFF21]">
                 <p className="font-[200] text-base">Choose savings method</p>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Label
                     htmlFor="by-frequency"
                     className={`w-full flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${
@@ -599,14 +597,14 @@ export default function SaveAssetsCard() {
               </div>
 
               {selectedOption === "per-transaction" && (
-                <div className="flex flex-col items-center justify-center space-y-4 py-2 text-white">
-                  <MemoComingSoonIcon className="w-[50%] h-[50vh] text-white" />
-                  <h1 className="text-3xl font-bold my-2 text-white leading-tight">
-                    We’re in the kitchen!
+                <div className="flex flex-col items-center justify-center space-y-4 py-4 text-white">
+                  <MemoComingSoonIcon className="w-32 h-32 sm:w-[50%] sm:h-[50vh] text-white" />
+                  <h1 className="text-xl sm:text-3xl font-bold my-2 text-white leading-tight text-center px-4">
+                    We're in the kitchen!
                   </h1>
-                  <p className="text-center max-w-md text-muted-foreground">
-                    We’re in the kitchen, putting the final touches on this
-                    feature. We’ll let you know as soon as it’s ready! Continue
+                  <p className="text-center max-w-md text-muted-foreground px-4 text-sm sm:text-base">
+                    We're in the kitchen, putting the final touches on this
+                    feature. We'll let you know as soon as it's ready! Continue
                     saving for now.
                   </p>
                 </div>
@@ -621,8 +619,8 @@ export default function SaveAssetsCard() {
                     (token) => !autoSafeTokenOptions.includes(token)
                   ).length < 1 ? (
                   <div className="p-4 flex flex-col items-center justify-center text-center gap-5">
-                    <h4 className="text-2xl ">You're all set up</h4>
-                    <p className="">
+                    <h4 className="text-xl sm:text-2xl">You're all set up</h4>
+                    <p className="text-sm sm:text-base px-4">
                       You have successfully set up your your automated savings
                       plan and added automated savings plans for all our
                       supported tokens.
@@ -654,7 +652,7 @@ export default function SaveAssetsCard() {
                       }
                     />
                     <>
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
                         <div className="text-sm font-[300] text-gray-300">
                           Wallet balance:{" "}
                           <span className="text-gray-400">
@@ -668,13 +666,12 @@ export default function SaveAssetsCard() {
                             saveState.amount > selectedTokenBalance)) ? (
                           <Button
                             variant="link"
-                            className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                            onClick={() => navigate("/dashboard/deposit")}>
+                            className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0 self-start sm:self-auto">
                             Deposit to save
                           </Button>
                         ) : (
                           <Button
-                            className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                            className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer self-start sm:self-auto"
                             onClick={() =>
                               setSaveState((prev) => ({
                                 ...prev,
@@ -731,7 +728,7 @@ export default function SaveAssetsCard() {
                     )}
                   </div>
                 ))}
-            </div> 
+            </div>
           </>
         )}
 
@@ -743,11 +740,11 @@ export default function SaveAssetsCard() {
             <></>
           ) : (
             <>
-              <div className="flex justify-end">
+              <div className="flex justify-center sm:justify-end mt-6">
                 <div>
                   <Button
                     onClick={handleSaveAsset}
-                    className="text-black px-8 rounded-[2rem]"
+                    className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
                     variant="outline"
                     disabled={isLoading || autoSavingsLoading}>
                     {isLoading || autoSavingsLoading ? (
@@ -764,14 +761,13 @@ export default function SaveAssetsCard() {
           ))}
 
         {saveType === "one-time" && (
-          <div className="flex justify-end mt-5">
+          <div className="flex justify-center sm:justify-end mt-6">
             <div>
               <Button
                 onClick={handleSaveAsset}
-                className="text-black px-8 rounded-[2rem]"
+                className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
                 variant="outline"
-                disabled={isLoading}
-              >
+                disabled={isLoading}>
                 {isLoading ? (
                   <LoaderCircle className="animate-spin" />
                 ) : (
