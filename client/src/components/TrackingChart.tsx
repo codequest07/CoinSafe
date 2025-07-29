@@ -33,7 +33,7 @@ const TrackingChart = () => {
   const openFirstModal = () => setIsFirstModalOpen(true);
 
   return (
-    <div className="w-full border-[1px] border-[#FFFFFF17] p-2 sm:p-4 rounded-[12px] bg-[#0A0A0A]">
+    <div className="w-full border-[1px] border-[#FFFFFF17] p-4 sm:p-4 rounded-[12px] bg-[#0A0A0A]">
       <div className="w-full">
         {/* Action Buttons */}
         <div className="flex justify-center sm:justify-end items-center pb-3 text-white gap-2 sm:gap-3">
