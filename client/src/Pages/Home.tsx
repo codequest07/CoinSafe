@@ -35,8 +35,8 @@ const Home = () => {
   ];
 
   return (
-    <main>
-      <div className="flex flex-col w-full sm:flex pr-3">
+    <main className="w-full overflow-x-hidden">
+      <div className="flex flex-col w-full sm:flex pr-0 sm:pr-3">
         <>
           <div className="step-1">
             <SmarterSavingCard setIsConnectModalOpen={setOpenConnectModal} />
@@ -51,8 +51,8 @@ const Home = () => {
             <div className="my-3">
               <StatsCards />
             </div>
-            <div className="sm:flex py-3">
-              <div className="sm:w-2/3 overflow-hidden step-3">
+            <div className="sm:flex py-3 flex-col sm:flex-row">
+              <div className="sm:w-2/3 overflow-hidden step-3 mb-3 sm:mb-0">
                 <AssetTable />
               </div>
               <div className="sm:w-1/3 hidden md:block pl-3 step-4">

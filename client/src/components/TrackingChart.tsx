@@ -7,7 +7,12 @@ import { getPercentage } from "@/lib/utils";
 import { Skeleton } from "./ui/skeleton";
 import { useActiveAccount } from "thirdweb/react";
 import { Link } from "react-router-dom";
-import { availableBalanceState, loadingState, savingsBalanceState, totalBalanceState } from "@/store/atoms/balance";
+import {
+  availableBalanceState,
+  loadingState,
+  savingsBalanceState,
+  totalBalanceState,
+} from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
 
 const TrackingChart = () => {
@@ -20,7 +25,6 @@ const TrackingChart = () => {
   const [totalBalance] = useRecoilState(totalBalanceState);
   const [savingsBalance] = useRecoilState(savingsBalanceState);
   const [availableBalance] = useRecoilState(availableBalanceState);
-
 
   const userBalanceLoading = useMemo(() => loading.total, [loading]);
   const savingsBalanceLoading = useMemo(() => loading.savings, [loading]);
@@ -47,8 +51,7 @@ const TrackingChart = () => {
               </Link>
               <Button
                 onClick={openFirstModal}
-                className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm sm:text-base"
-              >
+                className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] text-sm sm:text-base">
                 Save
               </Button>
             </div>
@@ -59,7 +62,7 @@ const TrackingChart = () => {
         <div className="sm:hidden overflow-x-auto pb-4 scrollbar-hide">
           <div className="flex gap-3 min-w-max px-1">
             {/* Total wallet balance */}
-            <div className="w-[280px] bg-[#111111] rounded-xl p-4">
+            <div className="w-[280px] flex-shrink-0 bg-[#111111] rounded-xl p-4">
               <BalanceCard
                 title="Total wallet balance"
                 isConnected={isConnected}
@@ -70,7 +73,7 @@ const TrackingChart = () => {
             </div>
 
             {/* Vault balance */}
-            <div className="w-[280px] bg-[#111111] rounded-xl p-4">
+            <div className="w-[280px] flex-shrink-0 bg-[#111111] rounded-xl p-4">
               <BalanceCard
                 title="Vault balance"
                 isConnected={isConnected}
@@ -81,7 +84,7 @@ const TrackingChart = () => {
             </div>
 
             {/* Available balance */}
-            <div className="w-[280px] bg-[#111111] rounded-xl p-4">
+            <div className="w-[280px] flex-shrink-0 bg-[#111111] rounded-xl p-4">
               <BalanceCard
                 title="Available balance"
                 isConnected={isConnected}
@@ -174,8 +177,7 @@ function BalanceCard({
           : alignCenter
           ? "items-center"
           : "items-start"
-      }`}
-    >
+      }`}>
       <div>
         <div className="text-[#CACACA] font-light text-sm pb-2">{title}</div>
         <div className="flex items-center">
