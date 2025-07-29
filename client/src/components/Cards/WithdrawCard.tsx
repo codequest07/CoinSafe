@@ -95,7 +95,7 @@ export default function WithdrawCard() {
   }, [token, address, AvailableBalance]);
 
   return (
-    <main className="min-h-screen md:min-h-fit flex items-center justify-center md:justify-center p-4">
+    <main className="min-h-screen md:min-h-fit flex items-start md:items-center justify-center md:justify-center p-4 pt-8 md:pt-4">
       <div className="w-full max-w-md md:max-w-[600px] border-0 p-6 rounded-[12px] text-white bg-[#1D1D1D73]">
         <div className="flex items-center gap-2 mb-6">
           <button className="rounded-full" onClick={() => navigate(-1)}>
@@ -107,14 +107,14 @@ export default function WithdrawCard() {
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Amount</label>
-            <div className="flex items-center gap-3 p-4 bg-transparent border border-[#FFFFFF3D] rounded-xl">
+            <div className="flex items-center gap-3 bg-transparent rounded-[8px] border-[1px] border-[#FFFFFF3D] px-4 py-4">
               <div className="flex-1">
                 <input
                   type="number"
                   value={amount}
                   onChange={(e: any) => setAmount(e.target.value)}
-                  className="text-2xl font-medium bg-transparent text-white w-full outline-none"
-                  placeholder="0"
+                  className="bg-transparent text-[#B5B5B5] text-base outline-none w-full"
+                  placeholder="0.00"
                 />
                 <div className="text-sm text-gray-400 mt-1">
                   ≈ ${tokenPrice}
@@ -123,7 +123,7 @@ export default function WithdrawCard() {
 
               <div className="flex-shrink-0">
                 <Select onValueChange={handleTokenSelect} value={token}>
-                  <SelectTrigger className="w-32 h-12 border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
+                  <SelectTrigger className="w-28 h-12 bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                     <div className="flex items-center">
                       {token && tokenData[token]?.image ? (
                         <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center mr-2">
@@ -199,7 +199,7 @@ export default function WithdrawCard() {
                   Amount greater than available balance
                 </p>
               )}
-              <div className="flex items-center justify-between">
+              <div className="flex justify-between items-center">
                 <div className="text-sm font-[300] text-gray-300">
                   Available balance:{" "}
                   <span className="text-gray-400">
@@ -225,11 +225,11 @@ export default function WithdrawCard() {
               //   openThirdModal();
               // }
             }}
-            className="text-black px-8 rounded-[2rem]"
+            className="text-black px-8 py-2 rounded-[2rem]"
             variant="outline"
             disabled={isLoading || (amount || 0) > selectedTokenBalance}>
             {isLoading ? (
-              <LoaderCircle className="animate-spin" />
+              <LoaderCircle className="animate-spin mr-2" />
             ) : (
               "Withdraw assets"
             )}
