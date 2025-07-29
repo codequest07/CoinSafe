@@ -113,9 +113,11 @@ const AutoSave = () => {
   };
 
   // const { safes, isLoading, isError, fetchSafes } = useGetSafes();
-  const { details, isLoading: autoSafeIsLoading, refetch } = useAutomatedSafeForUser(
-    userAddress as `0x${string}`
-  );
+  const {
+    details,
+    isLoading: autoSafeIsLoading,
+    refetch,
+  } = useAutomatedSafeForUser(userAddress as `0x${string}`);
   const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
   const [savingsBalance] = useRecoilState(savingsBalanceState);
 
@@ -314,11 +316,11 @@ const AutoSave = () => {
   // }
 
   useEffect(() => {
-    refetch()
-  }, [savingsBalance])
+    refetch();
+  }, [savingsBalance]);
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-black text-white p-2 lg:p-6">
       <div className="max-w-5xl mx-auto">
         {isLoading ? (
           <div className="mb-8">
@@ -377,7 +379,7 @@ const AutoSave = () => {
         ) : (
           details && (
             <div className="mb-8">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 lg:gap-4">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -386,8 +388,8 @@ const AutoSave = () => {
                 >
                   <ArrowLeft className="h-6 w-6" />
                 </Button>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl">Auto Savings</h1>
+                <div className="flex items-center gap-2 w-full justify-between">
+                  <h1 className="text-base lg:text-2xl">Auto Savings</h1>
                   {/* formattedDate = unlockDate.toLocaleDateString("en-US", {
                       day: "numeric",
                       month: "long",
@@ -423,15 +425,15 @@ const AutoSave = () => {
         )}
 
         {details && !isLoading && (
-          <div className="flex gap-4 pr-4 pb-2">
-            <div className="flex-1 flex gap-2">
+          <div className="flex flex-col lg:flex-row gap-4 pr-0 lg:pr-4 pb-2">
+            <div className="flex-1 flex  gap-2">
               <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
                 <div className="flex justify-between items-center pb-4">
                   <div className="text-[#CACACA] font-light">
                     Savings Balance
                   </div>
                 </div>
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col justify-between items-start lg:items-end">
                   <div>
                     <div>
                       <span className="text-[#F1F1F1] pr-2 text-3xl">
@@ -454,7 +456,7 @@ const AutoSave = () => {
                       <span className="text-[#CACACA] text-xs">USD</span>
                     </div>
                     <div>
-                      <div className="pt-2">
+                      <div className="py-2">
                         <p className="text-[#7F7F7F] text-xs">
                           sum of all balances
                         </p>
@@ -490,7 +492,7 @@ const AutoSave = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-end">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end">
                 <div>
                   <div>
                     <span className="text-[#F1F1F1] pr-2 text-3xl">
@@ -514,7 +516,7 @@ const AutoSave = () => {
                     <span className="text-[#CACACA] text-xs">USD</span>
                   </div>
                   <div>
-                    <div className="pt-2">
+                    <div className="py-2">
                       <p className="text-[#7F7F7F] text-xs">
                         Available to withdraw anytime
                       </p>

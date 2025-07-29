@@ -87,7 +87,7 @@ const ClaimCard = ({
   };
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
-      <div className="flex justify-between items-center pb-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center pb-4">
         <div className="text-[#CACACA] font-light">{title}</div>
         <div>
           {icon ? (
@@ -102,7 +102,7 @@ const ClaimCard = ({
         </div>
       </div>
 
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col gap-4 lg:gap-0 lg:flex-row justify-between items-start lg:items-end">
         <div>
           <div>
             <span className="text-[#F1F1F1] pr-2 text-3xl">
@@ -127,7 +127,8 @@ const ClaimCard = ({
               isLoading || !hasMaturedSafes
                 ? "bg-[#3F3F3F50] text-[#F1F1F150] cursor-not-allowed"
                 : "bg-[#3F3F3F99] text-[#F1F1F1] hover:bg-[#4F4F4F99]"
-            }`}>
+            }`}
+          >
             {isLoading ? "Loading..." : "Claim all"}
           </button>
           {/* <button className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">Save</button> */}

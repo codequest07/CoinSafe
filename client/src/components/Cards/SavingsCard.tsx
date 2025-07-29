@@ -74,7 +74,7 @@ const SavingsCard = ({
   };
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
-      <div className="flex justify-between items-center pb-4">
+      <div className="flex justify-between items-start lg:items-center pb-4">
         <div className="text-[#CACACA] font-light">{title}</div>
         <div>
           {icon ? (
@@ -89,7 +89,7 @@ const SavingsCard = ({
         </div>
       </div>
 
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col lg:flex-row justify-between items-start gap-3 lg:gap-0 lg:items-end">
         <div>
           <div>
             <span className="text-[#F1F1F1] pr-2 text-3xl">

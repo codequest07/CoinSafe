@@ -126,7 +126,7 @@ export default function TopUpModal({
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1A1A1A] rounded-2xl max-w-xl w-full p-8 relative">
+      <div className="bg-[#1A1A1A] rounded-2xl max-w-xl w-full p-4 lg:p-8 relative">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-white text-[20px] font-medium">Top up savings</h2>
           <button
@@ -149,10 +149,10 @@ export default function TopUpModal({
           ) : safeDetails ? (
             <>
               <div className="flex justify-between items-center mb-1">
-                <h3 className="text-white text-[20px] font-[400]">
+                <h3 className="text-white text-base lg:text-[20px] font-[400]">
                   {safeDetails.target}
                 </h3>
-                <span className="bg-[#79E7BA33] text-[#F1F1F1] text-sm px-3 py-1 rounded-full">
+                <span className="bg-[#79E7BA33] text-[#F1F1F1] text-xs lg:text-sm px-3 py-1 rounded-full">
                   {safeDetails.isLocked
                     ? safeDetails.unlockTime > new Date()
                       ? `${Math.ceil(
@@ -164,7 +164,7 @@ export default function TopUpModal({
                     : "Flexible"}
                 </span>
               </div>
-              <p className="text-[#F1F1F1] text-[14px]">
+              <p className="text-[#F1F1F1] text-xs lg:text-[14px]">
                 {safeDetails.isLocked
                   ? `Next unlock date: ${safeDetails.nextUnlockDate}`
                   : "Withdraw anytime"}
