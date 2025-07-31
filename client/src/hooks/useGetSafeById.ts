@@ -56,8 +56,11 @@ export function useGetSafeById(id: string | undefined) {
       // Find the safe with the matching ID
       const safe = safes.find((safe) => safe.id.toString() === id);
 
-      if (!safe) return;
 
+
+      if (!safe) return;
+      console.log("Safeeeeeeeee============:", safe); 
+      
       // Format the safe data
       const startTime = new Date(Number(safe.startTime) * 1000);
       const unlockTime = new Date(Number(safe.unlockTime) * 1000);

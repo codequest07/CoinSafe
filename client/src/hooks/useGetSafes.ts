@@ -227,6 +227,7 @@ export function useGetSafes() {
     isLoading,
     isError,
     error,
+    fetchEmergencySafe,
     fetchSafes,
     refetch: () => fetchSafes(true), // Explicitly pass true to force a refresh
   };

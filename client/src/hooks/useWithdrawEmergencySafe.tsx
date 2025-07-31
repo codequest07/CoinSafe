@@ -16,7 +16,6 @@ interface UseWithdrawEmergencySafeParams {
   coinSafeAbi: any;
   chainId?: number;
   onSuccess?: () => void;
-  onApprove?: () => void;
   onError?: (error: Error) => void;
   toast: (props: { title: string; variant: "default" | "destructive" }) => void;
 }
@@ -34,7 +33,6 @@ export const useWithdrawEmergencySafe = ({
   coinSafeAddress,
   coinSafeAbi,
   onSuccess,
-  onApprove,
   onError,
   toast,
 }: UseWithdrawEmergencySafeParams): WithdrawEmergencySafeResult => {
@@ -106,10 +104,6 @@ export const useWithdrawEmergencySafe = ({
 
         const decimals: number = getTokenDecimals(token);
         console.log(`Using decimals: ${decimals} for token: ${token}`);
-
-        // Prepare the contract call for withdrawFromPool
-        // Call onApprove callback to show the approval modal
-        onApprove?.();
 
         const transaction = prepareContractCall({
           contract,
