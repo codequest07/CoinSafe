@@ -75,11 +75,6 @@ export default function WithdrawEmergencySafe({
       console.log("Withdrawal successful");
       // Success is handled in the onClick handler
     },
-    onApprove: () => {
-      console.log("Showing approval modal");
-      // Show the approval modal
-      setIsApproveModalOpen(true);
-    },
     onError: (error) => {
       console.error("Withdrawal error:", error);
       // Hide the approval modal
