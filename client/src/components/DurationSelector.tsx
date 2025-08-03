@@ -21,7 +21,7 @@ interface PillSelectorProps {
   className?: string;
   isDisabled?: boolean;
   label?: string;
-  unlockDate?: string; 
+  unlockDate?: string;
 }
 
 export function DurationSelector({
@@ -58,7 +58,7 @@ export function DurationSelector({
   };
 
   return (
-    <div className={`flex flex-col space-y-3 `}>
+    <div className={`flex flex-col space-y-3`}>
       <div className="flex justify-between items-center text-white">
         <Label htmlFor="duration">{label ? label : "Duration"}</Label>
 
@@ -69,19 +69,18 @@ export function DurationSelector({
         )}
       </div>
 
-      <div className={`flex space-x-2 ${className}`}>
+      <div className={`flex flex-wrap gap-2 ${className}`}>
         {options.map((option) => (
           <button
             key={option.value}
             onClick={() => onChange(option.value)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors
+            className={`px-3 py-2 rounded-full text-sm font-medium transition-colors flex-shrink-0
               ${
                 selectedValue === option.value
                   ? "bg-[#79E7BA] text-[#010104]"
                   : "bg-[#092324] text-[#F1F1F1] hover:bg-secondary/80"
               }`}
-            disabled={isDisabled}
-          >
+            disabled={isDisabled}>
             {option.label}
           </button>
         ))}
@@ -90,22 +89,20 @@ export function DurationSelector({
         <Popover>
           <PopoverTrigger asChild>
             <button
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center
+              className={`px-3 py-2 rounded-full text-sm font-medium transition-colors flex items-center flex-shrink-0
                 ${
                   isCustomSelected
                     ? "bg-[#79E7BA] text-[#010104]"
                     : "bg-[#092324] text-[#F1F1F1] hover:bg-secondary/80"
                 }`}
-              disabled={isDisabled}
-            >
+              disabled={isDisabled}>
               {isCustomSelected ? `${selectedValue} days` : "Custom"}
               <CalendarIcon className="ml-1 h-4 w-4" />
             </button>
           </PopoverTrigger>
           <PopoverContent
             className="w-auto p-0 bg-[#092324] text-white"
-            align="start"
-          >
+            align="start">
             <Calendar
               mode="single"
               selected={customDate}

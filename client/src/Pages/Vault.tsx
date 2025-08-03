@@ -18,7 +18,7 @@ const Vault = () => {
   const savings = useMemo(() => loading.savings, [loading]);
 
   return (
-    <div className="w-full relative px-2 sm:px-4 overflow-x-hidden">
+    <div className="w-full relative px-0 sm:px-4 overflow-x-hidden">
       <section className="w-full">
         <div className="w-full">
           <SmarterSavingCard />
@@ -45,7 +45,7 @@ const Vault = () => {
         /> */}
         </div>
 
-        <div className="w-full max-w-[1050px] overflow-x-hidden">
+        <div className="w-full max-w-full overflow-x-hidden">
           <SavingsCards />
         </div>
 
@@ -61,7 +61,7 @@ const Vault = () => {
         <SavingsPerformance />
       </div> */}
 
-        <div className="py-2 max-w-[98%] ">
+        <div className="py-2 w-full">
           <AssetTabs />
         </div>
 

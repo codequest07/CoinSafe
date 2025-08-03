@@ -243,10 +243,12 @@ export default function UnlockAutoSafeModal({
             <AmountInput
               amount={
                 isMaxClicked
-                  ? formatUnits(
-                      BigInt(saveState.amount),
-                      getTokenDecimals(saveState.token)
-                    )
+                  ? Number(saveState.amount) % 1 === 0
+                    ? formatUnits(
+                        BigInt(saveState.amount),
+                        getTokenDecimals(saveState.token)
+                      )
+                    : saveState.amount
                   : saveState.amount || ""
               }
               handleAmountChange={handleAmountChange}
@@ -458,7 +460,11 @@ export default function UnlockAutoSafeModal({
         onClose={() => {
           if (!isLoading) setShowApproveTxModal(false);
         }}
-        amount={formatEther(BigInt(saveState.amount))}
+        amount={
+          Number(saveState.amount) % 1 === 0
+            ? formatEther(BigInt(saveState.amount))
+            : saveState.amount
+        }
         token={tokenData[saveState.token]?.symbol || ""}
         text="To Unlock"
       />
@@ -470,7 +476,11 @@ export default function UnlockAutoSafeModal({
           if (onClose) onClose();
         }}
         transactionType="withdraw"
-        amount={formatEther(BigInt(saveState.amount))}
+        amount={
+          Number(saveState.amount) % 1 === 0
+            ? formatEther(BigInt(saveState.amount))
+            : saveState.amount
+        }
         token={tokenData[saveState.token]?.symbol || ""}
         additionalDetails={{
           subText: "Assets will be available in your wallet.",

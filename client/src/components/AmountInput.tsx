@@ -64,12 +64,12 @@ const AmountInput = ({
   const selectedTokenInfo = saveState.token ? tokenData[saveState.token] : null;
 
   return (
-    <div className="mb-1">
+    <div className="mb-4">
       <label className="text-sm text-gray-400">Amount</label>
 
-      <div className="mt-1 relative">
-        <div className="flex items-center justify-between bg-transparent rounded-[8px] border-[1px] border-[#FFFFFF3D] px-4 py-6">
-          <div>
+      <div className="mt-2 relative">
+        <div className="flex items-center gap-3 bg-transparent rounded-[8px] border-[1px] border-[#FFFFFF3D] px-4 py-4">
+          <div className="flex-1">
             <input
               type="number"
               value={amount === 0 ? "" : amount}
@@ -81,38 +81,36 @@ const AmountInput = ({
             />
             {/* <div className="text-xs text-gray-300">≈ 400.58</div> */}
           </div>
-          <div className="relative">
+          <div className="flex-shrink-0">
             <Select
               onValueChange={handleTokenSelectWithClear}
-              value={saveState.token}
-            >
-              <SelectTrigger className="w-[140px] bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
+              value={saveState.token}>
+              <SelectTrigger className="w-28 h-12 bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                 <div className="flex items-center">
                   {saveState.token && selectedTokenInfo?.image ? (
-                    <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center mr-2">
+                    <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center mr-2">
                       <img
                         src={selectedTokenInfo.image}
-                        width={20}
-                        height={20}
+                        width={16}
+                        height={16}
                         className="w-full h-full"
                         alt={selectedTokenInfo.symbol}
                       />
                     </div>
                   ) : saveState.token && selectedTokenInfo ? (
                     <div
-                      className={`w-5 h-5 rounded-full ${
+                      className={`w-4 h-4 rounded-full ${
                         selectedTokenInfo?.color || "bg-gray-600"
-                      } flex items-center justify-center text-white text-xs font-medium mr-2`}
-                    >
+                      } flex items-center justify-center text-white text-xs font-medium mr-2`}>
                       {selectedTokenInfo?.symbol?.charAt(0) || "?"}
                     </div>
                   ) : null}
                   {saveState.token ? (
-                    <span className="text-white">
+                    <span className="text-white text-sm">
                       {selectedTokenInfo?.symbol}
                     </span>
                   ) : (
-                    <SelectValue placeholder="Select Token" />
+                    <SelectValue placeholder="Token" />
                   )}
                 </div>
               </SelectTrigger>
@@ -123,25 +121,26 @@ const AmountInput = ({
                     <SelectItem value={token} key={token}>
                       <div className="flex items-center">
                         {tokenInfo?.image ? (
-                          <div className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center mr-2">
+                          <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center mr-2">
                             <img
                               src={tokenInfo.image}
-                              width={20}
-                              height={20}
+                              width={16}
+                              height={16}
                               className="w-full h-full"
                               alt={tokenInfo.symbol}
                             />
                           </div>
                         ) : (
                           <div
-                            className={`w-5 h-5 rounded-full ${
+                            className={`w-4 h-4 rounded-full ${
                               tokenInfo?.color || "bg-gray-600"
-                            } flex items-center justify-center text-white text-xs font-medium mr-2`}
-                          >
+                            } flex items-center justify-center text-white text-xs font-medium mr-2`}>
                             {tokenInfo?.symbol?.charAt(0) || "?"}
                           </div>
                         )}
-                        <span>{tokenInfo?.symbol || token}</span>
+                        <span className="text-sm">
+                          {tokenInfo?.symbol || token}
+                        </span>
                       </div>
                     </SelectItem>
                   );

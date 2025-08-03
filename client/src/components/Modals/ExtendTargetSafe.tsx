@@ -161,7 +161,7 @@ ExtendTargetSafeModalProps) {
           <div className="mt-8">
             <div className="text-[14px] mt-4 mb-3 flex justify-between items-center">
               <p className="">Current Duration</p>
-              <p className="">
+              <p className="text-[12px]">
                 Unlocks on{" "}
                 {details?.unlockTime
                   ? format(new Date(Number(details.unlockTime)), "PPP")

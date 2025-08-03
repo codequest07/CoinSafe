@@ -254,15 +254,13 @@ function VaultAssetTableContent({
           {safeDetails ? (
             <Button
               onClick={() => setIsFirstModalOpen(true)}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-            >
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
               Top Up Safe
             </Button>
           ) : isConnected ? (
             <Button
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-              onClick={() => navigate("/dashboard/deposit")}
-            >
+              onClick={() => navigate("/dashboard/deposit")}>
               Deposit
             </Button>
           ) : (
@@ -280,28 +278,26 @@ function VaultAssetTableContent({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-x-auto">
       <CardContent className="p-0">
-        <Table className="w-full border-collapse">
+        <Table className="w-full border-collapse min-w-[600px]">
           <TableHeader className="bg-[#1D1D1D73]/40">
             <TableRow className="border-b border-[#1D1D1D]">
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 TICKER
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                AMOUNT
+                AMOUNT IN SAFE
+              </TableHead>
+              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                VALUE (USD)
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 AUTOSAVED
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                CLAIMABLE AMOUNT
-              </TableHead>
-              {/* Actions column header - temporarily commented out
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 <span className="sr-only">Actions</span>
               </TableHead>
-              */}
             </TableRow>
           </TableHeader>
           <TableBody className="text-white">
@@ -320,8 +316,7 @@ function VaultAssetTableContent({
                       </div>
                     ) : (
                       <div
-                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
-                      >
+                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
                         {asset.tokenInfo.symbol?.charAt(0)}
                       </div>
                     )}

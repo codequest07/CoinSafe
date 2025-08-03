@@ -114,8 +114,8 @@ export default function DepositCard() {
   }, [token, address]);
 
   return (
-    <main>
-      <div className="w-11/12 mx-auto sm:max-w-[600px] border-0 p-6 rounded-[12px] text-white bg-[#1D1D1D73]">
+    <main className="min-h-screen md:min-h-fit flex items-start md:items-center justify-center md:justify-center p-4 pt-8 md:pt-4">
+      <div className="w-full max-w-md md:max-w-[600px] border-0 p-6 rounded-[12px] text-white bg-[#1D1D1D73]">
         {/* Header */}
         <div className="flex items-center gap-2 mb-6">
           <button className="rounded-full" onClick={() => navigate(-1)}>
@@ -126,39 +126,88 @@ export default function DepositCard() {
         <div className="py-4 text-gray-700">
           <div className="space-y-2">
             <label className="text-sm text-gray-400">Amount</label>
-            <div className="flex items-center justify-between p-6 bg-transparent border border-[#FFFFFF3D] rounded-xl relative">
-              <div className="flex flex-col items-start">
+            <div className="flex items-center gap-3 bg-transparent rounded-[8px] border-[1px] border-[#FFFFFF3D] px-4 py-4">
+              <div className="flex-1">
                 <input
                   type="number"
                   value={amount}
                   disabled={isLoading}
                   onChange={(e: any) => setAmount(e.target.value)}
-                  className="text-2xl font-medium bg-transparent text-white w-16 sm:w-full outline-none"
-                  placeholder="0"
+                  className="bg-transparent text-[#B5B5B5] text-base outline-none w-full"
+                  placeholder="0.00"
                 />
-
-                <div className="text-sm text-left text-gray-400 mt-1">
+                <div className="text-sm text-gray-400 mt-1">
                   ≈ ${tokenPrice}
                 </div>
               </div>
-              <div className="sm:ml-4">
+
+              <div className="flex-shrink-0">
                 <Select
                   onValueChange={handleTokenSelect}
                   value={token}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger className="w-[160px] border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
+                  disabled={isLoading}>
+                  <SelectTrigger className="w-28 h-12 bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                     <div className="flex items-center">
-                      <MemoRipple className="mr-2" />
-                      <SelectValue placeholder="Select Token" />
+                      {token && tokenData[token]?.image ? (
+                        <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center mr-2">
+                          <img
+                            src={tokenData[token].image}
+                            width={16}
+                            height={16}
+                            className="w-full h-full"
+                            alt={tokenData[token].symbol}
+                          />
+                        </div>
+                      ) : token && tokenData[token] ? (
+                        <div
+                          className={`w-4 h-4 rounded-full ${
+                            tokenData[token]?.color || "bg-gray-600"
+                          } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                          {tokenData[token]?.symbol?.charAt(0) || "?"}
+                        </div>
+                      ) : (
+                        <MemoRipple className="w-4 h-4 mr-2" />
+                      )}
+                      {token ? (
+                        <span className="text-white text-sm">
+                          {tokenData[token]?.symbol}
+                        </span>
+                      ) : (
+                        <SelectValue placeholder="Token" />
+                      )}
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    {supportedTokens.map((token) => (
-                      <SelectItem value={token} key={token}>
-                        {tokenData[token]?.symbol}
+                    {supportedTokens.map((tokenAddress) => {
+                      const tokenInfo = tokenData[tokenAddress];
+                      return (
+                        <SelectItem value={tokenAddress} key={tokenAddress}>
+                          <div className="flex items-center">
+                            {tokenInfo?.image ? (
+                              <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center mr-2">
+                                <img
+                                  src={tokenInfo.image}
+                                  width={16}
+                                  height={16}
+                                  className="w-full h-full"
+                                  alt={tokenInfo.symbol}
+                                />
+                              </div>
+                            ) : (
+                              <div
+                                className={`w-4 h-4 rounded-full ${
+                                  tokenInfo?.color || "bg-gray-600"
+                                } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                                {tokenInfo?.symbol?.charAt(0) || "?"}
+                              </div>
+                            )}
+                            <span className="text-sm">
+                              {tokenInfo?.symbol || tokenAddress}
+                            </span>
+                          </div>
                       </SelectItem>
-                    ))}
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -173,7 +222,7 @@ export default function DepositCard() {
                   Amount greater than wallet balance
                 </p>
               )}
-              <div className="flex items-center justify-between my-2">
+              <div className="flex justify-between items-center my-2">
                 <div className="text-sm font-[300] text-gray-300">
                   Wallet balance:{" "}
                   <span className="text-gray-400">
@@ -186,15 +235,13 @@ export default function DepositCard() {
                   <Button
                     variant="link"
                     className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                    onClick={() => navigate("/dashboard/deposit")}
-                  >
+                    onClick={() => navigate("/dashboard/deposit")}>
                     Deposit to save
                   </Button>
                 ) : (
                   <Button
                     className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                    onClick={() => setAmount(selectedTokenBalance)}
-                  >
+                    onClick={() => setAmount(selectedTokenBalance)}>
                     Max
                   </Button>
                 )}
@@ -209,8 +256,7 @@ export default function DepositCard() {
             }}
             className="text-black px-8 rounded-[2rem]"
             variant="outline"
-            disabled={isLoading || (amount || 0) > selectedTokenBalance}
-          >
+            disabled={isLoading || (amount || 0) > selectedTokenBalance}>
             {isLoading ? (
               <LoaderCircle className="animate-spin" />
             ) : (

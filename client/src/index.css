@@ -20,6 +20,25 @@ body {
   font-family: "Archivo", sans-serif;
   font-optical-sizing: auto;
   overflow-x: hidden;
+  min-width: 320px;
+}
+
+/* Mobile-specific overflow prevention */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .mobile-container {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
 }
 
 /* Hide scrollbar but still allow scrolling */
@@ -72,6 +91,16 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* Ensure proper mobile layout */
+@media (max-width: 640px) {
+  .mobile-safe {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    width: 100%;
+    max-width: 100vw;
+  }
 }
 
 @layer base {
