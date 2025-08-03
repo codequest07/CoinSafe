@@ -1,5 +1,5 @@
 import { inAppWallet, createWallet } from "thirdweb/wallets";
-// import { liskSepolia } from "./config";
+// import { liskMainnet } from "./config";
 
 // Define the wallets you want to support
 export const wallets = [
@@ -16,10 +16,10 @@ export const wallets = [
       ],
     },
     // enable gasless transactions for the wallet
-    // executionMode: {
-    //   mode: "EIP7702",
-    //   sponsorGas: true,
-    // },
+    executionMode: {
+      mode: "EIP7702",
+      sponsorGas: true,
+    },
   }),
   createWallet("io.metamask"),
   createWallet("com.coinbase.wallet"),

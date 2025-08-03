@@ -22,7 +22,7 @@ import {
 import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useActiveAccount } from "thirdweb/react";
 import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
-import { liskSepolia } from "@/lib/config";
+import { liskMainnet } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
@@ -236,7 +236,7 @@ export default function SaveAssetsCard() {
     saveState,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
     coinSafeAbi: targetSavingsFacetAbi,
-    chainId: liskSepolia.id,
+    chainId: liskMainnet.id,
     onSuccess: () => {
       openThirdModal();
 
@@ -539,7 +539,8 @@ export default function SaveAssetsCard() {
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}>
+                    }`}
+                  >
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -569,7 +570,8 @@ export default function SaveAssetsCard() {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}>
+                    }`}
+                  >
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -628,7 +630,8 @@ export default function SaveAssetsCard() {
                     <Link to={"/dashboard/vault/auto-safe"}>
                       <Button
                         variant="link"
-                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0">
+                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                      >
                         View your Automated Safe here
                       </Button>
                     </Link>
@@ -666,7 +669,10 @@ export default function SaveAssetsCard() {
                             saveState.amount > selectedTokenBalance)) ? (
                           <Button
                             variant="link"
-                            className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0 self-start sm:self-auto">
+                            className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0 self-start sm:self-auto"
+                            onClick={() => navigate("/dashboard/deposit")}
+                          >
+
                             Deposit to save
                           </Button>
                         ) : (
@@ -677,7 +683,8 @@ export default function SaveAssetsCard() {
                                 ...prev,
                                 amount: selectedTokenBalance,
                               }))
-                            }>
+                            }
+                          >
                             Max
                           </Button>
                         )}
@@ -746,7 +753,8 @@ export default function SaveAssetsCard() {
                     onClick={handleSaveAsset}
                     className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
                     variant="outline"
-                    disabled={isLoading || autoSavingsLoading}>
+                    disabled={isLoading || autoSavingsLoading}
+                  >
                     {isLoading || autoSavingsLoading ? (
                       <LoaderCircle className="animate-spin" />
                     ) : hasAutoSafe ? (

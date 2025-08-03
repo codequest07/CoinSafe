@@ -12,7 +12,7 @@ import { useEffect } from "react";
 import { getValidNumberValue } from "@/lib/utils";
 import { convertTokenAmountToUsd } from "@/lib/utils";
 import { getContract, readContract } from "thirdweb";
-import { liskSepolia } from "@/lib/config";
+import { liskMainnet } from "@/lib/config";
 import { client } from "@/lib/config";
 import { Abi } from "viem";
 
@@ -27,7 +27,7 @@ export const useBalances = (address: string) => {
   const contract = getContract({
     client,
     address: CoinsafeDiamondContract.address,
-    chain: liskSepolia,
+    chain: liskMainnet,
     abi: facetAbis.fundingFacet as unknown as Abi,
   });
 
@@ -40,7 +40,7 @@ export const useBalances = (address: string) => {
         const fundingFacetContract = getContract({
           client,
           address: CoinsafeDiamondContract.address,
-          chain: liskSepolia,
+          chain: liskMainnet,
           abi: facetAbis.fundingFacet as unknown as Abi,
         });
 

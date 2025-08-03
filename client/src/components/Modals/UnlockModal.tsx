@@ -17,7 +17,7 @@ import { Skeleton } from "../ui/skeleton";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { getContract, readContract } from "thirdweb";
 import { Abi } from "viem";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { useUnlockSafe } from "@/hooks/useUnlockSafe";
 
 import { format } from "date-fns";
@@ -94,7 +94,7 @@ export default function UnlockModal({
       setIsLoadingFee(true);
       const contract = getContract({
         client,
-        chain: liskSepolia,
+        chain: liskMainnet,
         address: CoinsafeDiamondContract.address,
         abi: facetAbis.targetSavingsFacet as Abi,
       });

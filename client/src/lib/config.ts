@@ -1,7 +1,7 @@
 import { createThirdwebClient, defineChain } from "thirdweb";
 
 export const liskSepolia = defineChain({
-  id: 4202,  // Lisk Sepolia chain ID
+  id: 4202, // Lisk Sepolia chain ID
   name: "Lisk Sepolia",
   nativeCurrency: {
     name: "LSK",
@@ -24,10 +24,40 @@ export const liskSepolia = defineChain({
       url: "https://sepolia-explorer.lisk.com",
     },
   },
-  testnet: true
+  testnet: true,
 });
- 
+
+export const liskMainnet = defineChain({
+  id: 1135,
+  name: "Lisk Mainnet",
+  nativeCurrency: {
+    name: "Ether",
+    symbol: "ETH",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.api.lisk.com"],
+      webSocket: ["wss://ws.api.lisk.com"],
+    },
+    public: {
+      http: ["https://rpc.api.lisk.com"],
+      webSocket: ["wss://ws.api.lisk.com"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Lisk Explorer",
+      url: "https://blockscout.lisk.com",
+    },
+  },
+  testnet: false,
+});
+
 export const client = createThirdwebClient({
   clientId: import.meta.env.VITE_THIRDWEB_CLIENT_ID,
   secretKey: import.meta.env.VITE_THIRDWEB_SECRET_KEY,
 });
+
+// 
+// export const FONBNK_SIGNATURE = "";

@@ -1,14 +1,14 @@
 // import { useEffect, useMemo } from "react";
-import {
-  getContract,
-  watchContractEvents,
-} from "thirdweb";
+import { getContract, watchContractEvents } from "thirdweb";
 // import { useContractEvents } from "thirdweb/react";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Abi } from "viem";
-import { fundingFacetEvents, targetedSavingsFacetEvents } from "@/lib/contract-events";
+import {
+  fundingFacetEvents,
+  targetedSavingsFacetEvents,
+} from "@/lib/contract-events";
 
 // type EventHandler = (amountInUsd: number) => void;
 
@@ -22,28 +22,28 @@ export const useWatchEvents = async () => {
   const fundingFacet = getContract({
     client,
     address: CoinsafeDiamondContract.address,
-    chain: liskSepolia,
+    chain: liskMainnet,
     abi: facetAbis.fundingFacet as unknown as Abi,
   });
 
-//   const emergencySavingsFacet = getContract({
-//     client,
-//     address: CoinsafeDiamondContract.address,
-//     chain: liskSepolia,
-//     abi: facetAbis.emergencySavingsFacet as Abi,
-//   });
+  //   const emergencySavingsFacet = getContract({
+  //     client,
+  //     address: CoinsafeDiamondContract.address,
+  //     chain: liskMainnet,
+  //     abi: facetAbis.emergencySavingsFacet as Abi,
+  //   });
 
-//   const automatedSavingsFacet = getContract({
-//     client,
-//     chain: liskSepolia,
-//     address: CoinsafeDiamondContract.address,
-//     abi: facetAbis.automatedSavingsFacet as Abi,
-//   });
+  //   const automatedSavingsFacet = getContract({
+  //     client,
+  //     chain: liskMainnet,
+  //     address: CoinsafeDiamondContract.address,
+  //     abi: facetAbis.automatedSavingsFacet as Abi,
+  //   });
 
   const targetedSavingsFacet = getContract({
     client,
     address: CoinsafeDiamondContract.address,
-    chain: liskSepolia,
+    chain: liskMainnet,
     abi: facetAbis.targetSavingsFacet as Abi,
   });
 
@@ -95,106 +95,106 @@ export const useWatchEvents = async () => {
     },
   });
 
-  return ()=> {
+  return () => {
     unwatchFundingSavings();
     unwatchTargetSavings();
-    console.log("watch events hook cleanup")
-  }
+    console.log("watch events hook cleanup");
+  };
 
-//   // Main event handler function
-//   const createEventHandler = (callback?: EventHandler) => {
-//     return async (logs: any) => {
-//       try {
-//         const log = logs[0];
-//         const { token, amount } = log.args;
+  //   // Main event handler function
+  //   const createEventHandler = (callback?: EventHandler) => {
+  //     return async (logs: any) => {
+  //       try {
+  //         const log = logs[0];
+  //         const { token, amount } = log.args;
 
-//         const amountInUsd = await convertTokenAmountToUsd(token, amount);
-//         if (amountInUsd === 0) return;
+  //         const amountInUsd = await convertTokenAmountToUsd(token, amount);
+  //         if (amountInUsd === 0) return;
 
-//         callback?.(amountInUsd);
-//       } catch (error) {
-//         console.error("Error processing event logs:", error);
-//       }
-//     };
-//   };
+  //         callback?.(amountInUsd);
+  //       } catch (error) {
+  //         console.error("Error processing event logs:", error);
+  //       }
+  //     };
+  //   };
 
-//   const saveEventHandler = useMemo(() => createEventHandler(onSave), [onSave]);
-//   const withdrawEventHandler = useMemo(
-//     () => createEventHandler(onWithdraw),
-//     [onWithdraw]
-//   );
-//   const depositEventHandler = useMemo(
-//     () => createEventHandler(onDeposit),
-//     [onDeposit]
-//   );
+  //   const saveEventHandler = useMemo(() => createEventHandler(onSave), [onSave]);
+  //   const withdrawEventHandler = useMemo(
+  //     () => createEventHandler(onWithdraw),
+  //     [onWithdraw]
+  //   );
+  //   const depositEventHandler = useMemo(
+  //     () => createEventHandler(onDeposit),
+  //     [onDeposit]
+  //   );
 
-//   const handleDeposited = (user: string, token: string, amount: string) => {
-//     console.log(user);
-//     const logs = [{ args: { token, amount } }];
+  //   const handleDeposited = (user: string, token: string, amount: string) => {
+  //     console.log(user);
+  //     const logs = [{ args: { token, amount } }];
 
-//     depositEventHandler(logs);
-//   };
+  //     depositEventHandler(logs);
+  //   };
 
-//   const handleWithdrawn = (user: string, tokenType: string, amount: number) => {
-//     console.log(user);
+  //   const handleWithdrawn = (user: string, tokenType: string, amount: number) => {
+  //     console.log(user);
 
-//     const logs = [{ args: { token: tokenType, amount } }];
+  //     const logs = [{ args: { token: tokenType, amount } }];
 
-//     withdrawEventHandler(logs);
-//   };
+  //     withdrawEventHandler(logs);
+  //   };
 
-//   const handleSaved = (
-//     user: string,
-//     token: string,
-//     amount: number,
-//     duration: number
-//   ) => {
-//     console.log(user, duration);
+  //   const handleSaved = (
+  //     user: string,
+  //     token: string,
+  //     amount: number,
+  //     duration: number
+  //   ) => {
+  //     console.log(user, duration);
 
-//     const logs = [{ args: { token, amount } }];
+  //     const logs = [{ args: { token, amount } }];
 
-//     saveEventHandler(logs);
-//   };
+  //     saveEventHandler(logs);
+  //   };
 
-//   useEffect(() => {
-//     const contract = new Contract(
-//       CoinSafeContract.address as `0x${string}`, // Address of the contract
-//       CoinSafeContract.abi.abi,
-//       jsonRpcProvider
-//     );
+  //   useEffect(() => {
+  //     const contract = new Contract(
+  //       CoinSafeContract.address as `0x${string}`, // Address of the contract
+  //       CoinSafeContract.abi.abi,
+  //       jsonRpcProvider
+  //     );
 
-//     contract.on("DepositSuccessful", handleDeposited);
+  //     contract.on("DepositSuccessful", handleDeposited);
 
-//     return () => {
-//       contract.off("DepositSuccessful", handleDeposited);
-//     };
-//   }, []);
+  //     return () => {
+  //       contract.off("DepositSuccessful", handleDeposited);
+  //     };
+  //   }, []);
 
-//   useEffect(() => {
-//     const contract = new Contract(
-//       CoinSafeContract.address as `0x${string}`, // Address of the contract
-//       CoinSafeContract.abi.abi,
-//       jsonRpcProvider
-//     );
+  //   useEffect(() => {
+  //     const contract = new Contract(
+  //       CoinSafeContract.address as `0x${string}`, // Address of the contract
+  //       CoinSafeContract.abi.abi,
+  //       jsonRpcProvider
+  //     );
 
-//     contract.on("SavedSuccessfully", handleSaved);
+  //     contract.on("SavedSuccessfully", handleSaved);
 
-//     return () => {
-//       contract.off("SavedSuccessfully", handleSaved);
-//     };
-//   }, []);
+  //     return () => {
+  //       contract.off("SavedSuccessfully", handleSaved);
+  //     };
+  //   }, []);
 
-//   useEffect(() => {
-//     const contract = new Contract(
-//       CoinSafeContract.address as `0x${string}`, // Address of the contract
-//       CoinSafeContract.abi.abi,
-//       jsonRpcProvider
-//     );
+  //   useEffect(() => {
+  //     const contract = new Contract(
+  //       CoinSafeContract.address as `0x${string}`, // Address of the contract
+  //       CoinSafeContract.abi.abi,
+  //       jsonRpcProvider
+  //     );
 
-//     contract.on("Withdrawn", handleWithdrawn);
+  //     contract.on("Withdrawn", handleWithdrawn);
 
-//     return () => {
-//       contract.off("Withdrawn", handleWithdrawn);
-//     };
-//   }, []);
+  //     return () => {
+  //       contract.off("Withdrawn", handleWithdrawn);
+  //     };
+  //   }, []);
 };
