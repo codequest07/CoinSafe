@@ -1,17 +1,45 @@
 [
-  { "inputs": [], "name": "AddressZeroDetected", "type": "error" },
-  { "inputs": [], "name": "InsufficientAllowance", "type": "error" },
-  { "inputs": [], "name": "InsufficientFunds", "type": "error" },
-  { "inputs": [], "name": "InvalidTokenAddress", "type": "error" },
-  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
+  {
+    "inputs": [],
+    "name": "AddressZeroDetected",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientAllowance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientFunds",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTokenAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
   {
     "inputs": [
-      { "internalType": "address", "name": "token", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
     ],
     "name": "SafeERC20FailedOperation",
     "type": "error"
   },
-  { "inputs": [], "name": "ZeroValueNotAllowed", "type": "error" },
+  {
+    "inputs": [],
+    "name": "ZeroValueNotAllowed",
+    "type": "error"
+  },
   {
     "anonymous": false,
     "inputs": [
@@ -113,8 +141,16 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" },
-      { "internalType": "address", "name": "_token", "type": "address" }
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      }
     ],
     "name": "depositToPool",
     "outputs": [],
@@ -125,31 +161,67 @@
     "inputs": [],
     "name": "getAcceptedTokenAddresses",
     "outputs": [
-      { "internalType": "address[]", "name": "", "type": "address[]" }
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_user", "type": "address" },
-      { "internalType": "uint256", "name": "offset", "type": "uint256" },
-      { "internalType": "uint256", "name": "limit", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offset",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
     ],
     "name": "getTransactionHistory",
     "outputs": [
       {
         "components": [
-          { "internalType": "uint256", "name": "id", "type": "uint256" },
-          { "internalType": "address", "name": "user", "type": "address" },
-          { "internalType": "address", "name": "token", "type": "address" },
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
           {
             "internalType": "string",
             "name": "typeOfTransaction",
             "type": "string"
           },
-          { "internalType": "uint256", "name": "amount", "type": "uint256" },
-          { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
         ],
         "internalType": "struct LibDiamond.Transaction[]",
         "name": "",
@@ -161,8 +233,16 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
     ],
     "name": "withdrawFromPool",
     "outputs": [],
