@@ -205,7 +205,7 @@ export default function DepositCard() {
                               {tokenInfo?.symbol || tokenAddress}
                             </span>
                           </div>
-                        </SelectItem>
+                      </SelectItem>
                       );
                     })}
                   </SelectContent>
