@@ -11,6 +11,7 @@ import CoinGeckoApiRouter from "./Routes/CoinGeckoApiRouter";
 import BaseRouter from "./Routes/BaseRouter";
 import WaitlistRouter from "./Routes/WaitlistRouter";
 import faucetRouter from "./Routes/FaucetClaimRoute";
+import FonbnkRouter from "./Routes/FonbnkRouter";
 
 // Models and Services
 import { TransactionModel } from "./Models/TransactionModel";
@@ -65,6 +66,7 @@ app.use("/api/waitlist", WaitlistRouter);
 app.use("/api/faucet", faucetRouter);
 app.use("/api/coingecko", CoinGeckoApiRouter);
 app.use("/api/profile", profileRoutes);
+app.use("/api/fonbnk", FonbnkRouter);
 
 // MongoDB Connection
 const mongodbUri = process.env.MONGO_URI || "";
