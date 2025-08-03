@@ -7,12 +7,14 @@ interface EtherscanResponse {
   result: any[];
 }
 
-type Network = 'mainnet' | 'sepolia';
+type Network = "base" | "optimism" | "arbitrum" | "arbitrum-nova";
 
 export class TransactionModel {
   private readonly apiBaseUrls: Record<Network, string> = {
-    mainnet: "https://api.etherscan.io/api",
-    sepolia: "https://api-sepolia.etherscan.io/api",
+    base: "https://api.etherscan.io/v2/api?chainid=8453",
+    optimism: "https://api.etherscan.io/v2/api?chainid=10",
+    arbitrum: "https://api.etherscan.io/v2/api?chainid=42161",
+    "arbitrum-nova": "https://api.etherscan.io/v2/api?chainid=42170",
   };
   private readonly maxRetries = 3;
   private readonly retryDelay = 1000;
@@ -21,24 +23,34 @@ export class TransactionModel {
 
   async getTransactions(address: string): Promise<Transfer[]> {
     try {
-      // Fetch from both networks in parallel
+      // Fetch from all networks in parallel
       const results = await Promise.allSettled([
-        this.fetchNetworkTransactions(address, 'mainnet'),
-        this.fetchNetworkTransactions(address, 'sepolia'),
+        this.fetchNetworkTransactions(address, "base"),
+        this.fetchNetworkTransactions(address, "optimism"),
+        this.fetchNetworkTransactions(address, "arbitrum"),
+        this.fetchNetworkTransactions(address, "arbitrum-nova"),
       ]);
 
       const allTransfers: Transfer[] = [];
+      const networks: Network[] = ["base", "optimism", "arbitrum", "arbitrum-nova"];
       results.forEach((result, index) => {
-        const network = index === 0 ? 'mainnet' : 'sepolia';
-        if (result.status === 'fulfilled') {
-          console.log(`Successfully fetched ${result.value.length} transactions from ${network}`);
+        const network = networks[index];
+        if (result.status === "fulfilled") {
+          console.log(
+            `Successfully fetched ${result.value.length} transactions from ${network}`
+          );
           allTransfers.push(...result.value);
         } else {
-          console.error(`Failed to fetch transactions from ${network}:`, result.reason);
+          console.error(
+            `Failed to fetch transactions from ${network}:`,
+            result.reason
+          );
         }
       });
 
-      console.log(`Total transactions fetched from all networks: ${allTransfers.length}`);
+      console.log(
+        `Total transactions fetched from all networks: ${allTransfers.length}`
+      );
       return allTransfers;
     } catch (error) {
       console.error(`Failed to get transactions for ${address}:`, error);
@@ -47,14 +59,16 @@ export class TransactionModel {
   }
 
   // Helper to fetch all transactions for a specific network
-  private async fetchNetworkTransactions(address: string, network: Network): Promise<Transfer[]> {
+  private async fetchNetworkTransactions(
+    address: string,
+    network: Network
+  ): Promise<Transfer[]> {
     const [externalTransfers, erc20Transfers] = await Promise.all([
       this.fetchExternalTransactions(address, network),
       this.fetchERC20Transfers(address, network),
     ]);
     return [...externalTransfers, ...erc20Transfers];
   }
-
 
   private async fetchExternalTransactions(
     address: string,
@@ -102,7 +116,9 @@ export class TransactionModel {
   ): Promise<T> {
     const apiUrl = this.apiBaseUrls[network]; // Use network-specific URL
     try {
-      console.log(`${logPrefix} - Attempt ${attempt}: Fetching from ${apiUrl}...`);
+      console.log(
+        `${logPrefix} - Attempt ${attempt}: Fetching from ${apiUrl}...`
+      );
       const response = await axios.get<T>(apiUrl, { params });
 
       // Handle potential rate limits or empty results gracefully
@@ -132,7 +148,11 @@ export class TransactionModel {
     }
   }
 
-  private processExternalTransfers(response: EtherscanResponse, network: Network): Transfer[] { // Added network parameter
+  private processExternalTransfers(
+    response: EtherscanResponse,
+    network: Network
+  ): Transfer[] {
+    // Added network parameter
     if (response.status !== "1" || !Array.isArray(response.result)) return [];
 
     return response.result
@@ -142,7 +162,7 @@ export class TransactionModel {
         erc721TokenId: null,
         erc1155Metadata: null,
         tokenId: null,
-        asset: "ETH", // Assuming ETH for external transfers on both networks
+        asset: "ETH", // ETH for all networks
         category: "external",
         hash: tx.hash,
         timestamp: parseInt(tx.timeStamp),
@@ -152,7 +172,11 @@ export class TransactionModel {
       }));
   }
 
-  private processERC20Transfers(response: EtherscanResponse, network: Network): Transfer[] { // Added network parameter
+  private processERC20Transfers(
+    response: EtherscanResponse,
+    network: Network
+  ): Transfer[] {
+    // Added network parameter
     if (response.status !== "1" || !Array.isArray(response.result)) return [];
 
     return response.result
@@ -162,7 +186,7 @@ export class TransactionModel {
         erc721TokenId: null,
         erc1155Metadata: null,
         tokenId: tx.tokenID || null,
-        asset: tx.tokenSymbol || 'Unknown ERC20', // Added default symbol
+        asset: tx.tokenSymbol || "Unknown ERC20", // Added default symbol
         category: "erc20",
         hash: tx.hash,
         timestamp: parseInt(tx.timeStamp),
