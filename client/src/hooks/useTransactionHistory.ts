@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
 
-import { liskSepolia, client } from "@/lib/config";
+import { liskMainnet, client } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 
@@ -55,7 +55,7 @@ export function useTransactionHistory({
     return getContract({
       client,
       address: CoinsafeDiamondContract.address,
-      chain: liskSepolia,
+      chain: liskMainnet,
       abi: facetAbis.fundingFacet as Abi,
     });
   }, []); // <-- Only create once

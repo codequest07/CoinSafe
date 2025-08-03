@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount, useConnect } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { parseUnits } from "ethers";
 import { getTokenDecimals } from "@/lib/utils";
@@ -49,7 +49,7 @@ export const useWithdrawEmergencySafe = ({
 
   const contract = getContract({
     client,
-    chain: liskSepolia,
+    chain: liskMainnet,
     address: coinSafeAddress,
   });
 
@@ -65,7 +65,7 @@ export const useWithdrawEmergencySafe = ({
         if (!address) {
           try {
             // await connect(async () => ({
-            //   chainId: liskSepolia.id,
+            //   chainId: liskMainnet.id,
             //   // Assuming a smart wallet setup; adjust based on your configuration
             //   wallet: wallet || { id: "inApp" }, // Fallback to in-app wallet if none specified
             //   client: config.client, // Assuming config.client contains Thirdweb client

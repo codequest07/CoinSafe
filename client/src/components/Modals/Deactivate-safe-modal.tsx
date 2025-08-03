@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { useState } from "react";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
-import { liskSepolia } from "@/lib/config";
+import { liskMainnet } from "@/lib/config";
 import { Abi } from "viem";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
@@ -47,7 +47,7 @@ export default function DeactivateSafeModal({
     if (!account) return;
     const contract = getContract({
       client,
-      chain: liskSepolia,
+      chain: liskMainnet,
       address: CoinsafeDiamondContract.address,
       abi: facetAbis.automatedSavingsFacet as Abi,
     });

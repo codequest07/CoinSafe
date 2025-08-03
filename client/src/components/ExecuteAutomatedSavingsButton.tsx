@@ -1,4 +1,4 @@
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useMemo, useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
@@ -21,7 +21,7 @@ export function ExecuteAutomatedSavingsButton() {
     () =>
       getContract({
         client,
-        chain: liskSepolia,
+        chain: liskMainnet,
         address: CoinsafeDiamondContract.address,
         abi: facetAbis.automatedSavingsFacet as Abi,
       }),
@@ -38,7 +38,7 @@ export function ExecuteAutomatedSavingsButton() {
     // try {
     //     const contract = getContract({
     //       client,
-    //       chain: liskSepolia,
+    //       chain: liskMainnet,
     //       address: coinSafeAddress,
     //       abi: facetAbis.fundingFacet as Abi,
     //     });
@@ -64,7 +64,7 @@ export function ExecuteAutomatedSavingsButton() {
     //     const tokenContract = getContract({
     //       client,
     //       address: token,
-    //       chain: liskSepolia,
+    //       chain: liskMainnet,
     //       abi: erc20Abi,
     //     });
 

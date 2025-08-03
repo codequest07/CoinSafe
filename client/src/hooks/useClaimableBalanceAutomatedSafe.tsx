@@ -1,6 +1,6 @@
 import { useReadContract } from "thirdweb/react";
 import { getContract } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Abi } from "viem";
 
@@ -19,7 +19,7 @@ interface ClaimableBalanceResult {
 export const useClaimableBalanceAutomatedSafe = (): ClaimableBalanceResult => {
   const contract = getContract({
     client,
-    chain: liskSepolia,
+    chain: liskMainnet,
     address: CoinsafeDiamondContract.address,
     abi: facetAbis.automatedSavingsFacet as Abi,
   });
