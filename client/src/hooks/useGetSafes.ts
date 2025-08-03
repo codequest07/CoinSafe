@@ -3,7 +3,7 @@ import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
 import { useRecoilState } from "recoil";
 
-import { liskSepolia, client } from "@/lib/config";
+import { liskMainnet, client } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import {
@@ -12,7 +12,10 @@ import {
   safesErrorState,
   targetedSafesState,
 } from "@/store/atoms/safes";
-import { savingsBalanceState, supportedTokensState } from "@/store/atoms/balance";
+import {
+  savingsBalanceState,
+  supportedTokensState,
+} from "@/store/atoms/balance";
 import { publicClient } from "@/lib/client";
 // Define the SafeDetails interface based on the provided struct
 interface Token {
@@ -47,7 +50,7 @@ export function useGetSafes() {
     return getContract({
       client,
       address: CoinsafeDiamondContract.address,
-      chain: liskSepolia,
+      chain: liskMainnet,
       abi: facetAbis.targetSavingsFacet as Abi,
     });
   }, []); // <-- Only create once
@@ -64,7 +67,7 @@ export function useGetSafes() {
     // const emergencyContract = getContract({
     //   client,
     //   address: CoinsafeDiamondContract.address,
-    //   chain: liskSepolia,
+    //   chain: liskMainnet,
     //   abi: facetAbis.emergencySavingsFacet as Abi,
     // });
 
@@ -81,7 +84,7 @@ export function useGetSafes() {
     try {
       const results = await publicClient.multicall({
         contracts: rawTxs,
-        chain: liskSepolia,
+        chain: liskMainnet,
       });
 
       // console.log("Multicall results:", results);
@@ -192,10 +195,10 @@ export function useGetSafes() {
       supportedTokens,
     ]
   );
-  
+
   useEffect(() => {
     fetchSafes(true);
-  }, [savingsBalance])
+  }, [savingsBalance]);
   // Add an effect to monitor supportedTokens changes
   useEffect(() => {
     // console.log("supportedTokens changed in useGetSafes:", supportedTokens);

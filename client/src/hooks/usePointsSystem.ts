@@ -3,7 +3,7 @@ import { useCallback, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { ActionType, PointWeights, PointsSystemHookReturn } from "../types";
 import { client } from "@/lib/config";
-import { liskSepolia } from "@/lib/config";
+import { liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import {
   userPointsState,
@@ -16,7 +16,7 @@ import {
 export function usePointsSystem(): PointsSystemHookReturn {
   const contract = getContract({
     client,
-    chain: liskSepolia,
+    chain: liskMainnet,
     address: CoinsafeDiamondContract.address,
     abi: facetAbis.balanceFacet as any,
   });

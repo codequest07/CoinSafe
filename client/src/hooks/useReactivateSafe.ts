@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall, resolveMethod } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { Abi } from "viem";
@@ -47,7 +47,7 @@ export const useReactivateSavingsTarget = ({
 
         const contract = getContract({
           client,
-          chain: liskSepolia,
+          chain: liskMainnet,
           address: CoinsafeDiamondContract.address,
           abi: facetAbis.targetSavingsFacet as Abi,
         });

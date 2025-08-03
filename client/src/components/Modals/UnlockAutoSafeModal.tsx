@@ -16,7 +16,7 @@ import { Label } from "../ui/label";
 // import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { getContract, readContract } from "thirdweb";
 import { Abi, formatEther, formatUnits } from "viem";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { useWithdrawAutomatedSafe } from "@/hooks/useWithdrawAutomatedSafe";
 import { format } from "date-fns";
 // import { toast } from "@sonner/toast";
@@ -96,7 +96,7 @@ export default function UnlockAutoSafeModal({
       setIsLoadingFee(true);
       const contract = getContract({
         client,
-        chain: liskSepolia,
+        chain: liskMainnet,
         address: CoinsafeDiamondContract.address,
         abi: facetAbis.automatedSavingsFacet as Abi,
       });

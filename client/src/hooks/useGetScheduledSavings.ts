@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getContract, resolveMethod } from "thirdweb";
-import { liskSepolia } from "@/lib/config";
+import { liskMainnet } from "@/lib/config";
 import { client } from "@/lib/config";
 import { useReadContract } from "thirdweb/react";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
@@ -47,7 +47,7 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
   const contract = getContract({
     client,
     address: CoinsafeDiamondContract.address,
-    chain: liskSepolia,
+    chain: liskMainnet,
     abi: facetAbis.automatedSavingsFacet as Abi,
   });
 
@@ -63,7 +63,10 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
       try {
         if (result) {
           const scheduledSavingsRes = await transformArrayData(result as []);
-          console.log("Scheduled savings res from contract already transformed", scheduledSavingsRes);
+          console.log(
+            "Scheduled savings res from contract already transformed",
+            scheduledSavingsRes
+          );
           setScheduledSavings(
             scheduledSavingsRes.filter(
               (item) => item.scheduledDate >= new Date().getTime()

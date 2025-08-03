@@ -22,7 +22,7 @@ import {
 import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useActiveAccount } from "thirdweb/react";
 import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
-import { liskSepolia } from "@/lib/config";
+import { liskMainnet } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
@@ -116,11 +116,11 @@ export default function SaveAssetsCard() {
     refetch();
   }, [savingsBalance]);
 
-    const calculateEndDate = (days: number) => {
-      const currentDate = new Date();
-      const futureDate = addDays(currentDate, days);
-      return format(futureDate, "dd MMMM yyyy");
-    };
+  const calculateEndDate = (days: number) => {
+    const currentDate = new Date();
+    const futureDate = addDays(currentDate, days);
+    return format(futureDate, "dd MMMM yyyy");
+  };
 
   const handleDurationChange = (duration: number) => {
     setSavingsDuration(duration);
@@ -178,7 +178,7 @@ export default function SaveAssetsCard() {
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
-    setDecimals(getTokenDecimals(value))
+    setDecimals(getTokenDecimals(value));
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
   };
@@ -236,7 +236,7 @@ export default function SaveAssetsCard() {
     saveState,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
     coinSafeAbi: targetSavingsFacetAbi,
-    chainId: liskSepolia.id,
+    chainId: liskMainnet.id,
     onSuccess: () => {
       openThirdModal();
 
@@ -361,7 +361,9 @@ export default function SaveAssetsCard() {
 
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
 
-      setSelectedTokenBalance(Number(formatUnits(tokenBalance, getTokenDecimals(saveState.token))));
+      setSelectedTokenBalance(
+        Number(formatUnits(tokenBalance, getTokenDecimals(saveState.token)))
+      );
       // console.log("token Balance: ", tokenBalance);
     }
   }, [saveState.token, address, AvailableBalance, savingsBalance]);
@@ -541,7 +543,8 @@ export default function SaveAssetsCard() {
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}>
+                    }`}
+                  >
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -571,7 +574,8 @@ export default function SaveAssetsCard() {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}>
+                    }`}
+                  >
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -630,7 +634,8 @@ export default function SaveAssetsCard() {
                     <Link to={"/dashboard/vault/auto-safe"}>
                       <Button
                         variant="link"
-                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0">
+                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                      >
                         View your Automated Safe here
                       </Button>
                     </Link>
@@ -669,7 +674,8 @@ export default function SaveAssetsCard() {
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                            onClick={() => navigate("/dashboard/deposit")}>
+                            onClick={() => navigate("/dashboard/deposit")}
+                          >
                             Deposit to save
                           </Button>
                         ) : (
@@ -680,7 +686,8 @@ export default function SaveAssetsCard() {
                                 ...prev,
                                 amount: selectedTokenBalance,
                               }))
-                            }>
+                            }
+                          >
                             Max
                           </Button>
                         )}
@@ -731,7 +738,7 @@ export default function SaveAssetsCard() {
                     )}
                   </div>
                 ))}
-            </div> 
+            </div>
           </>
         )}
 
@@ -749,7 +756,8 @@ export default function SaveAssetsCard() {
                     onClick={handleSaveAsset}
                     className="text-black px-8 rounded-[2rem]"
                     variant="outline"
-                    disabled={isLoading || autoSavingsLoading}>
+                    disabled={isLoading || autoSavingsLoading}
+                  >
                     {isLoading || autoSavingsLoading ? (
                       <LoaderCircle className="animate-spin" />
                     ) : hasAutoSafe ? (

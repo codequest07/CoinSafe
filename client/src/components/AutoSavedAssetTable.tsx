@@ -19,7 +19,7 @@ import { Check, Loader2, X } from "lucide-react";
 import { formatUnits } from "viem";
 import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 // import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
@@ -31,7 +31,7 @@ async function checkIsTokenAutoSaved(
   const contract = getContract({
     client,
     address: CoinsafeDiamondContract.address,
-    chain: liskSepolia,
+    chain: liskMainnet,
   });
 
   const balance = await readContract({

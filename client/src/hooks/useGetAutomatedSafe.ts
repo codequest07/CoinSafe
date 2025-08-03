@@ -1,4 +1,4 @@
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useMemo } from "react";
 import { getContract } from "thirdweb";
@@ -7,30 +7,29 @@ import { Abi } from "viem";
 
 // Custom hook to fetch AutomatedSavingsPlanDetails for a user
 export function useAutomatedSafeForUser(userAddress: `0x${string}`) {
-    // Initialize contract
-    const contract = useMemo(
-      () =>
-        getContract({
-          client,
-          chain: liskSepolia,
-          address: CoinsafeDiamondContract.address, // Replace with your contract address
-          abi: facetAbis.automatedSavingsFacet as Abi,
-        }),
-      []
-    );
-  
-    // Call getAutomatedSafeForUser using useReadContract
-    const { data, isLoading, error, refetch } = useReadContract({
-      contract,
-      method: "getAutomatedSafeForUser",
-      params: [userAddress],
-    });
-  
-    return {
-      details: data as
-        | any | undefined,
-      isLoading,
-      error,
-      refetch
-    };
-  }
+  // Initialize contract
+  const contract = useMemo(
+    () =>
+      getContract({
+        client,
+        chain: liskMainnet,
+        address: CoinsafeDiamondContract.address, // Replace with your contract address
+        abi: facetAbis.automatedSavingsFacet as Abi,
+      }),
+    []
+  );
+
+  // Call getAutomatedSafeForUser using useReadContract
+  const { data, isLoading, error, refetch } = useReadContract({
+    contract,
+    method: "getAutomatedSafeForUser",
+    params: [userAddress],
+  });
+
+  return {
+    details: data as any | undefined,
+    isLoading,
+    error,
+    refetch,
+  };
+}

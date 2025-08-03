@@ -14,7 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
 import { useActiveAccount } from "thirdweb/react";
 import { getContract } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { getBalance } from "thirdweb/extensions/erc20";
 import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
@@ -97,7 +97,7 @@ export default function DepositCard() {
           client,
           address: token,
           // abi: erc20Abi,
-          chain: liskSepolia,
+          chain: liskMainnet,
         });
 
         const tokenBalance = await getBalance({ contract, address: address! });

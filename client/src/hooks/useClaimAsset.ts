@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount, useConnect } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { toBigInt } from "ethers";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
@@ -47,7 +47,7 @@ export const useClaimAsset = ({
   // Initialize contract
   const contract = getContract({
     client,
-    chain: liskSepolia,
+    chain: liskMainnet,
     address: coinSafeAddress,
     abi: coinSafeAbi,
   });

@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
-import { liskSepolia } from "@/lib/config";
+import { liskMainnet } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { Abi } from "viem";
 import { facetAbis } from "@/lib/contract";
@@ -59,7 +59,7 @@ export const useRemoveTokenFromAutomatedPlan = ({
 
         const contract = getContract({
           client,
-          chain: liskSepolia,
+          chain: liskMainnet,
           address: coinSafeAddress,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });

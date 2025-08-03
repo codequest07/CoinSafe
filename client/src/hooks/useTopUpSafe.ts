@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { toast } from "./use-toast";
 import { tokenDecimals } from "@/lib/utils";
@@ -89,7 +89,7 @@ export const useTopUpSafe = ({
       try {
         const contract = getContract({
           client,
-          chain: liskSepolia,
+          chain: liskMainnet,
           address: coinSafeAddress,
         });
 
