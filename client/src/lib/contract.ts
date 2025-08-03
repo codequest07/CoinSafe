@@ -7,10 +7,11 @@ import emergencySavingsFacetAbi from "../abi/EmergencySavingsFacet.json";
 import fundingFacetAbi from "../abi/FundingFacet.json";
 
 export const tokens = {
-  usdt: "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda",
-  usdc: "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83",
+  usdt: "0x05D032ac25d322df992303dCa074EE7392C117b9",
+  usdc: "0xF242275d3a6527d877f2c927a82D9b057609cc71",
   safu: "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a",
-  lsk: "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D",
+  lsk: "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24",
+
 };
 
 export const CoinSafeContract = {
