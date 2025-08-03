@@ -1,4 +1,4 @@
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useMemo } from "react";
 import { getContract } from "thirdweb";
@@ -12,7 +12,7 @@ export function useGetAutomatedSavingsDuePlans() {
     () =>
       getContract({
         client,
-        chain: liskSepolia,
+        chain: liskMainnet,
         address: CoinsafeDiamondContract.address, // Replace with your contract address
         abi: facetAbis.automatedSavingsFacet as Abi,
       }),

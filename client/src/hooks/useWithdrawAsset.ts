@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount, useConnect } from "thirdweb/react";
-// import { liskSepolia } from 'viem/chains'; // Still used for chain ID reference
+// import { liskMainnet } from 'viem/chains'; // Still used for chain ID reference
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { getTokenDecimals } from "@/lib/utils";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
@@ -51,7 +51,7 @@ export const useWithdrawAsset = ({
 
   const contract = getContract({
     client,
-    chain: liskSepolia,
+    chain: liskMainnet,
     address: coinSafeAddress,
   });
 
@@ -66,7 +66,7 @@ export const useWithdrawAsset = ({
         if (!address) {
           try {
             // await connect(async () => ({
-            //   chainId: liskSepolia.id,
+            //   chainId: liskMainnet.id,
             //   // Assuming a smart wallet setup; adjust based on your configuration
             //   wallet: wallet || { id: "inApp" }, // Fallback to in-app wallet if none specified
             //   client: config.client, // Assuming config.client contains Thirdweb client

@@ -4,10 +4,13 @@ import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { publicClient } from "@/lib/client";
-import { liskSepolia } from "@/lib/config";
+import { liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis, tokens } from "@/lib/contract";
 import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
-import { savingsBalanceState, supportedTokensState } from "@/store/atoms/balance";
+import {
+  savingsBalanceState,
+  supportedTokensState,
+} from "@/store/atoms/balance";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -48,7 +51,7 @@ const EmergencySafe = () => {
     try {
       const results = await publicClient.multicall({
         contracts: rawTxs,
-        chain: liskSepolia,
+        chain: liskMainnet,
       });
 
       // console.log("Multicall results:", results);

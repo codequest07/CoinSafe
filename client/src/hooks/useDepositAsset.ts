@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
-import { liskSepolia } from "@/lib/config";
+import { liskMainnet } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { erc20Abi, Abi } from "viem";
 import { getTokenDecimals } from "@/lib/utils";
@@ -53,7 +53,7 @@ export const useDepositAsset = ({
       try {
         const contract = getContract({
           client,
-          chain: liskSepolia,
+          chain: liskMainnet,
           address: coinSafeAddress,
           abi: facetAbis.fundingFacet as Abi,
         });
@@ -79,7 +79,7 @@ export const useDepositAsset = ({
         const tokenContract = getContract({
           client,
           address: token,
-          chain: liskSepolia,
+          chain: liskMainnet,
           abi: erc20Abi,
         });
 

@@ -16,7 +16,7 @@ import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { Check, X } from "lucide-react";
 import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
@@ -32,7 +32,7 @@ async function checkIsTokenAutoSaved(
   const contract = getContract({
     client,
     address: CoinsafeDiamondContract.address,
-    chain: liskSepolia,
+    chain: liskMainnet,
   });
 
   const balance = await readContract({

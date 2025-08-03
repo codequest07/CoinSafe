@@ -2,7 +2,7 @@ import { useConnectModal } from "thirdweb/react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { useEffect, useState } from "react";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { darkTheme } from "thirdweb/react";
 import { wallets } from "@/lib/wallets";
 
@@ -22,7 +22,7 @@ const ConnectModal = ({
       await connect({
         client,
         wallets,
-        chain: liskSepolia,
+        chain: liskMainnet,
         theme: darkTheme({
           colors: { accentText: "hsl(144, 100%, 39%)" },
         }),
@@ -68,14 +68,16 @@ const ConnectModal = ({
           <Button
             className="rounded-full border-none outline-none font-light py-2 px-10 text-sm bg-[#FFFFFF2B]/20"
             onClick={() => setIsConnectModalOpen(false)}
-            disabled={isConnecting || localIsConnecting}>
+            disabled={isConnecting || localIsConnecting}
+          >
             Close
           </Button>
           <Button
             className="rounded-full border-none outline-none text-black font-light py-2 px-10 text-sm"
             variant="outline"
             onClick={handleConnect}
-            disabled={isConnecting || localIsConnecting}>
+            disabled={isConnecting || localIsConnecting}
+          >
             {isConnecting || localIsConnecting
               ? "Connecting..."
               : "Connect Wallet"}

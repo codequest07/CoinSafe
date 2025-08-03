@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall, resolveMethod } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { Abi } from "viem";
@@ -28,7 +28,6 @@ export const useDeleteSafe = ({ id, onSuccess, onError }: DeleteSafeParams) => {
   const [error, setError] = useState<Error | null>(null);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
-
   const account = useActiveAccount();
 
   const deleteSafe = useCallback(
@@ -40,7 +39,7 @@ export const useDeleteSafe = ({ id, onSuccess, onError }: DeleteSafeParams) => {
 
         const contract = getContract({
           client,
-          chain: liskSepolia,
+          chain: liskMainnet,
           address: CoinsafeDiamondContract.address,
           abi: facetAbis.targetSavingsFacet as Abi,
         });

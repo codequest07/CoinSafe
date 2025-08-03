@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall, resolveMethod } from "thirdweb";
-import { client, liskSepolia } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "./use-toast";
@@ -76,7 +76,7 @@ export const useCreateAutoSavings = ({
 
         const contract = getContract({
           client,
-          chain: liskSepolia,
+          chain: liskMainnet,
           address: CoinsafeDiamondContract.address,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
@@ -151,7 +151,7 @@ export const useCreateAutoSavings = ({
 
         const contract = getContract({
           client,
-          chain: liskSepolia,
+          chain: liskMainnet,
           address: CoinsafeDiamondContract.address,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
@@ -225,7 +225,7 @@ export const useCreateAutoSavings = ({
 
         const contract = getContract({
           client,
-          chain: liskSepolia,
+          chain: liskMainnet,
           address: CoinsafeDiamondContract.address,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
