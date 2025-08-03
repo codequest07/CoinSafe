@@ -116,11 +116,11 @@ export default function SaveAssetsCard() {
     refetch();
   }, [savingsBalance]);
 
-  const calculateEndDate = (days: number) => {
-    const currentDate = new Date();
-    const futureDate = addDays(currentDate, days);
-    return format(futureDate, "dd MMMM yyyy");
-  };
+    const calculateEndDate = (days: number) => {
+      const currentDate = new Date();
+      const futureDate = addDays(currentDate, days);
+      return format(futureDate, "dd MMMM yyyy");
+    };
 
   const handleDurationChange = (duration: number) => {
     setSavingsDuration(duration);
@@ -728,7 +728,7 @@ export default function SaveAssetsCard() {
                     )}
                   </div>
                 ))}
-            </div>
+            </div> 
           </>
         )}
 
