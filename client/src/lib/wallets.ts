@@ -16,10 +16,10 @@ export const wallets = [
       ],
     },
     // enable gasless transactions for the wallet
-    // executionMode: {
-    //   mode: "EIP7702",
-    //   sponsorGas: true,
-    // },
+    executionMode: {
+      mode: "EIP7702",
+      sponsorGas: true,
+    },
   }),
   createWallet("io.metamask"),
   createWallet("com.coinbase.wallet"),
