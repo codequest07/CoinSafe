@@ -1,9 +1,29 @@
 [
-  { "inputs": [], "name": "AddressZeroDetected", "type": "error" },
-  { "inputs": [], "name": "InsufficientFunds", "type": "error" },
-  { "inputs": [], "name": "InvalidTokenAddress", "type": "error" },
-  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
-  { "inputs": [], "name": "ZeroValueNotAllowed", "type": "error" },
+  {
+    "inputs": [],
+    "name": "AddressZeroDetected",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientFunds",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTokenAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroValueNotAllowed",
+    "type": "error"
+  },
   {
     "anonymous": false,
     "inputs": [
@@ -105,18 +125,40 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_user", "type": "address" },
-      { "internalType": "address", "name": "_token", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      }
     ],
     "name": "getEmergencySafeBalance",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
     ],
     "name": "saveToEmergencySafe",
     "outputs": [],
@@ -125,8 +167,16 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
     ],
     "name": "withdrawFromEmergencySafe",
     "outputs": [],
