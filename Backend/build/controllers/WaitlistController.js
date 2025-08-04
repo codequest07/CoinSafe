@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getWaitlistCount = exports.getOne = exports.getAllWaitlistEntries = exports.addToWaitlist = void 0;
 const WaitlistModel_1 = __importDefault(require("../Models/WaitlistModel"));
 const Validation_1 = require("../Validation");
-const email_1 = require("../email");
+const email_1 = require("../services/email");
 const addToWaitlist = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, country, email } = req.body;
     if (!name || !country || !email) {

@@ -9,7 +9,7 @@ import { ethers } from "ethers";
 
 const BATCH_SIZE = 30;
 
-// Token addresses and their symbols for formatting
+// Token addresses and their symbols for formatting (updated to match frontend contract addresses)
 const TOKEN_SYMBOLS: { [key: string]: string } = {
   "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": "SAFU",
   "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda": "USDT",
@@ -17,10 +17,10 @@ const TOKEN_SYMBOLS: { [key: string]: string } = {
   "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83": "USDC",
 };
 
-// Token decimals mapping
+// Token decimals mapping (updated to match frontend contract addresses)
 const TOKEN_DECIMALS: { [key: string]: number } = {
   "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": 18, // SAFU
-  "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda": 18, // USDT
+  "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda": 6, // USDT
   "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": 18, // LSK
   "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83": 6, // USDC
 };
@@ -28,9 +28,11 @@ const TOKEN_DECIMALS: { [key: string]: number } = {
 // Function to format token amount with proper decimals
 function formatTokenAmount(amount: bigint, tokenAddress: string): string {
   try {
-    const decimals = TOKEN_DECIMALS[tokenAddress.toLowerCase()] || 18;
+    const normalizedAddress = tokenAddress.toLowerCase();
+    const decimals = TOKEN_DECIMALS[normalizedAddress] || 18;
     const formattedAmount = ethers.formatUnits(amount, decimals);
-    const symbol = TOKEN_SYMBOLS[tokenAddress.toLowerCase()] || "TOKEN";
+    const symbol = TOKEN_SYMBOLS[normalizedAddress] || "TOKEN";
+    
     return `${formattedAmount} ${symbol}`;
   } catch (error) {
     console.error(`Error formatting amount for token ${tokenAddress}:`, error);
@@ -195,6 +197,17 @@ function generateEmailContent(
         align-items: center;
         justify-content: center;
         text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
+
+      .social-icon:hover {
+        background-color: #333333;
+      }
+
+      .social-icon svg {
+        width: 20px;
+        height: 20px;
+        fill: white;
       }
 
       .footer {
@@ -245,7 +258,8 @@ function generateEmailContent(
         <div class="header">
           <img
             src="https://res.cloudinary.com/dfp2rztmd/image/upload/v1752393890/logo_fppdfj.svg"
-            alt="" />
+            alt="Coinsafe Logo"
+            style="max-width: 200px; height: auto; display: block;" />
         </div>
 
         <!-- Main Content -->

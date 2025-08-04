@@ -10,12 +10,21 @@ import axios, { AxiosError } from "axios";
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 
-const settings = {
-  apiKey: alchemyApiKey,
-  network: Network.ETH_SEPOLIA,
-};
+const networks = [
+  Network.ETH_MAINNET,
+  Network.BASE_MAINNET,
+  Network.ARB_MAINNET,
+  Network.OPT_MAINNET,
+];
 
-const alchemy = new Alchemy(settings);
+// Create Alchemy instances for each mainnet
+const alchemyInstances = networks.map(
+  (network) =>
+    new Alchemy({
+      apiKey: alchemyApiKey,
+      network: network,
+    })
+);
 
 interface Transfer {
   value: number;
@@ -100,24 +109,67 @@ export async function main(address: string): Promise<string | null> {
       throw new Error("Invalid Ethereum address format");
     }
 
-    console.log("Fetching asset transfers for address:", address);
-    const getTransfers = await alchemy.core.getAssetTransfers({
-      fromBlock: "0x0",
-      toBlock: "latest",
-      toAddress: address,
-      excludeZeroValue: true,
-      category: [AssetTransfersCategory.ERC20],
-    });
-    console.log("Fetched ERC20 transfers:", getTransfers);
+    console.log(
+      "Fetching asset transfers for address across multiple chains:",
+      address
+    );
 
-    const getInternalTransfers: AssetTransfersResponse =
-      await alchemy.core.getAssetTransfers({
-        fromBlock: "0x0",
-        toBlock: "latest",
-        toAddress: address,
-        excludeZeroValue: true,
-        category: [AssetTransfersCategory.INTERNAL],
-      });
+    // Fetch transfers from all mainnet chains
+    const allTransfersPromises = alchemyInstances.map(
+      async (alchemy, index) => {
+        const networkName = networks[index];
+        console.log(`Fetching from ${networkName}...`);
+
+        try {
+          const [erc20Transfers, internalTransfers] = await Promise.all([
+            alchemy.core.getAssetTransfers({
+              fromBlock: "0x0",
+              toBlock: "latest",
+              toAddress: address,
+              excludeZeroValue: true,
+              category: [AssetTransfersCategory.ERC20],
+            }),
+            alchemy.core.getAssetTransfers({
+              fromBlock: "0x0",
+              toBlock: "latest",
+              toAddress: address,
+              excludeZeroValue: true,
+              category: [AssetTransfersCategory.INTERNAL],
+            }),
+          ]);
+
+          return {
+            network: networkName,
+            erc20: erc20Transfers.transfers,
+            internal: internalTransfers.transfers,
+          };
+        } catch (error) {
+          console.error(`Error fetching from ${networkName}:`, error);
+          return {
+            network: networkName,
+            erc20: [],
+            internal: [],
+          };
+        }
+      }
+    );
+
+    const allTransfers = await Promise.all(allTransfersPromises);
+
+    // Aggregate all transfers from all chains
+    const aggregatedERC20Transfers = allTransfers.flatMap(
+      (result) => result.erc20
+    );
+    const aggregatedInternalTransfers = allTransfers.flatMap(
+      (result) => result.internal
+    );
+
+    console.log(
+      `Total ERC20 transfers across all chains: ${aggregatedERC20Transfers.length}`
+    );
+    console.log(
+      `Total internal transfers across all chains: ${aggregatedInternalTransfers.length}`
+    );
 
     const selectFields = (
       transfer: AssetTransfersResponse["transfers"][0]
@@ -131,9 +183,9 @@ export async function main(address: string): Promise<string | null> {
     });
 
     const filteredERC20Transfers: Transfer[] =
-      getTransfers.transfers.map(selectFields);
+      aggregatedERC20Transfers.map(selectFields);
     const filteredInternalTransfers: Transfer[] =
-      getInternalTransfers.transfers.map(selectFields);
+      aggregatedInternalTransfers.map(selectFields);
 
     const transfersData: TransfersData = {
       erc20Transfers: filteredERC20Transfers,
