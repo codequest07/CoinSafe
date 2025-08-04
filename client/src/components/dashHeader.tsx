@@ -9,7 +9,7 @@ import { NavLinks } from "@/lib/data";
 import MemoLogo from "@/icons/Logo";
 import SmileFace from "./Smile";
 import ExtensionCard from "./Cards/ExtensionCard";
-import ClaimBtn from "./ClaimBtn";
+// import ClaimBtn from "./ClaimBtn";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { Skeleton } from "./ui/skeleton";
 import { useStreakSystem } from "@/hooks/useStreakSystem";
@@ -125,7 +125,7 @@ const DashHeader = () => {
           </Link>
 
           <div className="flex items-center gap-2 md:hidden">
-            <ClaimBtn />
+            {/* <ClaimBtn /> */}
             <WalletAvatar />
           </div>
 
@@ -207,7 +207,7 @@ const DashHeader = () => {
               </div>
             </div>
             <div className="flex items-center sm:space-x-3">
-              <ClaimBtn />
+              {/* <ClaimBtn /> */}
               {/* Icons for connected wallets */}
               <SmileFace />
             </div>
