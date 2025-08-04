@@ -5,7 +5,7 @@ import ExtensionCard from "./Cards/ExtensionCard";
 import { useEffect, useState } from "react";
 import ConnectModal from "./Modals/ConnectModal";
 import { useActiveAccount } from "thirdweb/react";
-import { Coins, ExternalLinkIcon } from "lucide-react";
+// import { Coins, ExternalLinkIcon } from "lucide-react";
 
 const Sidebar = () => {
   const [openConnectModal, setOpenConnectModal] = useState(false);
@@ -14,24 +14,24 @@ const Sidebar = () => {
   const account = useActiveAccount();
   const isConnected = !!account?.address;
 
-  const [token, setToken] = useState('');
+  // const [token, setToken] = useState('');
 
-  useEffect(() => {
-    fetch('https://coinsafe-0q0m.onrender.com/api/fonbnk/generate-signature')
-      .then((res) => res.json())
-      .then((data) => setToken(data?.data?.signature))
-      .catch((err) => console.error('Error fetching token:', err));
-  }, []);
+  // useEffect(() => {
+  //   fetch('https://coinsafe-0q0m.onrender.com/api/fonbnk/generate-signature')
+  //     .then((res) => res.json())
+  //     .then((data) => setToken(data?.data?.signature))
+  //     .catch((err) => console.error('Error fetching token:', err));
+  // }, []);
 
-//   const token = jsonwebtoken.sign(
-//     {
-//       uid: uuid(),
-//     },
-//     FONBNK_SIGNATURE,
-//     {
-//       algorithm: 'HS256',
-//     },
-//  );
+  //   const token = jsonwebtoken.sign(
+  //     {
+  //       uid: uuid(),
+  //     },
+  //     FONBNK_SIGNATURE,
+  //     {
+  //       algorithm: 'HS256',
+  //     },
+  //  );
 
   const handleNavigate = (e: any) => {
     if (!isConnected) {
@@ -70,7 +70,8 @@ const Sidebar = () => {
             <div className="flex items-center py-12 px-4 lg:h-[60px] lg:px-6">
               <Link
                 to="/dashboard"
-                className="flex items-center gap-2 font-semibold">
+                className="flex items-center gap-2 font-semibold"
+              >
                 <MemoLogo className="w-40 h-40" />
               </Link>
             </div>
@@ -85,7 +86,8 @@ const Sidebar = () => {
                       isLinkActive(link.to)
                         ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#F1F1F1] bg-[#1E1E1E99] transition-all"
                         : "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
-                    }>
+                    }
+                  >
                     <>
                       {isLinkActive(link.to) ? (
                         <link.activeIcon className="w-5 h-5" />
@@ -98,7 +100,7 @@ const Sidebar = () => {
                 ))}
               </nav>
 
-              <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+              {/* <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
                   <NavLink
                     to={`https://sandbox-pay.fonbnk.com/?source=D4p5B3HY&signature=${token}`}
                     target="_blank"
@@ -112,7 +114,7 @@ const Sidebar = () => {
                       <span><ExternalLinkIcon className="w-5 h-5" /></span>
                     </>
                   </NavLink>
-              </nav>
+              </nav> */}
             </div>
           </div>
           <div className="mt-auto p-4">
