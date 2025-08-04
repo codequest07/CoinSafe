@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Coins, ExternalLinkIcon, Menu } from "lucide-react";
+// import { Coins, ExternalLinkIcon, Menu } from "lucide-react";
 import { Link, NavLink, useLocation, useParams } from "react-router-dom";
 import { NavLinks } from "@/lib/data";
 import MemoLogo from "@/icons/Logo";
@@ -17,6 +17,7 @@ import { useRecoilValue } from "recoil";
 import { userCurrentStreakState } from "@/store/atoms/streak";
 import { useActiveAccount } from "thirdweb/react";
 import WalletAvatar from "./WalletAvatar";
+import { Menu } from "lucide-react";
 
 const getRandomMessage = () => {
   const messages = [
@@ -38,14 +39,14 @@ const DashHeader = () => {
   const account = useActiveAccount();
   const address = account?.address;
 
-  const [token, setToken] = useState('');
+  // const [token, setToken] = useState('');
 
-  useEffect(() => {
-    fetch('https://coinsafe-0q0m.onrender.com/api/fonbnk/generate-signature')
-      .then((res) => res.json())
-      .then((data) => setToken(data?.data?.signature))
-      .catch((err) => console.error('Error fetching token:', err));
-  }, []);
+  // useEffect(() => {
+  //   fetch('https://coinsafe-0q0m.onrender.com/api/fonbnk/generate-signature')
+  //     .then((res) => res.json())
+  //     .then((data) => setToken(data?.data?.signature))
+  //     .catch((err) => console.error('Error fetching token:', err));
+  // }, []);
 
   // Get streak information
   const { getStreakInfo } = useStreakSystem();
@@ -140,7 +141,8 @@ const DashHeader = () => {
             {/* Mobile Navigation Sidebar */}
             <SheetContent
               side="right"
-              className="flex flex-col bg-[#13131373] border-r border-r-[#333333]">
+              className="flex flex-col bg-[#13131373] border-r border-r-[#333333]"
+            >
               <nav className="grid gap-2 text-lg font-medium">
                 <Link to="/" className="flex items-center gap-2 font-semibold">
                   <MemoLogo className="w-32 h-10" />
@@ -154,13 +156,14 @@ const DashHeader = () => {
                       isActive
                         ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
                         : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
-                    }>
+                    }
+                  >
                     <link.icon className="w-5 h-5" />
                     {link.label}
                   </NavLink>
                 ))}
               </nav>
-              <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+              {/* <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
                   <NavLink
                     to={`https://sandbox-pay.fonbnk.com/?source=D4p5B3HY&signature=${token}`}
                     target="_blank"
@@ -173,7 +176,7 @@ const DashHeader = () => {
                       <span><ExternalLinkIcon className="w-5 h-5" /></span>
                     </>
                   </NavLink>
-              </nav>
+              </nav> */}
               <div className="mt-auto">
                 <ExtensionCard />
               </div>
