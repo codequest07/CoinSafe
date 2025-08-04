@@ -16,7 +16,6 @@ import { useWithdrawAsset } from "@/hooks/useWithdrawAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
-import MemoRipple from "@/icons/Ripple";
 import { getTokenPrice } from "@/lib";
 import { useNavigate } from "react-router-dom";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
@@ -143,7 +142,8 @@ export default function WithdrawCard() {
                           {tokenData[token]?.symbol?.charAt(0) || "?"}
                         </div>
                       ) : (
-                        <MemoRipple className="w-4 h-4 mr-2" />
+                        <></>
+                        // <MemoRipple className="w-4 h-4 mr-2" />
                       )}
                       {token ? (
                         <span className="text-white text-sm">
