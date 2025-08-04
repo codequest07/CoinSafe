@@ -9,7 +9,7 @@ import LandingPage from "./Pages/LandingPage";
 import Extension from "./Pages/Extension";
 import SaveSense from "./Pages/SaveSense";
 import { Toaster } from "./components/ui/toaster";
-import Faucet from "./Pages/Faucet";
+// import Faucet from "./Pages/Faucet";
 import SavingsDetail from "./components/SavingsDetail";
 import SaveAssets from "./Pages/SaveAssets";
 import Deposit from "./Pages/Deposit";
@@ -87,7 +87,7 @@ const App = () => {
           <Route path="/extension" element={<Extension />} />
           <Route path="/testnet" element={<Navigate to={"/dashboard"} />} />
           <Route path="/contact" element={<ContactUs />} />
-          <Route path="/faucet" element={<Faucet />} />
+          {/* <Route path="/faucet" element={<Faucet />} /> */}
           <Route path="/dashboard" element={<Layout />}>
             <Route path="/dashboard/" element={<Home />} />
             <Route path="/dashboard/wallet" element={<Portfolio />} />
