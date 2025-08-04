@@ -15,12 +15,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatUnits } from "viem";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
+import { Dialog } from "../ui/dialog";
 interface TopUpEmergencyProps {
+  isTopUpModalOpen: boolean;
+  setIsTopUpModalOpen: (open: boolean) => void;
   onClose: () => void;
   onTopUp?: (amount: number, currency: string) => void;
 }
 
 export default function TopUpEmergencySafe({
+  isTopUpModalOpen,
+  setIsTopUpModalOpen,
   onClose,
   onTopUp,
 }: TopUpEmergencyProps) {
@@ -119,135 +124,143 @@ export default function TopUpEmergencySafe({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1A1A1A] rounded-2xl max-w-xl w-full p-8 relative">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-white text-[20px] font-medium">
-            Top up emergency savings
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-full p-2  bg-[#FFFFFF] transition-colors">
-            <X className="h-5 w-5 text-black" />
-          </button>
-        </div>
-
-        <div className="mb-6">
-          {isSafeLoading ? (
-            <div className="py-4">
-              <div className="flex justify-between items-center mb-2">
-                <Skeleton className="h-6 w-32" />
-                <Skeleton className="h-5 w-24 rounded-full" />
-              </div>
-              <Skeleton className="h-4 w-48 mt-1" />
-            </div>
-          ) : safeDetails ? (
-            <>
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="text-white text-[20px] font-[400]">
-                  {safeDetails.target}
-                </h3>
-                <span className="bg-[#79E7BA33] text-[#F1F1F1] text-sm px-3 py-1 rounded-full">
-                  {safeDetails.isLocked
-                    ? safeDetails.unlockTime > new Date()
-                      ? `${Math.ceil(
-                          (safeDetails.unlockTime.getTime() -
-                            new Date().getTime()) /
-                            (1000 * 60 * 60 * 24)
-                        )} days to unlock`
-                      : "Ready to unlock"
-                    : "Flexible"}
-                </span>
-              </div>
-              <p className="text-[#F1F1F1] text-[14px]">
-                {safeDetails.isLocked
-                  ? `Next unlock date: ${safeDetails.nextUnlockDate}`
-                  : "Withdraw anytime"}
-              </p>
-            </>
-          ) : (
-            <div className="text-white text-center py-4">Safe not found</div>
-          )}
-        </div>
-        <AmountInput
-          amount={saveState.amount}
-          handleAmountChange={handleAmountChange}
-          handleTokenSelect={handleTokenSelect}
-          saveState={saveState}
-          tokens={tokens}
-          selectedTokenBalance={selectedTokenBalance}
-          validationErrors={validationErrors}
-          supportedTokens={supportedTokens}
-        />
-
-        {/* Wallet balance */}
-        <>
-          {/* Wallet Balance */}
+    <Dialog open={isTopUpModalOpen} onOpenChange={setIsTopUpModalOpen}>
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+        <div className="bg-[#1A1A1A] rounded-2xl max-w-xl w-full p-8 relative">
           <div className="flex justify-between items-center mb-6">
-            <div className="text-sm text-gray-300">
-              Wallet balance:{" "}
-              <span className="text-gray-400">
-                {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
-              </span>
-            </div>
-            {saveState.token &&
-            (selectedTokenBalance == 0 ||
-              (saveState.amount && saveState.amount > selectedTokenBalance)) ? (
-              <Button
-                variant="link"
-                className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                onClick={() => navigate("/dashboard/deposit")}>
-                Deposit to save
-              </Button>
-            ) : (
-              <Button
-                className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                onClick={() =>
-                  setSaveState((prev) => ({
-                    ...prev,
-                    amount: selectedTokenBalance,
-                  }))
-                }>
-                Save all
-              </Button>
-            )}
+            <h2 className="text-white text-[20px] font-medium">
+              Top up emergency savings
+            </h2>
+            <button
+              onClick={onClose}
+              className="rounded-full p-2  bg-[#FFFFFF] transition-colors"
+            >
+              <X className="h-5 w-5 text-black" />
+            </button>
           </div>
-        </>
 
-        <div className="flex justify-between my-5">
-          <Button
-            onClick={onClose}
-            className="px-8 py-3 rounded-full bg-[#2A2A2A] text-white font-medium hover:bg-[#333333] border-0">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleTopUp}
-            disabled={isPending || !saveState.amount || !saveState.token}
-            className="px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-gray-200 border-0 disabled:opacity-50 disabled:cursor-not-allowed">
-            {isPending ? (
+          <div className="mb-6">
+            {isSafeLoading ? (
+              <div className="py-4">
+                <div className="flex justify-between items-center mb-2">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-48 mt-1" />
+              </div>
+            ) : safeDetails ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
+                <div className="flex justify-between items-center mb-1">
+                  <h3 className="text-white text-[20px] font-[400]">
+                    {safeDetails.target}
+                  </h3>
+                  <span className="bg-[#79E7BA33] text-[#F1F1F1] text-sm px-3 py-1 rounded-full">
+                    {safeDetails.isLocked
+                      ? safeDetails.unlockTime > new Date()
+                        ? `${Math.ceil(
+                            (safeDetails.unlockTime.getTime() -
+                              new Date().getTime()) /
+                              (1000 * 60 * 60 * 24)
+                          )} days to unlock`
+                        : "Ready to unlock"
+                      : "Flexible"}
+                  </span>
+                </div>
+                <p className="text-[#F1F1F1] text-[14px]">
+                  {safeDetails.isLocked
+                    ? `Next unlock date: ${safeDetails.nextUnlockDate}`
+                    : "Withdraw anytime"}
+                </p>
               </>
             ) : (
-              "Top up"
+              <div className="text-white text-center py-4">Safe not found</div>
             )}
-          </Button>
-        </div>
-      </div>
+          </div>
+          <AmountInput
+            amount={saveState.amount}
+            handleAmountChange={handleAmountChange}
+            handleTokenSelect={handleTokenSelect}
+            saveState={saveState}
+            tokens={tokens}
+            selectedTokenBalance={selectedTokenBalance}
+            validationErrors={validationErrors}
+            supportedTokens={supportedTokens}
+          />
 
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <SuccessfulTxModal
-          onClose={() => {
-            setShowSuccessModal(false);
-            onClose();
-          }}
-          transactionType="top-up"
-          amount={saveState.amount}
-          token={tokenData[saveState.token]?.symbol || ""}
-        />
-      )}
-    </div>
+          {/* Wallet balance */}
+          <>
+            {/* Wallet Balance */}
+            <div className="flex justify-between items-center mb-6">
+              <div className="text-sm text-gray-300">
+                Wallet balance:{" "}
+                <span className="text-gray-400">
+                  {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
+                </span>
+              </div>
+              {saveState.token &&
+              (selectedTokenBalance == 0 ||
+                (saveState.amount &&
+                  saveState.amount > selectedTokenBalance)) ? (
+                <Button
+                  variant="link"
+                  className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                  onClick={() => navigate("/dashboard/deposit")}
+                >
+                  Deposit to save
+                </Button>
+              ) : (
+                <Button
+                  className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
+                  onClick={() =>
+                    setSaveState((prev) => ({
+                      ...prev,
+                      amount: selectedTokenBalance,
+                    }))
+                  }
+                >
+                  Save all
+                </Button>
+              )}
+            </div>
+          </>
+
+          <div className="flex justify-between my-5">
+            <Button
+              onClick={onClose}
+              className="px-8 py-3 rounded-full bg-[#2A2A2A] text-white font-medium hover:bg-[#333333] border-0"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleTopUp}
+              disabled={isPending || !saveState.amount || !saveState.token}
+              className="px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-gray-200 border-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Top up"
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Success Modal */}
+        {showSuccessModal && (
+          <SuccessfulTxModal
+            onClose={() => {
+              setShowSuccessModal(false);
+              onClose();
+            }}
+            transactionType="top-up"
+            amount={saveState.amount}
+            token={tokenData[saveState.token]?.symbol || ""}
+          />
+        )}
+      </div>
+    </Dialog>
   );
 }
