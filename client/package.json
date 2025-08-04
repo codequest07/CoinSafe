@@ -23,7 +23,6 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.1",
-    "@rainbow-me/rainbowkit": "^2.1.5",
     "@tanstack/react-query": "^5.54.1",
     "@tsparticles/engine": "^3.5.0",
     "@tsparticles/react": "^3.0.0",
@@ -56,8 +55,7 @@
     "tailwindcss-animate": "^1.0.7",
     "thirdweb": "^5.105.26",
     "uuid": "^11.1.0",
-    "viem": "^2.21.1",
-    "web3": "^4.12.1"
+    "viem": "^2.21.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
