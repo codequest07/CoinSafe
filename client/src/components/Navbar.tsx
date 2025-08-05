@@ -34,7 +34,8 @@ export default function Navbar() {
             </Link>
             <Button
               className="bg-transparent hover:bg-transparent"
-              onClick={toggleMenu}>
+              onClick={toggleMenu}
+            >
               <X className="h-9 w-9" />
               <span className="sr-only">Close menu</span>
             </Button>
@@ -42,17 +43,19 @@ export default function Navbar() {
           <div className="flex flex-col justify-center items-start p-6 space-y-8 text-white text-5xl font-bold">
             <Link
               to="/testnet"
-              className="hover:text-[#79E7BA] transition-colors">
+              className="hover:text-[#79E7BA] transition-colors"
+            >
               APP
             </Link>
-            <Link
+            {/* <Link
               to="/faucet"
               className="hover:text-[#79E7BA] transition-colors">
               FAUCET
-            </Link>
+            </Link> */}
             <Link
               to="/contact"
-              className="hover:text-[#79E7BA] transition-colors">
+              className="hover:text-[#79E7BA] transition-colors"
+            >
               CONTACT US
             </Link>
           </div>

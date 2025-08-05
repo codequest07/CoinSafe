@@ -5,7 +5,7 @@ export interface Transfer {
   tokenId: string | null;
   asset: string;
   category: string;
-  network: 'mainnet' | 'sepolia'; // Added network field
+  network: "base" | "optimism" | "arbitrum" | "arbitrum-nova"; // Updated network field for mainnet chains
 }
 
 export interface TransfersData {

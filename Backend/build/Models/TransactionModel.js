@@ -17,18 +17,39 @@ const axios_1 = __importDefault(require("axios"));
 class TransactionModel {
     constructor(etherscanApiKey) {
         this.etherscanApiKey = etherscanApiKey;
-        this.apiBaseUrl = "https://api-sepolia.etherscan.io/api";
+        this.apiBaseUrls = {
+            base: "https://api.etherscan.io/v2/api?chainid=8453",
+            optimism: "https://api.etherscan.io/v2/api?chainid=10",
+            arbitrum: "https://api.etherscan.io/v2/api?chainid=42161",
+            "arbitrum-nova": "https://api.etherscan.io/v2/api?chainid=42170",
+        };
         this.maxRetries = 3;
         this.retryDelay = 1000;
     }
     getTransactions(address) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const [externalTransfers, erc20Transfers] = yield Promise.all([
-                    this.fetchExternalTransactions(address),
-                    this.fetchERC20Transfers(address),
+                // Fetch from all networks in parallel
+                const results = yield Promise.allSettled([
+                    this.fetchNetworkTransactions(address, "base"),
+                    this.fetchNetworkTransactions(address, "optimism"),
+                    this.fetchNetworkTransactions(address, "arbitrum"),
+                    this.fetchNetworkTransactions(address, "arbitrum-nova"),
                 ]);
-                return [...externalTransfers, ...erc20Transfers];
+                const allTransfers = [];
+                const networks = ["base", "optimism", "arbitrum", "arbitrum-nova"];
+                results.forEach((result, index) => {
+                    const network = networks[index];
+                    if (result.status === "fulfilled") {
+                        console.log(`Successfully fetched ${result.value.length} transactions from ${network}`);
+                        allTransfers.push(...result.value);
+                    }
+                    else {
+                        console.error(`Failed to fetch transactions from ${network}:`, result.reason);
+                    }
+                });
+                console.log(`Total transactions fetched from all networks: ${allTransfers.length}`);
+                return allTransfers;
             }
             catch (error) {
                 console.error(`Failed to get transactions for ${address}:`, error);
@@ -36,35 +57,50 @@ class TransactionModel {
             }
         });
     }
-    fetchExternalTransactions(address) {
+    // Helper to fetch all transactions for a specific network
+    fetchNetworkTransactions(address, network) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.fetchWithRetry({
+            const [externalTransfers, erc20Transfers] = yield Promise.all([
+                this.fetchExternalTransactions(address, network),
+                this.fetchERC20Transfers(address, network),
+            ]);
+            return [...externalTransfers, ...erc20Transfers];
+        });
+    }
+    fetchExternalTransactions(address, network) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const logPrefix = `${network} External transactions`;
+            return this.fetchWithRetry(network, {
                 module: "account",
                 action: "txlist",
                 address,
                 startblock: 0,
                 endblock: "latest",
                 apikey: this.etherscanApiKey,
-            }, "External transactions").then((response) => this.processExternalTransfers(response));
+            }, logPrefix).then((response) => this.processExternalTransfers(response, network)); // Pass network
         });
     }
-    fetchERC20Transfers(address) {
+    fetchERC20Transfers(address, network) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.fetchWithRetry({
+            const logPrefix = `${network} ERC-20 transfers`;
+            return this.fetchWithRetry(network, {
                 module: "account",
                 action: "tokentx",
                 address,
                 startblock: 0,
                 endblock: "latest",
                 apikey: this.etherscanApiKey,
-            }, "ERC-20 transfers").then((response) => this.processERC20Transfers(response));
+            }, logPrefix).then((response) => this.processERC20Transfers(response, network)); // Pass network
         });
     }
-    fetchWithRetry(params_1, logPrefix_1) {
-        return __awaiter(this, arguments, void 0, function* (params, logPrefix, attempt = 1) {
+    fetchWithRetry(network_1, params_1, logPrefix_1) {
+        return __awaiter(this, arguments, void 0, function* (network, // Added network parameter
+        params, logPrefix, attempt = 1) {
+            const apiUrl = this.apiBaseUrls[network]; // Use network-specific URL
             try {
-                console.log(`${logPrefix} - Attempt ${attempt}: Fetching...`);
-                const response = yield axios_1.default.get(this.apiBaseUrl, { params });
+                console.log(`${logPrefix} - Attempt ${attempt}: Fetching from ${apiUrl}...`);
+                const response = yield axios_1.default.get(apiUrl, { params });
+                // Handle potential rate limits or empty results gracefully
                 const data = response.data;
                 if (data.status !== "1") {
                     if (response.data.message ===
@@ -82,12 +118,13 @@ class TransactionModel {
                     throw error;
                 }
                 yield new Promise((resolve) => setTimeout(resolve, this.retryDelay));
-                return this.fetchWithRetry(params, logPrefix, attempt + 1);
+                return this.fetchWithRetry(network, params, logPrefix, attempt + 1); // Pass network recursively
             }
         });
     }
-    processExternalTransfers(response) {
-        if (response.status !== "1" || !response.result)
+    processExternalTransfers(response, network) {
+        // Added network parameter
+        if (response.status !== "1" || !Array.isArray(response.result))
             return [];
         return response.result
             .filter((tx) => Number(tx.value) > 0)
@@ -96,31 +133,34 @@ class TransactionModel {
             erc721TokenId: null,
             erc1155Metadata: null,
             tokenId: null,
-            asset: "ETH",
+            asset: "ETH", // ETH for all networks
             category: "external",
             hash: tx.hash,
             timestamp: parseInt(tx.timeStamp),
             from: tx.from,
             to: tx.to,
+            network: network, // Add network field
         }));
     }
-    processERC20Transfers(response) {
-        if (response.status !== "1" || !response.result)
+    processERC20Transfers(response, network) {
+        // Added network parameter
+        if (response.status !== "1" || !Array.isArray(response.result))
             return [];
         return response.result
             .filter((tx) => Number(tx.value) > 0)
             .map((tx) => ({
-            value: Number(tx.value) / 10 ** Number(tx.tokenDecimal),
+            value: Number(tx.value) / 10 ** Number(tx.tokenDecimal || 18), // Added default decimal
             erc721TokenId: null,
             erc1155Metadata: null,
             tokenId: tx.tokenID || null,
-            asset: tx.tokenSymbol,
+            asset: tx.tokenSymbol || "Unknown ERC20", // Added default symbol
             category: "erc20",
             hash: tx.hash,
             timestamp: parseInt(tx.timeStamp),
             from: tx.from,
             to: tx.to,
             contractAddress: tx.contractAddress,
+            network: network, // Add network field
         }));
     }
 }

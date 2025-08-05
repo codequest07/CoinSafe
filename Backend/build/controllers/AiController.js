@@ -49,11 +49,17 @@ const alchemy_sdk_1 = require("alchemy-sdk");
 const axios_1 = __importStar(require("axios"));
 const alchemyApiKey = process.env.ALCHEMY_API_KEY;
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-const settings = {
+const networks = [
+    alchemy_sdk_1.Network.ETH_MAINNET,
+    alchemy_sdk_1.Network.BASE_MAINNET,
+    alchemy_sdk_1.Network.ARB_MAINNET,
+    alchemy_sdk_1.Network.OPT_MAINNET,
+];
+// Create Alchemy instances for each mainnet
+const alchemyInstances = networks.map((network) => new alchemy_sdk_1.Alchemy({
     apiKey: alchemyApiKey,
-    network: alchemy_sdk_1.Network.ETH_SEPOLIA,
-};
-const alchemy = new alchemy_sdk_1.Alchemy(settings);
+    network: network,
+}));
 function getClaudeSavingsPlan(transfersData) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
@@ -114,22 +120,49 @@ function main(address) {
             if (!address.startsWith("0x") || address.length !== 42) {
                 throw new Error("Invalid Ethereum address format");
             }
-            console.log("Fetching asset transfers for address:", address);
-            const getTransfers = yield alchemy.core.getAssetTransfers({
-                fromBlock: "0x0",
-                toBlock: "latest",
-                toAddress: address,
-                excludeZeroValue: true,
-                category: [alchemy_sdk_1.AssetTransfersCategory.ERC20],
-            });
-            console.log("Fetched ERC20 transfers:", getTransfers);
-            const getInternalTransfers = yield alchemy.core.getAssetTransfers({
-                fromBlock: "0x0",
-                toBlock: "latest",
-                toAddress: address,
-                excludeZeroValue: true,
-                category: [alchemy_sdk_1.AssetTransfersCategory.INTERNAL],
-            });
+            console.log("Fetching asset transfers for address across multiple chains:", address);
+            // Fetch transfers from all mainnet chains
+            const allTransfersPromises = alchemyInstances.map((alchemy, index) => __awaiter(this, void 0, void 0, function* () {
+                const networkName = networks[index];
+                console.log(`Fetching from ${networkName}...`);
+                try {
+                    const [erc20Transfers, internalTransfers] = yield Promise.all([
+                        alchemy.core.getAssetTransfers({
+                            fromBlock: "0x0",
+                            toBlock: "latest",
+                            toAddress: address,
+                            excludeZeroValue: true,
+                            category: [alchemy_sdk_1.AssetTransfersCategory.ERC20],
+                        }),
+                        alchemy.core.getAssetTransfers({
+                            fromBlock: "0x0",
+                            toBlock: "latest",
+                            toAddress: address,
+                            excludeZeroValue: true,
+                            category: [alchemy_sdk_1.AssetTransfersCategory.INTERNAL],
+                        }),
+                    ]);
+                    return {
+                        network: networkName,
+                        erc20: erc20Transfers.transfers,
+                        internal: internalTransfers.transfers,
+                    };
+                }
+                catch (error) {
+                    console.error(`Error fetching from ${networkName}:`, error);
+                    return {
+                        network: networkName,
+                        erc20: [],
+                        internal: [],
+                    };
+                }
+            }));
+            const allTransfers = yield Promise.all(allTransfersPromises);
+            // Aggregate all transfers from all chains
+            const aggregatedERC20Transfers = allTransfers.flatMap((result) => result.erc20);
+            const aggregatedInternalTransfers = allTransfers.flatMap((result) => result.internal);
+            console.log(`Total ERC20 transfers across all chains: ${aggregatedERC20Transfers.length}`);
+            console.log(`Total internal transfers across all chains: ${aggregatedInternalTransfers.length}`);
             const selectFields = (transfer) => ({
                 value: Number(transfer.value),
                 erc721TokenId: transfer.erc721TokenId,
@@ -138,8 +171,8 @@ function main(address) {
                 asset: transfer.asset || "",
                 category: transfer.category,
             });
-            const filteredERC20Transfers = getTransfers.transfers.map(selectFields);
-            const filteredInternalTransfers = getInternalTransfers.transfers.map(selectFields);
+            const filteredERC20Transfers = aggregatedERC20Transfers.map(selectFields);
+            const filteredInternalTransfers = aggregatedInternalTransfers.map(selectFields);
             const transfersData = {
                 erc20Transfers: filteredERC20Transfers,
                 internalTransfers: filteredInternalTransfers,

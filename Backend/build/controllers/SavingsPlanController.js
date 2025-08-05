@@ -11,12 +11,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SavingsPlanController = void 0;
 class SavingsPlanController {
-    constructor(transactionModel, anthropicService) {
+    constructor(transactionModel, geminiService) {
         this.transactionModel = transactionModel;
-        this.anthropicService = anthropicService;
+        this.geminiService = geminiService;
     }
     getSavingsPlan(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("Received request body:", req.body);
             const { address } = req.body;
             // Input validation
             if (!address) {
@@ -80,7 +81,7 @@ class SavingsPlanController {
             };
             console.log(`Processing ${transfersData.erc20Transfers.length} ERC20 transfers`);
             try {
-                const savingsPlan = yield this.anthropicService.getSavingsPlan(transfersData);
+                const savingsPlan = yield this.geminiService.getSavingsPlan(transfersData);
                 if (!savingsPlan) {
                     throw new Error("Failed to generate savings plan: result is null");
                 }
