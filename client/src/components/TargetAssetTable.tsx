@@ -239,13 +239,13 @@ function AssetTableContent({
           isSecondModalOpen={isSecondModalOpen}
           setIsSecondModalOpen={setIsSecondModalOpen}
         />
-        {safeDetails && (
+        {/* {safeDetails && (
           <TopUpModal
             onClose={() => setShowTopUpModal(false)}
             onTopUp={handleTopUp}
             safeId={Number(safeDetails.id)}
           />
-        )}
+        )} */}
       </>
     );
   }

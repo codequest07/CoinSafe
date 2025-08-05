@@ -16,7 +16,6 @@ import { useActiveAccount } from "thirdweb/react";
 import { getContract } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
 import { getBalance } from "thirdweb/extensions/erc20";
-import MemoRipple from "@/icons/Ripple";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import ApproveTxModal from "../Modals/ApproveTxModal";
 import { useNavigate } from "react-router-dom";
@@ -145,7 +144,8 @@ export default function DepositCard() {
                 <Select
                   onValueChange={handleTokenSelect}
                   value={token}
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   <SelectTrigger className="w-28 h-12 bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                     <div className="flex items-center">
                       {token && tokenData[token]?.image ? (
@@ -162,11 +162,13 @@ export default function DepositCard() {
                         <div
                           className={`w-4 h-4 rounded-full ${
                             tokenData[token]?.color || "bg-gray-600"
-                          } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                          } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                        >
                           {tokenData[token]?.symbol?.charAt(0) || "?"}
                         </div>
                       ) : (
-                        <MemoRipple className="w-4 h-4 mr-2" />
+                        <></>
+                        // <MemoRipple className="w-4 h-4 mr-2" />
                       )}
                       {token ? (
                         <span className="text-white text-sm">
@@ -197,7 +199,8 @@ export default function DepositCard() {
                               <div
                                 className={`w-4 h-4 rounded-full ${
                                   tokenInfo?.color || "bg-gray-600"
-                                } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                                } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                              >
                                 {tokenInfo?.symbol?.charAt(0) || "?"}
                               </div>
                             )}
@@ -205,7 +208,7 @@ export default function DepositCard() {
                               {tokenInfo?.symbol || tokenAddress}
                             </span>
                           </div>
-                      </SelectItem>
+                        </SelectItem>
                       );
                     })}
                   </SelectContent>
@@ -235,13 +238,15 @@ export default function DepositCard() {
                   <Button
                     variant="link"
                     className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                    onClick={() => navigate("/dashboard/deposit")}>
+                    onClick={() => navigate("/dashboard/deposit")}
+                  >
                     Deposit to save
                   </Button>
                 ) : (
                   <Button
                     className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                    onClick={() => setAmount(selectedTokenBalance)}>
+                    onClick={() => setAmount(selectedTokenBalance)}
+                  >
                     Max
                   </Button>
                 )}
@@ -256,7 +261,8 @@ export default function DepositCard() {
             }}
             className="text-black px-8 rounded-[2rem]"
             variant="outline"
-            disabled={isLoading || (amount || 0) > selectedTokenBalance}>
+            disabled={isLoading || (amount || 0) > selectedTokenBalance}
+          >
             {isLoading ? (
               <LoaderCircle className="animate-spin" />
             ) : (

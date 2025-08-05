@@ -365,6 +365,8 @@ const EmergencySafe = () => {
 
       {showTopUpModal && (
         <TopUpEmergencySafe
+          isTopUpModalOpen={showTopUpModal}
+          setIsTopUpModalOpen={setShowTopUpModal}
           onClose={() => setShowTopUpModal(false)}
           onTopUp={() => setShowTopUpModal(false)}
         />
