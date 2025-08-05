@@ -1,4 +1,3 @@
-import MemoDetailsIccon from "@/icons/DetailsIccon";
 import MemoDiscord from "@/icons/Discord";
 import MemoX from "@/icons/X";
 import { Link } from "react-router-dom";
@@ -29,7 +28,7 @@ const UserCard = () => {
             </div>
           </div>
         </div>
-        <MemoDetailsIccon className="w-16 h-16" />
+        <img src='/assets/orb.png' alt="orb" className="w-11 h-11" />
       </div>
       <div className="h-[1px] w-full " />
       <div className="max-w-sm flex  flex-col space-y-4  p-2  text-white">
