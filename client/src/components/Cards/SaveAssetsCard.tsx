@@ -600,7 +600,7 @@ export default function SaveAssetsCard() {
 
               {selectedOption === "per-transaction" && (
                 <div className="flex flex-col items-center justify-center space-y-4 py-4 text-white">
-                  <MemoComingSoonIcon className="w-32 h-32 sm:w-[50%] sm:h-[50vh] text-white" />
+                  <MemoComingSoonIcon className="w-32 h-32 sm:w-[50%] sm:h-[35vh] text-white" />
                   <h1 className="text-xl sm:text-3xl font-bold my-2 text-white leading-tight text-center px-4">
                     We're in the kitchen!
                   </h1>

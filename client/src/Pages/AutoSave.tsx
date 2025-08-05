@@ -120,6 +120,7 @@ const AutoSave = () => {
   } = useAutomatedSafeForUser(userAddress as `0x${string}`);
   const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
   const [savingsBalance] = useRecoilState(savingsBalanceState);
+  // const [isActive, ] = useState(false);
 
   const {
     claimAllAutoSafe,
@@ -413,6 +414,9 @@ const AutoSave = () => {
                         )} days till unlock`
                       : "Ready to unlock"}
                   </div>
+                  {/* {!isActive && (
+                    <div className="bg-red-300 text-red-600 text-center p-2 rounded-[2rem] text-xs inline-block"></div>
+                  )} */}
                 </div>
               </div>
               {/* <p className="text-base my-1 ml-[3.3rem] text-gray-300">
@@ -433,7 +437,7 @@ const AutoSave = () => {
                     Savings Balance
                   </div>
                 </div>
-                <div className="flex flex-col justify-between items-start lg:items-end">
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end">
                   <div>
                     <div>
                       <span className="text-[#F1F1F1] pr-2 text-3xl">
