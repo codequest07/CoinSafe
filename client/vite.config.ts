@@ -25,9 +25,36 @@ export default defineConfig({
       },
       // Increase memory allocation for large builds
       maxParallelFileOps: 5,
+      output: {
+        // Manual chunking to optimize bundle size
+        manualChunks: {
+          // Vendor chunks
+          "vendor-react": ["react", "react-dom"],
+          "vendor-thirdweb": ["thirdweb"],
+          "vendor-walletconnect": [
+            "@walletconnect/universal-provider",
+            "@walletconnect/utils",
+          ],
+          // Crypto libraries
+          // "vendor-crypto": ["sha256"],
+          // UI components
+          "vendor-ui": ["lucide-react"],
+        },
+        // Asset file naming
+        assetFileNames: (assetInfo) => {
+          if (!assetInfo.name) return `assets/[name]-[hash][extname]`;
+
+          const info = assetInfo.name.split(".");
+          const ext = info[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+            return `assets/images/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
+        },
+      },
     },
     // Additional build optimizations
-    chunkSizeWarningLimit: 1600,
+    chunkSizeWarningLimit: 3000, // Single location, increased limit
     minify: "terser",
     terserOptions: {
       compress: {
