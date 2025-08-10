@@ -23,8 +23,8 @@ export default defineConfig({
         // Show other warnings
         warn(warning);
       },
-      // Increase memory allocation for large builds
-      maxParallelFileOps: 5,
+      // Reduce memory allocation to prevent build from being killed
+      maxParallelFileOps: 2,
       output: {
         // Manual chunking to optimize bundle size
         manualChunks: {
@@ -55,12 +55,18 @@ export default defineConfig({
     },
     // Additional build optimizations
     chunkSizeWarningLimit: 3000, // Single location, increased limit
+    // Memory optimization settings
+    target: 'esnext',
+    sourcemap: false, // Disable sourcemaps to reduce memory usage
     minify: "terser",
     terserOptions: {
       compress: {
         drop_console: true, // Remove console logs in production
         drop_debugger: true,
         pure_funcs: ["console.log"], // Remove specific functions
+      },
+      mangle: {
+        safari10: true,
       },
     },
   },
