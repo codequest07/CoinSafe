@@ -1,12 +1,10 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Layout from "./Layout/Layout";
 import Home from "./Pages/Home";
 import Portfolio from "./Pages/Portfolio";
 import Vault from "./Pages/Vault";
 import Staking from "./Pages/Staking";
 import Rewards from "./Pages/Rewards";
-import LandingPage from "./Pages/LandingPage";
-import Extension from "./Pages/Extension";
 import SaveSense from "./Pages/SaveSense";
 import { Toaster } from "./components/ui/toaster";
 // import Faucet from "./Pages/Faucet";
@@ -28,7 +26,6 @@ import {
 } from "./store/atoms/balance";
 import { useWatchEvents } from "./hooks/useWatchEvents";
 import Profile from "./Pages/Profile";
-import ContactUs from "./Pages/Contact-Us";
 import { SmartAccountTransactionProvider } from "./hooks/useSmartAccountTransactionInterceptor";
 import {
   userCurrentStreakState,
