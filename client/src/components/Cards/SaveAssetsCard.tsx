@@ -451,7 +451,7 @@ export default function SaveAssetsCard() {
                 <Button
                   variant="link"
                   className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                  onClick={() => navigate("/dashboard/deposit")}>
+                  onClick={() => navigate("/deposit")}>
                   Deposit to save
                 </Button>
               ) : (
@@ -627,7 +627,7 @@ export default function SaveAssetsCard() {
                       plan and added automated savings plans for all our
                       supported tokens.
                     </p>
-                    <Link to={"/dashboard/vault/auto-safe"}>
+                    <Link to={"/vault/auto-safe"}>
                       <Button
                         variant="link"
                         className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
@@ -670,7 +670,7 @@ export default function SaveAssetsCard() {
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0 self-start sm:self-auto"
-                            onClick={() => navigate("/dashboard/deposit")}
+                            onClick={() => navigate("/deposit")}
                           >
 
                             Deposit to save

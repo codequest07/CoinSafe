@@ -156,7 +156,7 @@ const PercentageCard = () => {
           </div>
           <p>
             <Link
-              to="/savings"
+              to="/save-assets"
               className="text-[12px] text-[#79E7BA] items-center justify-center rounded-md">
               {item.link}
             </Link>{" "}

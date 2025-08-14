@@ -31,7 +31,7 @@ const RecurrentSavingsCard = () => {
         </div>
         <div className="flex justify-center">
           <button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/")}
             className="bg-[#1E1E1E99] text-[#F1F1F1] px-6 py-3 rounded-full">
             Start saving
           </button>

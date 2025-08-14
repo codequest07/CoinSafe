@@ -39,12 +39,12 @@ const TrackingChart = () => {
         <div className="flex justify-center sm:justify-end items-center pb-3 text-white gap-2 sm:gap-3">
           {isConnected && (
             <div className="flex items-center gap-2 my-2 sm:my-4 w-full sm:w-auto">
-              <Link to={"/dashboard/withdraw-assets"}>
+              <Link to={"/withdraw-assets"}>
                 <Button className="flex-1 sm:flex-none bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base">
                   Withdraw
                 </Button>
               </Link>
-              <Link to={"/dashboard/deposit"}>
+              <Link to={"/deposit"}>
                 <Button className="flex-1 sm:flex-none rounded-[100px] px-4 sm:px-8 py-2 bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-sm sm:text-base cursor-pointer">
                   Deposit
                 </Button>

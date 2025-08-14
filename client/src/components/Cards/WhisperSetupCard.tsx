@@ -30,7 +30,7 @@ const WhisperSetupCard = () => {
             With Coinsafe, you can put it to work in high-yield vaults and
             investment plans, designed to maximize your returns.
           </p>
-         <Link to="/dashboard">
+         <Link to="/">
             <Button
               variant="outline"
               className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]"

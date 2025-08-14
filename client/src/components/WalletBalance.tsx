@@ -34,12 +34,12 @@ export default function WalletBalance() {
         {/* Action Buttons */}
         {isConnected && (
           <div className="flex flex-row justify-center gap-3">
-            <Link to={"/dashboard/withdraw-assets"}>
+            <Link to={"/withdraw-assets"}>
               <Button className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
                 Withdraw
               </Button>
             </Link>
-            <Link to={"/dashboard/deposit"}>
+            <Link to={"/deposit"}>
               <Button className="bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white px-4 py-2 rounded-full text-sm flex-1">
                 Deposit
               </Button>
@@ -156,10 +156,10 @@ export default function WalletBalance() {
         {isConnected && (
           <div className="flex flex-row space-x-4">
             <Button className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
-              <Link to={"/dashboard/withdraw-assets"}>Withdraw</Link>
+              <Link to={"/withdraw-assets"}>Withdraw</Link>
             </Button>
             <Button className="bg-[#1E1E1E99] hover:bg-[#1E1E1E99] text-white px-6 py-2 rounded-full">
-              <Link to={"/dashboard/deposit"}>Deposit</Link>
+              <Link to={"/deposit"}>Deposit</Link>
             </Button>
             <Button
               onClick={openFirstModal}
