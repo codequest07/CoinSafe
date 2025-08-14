@@ -22,7 +22,7 @@ const SavingsTools = () => {
             Automate your savings so they happen in the background, or deposit
             manually when it suits you.
           </p>
-          <Link to="/dashboard">
+          <Link to="https://app.coinsafe.network/">
             <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
               Start saving
             </Button>
@@ -41,7 +41,7 @@ const SavingsTools = () => {
             Our AI looks at your past transactions and suggests personalized
             strategies that fit your habits, income, and spending patterns.
           </p>
-          <Link to="/dashboard">
+          <Link to="https://app.coinsafe.network/">
             <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
               Start saving
             </Button>
@@ -62,7 +62,7 @@ const SavingsTools = () => {
             Set goals, track progress, and adjust whenever life changes. Your
             savings, your pace.
           </p>
-          <Link to="/dashboard">
+          <Link to="https://app.coinsafe.network/">
             <Button className="bg-[#3F3F3F99] rounded-[2rem] text-white hover:text-white border-gray-700 hover:bg-[#3F3F3F99]">
               Start saving
             </Button>

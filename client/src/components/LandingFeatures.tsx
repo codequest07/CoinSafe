@@ -18,7 +18,7 @@ export default function LandingFeatures() {
             <br className="hidden sm:block" /> crypto simple, secure, and
             rewarding.
           </h1>
-          <Link to="/dashboard">
+          <Link to="https://app.coinsafe.network/">
             <Button
               variant="secondary"
               className="whitespace-nowrap rounded-full mt-8 sm:mt-0 px-6 py-2">

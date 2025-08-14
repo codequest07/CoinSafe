@@ -40,7 +40,7 @@ export default function Hero() {
                 className="bg-[#262628] text-[#F1F1F1] rounded-[2rem]  sm:w-auto">
                 Download extension
               </Button> */}
-              <Link to="/dashboard">
+              <Link to="https://app.coinsafe.network/">
                 <Button
                   size="lg"
                   variant="outline"

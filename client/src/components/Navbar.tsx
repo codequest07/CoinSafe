@@ -19,8 +19,7 @@ export default function Navbar() {
         </Link>
         <Button
           className="bg-transparent hover:bg-transparent"
-          onClick={toggleMenu}
-        >
+          onClick={toggleMenu}>
           <MemoHandburggerIcon className="w-9 h-9" />
           <span className="sr-only">Menu</span>
         </Button>
@@ -34,17 +33,15 @@ export default function Navbar() {
             </Link>
             <Button
               className="bg-transparent hover:bg-transparent"
-              onClick={toggleMenu}
-            >
+              onClick={toggleMenu}>
               <X className="h-9 w-9" />
               <span className="sr-only">Close menu</span>
             </Button>
           </div>
           <div className="flex flex-col justify-center items-start p-6 space-y-8 text-white text-5xl font-bold">
             <Link
-              to="/testnet"
-              className="hover:text-[#79E7BA] transition-colors"
-            >
+              to="https://app.coinsafe.network/"
+              className="hover:text-[#79E7BA] transition-colors">
               APP
             </Link>
             {/* <Link
@@ -54,8 +51,7 @@ export default function Navbar() {
             </Link> */}
             <Link
               to="/contact"
-              className="hover:text-[#79E7BA] transition-colors"
-            >
+              className="hover:text-[#79E7BA] transition-colors">
               CONTACT US
             </Link>
           </div>

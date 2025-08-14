@@ -13,8 +13,7 @@ const Hero = () => {
           bg-bottom mt-6 bg-blend-overlay px-4 sm:px-6"
       style={{
         backgroundBlendMode: "overlay",
-      }}
-    >
+      }}>
       <div className="absolute bottom-0">
         <img
           src="/assets/hero-image.svg"
@@ -37,14 +36,12 @@ const Hero = () => {
         <div className="flex flex-col sm:flex-row gap-4 pt-10">
           <button
             onClick={() => navigate("/extension")}
-            className="bg-[#1E1E1E99] text-[#F1F1F1] px-5 py-2 sm:px-8 sm:py-3 rounded-[2rem]"
-          >
+            className="bg-[#1E1E1E99] text-[#F1F1F1] px-5 py-2 sm:px-8 sm:py-3 rounded-[2rem]">
             Download extension
           </button>
           <button
-            onClick={() => navigate("/dashboard")}
-            className="bg-[#FFFFFFE5] text-[#010104] px-5 py-2 sm:px-8 sm:py-3 rounded-[2rem]"
-          >
+            onClick={() => navigate("https://app.coinsafe.network/")}
+            className="bg-[#FFFFFFE5] text-[#010104] px-5 py-2 sm:px-8 sm:py-3 rounded-[2rem]">
             Launch app
           </button>
         </div>
