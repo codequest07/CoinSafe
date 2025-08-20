@@ -151,8 +151,7 @@ const DashHeader = () => {
   } days 🔥`;
 
   // Check if we're on a vault detail page
-  const isVaultDetailPage =
-    location.pathname.includes("/vault/") && params.id;
+  const isVaultDetailPage = location.pathname.includes("/vault/") && params.id;
 
   // Get safe details if we're on a vault detail page
   const { safeDetails, isLoading } = useGetSafeById(
@@ -397,7 +396,7 @@ const DashHeader = () => {
                   to={
                     !amount
                       ? "#"
-                      : `https://pay.fonbnk.com/auth?source=o9VjcneL&network=LISK&asset=${selectedCurrency}&amount=${amount}&currency=crypto&countryIsoCode=NG&address=${account?.address}&signature=${token}`
+                      : `https://pay.fonbnk.com/auth?source=o9VjcneL&network=LISK&asset=${selectedCurrency}&amount=${amount}&currency=crypto&paymentChannel=bank&countryIsoCode=NG&address=${account?.address}&signature=${token}`
                   }
                   target="_blank"
                 >
