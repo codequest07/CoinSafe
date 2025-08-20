@@ -77,7 +77,7 @@ function AssetTableContent({ assets }: { assets: any[] }) {
         </p>
         <Button
           className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-          onClick={() => navigate('/dashboard/deposit')}
+          onClick={() => navigate('/deposit')}
         >
           Save Assets
         </Button>

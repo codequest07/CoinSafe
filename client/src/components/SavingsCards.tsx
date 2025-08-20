@@ -229,7 +229,7 @@ export default function SavingsCards() {
               >
                 {hasActiveAutoSavings && (
                   <button
-                    onClick={() => navigate("/dashboard/vault/auto-safe")}
+                    onClick={() => navigate("/vault/auto-safe")}
                     className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors"
                   >
                     <div className="flex justify-between items-start mb-4">
@@ -274,8 +274,8 @@ export default function SavingsCards() {
                     onClick={() =>
                       navigate(
                         safe.id === "911" && safe.name === "Emergency Safe"
-                          ? "/dashboard/vault/emergency-safe"
-                          : `/dashboard/vault/${safe.id}`
+                          ? "/vault/emergency-safe"
+                          : `/vault/${safe.id}`
                       )
                     }
                     className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors"

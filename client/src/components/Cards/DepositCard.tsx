@@ -238,7 +238,7 @@ export default function DepositCard() {
                   <Button
                     variant="link"
                     className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                    onClick={() => navigate("/dashboard/deposit")}
+                    onClick={() => navigate("/deposit")}
                   >
                     Deposit to save
                   </Button>

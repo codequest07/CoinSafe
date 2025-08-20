@@ -46,25 +46,25 @@ interface SavingsCardData {
 
 export const NavLinks = [
   {
-    to: "/dashboard",
+    to: "/",
     icon: MemoDashboard,
     activeIcon: MemoDashboardActive,
     label: "Dashboard",
   },
   {
-    to: "/dashboard/wallet",
+    to: "/wallet",
     icon: MemoPortfolio,
     activeIcon: MemoPortfolioActive,
     label: "Wallet",
   },
   {
-    to: "/dashboard/vault",
+    to: "/vault",
     icon: MemoVault,
     activeIcon: MemoVaultActive,
     label: "Vault",
   },
   {
-    to: "/dashboard/rewards",
+    to: "/rewards",
     icon: MemoReward,
     activeIcon: MemoRewardActive,
     label: "Rewards",

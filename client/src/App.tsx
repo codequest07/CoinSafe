@@ -1,12 +1,10 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Layout from "./Layout/Layout";
 import Home from "./Pages/Home";
 import Portfolio from "./Pages/Portfolio";
 import Vault from "./Pages/Vault";
 import Staking from "./Pages/Staking";
 import Rewards from "./Pages/Rewards";
-import LandingPage from "./Pages/LandingPage";
-import Extension from "./Pages/Extension";
 import SaveSense from "./Pages/SaveSense";
 import { Toaster } from "./components/ui/toaster";
 // import Faucet from "./Pages/Faucet";
@@ -28,9 +26,11 @@ import {
 } from "./store/atoms/balance";
 import { useWatchEvents } from "./hooks/useWatchEvents";
 import Profile from "./Pages/Profile";
-import ContactUs from "./Pages/Contact-Us";
 import { SmartAccountTransactionProvider } from "./hooks/useSmartAccountTransactionInterceptor";
-import { userCurrentStreakState, userLongestStreakState } from "./store/atoms/streak";
+import {
+  userCurrentStreakState,
+  userLongestStreakState,
+} from "./store/atoms/streak";
 
 const App = () => {
   const [, setAvailableBalance] = useRecoilState(availableBalanceState);
@@ -83,29 +83,26 @@ const App = () => {
     <div className="bg-[#010104]">
       <SmartAccountTransactionProvider>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/extension" element={<Extension />} />
-          <Route path="/testnet" element={<Navigate to={"/dashboard"} />} />
-          <Route path="/contact" element={<ContactUs />} />
+          {/* <Route path="/" element={<LandingPage />} /> */}
+          {/* <Route path="/" element={<Navigate to={"/dashboard"} />} /> */}
+          {/* <Route path="/extension" element={<Extension />} /> */}
+          {/* <Route path="/contact" element={<ContactUs />} /> */}
           {/* <Route path="/faucet" element={<Faucet />} /> */}
-          <Route path="/dashboard" element={<Layout />}>
-            <Route path="/dashboard/" element={<Home />} />
-            <Route path="/dashboard/wallet" element={<Portfolio />} />
-            <Route path="/dashboard/vault" element={<Vault />} />
-            <Route path="/dashboard/vault/:id" element={<SavingsDetail />} />
-            <Route path="/dashboard/profile" element={<Profile />} />
-            <Route
-              path="/dashboard/vault/emergency-safe"
-              element={<EmergencySafe />}
-            />
-            <Route path="/dashboard/vault/auto-safe" element={<AutoSave />} />
-            <Route path="/dashboard/staking" element={<Staking />} />
-            <Route path="/dashboard/rewards" element={<Rewards />} />
-            <Route path="/dashboard/SaveSense" element={<SaveSense />} />
+          <Route path="/" element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/wallet" element={<Portfolio />} />
+            <Route path="/vault" element={<Vault />} />
+            <Route path="/vault/:id" element={<SavingsDetail />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/vault/emergency-safe" element={<EmergencySafe />} />
+            <Route path="/vault/auto-safe" element={<AutoSave />} />
+            <Route path="/staking" element={<Staking />} />
+            <Route path="/rewards" element={<Rewards />} />
+            <Route path="/SaveSense" element={<SaveSense />} />
             {/* Test */}
-            <Route path="/dashboard/save-assets" element={<SaveAssets />} />
-            <Route path="/dashboard/deposit" element={<Deposit />} />
-            <Route path="/dashboard/withdraw-assets" element={<Withdraw />} />
+            <Route path="/save-assets" element={<SaveAssets />} />
+            <Route path="/deposit" element={<Deposit />} />
+            <Route path="/withdraw-assets" element={<Withdraw />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

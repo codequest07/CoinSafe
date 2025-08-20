@@ -22,7 +22,7 @@ export default function ScheduledSavings() {
     }));
 
     // Navigate to the save-assets page
-    navigate("/dashboard/save-assets");
+    navigate("/save-assets");
   };
 
   return (
@@ -89,7 +89,7 @@ export default function ScheduledSavings() {
               </p>
               <div className="flex gap-5">
                 <Button
-                  onClick={() => navigate("/dashboard/deposit")}
+                  onClick={() => navigate("/deposit")}
                   className="rounded-[100px] px-8 py-2 bg-[#1E1E1E99] text-[#F1F1F1] hover:bg-[#2a2a2a] text-sm"
                 >
                   Deposit

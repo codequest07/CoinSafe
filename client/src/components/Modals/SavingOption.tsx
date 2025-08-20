@@ -62,7 +62,7 @@ export default function SavingOption({
       handleButtonClick();
       return;
     }
-    navigate("/dashboard/save-assets");
+    navigate("/save-assets");
   };
 
   // Update the Recoil state when the UI selection changes

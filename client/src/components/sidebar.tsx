@@ -156,13 +156,13 @@ const Sidebar = () => {
     const currentPath = location.pathname;
 
     // Exact match for dashboard
-    if (path === "/dashboard") {
-      return currentPath === "/dashboard";
+    if (path === "/") {
+      return currentPath === "/";
     }
 
     // For other routes, check if the current path starts with the link path
     // but is not just the dashboard path
-    return currentPath.startsWith(path) && path !== "/dashboard";
+    return currentPath.startsWith(path) && path !== "/";
   };
 
   return (
@@ -172,7 +172,7 @@ const Sidebar = () => {
           <div className="flex h-full max-h-fit shadow-lg rounded-xl flex-col gap-2">
             <div className="flex items-center py-12 px-4 lg:h-[60px] lg:px-6">
               <Link
-                to="/dashboard"
+                to="/"
                 className="flex items-center gap-2 font-semibold"
               >
                 <MemoLogo className="w-40 h-40" />

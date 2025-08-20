@@ -25,7 +25,7 @@ const TrackProgress = () => {
           </div>
           {/* <div className="mt-6 md:mt-0">
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/")}
               className="bg-[#1E1E1E99] text-[#F1F1F1] px-4 py-2 md:px-6 md:py-3 rounded-full">
               Get Started
             </button>

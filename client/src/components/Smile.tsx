@@ -22,7 +22,7 @@ export default function SmileFace() {
         Connect wallet
       </Button> */}
 
-      <Link to={"/dashboard/profile"}>
+      <Link to={"/profile"}>
         <button className="cursor-pointer">
           <img src="/assets/profile-icon.svg" alt="" />
         </button>

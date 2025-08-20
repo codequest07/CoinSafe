@@ -152,7 +152,7 @@ const DashHeader = () => {
 
   // Check if we're on a vault detail page
   const isVaultDetailPage =
-    location.pathname.includes("/dashboard/vault/") && params.id;
+    location.pathname.includes("/vault/") && params.id;
 
   // Get safe details if we're on a vault detail page
   const { safeDetails, isLoading } = useGetSafeById(
