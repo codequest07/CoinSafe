@@ -171,6 +171,8 @@ export const useBalances = (address: string) => {
 
         const usdResults = await Promise.all(usdPromises);
 
+        console.log("USD RESULTS: ", usdResults)
+
         let totalUsd = 0;
         let availableUsd = 0;
         let savedUsd = 0;

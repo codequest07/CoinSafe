@@ -5,12 +5,18 @@ export const base_uri = "https://coinsafe-0q0m.onrender.com/api/coingecko";
 
 export const getLskToUsd = async (lsk: number) => {
   const options = {
-        method: 'GET',
-        headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-xEDfyZh1gVhZ5LFCEuzwUW6M' }
-    };
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
+    },
+  };
   try {
     // const res = await fetch(`${base_uri}/api-cg/lisk`);
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=lisk', options);
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=lisk",
+      options
+    );
     const data = await res.json();
 
     if (data?.lisk?.usd) {
@@ -30,16 +36,29 @@ export const getSafuToUsd = (safu: number) => {
 
 export const getUsdtToUsd = async (usdt: number) => {
   const options = {
-        method: 'GET',
-        headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-xEDfyZh1gVhZ5LFCEuzwUW6M' }
-    };
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
+    },
+  };
 
   try {
     // const res = await fetch(`${base_uri}/api-cg/tether`);
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=tether', options)
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=tether",
+      options
+    );
     const data = await res.json();
 
+    console.log("=====================================");
+    console.log("USDT", data);
+    console.log("=====================================");
+
     if (data?.tether?.usd) {
+      console.log("=====================================");
+      console.log("USDT", data);
+      console.log("=====================================");
       return data.tether.usd * usdt;
     } else {
       throw new Error("USDT data or USD price not available");
@@ -52,15 +71,24 @@ export const getUsdtToUsd = async (usdt: number) => {
 
 export const getUsdcToUsd = async (usdc: number) => {
   const options = {
-        method: 'GET',
-        headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-xEDfyZh1gVhZ5LFCEuzwUW6M' }
-    };
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
+    },
+  };
   try {
     // const res = await fetch(`${base_uri}/api-cg/usd-coin`);
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=usd-coin', options);
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=usd-coin",
+      options
+    );
     const data = await res.json();
 
     if (data?.["usd-coin"]?.usd) {
+      console.log("=====================================");
+      console.log("USDT", data);
+      console.log("=====================================");
       return data["usd-coin"].usd * usdc;
     } else {
       throw new Error("USDC data or USD price not available");

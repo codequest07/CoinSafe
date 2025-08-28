@@ -61,16 +61,17 @@ export const convertTokenAmountToUsd = async (
   token: string,
   amount: bigint
 ): Promise<number> => {
+  const tokenDecimals = getTokenDecimals(token);
   switch (token) {
     case tokens.usdt:
       // this will be changed when going mainnet
-      return await getUsdtToUsd(Number(formatUnits(amount, 18)));
+      return await getUsdtToUsd(Number(formatUnits(amount, tokenDecimals)));
     case tokens.safu:
-      return getSafuToUsd(Number(formatUnits(amount, 18)));
+      return getSafuToUsd(Number(formatUnits(amount, tokenDecimals)));
     case tokens.lsk:
-      return await getLskToUsd(Number(formatUnits(amount, 18)));
+      return await getLskToUsd(Number(formatUnits(amount, tokenDecimals)));
     case tokens.usdc:
-      return await getUsdcToUsd(Number(formatUnits(amount, 6)));
+      return await getUsdcToUsd(Number(formatUnits(amount, tokenDecimals)));
     default:
       console.error("Unknown token address:", token);
       return 0;

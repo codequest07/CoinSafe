@@ -15,7 +15,7 @@ import {
   type Transaction,
   useTransactionHistory,
 } from "@/hooks/useTransactionHistory";
-import { formatEther } from "viem";
+import { formatUnits } from "viem";
 import { capitalize } from "@/utils/capitalize";
 import { Button } from "./ui/button";
 import MemoStory from "@/icons/Story";
@@ -24,7 +24,7 @@ import SavingOption from "./Modals/SavingOption";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { useActiveAccount } from "thirdweb/react";
 // import { ChevronDown, ExternalLink } from "lucide-react";
-import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
+import { convertTokenAmountToUsd, getTokenDecimals, tokenData } from "@/lib/utils";
 import Deposit from "@/components/Depositt";
 
 enum TxStatus {
@@ -255,7 +255,7 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                               <div className="flex flex-col">
                                 <span className="flex items-center gap-2 text-sm text-gray-400">
                                   <span>
-                                    {formatEther(transaction.amount)}{" "}
+                                    {formatUnits(transaction.amount, getTokenDecimals(transaction.token))}{" "}
                                     {tokenData[transaction.token]?.symbol}
                                   </span>
                                   <img
