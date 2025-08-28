@@ -4,8 +4,13 @@ import { tokens } from "./contract";
 export const base_uri = "https://coinsafe-0q0m.onrender.com/api/coingecko";
 
 export const getLskToUsd = async (lsk: number) => {
+  const options = {
+        method: 'GET',
+        headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-xEDfyZh1gVhZ5LFCEuzwUW6M' }
+    };
   try {
-    const res = await fetch(`${base_uri}/api-cg/lisk`);
+    // const res = await fetch(`${base_uri}/api-cg/lisk`);
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=lisk', options);
     const data = await res.json();
 
     if (data?.lisk?.usd) {
@@ -24,8 +29,14 @@ export const getSafuToUsd = (safu: number) => {
 };
 
 export const getUsdtToUsd = async (usdt: number) => {
+  const options = {
+        method: 'GET',
+        headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-xEDfyZh1gVhZ5LFCEuzwUW6M' }
+    };
+
   try {
-    const res = await fetch(`${base_uri}/api-cg/tether`);
+    // const res = await fetch(`${base_uri}/api-cg/tether`);
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=tether', options)
     const data = await res.json();
 
     if (data?.tether?.usd) {
@@ -40,8 +51,13 @@ export const getUsdtToUsd = async (usdt: number) => {
 };
 
 export const getUsdcToUsd = async (usdc: number) => {
+  const options = {
+        method: 'GET',
+        headers: { accept: 'application/json', 'x-cg-demo-api-key': 'CG-xEDfyZh1gVhZ5LFCEuzwUW6M' }
+    };
   try {
-    const res = await fetch(`${base_uri}/api-cg/usd-coin`);
+    // const res = await fetch(`${base_uri}/api-cg/usd-coin`);
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=usd-coin', options);
     const data = await res.json();
 
     if (data?.["usd-coin"]?.usd) {
