@@ -17,7 +17,7 @@ const PoweredBy = () => {
             className="bg-[#1E1E1E99] text-[#F1F1F1] px-5 py-2 sm:px-8 sm:py-3 rounded-full">
             Download extension
           </button> */}
-          <Link to={"/dashboard"}>
+          <Link to={"/"}>
             <button className="bg-[#FFFFFFE5] text-[#010104] px-5 py-2 sm:px-8 sm:py-3 rounded-full">
               Start saving
             </button>

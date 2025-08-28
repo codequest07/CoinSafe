@@ -15,8 +15,8 @@ interface AssetTabsProps {
 export function AssetTabs({ safeDetails, isLoading }: AssetTabsProps) {
   const [activeTab, setActiveTab] = useState<"assets" | "savings">("assets");
   const location = useLocation();
-  const isVaultPage = location.pathname === "/dashboard/vault";
-  const isAutoSafePage = location.pathname === "/dashboard/vault/auto-safe";
+  const isVaultPage = location.pathname === "/vault";
+  const isAutoSafePage = location.pathname === "/vault/auto-safe";
 
   return (
     <div className="w-full mx-auto">

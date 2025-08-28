@@ -6,7 +6,7 @@ import crypto from "crypto";
 
 // Helper function to generate verification link and HTML
 const generateVerificationContent = (email: string, token: string) => {
-  const verificationLink = `https://www.coinsafe.network/dashboard/profile?token=${token}&email=${encodeURIComponent(
+  const verificationLink = `https://www.app.coinsafe.network/profile?token=${token}&email=${encodeURIComponent(
     // const verificationLink = `http://localhost:5173/dashboard/profile?token=${token}&email=${encodeURIComponent(
     email
   )}`;
@@ -296,7 +296,7 @@ export const updateEmail = async (req: Request, res: Response) => {
     );
     console.log(
       "6. Verification link generated:",
-      `https://www.coinsafe.network/dashboard/profile?token=${verificationToken}&email=${encodeURIComponent(
+      `https://www.app.coinsafe.network/profile?token=${verificationToken}&email=${encodeURIComponent(
         // `http://localhost:5173/dashboard/profile?token=${verificationToken}&email=${encodeURIComponent(
         email
       )}`
