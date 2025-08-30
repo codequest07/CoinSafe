@@ -57,6 +57,7 @@ const DashHeader = () => {
   const [selectedCurrency, setSelectedCurrency] = useState("LSK");
   const [, setUsdValue] = useState<number>(0);
   const [openOnRampModal, setOpenOnRampModal] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   /**
    * Calculates USD equivalent when amount or currency changes
@@ -222,7 +223,7 @@ const DashHeader = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="text-white">
                 <Menu className="h-5 w-5" />
@@ -236,7 +237,7 @@ const DashHeader = () => {
               className="flex flex-col bg-[#13131373] border-r border-r-[#333333]"
             >
               <nav className="grid gap-2 text-lg font-medium">
-                <Link to="/" className="flex items-center gap-2 font-semibold">
+                <Link to="/" onClick={() => setIsSheetOpen(false)} className="flex items-center gap-2 font-semibold">
                   <MemoLogo className="w-32 h-10" />
                 </Link>
 
@@ -244,6 +245,7 @@ const DashHeader = () => {
                   <NavLink
                     key={link.label}
                     to={link.to}
+                    onClick={() => setIsSheetOpen(false)}
                     className={({ isActive }) =>
                       isActive
                         ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
