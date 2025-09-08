@@ -5,12 +5,11 @@ import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
 import { tokens, CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Button } from "../ui/button";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, X } from "lucide-react";
 import { unlockStateAtom, UnlockState } from "@/store/atoms/unlock";
 import { supportedTokensState } from "@/store/atoms/balance";
-import MemoBackIcon from "@/icons/BackIcon";
 import { Badge } from "../ui/badge";
-import { Dialog, DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
+// import { Dialog, DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
 
 import { Skeleton } from "../ui/skeleton";
 
@@ -304,177 +303,192 @@ export default function UnlockModal({
 
   return (
     <>
-      <Dialog
-        open={true}
-        onOpenChange={(open) => {
-          if (!open && onClose) {
-            onClose();
-          }
-        }}>
-        <DialogContent className="sm:max-w-[600px] border-1 border-[#FFFFFF21] text-white bg-[#17171C] max-h-[90vh] overflow-y-auto">
-          <DialogTitle className="text-white flex items-center space-x-3">
-            <MemoBackIcon className="w-6 h-6 cursor-pointer" />
-            <p>Unlock savings</p>
-          </DialogTitle>
-          <div className="space-y-2">
-            <AmountInput
-              amount={saveState.amount}
-              handleAmountChange={handleAmountChange}
-              handleTokenSelect={handleTokenSelect}
-              saveState={saveState}
-              tokens={tokens}
-              selectedTokenBalance={selectedTokenBalance}
-              validationErrors={validationErrors}
-              supportedTokens={supportedTokens}
-            />
-          </div>
-          <div className="flex justify-between items-center mb-6">
-            <div className="text-sm text-gray-300">
-              Saved balance:{" "}
-              <span className="text-gray-400">
-                {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
-              </span>
+      <div className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50 p-4 sm:p-6 md:p-8 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center bg-transparent z-50">
+          <div
+            className="absolute inset-0 bg-black/80"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          ></div>
+          <div className="relative w-full max-w-lg rounded-xl bg-[#17171C] text-white shadow-lg p-5 border border-white/15">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-[500]">Unlock savings</h2>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // handleApproval(false);
+                }}
+                className="rounded-full p-1 bg-white "
+                aria-label="Close"
+              >
+                <X className="h-4 w-4 text-black" />
+              </button>
             </div>
-            <button
-              className="text-sm text-[#5b8c7b] hover:text-[#79E7BA] transition-colors"
-              onClick={() => {
-                if (selectedTokenBalance > 0) {
-                  // Get normalized balance for Max button
-                  let maxAmount = selectedTokenBalance;
-                  const symbol = tokenData[saveState.token]?.symbol;
 
-                  // If it's USDT and the value is very large, normalize it
-                  if (symbol === "USDT" && maxAmount >= 1000000) {
-                    maxAmount = maxAmount / 1000000;
+            <div className="space-y-2 mt-8">
+              <AmountInput
+                amount={saveState.amount}
+                handleAmountChange={handleAmountChange}
+                handleTokenSelect={handleTokenSelect}
+                saveState={saveState}
+                tokens={tokens}
+                selectedTokenBalance={selectedTokenBalance}
+                validationErrors={validationErrors}
+                supportedTokens={supportedTokens}
+              />
+            </div>
+            <div className="flex justify-between items-center mb-6">
+              <div className="text-sm text-gray-300">
+                Saved balance:{" "}
+                <span className="text-gray-400">
+                  {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
+                </span>
+              </div>
+              <button
+                className="text-sm text-[#5b8c7b] hover:text-[#79E7BA] transition-colors"
+                onClick={() => {
+                  if (selectedTokenBalance > 0) {
+                    // Get normalized balance for Max button
+                    let maxAmount = selectedTokenBalance;
+                    const symbol = tokenData[saveState.token]?.symbol;
+
+                    // If it's USDT and the value is very large, normalize it
+                    if (symbol === "USDT" && maxAmount >= 1000000) {
+                      maxAmount = maxAmount / 1000000;
+                    }
+
+                    // Update both states to ensure synchronization
+                    setSaveState((prev) => ({
+                      ...prev,
+                      amount: maxAmount,
+                    }));
+                    setUnlockState((prev) => ({
+                      ...prev,
+                      amount: maxAmount,
+                    }));
+
+                    console.log(`Setting max amount: ${maxAmount}`);
+                  } else {
+                    toast({
+                      title: "No balance to unlock",
+                      description:
+                        "You don't have any tokens to unlock in this safe",
+                      variant: "destructive",
+                    });
                   }
-
-                  // Update both states to ensure synchronization
-                  setSaveState((prev) => ({
-                    ...prev,
-                    amount: maxAmount,
-                  }));
-                  setUnlockState((prev) => ({
-                    ...prev,
-                    amount: maxAmount,
-                  }));
-
-                  console.log(`Setting max amount: ${maxAmount}`);
-                } else {
-                  toast({
-                    title: "No balance to unlock",
-                    description:
-                      "You don't have any tokens to unlock in this safe",
-                    variant: "destructive",
-                  });
-                }
-              }}>
-              Max
-            </button>
-          </div>
-
-          {isSafeLoading ? (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <div className="flex justify-between items-center">
-                  <Skeleton className="h-6 w-40" />
-                  <Skeleton className="h-6 w-24 rounded-full" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <div className="flex justify-between items-center">
-                  <div>
-                    <Skeleton className="h-6 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                  <Skeleton className="h-4 w-16" />
-                </div>
-              </div>
+                }}
+              >
+                Max
+              </button>
             </div>
-          ) : safeDetails ? (
-            <>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-400">
-                  Next free unlock date
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="font-medium">
-                    {safeDetails.unlockTime > new Date()
-                      ? format(safeDetails.unlockTime, "dd MMM, yyyy • HH:mm")
-                      : "Ready to unlock"}
-                  </div>
-                  {safeDetails.unlockTime > new Date() && (
-                    <Badge className="bg-[#2a2a2a] text-white hover:bg-[#2a2a2a] rounded-full text-xs py-1">
-                      {Math.ceil(
-                        (safeDetails.unlockTime.getTime() -
-                          new Date().getTime()) /
-                          (1000 * 60 * 60 * 24)
-                      )}{" "}
-                      days left
-                    </Badge>
-                  )}
-                </div>
-              </div>
 
-              {safeDetails.unlockTime > new Date() && (
+            {isSafeLoading ? (
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <div className="text-sm text-gray-400">Breaking fee</div>
+                  <Skeleton className="h-4 w-32" />
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="h-6 w-40" />
+                    <Skeleton className="h-6 w-24 rounded-full" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
                   <div className="flex justify-between items-center">
                     <div>
-                      {isLoadingFee ? (
-                        <Skeleton className="h-6 w-32" />
-                      ) : (
-                        <div className="font-medium">
-                          {breakingFeeAmount.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 6,
-                          })}{" "}
-                          {tokenData[saveState.token]?.symbol || ""}
-                        </div>
-                      )}
-                      <div className="text-xs text-gray-400">
-                        {breakingFeePercentage}% of unlocked amount
-                      </div>
+                      <Skeleton className="h-6 w-32" />
+                      <Skeleton className="h-4 w-24" />
                     </div>
-                    <div className="text-sm text-gray-400">
-                      ≈ $
-                      {breakingFeeUsd.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </div>
+                    <Skeleton className="h-4 w-16" />
                   </div>
                 </div>
-              )}
-            </>
-          ) : null}
+              </div>
+            ) : safeDetails ? (
+              <>
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-400">
+                    Next free unlock date
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="font-medium">
+                      {safeDetails.unlockTime > new Date()
+                        ? format(safeDetails.unlockTime, "dd MMM, yyyy • HH:mm")
+                        : "Ready to unlock"}
+                    </div>
+                    {safeDetails.unlockTime > new Date() && (
+                      <Badge className="bg-[#2a2a2a] text-white hover:bg-[#2a2a2a] rounded-full text-xs py-1">
+                        {Math.ceil(
+                          (safeDetails.unlockTime.getTime() -
+                            new Date().getTime()) /
+                            (1000 * 60 * 60 * 24)
+                        )}{" "}
+                        days left
+                      </Badge>
+                    )}
+                  </div>
+                </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-            <Button
-              onClick={() => onClose && onClose()}
-              className="bg-[#1E1E1E99] px-8 py-3 sm:py-2 rounded-[2rem] hover:bg-[#1E1E1E99] w-full sm:w-auto text-sm sm:text-base"
-              type="submit">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleUnlockClick}
-              className="text-black px-8 py-3 sm:py-2 rounded-[2rem] w-full sm:w-auto text-sm sm:text-base bg-white hover:bg-gray-100"
-              variant="outline"
-              disabled={isPending || !saveState.amount || !saveState.token}>
-              {isPending ? (
-                <>
-                  <LoaderCircle className="animate-spin mr-2 w-4 h-4 sm:w-5 sm:h-5" />
-                  Processing...
-                </>
-              ) : (
-                "Unlock savings"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                {safeDetails.unlockTime > new Date() && (
+                  <div className="space-y-2">
+                    <div className="text-sm text-gray-400">Breaking fee</div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        {isLoadingFee ? (
+                          <Skeleton className="h-6 w-32" />
+                        ) : (
+                          <div className="font-medium">
+                            {breakingFeeAmount.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 6,
+                            })}{" "}
+                            {tokenData[saveState.token]?.symbol || ""}
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-400">
+                          {breakingFeePercentage}% of unlocked amount
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        ≈ $
+                        {breakingFeeUsd.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : null}
+
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 justify-end gap-3 items-center mt-5 ">
+              <Button
+                onClick={() => onClose && onClose()}
+                className="bg-[#1E1E1E99] px-8 py-3 sm:py-2 rounded-[2rem] hover:bg-[#1E1E1E99] w-full sm:w-auto text-sm sm:text-base"
+                type="submit"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUnlockClick}
+                className="text-black px-8 py-3 sm:py-2 rounded-[2rem] w-full sm:w-auto text-sm sm:text-base bg-white hover:bg-gray-100"
+                variant="outline"
+                disabled={isPending || !saveState.amount || !saveState.token}
+              >
+                {isPending ? (
+                  <>
+                    <LoaderCircle className="animate-spin mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                    Processing...
+                  </>
+                ) : (
+                  "Unlock savings"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Approval Transaction Modal */}
       <ApproveTxModal
         isOpen={showApproveTxModal}

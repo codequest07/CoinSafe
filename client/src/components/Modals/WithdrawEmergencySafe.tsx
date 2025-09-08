@@ -22,7 +22,6 @@ import SuccessfulTxModal from "./SuccessfulTxModal";
 import ApproveTxModal from "./ApproveTxModal";
 import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
-import MemoRipple from "@/icons/Ripple";
 import { getTokenPrice } from "@/lib";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { supportedTokensState } from "@/store/atoms/balance";
@@ -110,7 +109,9 @@ export default function WithdrawEmergencySafe({
 
       const tokenBalance = (AvailableBalance[token] as bigint) || 0n;
 
-      setSelectedTokenBalance(Number(formatUnits(tokenBalance, getTokenDecimals(token))));
+      setSelectedTokenBalance(
+        Number(formatUnits(tokenBalance, getTokenDecimals(token)))
+      );
     }
   }, [token, address, AvailableBalance]);
 
@@ -138,18 +139,71 @@ export default function WithdrawEmergencySafe({
               </div>
               <div className="sm:ml-4">
                 <Select onValueChange={handleTokenSelect} value={token}>
-                  <SelectTrigger className="w-[160px] border border-[#FFFFFF3D] bg-[#3F3F3F99]/60 text-white rounded-md">
+                  <SelectTrigger className="w-28 h-12 bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                     <div className="flex items-center">
-                      <MemoRipple className="mr-2" />
-                      <SelectValue placeholder="Select Token" />
+                      {token && tokenData[token]?.image ? (
+                        <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center mr-2">
+                          <img
+                            src={tokenData[token].image}
+                            width={16}
+                            height={16}
+                            className="w-full h-full"
+                            alt={tokenData[token].symbol}
+                          />
+                        </div>
+                      ) : token && tokenData[token] ? (
+                        <div
+                          className={`w-4 h-4 rounded-full ${
+                            tokenData[token]?.color || "bg-gray-600"
+                          } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                        >
+                          {tokenData[token]?.symbol?.charAt(0) || "?"}
+                        </div>
+                      ) : (
+                        <></>
+                        // <MemoRipple className="w-4 h-4 mr-2" />
+                      )}
+                      {token ? (
+                        <span className="text-white text-sm">
+                          {tokenData[token]?.symbol}
+                        </span>
+                      ) : (
+                        <SelectValue placeholder="Token" />
+                      )}
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    {supportedTokens.map((token) => (
-                      <SelectItem value={token} key={token}>
-                        {tokenData[token]?.symbol}
-                      </SelectItem>
-                    ))}
+                    {supportedTokens.map((tokenAddress) => {
+                      const tokenInfo = tokenData[tokenAddress];
+                      return (
+                        <SelectItem value={tokenAddress} key={tokenAddress}>
+                          <div className="flex items-center">
+                            {tokenInfo?.image ? (
+                              <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center mr-2">
+                                <img
+                                  src={tokenInfo.image}
+                                  width={16}
+                                  height={16}
+                                  className="w-full h-full"
+                                  alt={tokenInfo.symbol}
+                                />
+                              </div>
+                            ) : (
+                              <div
+                                className={`w-4 h-4 rounded-full ${
+                                  tokenInfo?.color || "bg-gray-600"
+                                } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                              >
+                                {tokenInfo?.symbol?.charAt(0) || "?"}
+                              </div>
+                            )}
+                            <span className="text-sm">
+                              {tokenInfo?.symbol || tokenAddress}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>

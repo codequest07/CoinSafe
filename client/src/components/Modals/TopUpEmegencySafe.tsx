@@ -75,8 +75,7 @@ export default function TopUpEmergencySafe({
     // Update selected token balance
     if (AvailableBalance && value) {
       const tokenBalance = (AvailableBalance[value] as bigint) || 0n;
-      const decimals =
-        value.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
+      const decimals = getTokenDecimals(value);
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   };
@@ -93,8 +92,7 @@ export default function TopUpEmergencySafe({
   useEffect(() => {
     if (AvailableBalance && saveState.token) {
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
-      const decimals =
-        saveState.token.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
+      const decimals = getTokenDecimals(saveState.token)
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   }, [AvailableBalance, saveState.token]);
