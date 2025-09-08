@@ -93,7 +93,6 @@ export default function TopUpEmergencySafe({
     if (AvailableBalance && saveState.token) {
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
       const decimals = getTokenDecimals(saveState.token)
-      alert(decimals)
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   }, [AvailableBalance, saveState.token]);

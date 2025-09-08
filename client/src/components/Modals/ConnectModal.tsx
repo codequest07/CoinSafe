@@ -1,10 +1,11 @@
-import { useConnectModal } from "thirdweb/react";
+import { useActiveWalletConnectionStatus, useConnectModal } from "thirdweb/react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { useEffect, useState } from "react";
 import { client, liskMainnet } from "@/lib/config";
 import { darkTheme } from "thirdweb/react";
 import { wallets } from "@/lib/wallets";
+import { Loader2 } from "lucide-react";
 
 const ConnectModal = ({
   isConnectModalOpen,
@@ -13,7 +14,8 @@ const ConnectModal = ({
   isConnectModalOpen: boolean;
   setIsConnectModalOpen: (open: boolean) => void;
 }) => {
-  const { connect, isConnecting } = useConnectModal();
+  const { connect, isConnecting  } = useConnectModal();
+  const status = useActiveWalletConnectionStatus()
   const [localIsConnecting, setLocalIsConnecting] = useState(false);
 
   const handleConnect = async () => {
@@ -58,31 +60,45 @@ const ConnectModal = ({
   return (
     <Dialog open={isConnectModalOpen} onOpenChange={setIsConnectModalOpen}>
       <DialogContent className="max-w-[390px] sm:max-w-[400px] border-0 text-white bg-[#17171C]">
-        <div className="flex items-center justify-center">
-          <img src="/assets/wallet.png" alt="wallet-icon" className="w-32" />
-        </div>
-        <p className="my-3 text-[16px] text-center text-[#F1F1F1]">
-          Connect your wallet to get the best of coinsafe
-        </p>
-        <div className="flex gap-2 items-center justify-center w-full">
-          <Button
-            className="rounded-full border-none outline-none font-light py-2 px-10 text-sm bg-[#FFFFFF2B]/20"
-            onClick={() => setIsConnectModalOpen(false)}
-            disabled={isConnecting || localIsConnecting}
-          >
-            Close
-          </Button>
-          <Button
-            className="rounded-full border-none outline-none text-black font-light py-2 px-10 text-sm"
-            variant="outline"
-            onClick={handleConnect}
-            disabled={isConnecting || localIsConnecting}
-          >
-            {isConnecting || localIsConnecting
-              ? "Connecting..."
-              : "Connect Wallet"}
-          </Button>
-        </div>
+        {status === 'connecting' ? (
+          <div className="flex flex-col items-center justify-center py-4 space-y-3">
+            <h3 className="text-lg">Reestablishing Connection</h3>
+            <p className="text-2xl">Please wait</p>
+            <Loader2 className="text-[#79E7BA] animate-spin w-11 h-11"/>
+          </div>
+        ) : status !== 'connected' && (
+          <>
+            <div className="flex items-center justify-center">
+              <img
+                src="/assets/wallet.png"
+                alt="wallet-icon"
+                className="w-32"
+              />
+            </div>
+            <p className="my-3 text-[16px] text-center text-[#F1F1F1]">
+              Connect your wallet to get the best of coinsafe
+            </p>
+            <div className="flex gap-2 items-center justify-center w-full">
+              <Button
+                className="rounded-full border-none outline-none font-light py-2 px-10 text-sm bg-[#FFFFFF2B]/20"
+                onClick={() => setIsConnectModalOpen(false)}
+                disabled={isConnecting || localIsConnecting}
+              >
+                Close
+              </Button>
+              <Button
+                className="rounded-full border-none outline-none text-black font-light py-2 px-10 text-sm"
+                variant="outline"
+                onClick={handleConnect}
+                disabled={isConnecting || localIsConnecting}
+              >
+                {isConnecting || localIsConnecting
+                  ? "Connecting..."
+                  : "Connect Wallet"}
+              </Button>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
