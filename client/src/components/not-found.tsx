@@ -6,7 +6,7 @@ export default function NotFound() {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate(-1);
+    navigate('/');
   };
   return (
     <div className="flex flex-col items-center py-10 min-h-screen bg-black text-white px-4">

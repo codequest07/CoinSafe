@@ -27,6 +27,7 @@ import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
 import TopUpModal from "./Modals/Top-up-modal";
+import UnlockModal from "./Modals/UnlockModal";
 
 interface AssetTableProps {
   safeDetails?: FormattedSafeDetails;
@@ -130,6 +131,7 @@ function AssetTableContent({
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [updatedAssets, setUpdatedAssets] = useState<any>([]);
   const navigate = useNavigate();
 
@@ -349,7 +351,7 @@ function AssetTableContent({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      // onClick={() => navigate("")}
+                      onClick={() => setShowUnlockModal(true)}
                     >
                       Unlock
                     </Button>
@@ -371,6 +373,16 @@ function AssetTableContent({
           onClose={() => setShowTopUpModal(false)}
           onTopUp={handleTopUp}
           safeId={Number(safeDetails.id)}
+        />
+      )}
+
+      {safeDetails && showUnlockModal && (
+        <UnlockModal
+          onClose={() => {
+            setShowUnlockModal(false);
+          }}
+          onUnlock={() => {}}
+          safeId={safeDetails?.id?.toString()}
         />
       )}
     </div>

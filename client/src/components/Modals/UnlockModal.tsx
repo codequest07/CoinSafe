@@ -318,6 +318,7 @@ export default function UnlockModal({
                 onClick={(e) => {
                   e.stopPropagation();
                   // handleApproval(false);
+                  onClose && onClose();
                 }}
                 className="rounded-full p-1 bg-white "
                 aria-label="Close"
