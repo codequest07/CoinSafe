@@ -11,7 +11,7 @@ const messages = [
   "SaveSense is ransacking your history...",
 ];
 
-const LogoAnimation = () => (
+export const LogoAnimation = () => (
   <motion.svg
     width="20"
     height="20"
