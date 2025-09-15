@@ -62,7 +62,13 @@ const ConnectModal = ({
   }, [isConnectModalOpen, isConnecting]);
 
   return (
-    <Dialog open={isConnectModalOpen} onOpenChange={setIsConnectModalOpen}>
+    <Dialog
+      open={status === "connecting" ? true : isConnectModalOpen}
+      onOpenChange={(open) => {
+        if (status === "connecting") return; // 🚫 block closing
+        setIsConnectModalOpen(open);
+      }}
+    >
       <DialogContent className="max-w-[390px] sm:max-w-[400px] border-0 text-white bg-[#17171C]">
         {status === "connecting" ? (
           <div className="h-[150px] rounded-2xl p-8 flex flex-col items-center justify-center">
@@ -96,7 +102,8 @@ const ConnectModal = ({
                 }}
                 className="text-gray-400 text-sm mb-4"
               >
-                Please be patient as we reestablish your connection with the blockchain.
+                Please be patient as we reestablish your connection with the
+                blockchain.
               </motion.p>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import MemoLogo from "@/icons/Logo";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 
 export default function NotFound() {
@@ -12,11 +12,12 @@ export default function NotFound() {
     <div className="flex flex-col items-center py-10 min-h-screen bg-black text-white px-4">
       <div className="flex flex-col items-center max-w-[50rem] w-full">
         {/* Logo */}
-        <div className="mb-24 sm:mb-2">
+
+        <Link to={'/'} className="mb-24 sm:mb-2">
           <div className="flex items-center">
             <MemoLogo className="w-40 h-10" />
           </div>
-        </div>
+        </Link>
 
         {/* Illustration */}
         <div className="mb-8">
