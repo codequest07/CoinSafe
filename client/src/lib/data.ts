@@ -108,68 +108,7 @@ export const savings = [
   },
 ];
 
-export const allAssets = [
-  {
-    symbol: "AVAX",
-    name: "Avalanche",
-    amount: "0.00234 AVAX",
-    value: "≈ $ 5.00",
-    autosaved: true,
-    staked: false,
-    liquid: false,
-    saved: true,
-  },
-  {
-    symbol: "AVAX",
-    name: "Avalanche",
-    amount: "0.00234 AVAX",
-    value: "≈ $ 5.00",
-    autosaved: false,
-    staked: true,
-    liquid: true,
-    saved: false,
-  },
-  {
-    symbol: "AVAX",
-    name: "Avalanche",
-    amount: "0.00234 AVAX",
-    value: "≈ $ 5.00",
-    autosaved: true,
-    staked: true,
-    liquid: false,
-    saved: false,
-  },
-  {
-    symbol: "AVAX",
-    name: "Avalanche",
-    amount: "0.00234 AVAX",
-    value: "≈ $ 5.00",
-    autosaved: true,
-    staked: false,
-    liquid: true,
-    saved: false,
-  },
-  {
-    symbol: "AVAX",
-    name: "Avalanche",
-    amount: "0.00234 AVAX",
-    value: "≈ $ 5.00",
-    autosaved: true,
-    staked: true,
-    liquid: false,
-    saved: false,
-  },
-  {
-    symbol: "AVAX",
-    name: "Avalanche",
-    amount: "0.00234 AVAX",
-    value: "≈ $ 5.00",
-    autosaved: false,
-    staked: false,
-    liquid: false,
-    saved: true,
-  },
-];
+
 
 export const vaultAssets = [
   {
