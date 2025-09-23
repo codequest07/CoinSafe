@@ -5,16 +5,20 @@ import { useActiveAccount } from "thirdweb/react";
 import { AssetTabs } from "@/components/Asset-tabs";
 import { loadingState, savingsBalanceState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import MobileHeader from "@/components/MobileHeader";
+import SavingOption from "@/components/Modals/SavingOption";
 // import SavingsTargetsCarousel from "@/components/SavingsTargetsCarousel";
 
 const Vault = () => {
   const account = useActiveAccount();
   const isConnected = !!account?.address;
+  const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
+  const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
 
   const [loading] = useRecoilState(loadingState);
   const [savingsBalance] = useRecoilState(savingsBalanceState);
+  const openFirstModal = () => setIsFirstModalOpen(true);
 
   const savings = useMemo(() => loading.savings, [loading]);
 
@@ -25,7 +29,11 @@ const Vault = () => {
         <div className="w-full">
           <SmarterSavingCard />
         </div>
-
+        <button
+          onClick={openFirstModal}
+          className="rounded-[100px] sm:hidden w-full max-w-[100%] mx-auto my-4 block px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
+          Save
+        </button>
         <div className="flex flex-col sm:flex-row gap-2 pb-2 w-full">
           <VaultCard
             title="Vault balance"
@@ -69,6 +77,12 @@ const Vault = () => {
 
         <div>{/* {isConnected && <SavingsHistoryTable />} */}</div>
       </section>
+      <SavingOption
+        isFirstModalOpen={isFirstModalOpen}
+        setIsFirstModalOpen={setIsFirstModalOpen}
+        isSecondModalOpen={isSecondModalOpen}
+        setIsSecondModalOpen={setIsSecondModalOpen}
+      />
     </div>
   );
 };
