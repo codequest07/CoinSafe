@@ -28,7 +28,7 @@ export default function WalletBalance() {
   const available = useMemo(() => loading.available, [loading]);
 
   return (
-    <div className="bg-black text-white px-6 flex flex-col">
+    <div className="bg-black text-white px-2 sm:px-6 flex flex-col">
       {/* Mobile View (Buttons on top, balances below) - Only visible on small screens */}
       <div className="sm:hidden flex flex-col space-y-6 mb-4">
         {/* Action Buttons */}
