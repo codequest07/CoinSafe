@@ -15,7 +15,7 @@ import { Skeleton } from "./ui/skeleton";
 import { useStreakSystem } from "@/hooks/useStreakSystem";
 import { useRecoilValue } from "recoil";
 import { userCurrentStreakState } from "@/store/atoms/streak";
-import { useActiveAccount } from "thirdweb/react";
+import { useActiveAccount, useConnectModal } from "thirdweb/react";
 import WalletAvatar from "./WalletAvatar";
 import { ChevronDown, Coins, Menu, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
@@ -25,6 +25,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { client, liskMainnet } from "@/lib/config";
+import { darkTheme } from "thirdweb/react";
+import { wallets } from "@/lib/wallets";
 
 const getRandomMessage = () => {
   const messages = [
@@ -52,6 +55,7 @@ const DashHeader = () => {
   const [randomMessage, setRandomMessage] = useState("");
   const account = useActiveAccount();
   const address = account?.address;
+  const isConnected = !!account?.address;
 
   const [amount, setAmount] = useState<string>("0.00");
   const [selectedCurrency, setSelectedCurrency] = useState("LSK");
@@ -204,6 +208,34 @@ const DashHeader = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
 
+  const { connect, isConnecting } = useConnectModal();
+  const [localIsConnecting, setLocalIsConnecting] = useState(false);
+
+  const handleConnect = async () => {
+    try {
+      setLocalIsConnecting(true);
+      await connect({
+        client,
+        wallets,
+        chain: liskMainnet,
+        theme: darkTheme({
+          colors: { accentText: "hsl(144, 100%, 39%)" },
+        }),
+        size: "compact",
+      });
+    } catch (error) {
+      console.error("Wallet connection failed:", error);
+      setLocalIsConnecting(false);
+    }
+  };
+
+  // Reset localIsConnecting when connection is successful
+  useEffect(() => {
+    if (isConnected && localIsConnecting) {
+      setLocalIsConnecting(false);
+    }
+  }, [isConnected, localIsConnecting]);
+
   return (
     <main>
       <header className="flex items-center h-14 shadow-xl border-b border-b-[#000000] lg:h-[70px] w-full bg-black text-white">
@@ -232,7 +264,7 @@ const DashHeader = () => {
               {/* Mobile Navigation Sidebar */}
               <SheetContent
                 side="right"
-                className="flex flex-col bg-[#13131373] border-r border-r-[#333333]">
+                className="flex flex-col bg-[#010104] border-[#010104] w-full max-w-none">
                 <nav className="grid gap-2 text-lg font-medium">
                   <Link
                     to="/"
@@ -286,7 +318,22 @@ const DashHeader = () => {
                     </>
                   </NavLink>
               </nav> */}
-                <div className="mt-auto">
+
+                {/* Connect Wallet Button - Only show when not connected */}
+                {!isConnected && (
+                  <div className="px-2 py-4">
+                    <Button
+                      onClick={handleConnect}
+                      disabled={isConnecting || localIsConnecting}
+                      className="w-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5]/80 text-[#010104] font-medium py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                      {isConnecting || localIsConnecting
+                        ? "Connecting..."
+                        : "Connect Wallet"}
+                    </Button>
+                  </div>
+                )}
+
+                <div className="mt-auto hidden">
                   <ExtensionCard />
                 </div>
               </SheetContent>
