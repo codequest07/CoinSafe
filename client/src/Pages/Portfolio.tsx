@@ -10,7 +10,7 @@ const Portfolio = () => {
     <div className="pr-4">
       <MobileHeader />
       <SmarterSavingCard />
-      <div className="rounded-[0.8rem] border border-[#FFFFFF17] mb-5">
+      <div className="sm:rounded-[0.8rem] sm:border sm:border-[#FFFFFF17] mb-5">
         <WalletBalance />
         {/* <CurrencyBreakdown /> */}
       </div>
