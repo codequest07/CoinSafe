@@ -6,6 +6,7 @@ import { AssetTabs } from "@/components/Asset-tabs";
 import { loadingState, savingsBalanceState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
 import { useMemo } from "react";
+import MobileHeader from "@/components/MobileHeader";
 // import SavingsTargetsCarousel from "@/components/SavingsTargetsCarousel";
 
 const Vault = () => {
@@ -19,6 +20,7 @@ const Vault = () => {
 
   return (
     <div className="w-full relative px-0 sm:px-4 overflow-x-hidden">
+      <MobileHeader />
       <section className="w-full">
         <div className="w-full">
           <SmarterSavingCard />

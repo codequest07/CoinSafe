@@ -5,6 +5,7 @@ import ScheduledSavings from "@/components/ScheduledSavingsCard";
 import StatsCards from "@/components/stats-cards";
 import { TourGuide } from "@/components/TourGuide";
 import TrackingChart from "@/components/TrackingChart";
+import MobileHeader from "@/components/MobileHeader";
 import { useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
 
@@ -38,6 +39,7 @@ const Home = () => {
     <main className="w-full overflow-x-hidden">
       <div className="flex flex-col w-full sm:flex pr-0 sm:pr-3">
         <>
+          <MobileHeader />
           <div className="step-1">
             <SmarterSavingCard setIsConnectModalOpen={setOpenConnectModal} />
           </div>
