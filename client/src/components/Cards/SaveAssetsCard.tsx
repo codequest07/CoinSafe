@@ -389,7 +389,7 @@ export default function SaveAssetsCard() {
 
   return (
     <div className="min-h-screen md:min-h-fit flex items-center justify-center md:justify-center bg-[#010104] p-4">
-      <div className="w-full max-w-md md:max-w-[600px] rounded-xl border-[1px] border-[#FFFFFF21] bg-[#1D1D1D73] p-6 text-white">
+      <div className="w-full max-w-md md:max-w-[600px] rounded-xl md:border-[1px] md:border-[#FFFFFF21] md:bg-[#1D1D1D73] md:p-6 text-white">
         {/* Header */}
         <div className="flex items-center gap-2 mb-6">
           <button className="rounded-full" onClick={() => navigate(-1)}>
@@ -531,16 +531,15 @@ export default function SaveAssetsCard() {
             {/* Autosave Tab section */}
             <div className="space-y-4 py-4">
               <div className="py-4 pb-6 border-b-[1px] border-[#FFFFFF21]">
-                <p className="font-[200] text-base">Choose savings method</p>
-                <div className="flex flex-col sm:flex-row gap-2">
+                <p className="font-[200] text-base mb-3">Choose savings method</p>
+                <div className="flex flex-row gap-2">
                   <Label
                     htmlFor="by-frequency"
                     className={`w-full flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -570,8 +569,7 @@ export default function SaveAssetsCard() {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -630,8 +628,7 @@ export default function SaveAssetsCard() {
                     <Link to={"/vault/auto-safe"}>
                       <Button
                         variant="link"
-                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      >
+                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0">
                         View your Automated Safe here
                       </Button>
                     </Link>
@@ -655,7 +652,7 @@ export default function SaveAssetsCard() {
                       }
                     />
                     <>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+                      <div className="flex flex-row sm:items-center justify-between mb-3 gap-2">
                         <div className="text-sm font-[300] text-gray-300">
                           Wallet balance:{" "}
                           <span className="text-gray-400">
@@ -670,9 +667,7 @@ export default function SaveAssetsCard() {
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0 self-start sm:self-auto"
-                            onClick={() => navigate("/deposit")}
-                          >
-
+                            onClick={() => navigate("/deposit")}>
                             Deposit to save
                           </Button>
                         ) : (
@@ -683,8 +678,7 @@ export default function SaveAssetsCard() {
                                 ...prev,
                                 amount: selectedTokenBalance,
                               }))
-                            }
-                          >
+                            }>
                             Max
                           </Button>
                         )}
@@ -747,14 +741,18 @@ export default function SaveAssetsCard() {
             <></>
           ) : (
             <>
-              <div className="flex justify-center sm:justify-end mt-6">
+              <div className="flex justify-between sm:gap-3 sm:justify-end mt-6">
+                <Button
+                  onClick={() => navigate(-1)}
+                  className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
+                  Cancel
+                </Button>
                 <div>
                   <Button
                     onClick={handleSaveAsset}
                     className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
                     variant="outline"
-                    disabled={isLoading || autoSavingsLoading}
-                  >
+                    disabled={isLoading || autoSavingsLoading}>
                     {isLoading || autoSavingsLoading ? (
                       <LoaderCircle className="animate-spin" />
                     ) : hasAutoSafe ? (
@@ -768,23 +766,30 @@ export default function SaveAssetsCard() {
             </>
           ))}
 
-        {saveType === "one-time" && (
-          <div className="flex justify-center sm:justify-end mt-6">
-            <div>
+        <div>
+          {saveType === "one-time" && (
+            <div className="flex justify-between sm:gap-3 sm:justify-end mt-6">
               <Button
-                onClick={handleSaveAsset}
-                className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
-                variant="outline"
-                disabled={isLoading}>
-                {isLoading ? (
-                  <LoaderCircle className="animate-spin" />
-                ) : (
-                  "Save assets"
-                )}
+                onClick={() => navigate(-1)}
+                className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
+                Cancel
               </Button>
+              <div>
+                <Button
+                  onClick={handleSaveAsset}
+                  className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
+                  variant="outline"
+                  disabled={isLoading}>
+                  {isLoading ? (
+                    <LoaderCircle className="animate-spin" />
+                  ) : (
+                    "Save assets"
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <SaveSuccessful
