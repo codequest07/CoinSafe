@@ -95,7 +95,7 @@ export default function WithdrawCard() {
 
   return (
     <main className="min-h-screen md:min-h-fit flex items-start md:items-center justify-center md:justify-center p-4 pt-8 md:pt-4">
-      <div className="w-full max-w-md md:max-w-[600px] border-0 p-6 rounded-[12px] text-white bg-[#1D1D1D73]">
+      <div className="w-full max-w-md md:max-w-[600px] border-0 md:p-6 rounded-[12px] text-white md:bg-[#1D1D1D73]">
         <div className="flex items-center gap-2 mb-6">
           <button className="rounded-full" onClick={() => navigate(-1)}>
             <ArrowLeft size={20} />
@@ -216,7 +216,7 @@ export default function WithdrawCard() {
           )}
         </div>
 
-        <div className="flex items-center justify-between sm:gap-3 sm:justify-end mt-6">
+        <div className="flex items-center  justify-between sm:gap-3 sm:justify-end mt-6">
           <Button
             onClick={() => navigate(-1)}
             className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
