@@ -114,7 +114,7 @@ export default function DepositCard() {
 
   return (
     <main className="min-h-screen md:min-h-fit flex items-start md:items-center justify-center md:justify-center p-4 pt-8 md:pt-4">
-      <div className="w-full max-w-md md:max-w-[600px] border-0 p-6 rounded-[12px] text-white bg-[#1D1D1D73]">
+      <div className="w-full max-w-md md:max-w-[600px] border-0 md:p-6 rounded-[12px] text-white md:bg-[#1D1D1D73]">
         {/* Header */}
         <div className="flex items-center gap-2 mb-6">
           <button className="rounded-full" onClick={() => navigate(-1)}>
@@ -144,8 +144,7 @@ export default function DepositCard() {
                 <Select
                   onValueChange={handleTokenSelect}
                   value={token}
-                  disabled={isLoading}
-                >
+                  disabled={isLoading}>
                   <SelectTrigger className="w-28 h-12 bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                     <div className="flex items-center">
                       {token && tokenData[token]?.image ? (
@@ -162,8 +161,7 @@ export default function DepositCard() {
                         <div
                           className={`w-4 h-4 rounded-full ${
                             tokenData[token]?.color || "bg-gray-600"
-                          } flex items-center justify-center text-white text-xs font-medium mr-2`}
-                        >
+                          } flex items-center justify-center text-white text-xs font-medium mr-2`}>
                           {tokenData[token]?.symbol?.charAt(0) || "?"}
                         </div>
                       ) : (
@@ -199,8 +197,7 @@ export default function DepositCard() {
                               <div
                                 className={`w-4 h-4 rounded-full ${
                                   tokenInfo?.color || "bg-gray-600"
-                                } flex items-center justify-center text-white text-xs font-medium mr-2`}
-                              >
+                                } flex items-center justify-center text-white text-xs font-medium mr-2`}>
                                 {tokenInfo?.symbol?.charAt(0) || "?"}
                               </div>
                             )}
@@ -238,15 +235,13 @@ export default function DepositCard() {
                   <Button
                     variant="link"
                     className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                    onClick={() => navigate("/deposit")}
-                  >
+                    onClick={() => navigate("/deposit")}>
                     Deposit to save
                   </Button>
                 ) : (
                   <Button
                     className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                    onClick={() => setAmount(selectedTokenBalance)}
-                  >
+                    onClick={() => setAmount(selectedTokenBalance)}>
                     Max
                   </Button>
                 )}
@@ -254,15 +249,19 @@ export default function DepositCard() {
             </>
           )}
         </div>
-        <div className="flex items-center justify-end mt-5">
+        <div className="flex items-center justify-between sm:gap-3 sm:justify-end mt-5">
+          <Button
+            onClick={() => navigate(-1)}
+            className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
+            Cancel
+          </Button>
           <Button
             onClick={(e) => {
               depositAsset(e);
             }}
             className="text-black px-8 rounded-[2rem]"
             variant="outline"
-            disabled={isLoading || (amount || 0) > selectedTokenBalance}
-          >
+            disabled={isLoading || (amount || 0) > selectedTokenBalance}>
             {isLoading ? (
               <LoaderCircle className="animate-spin" />
             ) : (

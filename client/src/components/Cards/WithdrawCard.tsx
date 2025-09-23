@@ -216,7 +216,12 @@ export default function WithdrawCard() {
           )}
         </div>
 
-        <div className="flex items-center justify-end mt-6">
+        <div className="flex items-center justify-between sm:gap-3 sm:justify-end mt-6">
+          <Button
+            onClick={() => navigate(-1)}
+            className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
+            Cancel
+          </Button>
           <Button
             onClick={(e) => {
               withdrawAsset(e);
