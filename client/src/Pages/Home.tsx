@@ -55,7 +55,7 @@ const Home = () => {
               <div className="sm:w-2/3 overflow-hidden step-3 mb-3 sm:mb-0">
                 <AssetTable />
               </div>
-              <div className="sm:w-1/3 hidden md:block pl-3 step-4">
+              <div className="sm:w-1/3 md:block pl-3 step-4">
                 <ScheduledSavings />
               </div>
             </div>
