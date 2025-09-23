@@ -212,69 +212,67 @@ const DashHeader = () => {
           {/* Logo for mobile */}
           <Link to="/" className="flex items-center">
             <MemoLogo className="w-20 h-6" />
-            <span className="text-xs bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded ml-1">
-              Beta
-            </span>
           </Link>
 
-          <div className="flex items-center gap-2 md:hidden">
-            {/* <ClaimBtn /> */}
-            <WalletAvatar />
-          </div>
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2 md:hidden">
+              {/* <ClaimBtn /> */}
+              <WalletAvatar />
+            </div>
 
-          {/* Mobile Menu Button */}
-          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
+            {/* Mobile Menu Button */}
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-white">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
 
-            {/* Mobile Navigation Sidebar */}
-            <SheetContent
-              side="right"
-              className="flex flex-col bg-[#13131373] border-r border-r-[#333333]"
-            >
-              <nav className="grid gap-2 text-lg font-medium">
-                <Link to="/" onClick={() => setIsSheetOpen(false)} className="flex items-center gap-2 font-semibold">
-                  <MemoLogo className="w-32 h-10" />
-                </Link>
-
-                {NavLinks.map((link) => (
-                  <NavLink
-                    key={link.label}
-                    to={link.to}
+              {/* Mobile Navigation Sidebar */}
+              <SheetContent
+                side="right"
+                className="flex flex-col bg-[#13131373] border-r border-r-[#333333]">
+                <nav className="grid gap-2 text-lg font-medium">
+                  <Link
+                    to="/"
                     onClick={() => setIsSheetOpen(false)}
-                    className={({ isActive }) =>
-                      isActive
-                        ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
-                        : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
-                    }
-                  >
-                    <link.icon className="w-5 h-5" />
-                    {link.label}
-                  </NavLink>
-                ))}
-              </nav>
+                    className="flex items-center gap-2 font-semibold">
+                    <MemoLogo className="w-32 h-10" />
+                  </Link>
 
-              <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-                <div
-                  // to={`https://pay.fonbnk.com/?source=o9VjcneL&signature=${token}`}
-                  // target="_blank"
-                  onClick={() => setOpenOnRampModal(true)}
-                  className={
-                    "flex items-center cursor-pointer gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
-                  }
-                >
-                  <>
-                    <Coins className="w-5 h-5" />
-                    {"On-ramp"}
-                    {/* <span><ExternalLinkIcon className="w-5 h-5" /></span> */}
-                  </>
-                </div>
-              </nav>
-              {/* <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+                  {NavLinks.map((link) => (
+                    <NavLink
+                      key={link.label}
+                      to={link.to}
+                      onClick={() => setIsSheetOpen(false)}
+                      className={({ isActive }) =>
+                        isActive
+                          ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
+                          : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
+                      }>
+                      <link.icon className="w-5 h-5" />
+                      {link.label}
+                    </NavLink>
+                  ))}
+                </nav>
+
+                <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+                  <div
+                    // to={`https://pay.fonbnk.com/?source=o9VjcneL&signature=${token}`}
+                    // target="_blank"
+                    onClick={() => setOpenOnRampModal(true)}
+                    className={
+                      "flex items-center cursor-pointer gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
+                    }>
+                    <>
+                      <Coins className="w-5 h-5" />
+                      {"On-ramp"}
+                      {/* <span><ExternalLinkIcon className="w-5 h-5" /></span> */}
+                    </>
+                  </div>
+                </nav>
+                {/* <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
                   <NavLink
                     to={`https://sandbox-pay.fonbnk.com/?source=D4p5B3HY&signature=${token}`}
                     target="_blank"
@@ -288,11 +286,12 @@ const DashHeader = () => {
                     </>
                   </NavLink>
               </nav> */}
-              <div className="mt-auto">
-                <ExtensionCard />
-              </div>
-            </SheetContent>
-          </Sheet>
+                <div className="mt-auto">
+                  <ExtensionCard />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
         {/* Desktop View */}
@@ -335,8 +334,7 @@ const DashHeader = () => {
             <div className="w-full max-w-sm">
               <label
                 htmlFor=""
-                className="text-[#CACACA] font-light text-[14px]"
-              >
+                className="text-[#CACACA] font-light text-[14px]">
                 Amount to On-ramp
               </label>
               <div className="flex items-center justify-between bg-transaprarent rounded-lg p-4 border-[1px] border-[#FFFFFF3D]">
@@ -358,8 +356,7 @@ const DashHeader = () => {
                     variant="ghost"
                     size="sm"
                     onClick={handleClear}
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
-                  >
+                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600">
                     <X className="h-4 w-4" />
                   </Button>
 
@@ -367,22 +364,19 @@ const DashHeader = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="secondary"
-                        className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md"
-                      >
+                        className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md">
                         {selectedCurrency}
                         <ChevronDown className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="w-32 bg-gray-600 text-white"
-                    >
+                      className="w-32 bg-gray-600 text-white">
                       {currencies.map((currency) => (
                         <DropdownMenuItem
                           key={currency.code}
                           onClick={() => handleCurrencySelect(currency.code)}
-                          className="cursor-pointer"
-                        >
+                          className="cursor-pointer">
                           <div className="flex flex-col">
                             <span className="font-medium">{currency.code}</span>
                             {/* <span className="text-xs text-gray-500">{currency.name}</span> */}
@@ -400,8 +394,7 @@ const DashHeader = () => {
                       ? "#"
                       : `https://pay.fonbnk.com/auth?source=o9VjcneL&network=LISK&asset=${selectedCurrency}&amount=${amount}&currency=crypto&paymentChannel=bank&countryIsoCode=NG&address=${account?.address}&signature=${token}`
                   }
-                  target="_blank"
-                >
+                  target="_blank">
                   <Button className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] rounded-[100px] border-[1px] border-[#FFFFFF05] text-[#010104] text-[14px]">
                     Proceed to On-ramp
                   </Button>
