@@ -161,9 +161,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
   ];
 
   const calculateEndDate = (days: number) => {
-    const currentDate = new Date(
-      details?.unlockTime ? Number(details.unlockTime) * 1000 : Date.now()
-    );
+    const currentDate = new Date();
     const futureDate = addDays(currentDate, days);
     return format(futureDate, "dd MMMM yyyy");
   };
@@ -175,6 +173,11 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
     transactionPercentage?: string;
     frequency?: string;
   }>({});
+
+  // Set initial endDate when component mounts
+  useEffect(() => {
+    setEndDate(calculateEndDate(savingsDuration));
+  }, [savingsDuration]);
 
   const handleDurationChange = (duration: number) => {
     setSavingsDuration(duration);
@@ -227,14 +230,12 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
           onClick={(e) => {
             e.stopPropagation();
             onClose();
-          }}
-        ></div>
+          }}></div>
         <div className="relative w-full max-w-md rounded-xl bg-[#17171C] text-white shadow-lg p-5 border border-white/15">
           {/* Close Icon */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-white"
-          >
+            className="absolute top-4 right-4 text-gray-400 hover:text-white">
             <X className="w-5 h-5" />
           </button>
 
@@ -251,7 +252,9 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                 <br />
                 Expired on:{" "}
                 <span className="text-white">
-                  {format(new Date(Number(details?.unlockTime)), "PPP")}
+                  {details?.unlockTime
+                    ? format(details.unlockTime, "PPP")
+                    : "N/A"}
                 </span>
               </p>
 
@@ -274,8 +277,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                             <div
                               className={`w-7 h-7 rounded-full ${
                                 tokenData[token.token].color
-                              } flex items-center justify-center text-white font-medium`}
-                            >
+                              } flex items-center justify-center text-white font-medium`}>
                               {token.tokenSymbol?.charAt(0)}
                             </div>
                           )}
@@ -294,9 +296,13 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                           {token.formattedAmount} {token.tokenSymbol}
                         </div>
                         <div className="text-sm text-gray-400 flex gap-1 items-center justify-center">
-                          ≈ ${totalUsdValues[index] ? totalUsdValues[index]?.toFixed(2) : <Skeleton className="h-6 w-12"/>}
+                          ≈ $
+                          {totalUsdValues[index] ? (
+                            totalUsdValues[index]?.toFixed(2)
+                          ) : (
+                            <Skeleton className="h-6 w-12" />
+                          )}
                         </div>
-
                       </div>
                     </div>
                   </div>
@@ -324,8 +330,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     e.stopPropagation();
                     onClose();
                   }}
-                  className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white "
-                >
+                  className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white ">
                   Cancel
                 </button>
                 <button
@@ -334,8 +339,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     extendTargetSafe(e);
                   }}
                   disabled={!details || extending}
-                  className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
-                >
+                  className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6">
                   {extending ? "Reactivating" : "Reactivate"}
                 </button>
               </div>
@@ -375,8 +379,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => navigate("/deposit")}
-                    >
+                      onClick={() => navigate("/deposit")}>
                       Deposit to save
                     </Button>
                   ) : (
@@ -387,8 +390,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                           ...prev,
                           amount: selectedTokenBalance,
                         }))
-                      }
-                    >
+                      }>
                       Max
                     </Button>
                   )}
@@ -432,8 +434,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     e.stopPropagation();
                     onClose();
                   }}
-                  className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white "
-                >
+                  className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white ">
                   Cancel
                 </button>
                 <button
@@ -443,8 +444,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     reactivateTargetSafe(e);
                   }}
                   disabled={!details || reactivating}
-                  className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
-                >
+                  className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6">
                   {extending ? "Reactivating" : "Reactivate"}
                 </button>
               </div>
