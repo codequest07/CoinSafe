@@ -1,12 +1,15 @@
 import {
   AccountAvatar,
   AccountProvider,
+  darkTheme,
   useActiveAccount,
   useConnectModal,
   useWalletDetailsModal,
 } from "thirdweb/react";
-import { client } from "@/lib/config"; 
+import { client, liskMainnet } from "@/lib/config";
 import { Skeleton } from "./ui/skeleton";
+import { wallets } from "@/lib/wallets";
+import { thirdwebSupportedTokens } from "@/lib/utils";
 
 const WalletAvatar = () => {
   const account = useActiveAccount();
@@ -16,9 +19,16 @@ const WalletAvatar = () => {
 
   const handleClick = async () => {
     if (!address) {
-      await connect({ client });
-    } else {
-      detailsModal.open({ client });
+      await connect({
+        client,
+        wallets: wallets,
+        chain: liskMainnet,
+        theme: darkTheme({
+          colors: { accentText: "hsl(144, 100%, 39%)" },
+        }),
+      });
+    } else {  
+      detailsModal.open({ client, supportedTokens: thirdwebSupportedTokens });
     }
   };
 
@@ -27,7 +37,8 @@ const WalletAvatar = () => {
       onClick={handleClick}
       style={{ cursor: "pointer", display: "inline-block" }}
       role="button"
-      aria-label="Open wallet modal">
+      aria-label="Open wallet modal"
+    >
       {address ? (
         <AccountProvider client={client} address={address}>
           <AccountAvatar
