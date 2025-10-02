@@ -3,6 +3,8 @@ import { twMerge } from "tailwind-merge";
 import { formatEther, formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
 import { getLskToUsd, getSafuToUsd, getUsdcToUsd, getUsdtToUsd } from "@/lib";
+import { liskMainnet } from "./config";
+import { TokenInfo } from "thirdweb/react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -205,3 +207,26 @@ export const tokenData = {
     image: "/assets/tokens/usdt.jpg",
   },
 } as any;
+
+export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
+    [liskMainnet.id]: [
+      {
+        address: tokens.usdt,
+        icon: tokenData[tokens.usdt]?.image,
+        name: tokenData[tokens.usdt]?.symbol,
+        symbol: tokenData[tokens.usdt]?.symbol,
+      },
+      {
+        address: tokens.lsk,
+        icon: tokenData[tokens.usdc]?.image,
+        name: tokenData[tokens.usdc]?.symbol,
+        symbol: tokenData[tokens.usdc]?.symbol,
+      },
+      {
+        address: tokens.lsk,
+        icon: tokenData[tokens.lsk]?.image,
+        name: tokenData[tokens.lsk]?.symbol,
+        symbol: tokenData[tokens.lsk]?.symbol,
+      },
+    ],
+  };
