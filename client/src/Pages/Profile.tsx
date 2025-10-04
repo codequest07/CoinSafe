@@ -189,7 +189,9 @@ export default function ProfilePage() {
               <h2 className="text-[14px] font-[400] text-[#CACACA]">
                 Connected wallet
               </h2>
-              <p className="text-white font-mono text-[14px]">{address}</p>
+              <p className="text-white font-mono text-[10px] sm:text-[12px] md:text-[14px] break-all">
+                {address}
+              </p>
             </div>
 
             {/* Email Address Section */}
@@ -236,7 +238,7 @@ export default function ProfilePage() {
                     <Input
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
-                      className="flex-1 bg-transparent border-[#FFFFFF21] text-white placeholder:text-gray-500 rounded-xl h-12 pr-24"
+                      className="sm:flex-1 bg-transparent border-[#FFFFFF21] text-white placeholder:text-gray-500 rounded-xl h-12 pr-24"
                       placeholder="Enter your email address"
                       disabled={emailLoading}
                     />
