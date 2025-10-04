@@ -10,6 +10,7 @@ interface EmailVerificationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onVerified: () => void;
+  onChangeEmail: () => void;
   email: string;
 }
 
@@ -17,6 +18,7 @@ export default function EmailVerificationModal({
   isOpen,
   onClose,
   onVerified,
+  onChangeEmail,
   email,
 }: EmailVerificationModalProps) {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -167,26 +169,30 @@ export default function EmailVerificationModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="w-full max-w-md">
+    <div className="fixed inset-0 bg-[#17171C] backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-xl">
         {/* Main card */}
         <div className="bg-[#17171C] rounded-[16px] p-8 border border-[#FFFFFF21]">
           <h1 className="text-[20px] font-light text-white mb-6">
             Verify your email address
           </h1>
 
-          <p className="text-[14px] text-[#CACACA] mb-6 leading-relaxed">
+          {/* <p className="text-[14px] text-[#CACACA] mb-6 leading-relaxed">
             We've sent a 6-digit verification code to <strong>{email}</strong>.
             Please enter the code below to verify your email address.
+          </p> */}
+          <p className="text-[14px] text-[#CACACA] mb-6 leading-relaxed">
+            Please enter the OTP sent to your email address to verify your
+            address
           </p>
 
           <form onSubmit={handleVerify} className="space-y-4 mb-6">
             <label className="text-[14px] text-[#C7C7D1] block mb-4">
-              Verification Code
+              Enter OTP
             </label>
 
             {/* Individual digit inputs */}
-            <div className="flex justify-center space-x-3 mb-6">
+            <div className="flex justify-center space-x-3 mb-12">
               {code.map((digit, index) => (
                 <Input
                   key={index}
@@ -196,7 +202,7 @@ export default function EmailVerificationModal({
                   onChange={(e) => handleDigitChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
-                  className="w-12 h-12 text-center text-lg font-medium bg-white border border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                  className="sm:w-16 sm:h-16 text-center text-[#F1F1F1] text-lg font-medium bg-transparent border border-[#FFFFFF3D] rounded-lg focus:border-[#79E7BA] focus:ring-2 focus:ring-[#79E7BA]"
                   maxLength={1}
                   disabled={isVerifying}
                   autoComplete="off"
@@ -206,36 +212,32 @@ export default function EmailVerificationModal({
               ))}
             </div>
 
-            <Button
-              type="submit"
-              disabled={isVerifying || code.join("").length !== 6}
-              className="w-full h-12 text-[14px] rounded-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] disabled:opacity-50">
-              {isVerifying ? "Verifying..." : "Verify Email"}
-            </Button>
+            <div className="text-center">
+              <Button
+                size="sm"
+                onClick={handleResendCode}
+                disabled={isResending}
+                className="text-[12px] text-[#79E7BA] bg-transparent hover:bg-transparent border-0 hover:text-[#79E7BA]">
+                {isResending ? "Sending..." : "Resend Code"}
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2 justify-between">
+              <Button
+                type="button"
+                onClick={onChangeEmail}
+                className="px-4 sm:px-8 h-12 text-[14px]  text-[#C7C7D1] bg-[#3F3F3F99] rounded-full hover:bg-[#3F3F3F99] hover:text-white">
+                Change email address
+              </Button>
+
+              <Button
+                type="submit"
+                disabled={isVerifying || code.join("").length !== 6}
+                className="px-4 sm:px-8 h-12 text-[14px] rounded-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] disabled:opacity-50">
+                {isVerifying ? "Linking..." : "Link email"}
+              </Button>
+            </div>
           </form>
-
-          <div className="text-center">
-            <p className="text-[12px] text-[#CACACA] mb-4">
-              Didn't receive the code?
-            </p>
-            <Button
-              size="sm"
-              onClick={handleResendCode}
-              disabled={isResending}
-              className="text-[12px] text-[#79E7BA] bg-transparent hover:bg-transparent border-0 hover:text-[#79E7BA]">
-              {isResending ? "Sending..." : "Resend Code"}
-            </Button>
-          </div>
-
-          <div className="mt-6 pt-4 ">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="w-full text-[12px] text-[#C7C7D1] hover:bg-transparent hover:text-white">
-              Cancel
-            </Button>
-          </div>
         </div>
       </div>
 

@@ -13,6 +13,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import AddTokenToMetaMask from "@/components/AddTokenToMetaMask";
 import MemoClipboard from "@/icons/Clipboard";
+import { API_BASE_URL } from "@/lib/api-config";
 
 export default function Faucet() {
   const navigate = useNavigate();
@@ -36,7 +37,8 @@ export default function Faucet() {
       setIsLoading(true);
 
       const response = await fetch(
-        "https://coinsafe-0q0m.onrender.com/api/faucet/claim",
+        `${API_BASE_URL}/faucet/claim`,
+
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
