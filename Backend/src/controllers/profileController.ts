@@ -162,7 +162,7 @@ const generateVerificationContent = (email: string, code: string) => {
         <!-- Header -->
         <div class="header">
           <img
-            src="https://coinsafe.network/assets/coinsafe-logo.svg"
+            src="https://app.coinsafe.network/assets/coinsafe-logo.svg"
             alt="CoinSafe Logo"
             style="height: 48px; width: auto; max-width: 200px"
             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
