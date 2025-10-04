@@ -8,7 +8,7 @@ import crypto from "crypto";
 const generateVerificationContent = (email: string, code: string) => {
   const subject = "CoinSafe: Your Email Verification Code";
   const htmlContent = `
-       <!DOCTYPE html>
+     <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -44,7 +44,7 @@ const generateVerificationContent = (email: string, code: string) => {
         align-items: center;
         gap: 8px;
       }
-      
+
       .logo img {
         height: 48px;
         width: auto;
@@ -63,7 +63,7 @@ const generateVerificationContent = (email: string, code: string) => {
         border-radius: 2px;
         margin-bottom: 2px;
       }
-      
+
       .logo-bar:last-child {
         margin-bottom: 0;
       }
@@ -80,14 +80,14 @@ const generateVerificationContent = (email: string, code: string) => {
       }
 
       .title {
-        font-size: 32px;
+        font-size: 20px;
         font-weight: bold;
         color: #111827;
         margin: 0 0 32px 0;
       }
 
       .text {
-        font-size: 18px;
+        font-size: 16px;
         color: #6b7280;
         margin: 0 0 24px 0;
       }
@@ -104,27 +104,23 @@ const generateVerificationContent = (email: string, code: string) => {
       }
 
       .social-icon {
-        padding: 12px 20px;
+        padding: 2px 2px;
         background-color: #000000;
-        border-radius: 25px;
-        display: inline-flex;
+        border-radius: 100%;
+        display: flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
         margin: 0 8px;
         transition: background-color 0.2s;
       }
-      
-      .social-icon:hover {
-        background-color: #333333;
-      }
 
       .footer {
         border-top: 1px solid #e5e7eb;
-        padding-top: 32px;
+        padding-top: 20px;
         font-size: 14px;
         color: #9ca3af;
-        line-height: 1.5;
+        line-height: 1;
       }
 
       .footer p {
@@ -166,11 +162,11 @@ const generateVerificationContent = (email: string, code: string) => {
         <!-- Header -->
         <div class="header">
           <img
-            src="https://coinsafe.network/assets/coinsafe-logo.png"
+            src="https://coinsafe.network/assets/coinsafe-logo.svg"
             alt="CoinSafe Logo"
-            style="height: 48px; width: auto; max-width: 200px;"
+            style="height: 48px; width: auto; max-width: 200px"
             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-          <div class="logo" style="display: none;">
+          <div class="logo" style="display: none">
             <div class="logo-icon">
               <div class="logo-bar"></div>
               <div class="logo-bar"></div>
@@ -187,36 +183,77 @@ const generateVerificationContent = (email: string, code: string) => {
           <p class="text">Hi there,</p>
 
           <p class="text">
-            Thank you for linking your profile with CoinSafe! Please use the verification code below to verify your email address.
+            Thank you for linking your profile with CoinSafe! Please use the
+            verification code below to verify your email address.
           </p>
 
-          <div style="text-align: center; margin: 30px 0;">
-            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; display: inline-block; font-family: monospace; font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #1f2937;">
+          <div style="text-align: center; margin: 30px 0">
+            <div
+              style="
+                background-color: #f3f4f6;
+                padding: 10px;
+                border-radius: 8px;
+                display: inline-block;
+                font-family: monospace;
+                font-size: 20px;
+                font-weight: bold;
+                letter-spacing: 4px;
+                color: #1f2937;
+              ">
               ${code}
             </div>
           </div>
 
           <p class="text">
-            Enter this code in the verification form on CoinSafe to complete your email verification.
+            Enter this code in the verification form on CoinSafe to complete
+            your email verification.
           </p>
           <p class="text">
-            This code will expire in 10 minutes. If you did not link your profile to CoinSafe, please ignore this email.
+            This code will expire in 10 minutes. If you did not link your
+            profile to CoinSafe, please ignore this email.
           </p>
           <p class="text">Best regards,<br />The CoinSafe Team!</p>
 
           <!-- Social Media Links -->
           <div class="social-icons">
-            <a href="https://discord.gg/AprSgxhh" class="social-icon" style="text-decoration: none; color: white;">
-              <img src="https://coinsafe.network/assets/discord.png" alt="Discord" style="width: 20px; height: 20px; margin-right: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-              <span style="font-size: 16px; font-weight: bold; display: none;">Discord</span>
+            <a
+              href="https://discord.gg/AprSgxhh"
+              class="social-icon"
+              style="text-decoration: none; color: white">
+              <img
+                src="https://app.coinsafe.network/assets/discord.svg"
+                alt="Discord"
+                style="width: 30px; height: 30px"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+              <span style="font-size: 16px; font-weight: bold; display: none"
+                >Discord</span
+              >
             </a>
-            <a href="https://x.com/Coinsafe_safe" class="social-icon" style="text-decoration: none; color: white;">
-              <img src="https://coinsafe.network/assets/twitter.png" alt="Twitter" style="width: 20px; height: 20px; margin-right: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-              <span style="font-size: 16px; font-weight: bold; display: none;">Twitter</span>
+            <a
+              href="https://x.com/Coinsafe_safe"
+              class="social-icon"
+              style="text-decoration: none; color: white">
+              <img
+                src="https://app.coinsafe.network/assets/twitter.svg"
+                alt="Twitter"
+                style="width: 30px; height: 30px"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+              <span style="font-size: 16px; font-weight: bold; display: none"
+                >Twitter</span
+              >
             </a>
-            <a href="https://t.me/coinsafe_safe" class="social-icon" style="text-decoration: none; color: white;">
-              <img src="https://coinsafe.network/assets/telegram.png" alt="Telegram" style="width: 20px; height: 20px; margin-right: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-              <span style="font-size: 16px; font-weight: bold; display: none;">Telegram</span>
+            <a
+              href="https://t.me/coinsafe_safe"
+              class="social-icon"
+              style="text-decoration: none; color: white">
+              <img
+                src="https://app.coinsafe.network/assets/telegram.svg"
+                alt="Telegram"
+                style="width: 30px; height: 30px"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+              <span style="font-size: 16px; font-weight: bold; display: none"
+                >Telegram</span
+              >
             </a>
           </div>
 
