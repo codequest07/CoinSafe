@@ -53,6 +53,8 @@ const UserSchema = new mongoose_1.Schema({
     discordHandle: { type: String, trim: true },
     verificationToken: { type: String },
     verificationTokenExpires: { type: Date },
+    verificationCode: { type: String },
+    verificationCodeExpires: { type: Date },
     notificationPreferences: {
         deposit: { type: Boolean, default: true },
         withdrawal: { type: Boolean, default: true },

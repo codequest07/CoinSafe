@@ -7,7 +7,7 @@ const router = (0, express_1.Router)();
 router.post("/update-email", profileController_1.updateEmail);
 router.post("/update-twitter", profileController_1.updateTwitter);
 router.post("/update-discord", profileController_1.updateDiscord);
-router.get("/verify-email", profileController_1.verifyEmail);
+router.post("/verify-email-code", profileController_1.verifyEmailCode);
 router.post("/update-preferences", profileController_1.updatePreferences);
 router.get("/:walletAddress", profileController_1.getProfile);
 router.get("/test/:walletAddress", profileController_1.testUserStatus);

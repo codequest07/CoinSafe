@@ -8,6 +8,8 @@ export interface IUser extends Document {
   discordHandle?: string;
   verificationToken?: string;
   verificationTokenExpires?: Date;
+  verificationCode?: string;
+  verificationCodeExpires?: Date;
   notificationPreferences: {
     deposit: boolean;
     withdrawal: boolean;
@@ -36,6 +38,8 @@ const UserSchema: Schema = new Schema({
   discordHandle: { type: String, trim: true },
   verificationToken: { type: String },
   verificationTokenExpires: { type: Date },
+  verificationCode: { type: String },
+  verificationCodeExpires: { type: Date },
   notificationPreferences: {
     deposit: { type: Boolean, default: true },
     withdrawal: { type: Boolean, default: true },

@@ -5,7 +5,7 @@ import {
   updateEmail,
   updateTwitter,
   updateDiscord,
-  verifyEmail,
+  verifyEmailCode,
   updatePreferences,
   getProfile,
   testUserStatus,
@@ -18,7 +18,7 @@ router.post("/update-email", updateEmail);
 router.post("/update-twitter", updateTwitter);
 router.post("/update-discord", updateDiscord);
 
-router.get("/verify-email", verifyEmail);
+router.post("/verify-email-code", verifyEmailCode);
 router.post("/update-preferences", updatePreferences);
 router.get("/:walletAddress", getProfile);
 
