@@ -1,21 +1,5 @@
 import axios, { type AxiosResponse } from "axios";
-
-// Safe environment variable access
-const getApiBaseUrl = () => {
-  if (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-  // Check if we're in development or production
-  if (
-    typeof window !== "undefined" &&
-    window.location.hostname === "localhost"
-  ) {
-    return "http://localhost:1234/api";
-  }
-  return "https://coinsafe-0q0m.onrender.com/api";
-};
-
-const API_BASE_URL = getApiBaseUrl();
+import { API_BASE_URL } from "@/lib/api-config";
 
 export interface ProfileData {
   email?: string;

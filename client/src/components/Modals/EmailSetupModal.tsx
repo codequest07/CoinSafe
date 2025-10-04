@@ -89,6 +89,12 @@ export default function EmailSetupModal({
     onClose();
   };
 
+  const handleChangeEmail = () => {
+    setShowVerificationModal(false);
+    // Reset the email input to allow user to change it
+    setEmail("");
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -146,6 +152,7 @@ export default function EmailSetupModal({
         isOpen={showVerificationModal}
         onClose={handleCloseVerification}
         onVerified={handleVerified}
+        onChangeEmail={handleChangeEmail}
         email={email}
       />
     </div>

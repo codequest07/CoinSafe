@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface WaitlistModalProps {
   open: boolean;
@@ -85,7 +86,7 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
       setIsSubmitting(true);
       try {
         const response = await fetch(
-          "https://coinsafe-0q0m.onrender.com/api/waitlist",
+          `${API_BASE_URL}/waitlist`,
           {
             method: "POST",
             headers: {

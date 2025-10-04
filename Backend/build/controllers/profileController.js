@@ -271,8 +271,8 @@ const updateEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         // Generate verification code (6-digit numeric code)
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log("2. Generated verification code:", verificationCode);
-        console.log("3. Code length:", verificationCode.length);
+        console.log("🆕 NEW CODE SYSTEM: Generated verification code:", verificationCode);
+        console.log("🆕 NEW CODE SYSTEM: Code length:", verificationCode.length);
         const codeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
         console.log("4. Code expiry set to:", codeExpiry.toISOString());
         // Update or create user
