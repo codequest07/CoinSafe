@@ -121,20 +121,20 @@ export default function EmailSetupModal({
             />
           </form>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 justify-between">
             <Button
               variant="ghost"
               size="lg"
               onClick={handleSkip}
               disabled={isSubmitting}
-              className="text-[14px] sm:last:px-8 py-3 h-auto rounded-full bg-[#3F3F3F99] hover:bg-[#3F3F3F99] text-[#F1F1F1] hover:text-[#F1F1F1]">
+              className="text-[14px] sm:px-8 py-3 h-auto rounded-full bg-[#3F3F3F99] hover:bg-[#3F3F3F99] text-[#F1F1F1] hover:text-[#F1F1F1]">
               Skip for now
             </Button>
             <Button
               size="lg"
               onClick={handleSubmit}
               disabled={isSubmitting || !email.trim()}
-              className="text-[14px] sm:p x-12 py-3 h-auto rounded-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104]">
+              className="text-[14px] sm:px-8 py-3 h-auto rounded-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104]">
               {isSubmitting ? "Adding..." : "Continue"}
             </Button>
           </div>
