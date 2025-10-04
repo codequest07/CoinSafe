@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 // import { Coins, ExternalLinkIcon, Menu } from "lucide-react";
 import { Link, NavLink, useLocation, useParams } from "react-router-dom";
-import { NavLinks } from "@/lib/data";
+import { MobileNavLinks } from "@/lib/data";
 import MemoLogo from "@/icons/Logo";
 import SmileFace from "./Smile";
 import ExtensionCard from "./Cards/ExtensionCard";
@@ -274,7 +274,7 @@ const DashHeader = () => {
                     <MemoLogo className="w-32 h-10" />
                   </Link>
 
-                  {NavLinks.map((link) => (
+                  {MobileNavLinks.map((link) => (
                     <NavLink
                       key={link.label}
                       to={link.to}
