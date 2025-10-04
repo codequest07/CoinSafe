@@ -3,6 +3,7 @@ import User from "../Models/UserModel";
 import { sendEmail } from "../services/email";
 import validator from "validator";
 import crypto from "crypto";
+import path from "path";
 
 // Helper function to generate verification link and HTML
 const generateVerificationContent = (email: string, code: string) => {
@@ -159,22 +160,13 @@ const generateVerificationContent = (email: string, code: string) => {
   <body>
     <div style="padding: 24px">
       <div class="email-container">
-        <!-- Header -->
-        <div class="header">
-          <img
-            src="https://app.coinsafe.network/assets/coinsafe-logo.svg"
-            alt="CoinSafe Logo"
-            style="height: 48px; width: auto; max-width: 200px"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-          <div class="logo" style="display: none">
-            <div class="logo-icon">
-              <div class="logo-bar"></div>
-              <div class="logo-bar"></div>
-              <div class="logo-bar"></div>
-            </div>
-            <h1 class="logo-text">CoinSafe</h1>
+          <!-- Header -->
+          <div class="header">
+            <img
+              src="cid:logo"
+              alt="CoinSafe Logo"
+              style="height: 48px; width: auto; max-width: 200px" />
           </div>
-        </div>
 
         <!-- Main Content -->
         <div class="content">
@@ -214,48 +206,36 @@ const generateVerificationContent = (email: string, code: string) => {
           </p>
           <p class="text">Best regards,<br />The CoinSafe Team!</p>
 
-          <!-- Social Media Links -->
-          <div class="social-icons">
-            <a
-              href="https://discord.gg/AprSgxhh"
-              class="social-icon"
-              style="text-decoration: none; color: white">
-              <img
-                src="https://app.coinsafe.network/assets/discord.svg"
-                alt="Discord"
-                style="width: 30px; height: 30px"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-              <span style="font-size: 16px; font-weight: bold; display: none"
-                >Discord</span
-              >
-            </a>
-            <a
-              href="https://x.com/Coinsafe_safe"
-              class="social-icon"
-              style="text-decoration: none; color: white">
-              <img
-                src="https://app.coinsafe.network/assets/twitter.svg"
-                alt="Twitter"
-                style="width: 30px; height: 30px"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-              <span style="font-size: 16px; font-weight: bold; display: none"
-                >Twitter</span
-              >
-            </a>
-            <a
-              href="https://t.me/coinsafe_safe"
-              class="social-icon"
-              style="text-decoration: none; color: white">
-              <img
-                src="https://app.coinsafe.network/assets/telegram.svg"
-                alt="Telegram"
-                style="width: 30px; height: 30px"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-              <span style="font-size: 16px; font-weight: bold; display: none"
-                >Telegram</span
-              >
-            </a>
-          </div>
+            <!-- Social Media Links -->
+            <div class="social-icons">
+              <a
+                href="https://discord.gg/AprSgxhh"
+                class="social-icon"
+                style="text-decoration: none; color: white">
+                <img
+                  src="cid:discord"
+                  alt="Discord"
+                  style="width: 30px; height: 30px" />
+              </a>
+              <a
+                href="https://x.com/Coinsafe_safe"
+                class="social-icon"
+                style="text-decoration: none; color: white">
+                <img
+                  src="cid:twitter"
+                  alt="Twitter"
+                  style="width: 30px; height: 30px" />
+              </a>
+              <a
+                href="https://t.me/coinsafe_safe"
+                class="social-icon"
+                style="text-decoration: none; color: white">
+                <img
+                  src="cid:telegram"
+                  alt="Telegram"
+                  style="width: 30px; height: 30px" />
+              </a>
+            </div>
 
           <!-- Footer -->
           <div class="footer">
@@ -354,11 +334,33 @@ export const updateEmail = async (req: Request, res: Response) => {
     );
     console.log("6. Verification code generated:", verificationCode);
 
-    // Send email
+    // Send email with attachments
     const emailResult = await sendEmail({
       email: email,
       subject: subject,
       html: htmlContent,
+      attachments: [
+        {
+          filename: "coinsafe-logo.svg",
+          path: path.join(__dirname, "../assets/coinsafe-logo.svg"),
+          cid: "logo",
+        },
+        {
+          filename: "discord.svg",
+          path: path.join(__dirname, "../assets/discord.svg"),
+          cid: "discord",
+        },
+        {
+          filename: "twitter.svg",
+          path: path.join(__dirname, "../assets/twitter.svg"),
+          cid: "twitter",
+        },
+        {
+          filename: "telegram.svg",
+          path: path.join(__dirname, "../assets/telegram.svg"),
+          cid: "telegram",
+        },
+      ],
     });
 
     console.log("7. Email send result:", emailResult);
@@ -764,6 +766,28 @@ export const resendVerificationEmail = async (req: Request, res: Response) => {
       email: user.email,
       subject: subject,
       html: htmlContent,
+      attachments: [
+        {
+          filename: "coinsafe-logo.svg",
+          path: path.join(__dirname, "../assets/coinsafe-logo.svg"),
+          cid: "logo",
+        },
+        {
+          filename: "discord.svg",
+          path: path.join(__dirname, "../assets/discord.svg"),
+          cid: "discord",
+        },
+        {
+          filename: "twitter.svg",
+          path: path.join(__dirname, "../assets/twitter.svg"),
+          cid: "twitter",
+        },
+        {
+          filename: "telegram.svg",
+          path: path.join(__dirname, "../assets/telegram.svg"),
+          cid: "telegram",
+        },
+      ],
     });
 
     if (!emailResult.success) {
