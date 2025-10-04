@@ -334,33 +334,50 @@ export const updateEmail = async (req: Request, res: Response) => {
     );
     console.log("6. Verification code generated:", verificationCode);
 
-    // Send email with attachments
+    // Send email with attachments (with fallback if assets not found)
+    const attachments = [];
+    const assetFiles = [
+      {
+        filename: "coinsafe-logo.svg",
+        path: path.join(process.cwd(), "src/assets/coinsafe-logo.svg"),
+        cid: "logo",
+      },
+      {
+        filename: "discord.svg",
+        path: path.join(process.cwd(), "src/assets/discord.svg"),
+        cid: "discord",
+      },
+      {
+        filename: "twitter.svg",
+        path: path.join(process.cwd(), "src/assets/twitter.svg"),
+        cid: "twitter",
+      },
+      {
+        filename: "telegram.svg",
+        path: path.join(process.cwd(), "src/assets/telegram.svg"),
+        cid: "telegram",
+      },
+    ];
+
+    // Check if assets exist before adding to attachments
+    for (const asset of assetFiles) {
+      try {
+        const fs = require("fs");
+        if (fs.existsSync(asset.path)) {
+          attachments.push(asset);
+        } else {
+          console.log(`⚠️ Asset not found: ${asset.path}`);
+        }
+      } catch (error) {
+        console.log(`⚠️ Error checking asset ${asset.filename}:`, error);
+      }
+    }
+
     const emailResult = await sendEmail({
       email: email,
       subject: subject,
       html: htmlContent,
-      attachments: [
-        {
-          filename: "coinsafe-logo.svg",
-          path: path.join(__dirname, "../assets/coinsafe-logo.svg"),
-          cid: "logo",
-        },
-        {
-          filename: "discord.svg",
-          path: path.join(__dirname, "../assets/discord.svg"),
-          cid: "discord",
-        },
-        {
-          filename: "twitter.svg",
-          path: path.join(__dirname, "../assets/twitter.svg"),
-          cid: "twitter",
-        },
-        {
-          filename: "telegram.svg",
-          path: path.join(__dirname, "../assets/telegram.svg"),
-          cid: "telegram",
-        },
-      ],
+      attachments: attachments,
     });
 
     console.log("7. Email send result:", emailResult);
@@ -762,32 +779,50 @@ export const resendVerificationEmail = async (req: Request, res: Response) => {
       verificationCode
     );
 
+    // Send email with attachments (with fallback if assets not found)
+    const attachments = [];
+    const assetFiles = [
+      {
+        filename: "coinsafe-logo.svg",
+        path: path.join(process.cwd(), "src/assets/coinsafe-logo.svg"),
+        cid: "logo",
+      },
+      {
+        filename: "discord.svg",
+        path: path.join(process.cwd(), "src/assets/discord.svg"),
+        cid: "discord",
+      },
+      {
+        filename: "twitter.svg",
+        path: path.join(process.cwd(), "src/assets/twitter.svg"),
+        cid: "twitter",
+      },
+      {
+        filename: "telegram.svg",
+        path: path.join(process.cwd(), "src/assets/telegram.svg"),
+        cid: "telegram",
+      },
+    ];
+
+    // Check if assets exist before adding to attachments
+    for (const asset of assetFiles) {
+      try {
+        const fs = require("fs");
+        if (fs.existsSync(asset.path)) {
+          attachments.push(asset);
+        } else {
+          console.log(`⚠️ Asset not found: ${asset.path}`);
+        }
+      } catch (error) {
+        console.log(`⚠️ Error checking asset ${asset.filename}:`, error);
+      }
+    }
+
     const emailResult = await sendEmail({
       email: user.email,
       subject: subject,
       html: htmlContent,
-      attachments: [
-        {
-          filename: "coinsafe-logo.svg",
-          path: path.join(__dirname, "../assets/coinsafe-logo.svg"),
-          cid: "logo",
-        },
-        {
-          filename: "discord.svg",
-          path: path.join(__dirname, "../assets/discord.svg"),
-          cid: "discord",
-        },
-        {
-          filename: "twitter.svg",
-          path: path.join(__dirname, "../assets/twitter.svg"),
-          cid: "twitter",
-        },
-        {
-          filename: "telegram.svg",
-          path: path.join(__dirname, "../assets/telegram.svg"),
-          cid: "telegram",
-        },
-      ],
+      attachments: attachments,
     });
 
     if (!emailResult.success) {
