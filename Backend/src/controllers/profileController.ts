@@ -5,12 +5,8 @@ import validator from "validator";
 import crypto from "crypto";
 
 // Helper function to generate verification link and HTML
-const generateVerificationContent = (email: string, token: string) => {
-  const verificationLink = `https://www.app.coinsafe.network/profile?token=${token}&email=${encodeURIComponent(
-    // const verificationLink = `http://localhost:5173/dashboard/profile?token=${token}&email=${encodeURIComponent(
-    email
-  )}`;
-  const subject = "CoinSafe: Please Verify Your Email Address";
+const generateVerificationContent = (email: string, code: string) => {
+  const subject = "CoinSafe: Your Email Verification Code";
   const htmlContent = `
        <!DOCTYPE html>
 <html lang="en">
@@ -166,16 +162,20 @@ const generateVerificationContent = (email: string, token: string) => {
           <p class="text">Hi there,</p>
 
           <p class="text">
-            Thank you for linking your profile with CoinSafe! Please click the
-            link below to verify your email address
+            Thank you for linking your profile with CoinSafe! Please use the verification code below to verify your email address.
           </p>
 
+          <div style="text-align: center; margin: 30px 0;">
+            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; display: inline-block; font-family: monospace; font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #1f2937;">
+              ${code}
+            </div>
+          </div>
+
           <p class="text">
-            <a href="${verificationLink}">Verify My Email</a>
+            Enter this code in the verification form on CoinSafe to complete your email verification.
           </p>
           <p class="text">
-            If you did not link your profile to CoinSafe, please ignore this
-            email.
+            This code will expire in 10 minutes. If you did not link your profile to CoinSafe, please ignore this email.
           </p>
           <p class="text">Best regards,<br />The CoinSafe Team!</p>
 
@@ -262,13 +262,18 @@ export const updateEmail = async (req: Request, res: Response) => {
       });
     }
 
-    // Generate verification token
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-    console.log("2. Generated verification token:", verificationToken);
-    console.log("3. Token length:", verificationToken.length);
+    // Generate verification code (6-digit numeric code)
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+    console.log(
+      "🆕 NEW CODE SYSTEM: Generated verification code:",
+      verificationCode
+    );
+    console.log("🆕 NEW CODE SYSTEM: Code length:", verificationCode.length);
 
-    const tokenExpiry = new Date(Date.now() + 3600 * 1000); // 1 hour from now
-    console.log("4. Token expiry set to:", tokenExpiry.toISOString());
+    const codeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+    console.log("4. Code expiry set to:", codeExpiry.toISOString());
 
     // Update or create user
     const updatedUser = await User.findOneAndUpdate(
@@ -276,8 +281,8 @@ export const updateEmail = async (req: Request, res: Response) => {
       {
         email: email.toLowerCase(),
         emailVerified: false,
-        verificationToken: verificationToken,
-        verificationTokenExpires: tokenExpiry,
+        verificationCode: verificationCode,
+        verificationCodeExpires: codeExpiry,
       },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
@@ -286,21 +291,15 @@ export const updateEmail = async (req: Request, res: Response) => {
     console.log("   - Wallet:", updatedUser.walletAddress);
     console.log("   - Email:", updatedUser.email);
     console.log("   - Email Verified:", updatedUser.emailVerified);
-    console.log("   - Verification Token:", updatedUser.verificationToken);
-    console.log("   - Token Expiry:", updatedUser.verificationTokenExpires);
+    console.log("   - Verification Code:", updatedUser.verificationCode);
+    console.log("   - Code Expiry:", updatedUser.verificationCodeExpires);
 
     // Generate verification email content
     const { subject, htmlContent } = generateVerificationContent(
       email,
-      verificationToken
+      verificationCode
     );
-    console.log(
-      "6. Verification link generated:",
-      `https://www.app.coinsafe.network/profile?token=${verificationToken}&email=${encodeURIComponent(
-        // `http://localhost:5173/dashboard/profile?token=${verificationToken}&email=${encodeURIComponent(
-        email
-      )}`
-    );
+    console.log("6. Verification code generated:", verificationCode);
 
     // Send email
     const emailResult = await sendEmail({
@@ -408,44 +407,49 @@ export const updateDiscord = async (req: Request, res: Response) => {
   }
 };
 
-// Controller for GET /api/profile/verify-email - ENHANCED VERSION
-export const verifyEmail = async (req: Request, res: Response) => {
-  const { token, email } = req.query;
+// Controller for POST /api/profile/verify-email-code - NEW CODE VERIFICATION
+export const verifyEmailCode = async (req: Request, res: Response) => {
+  const { code, email, walletAddress } = req.body;
 
-  console.log("=== EMAIL VERIFICATION DEBUG START ===");
-  console.log("1. Raw query params:", req.query);
-  console.log("2. Extracted token:", token);
+  console.log("=== EMAIL CODE VERIFICATION DEBUG START ===");
+  console.log("1. Request body:", req.body);
+  console.log("2. Extracted code:", code);
   console.log("3. Extracted email:", email);
-  console.log("4. Token type:", typeof token);
-  console.log("5. Email type:", typeof email);
-  console.log("6. Current timestamp:", new Date().toISOString());
+  console.log("4. Extracted walletAddress:", walletAddress);
+  console.log("5. Code type:", typeof code);
+  console.log("6. Email type:", typeof email);
+  console.log("7. Current timestamp:", new Date().toISOString());
 
-  if (
-    !token ||
-    !email ||
-    typeof token !== "string" ||
-    typeof email !== "string"
-  ) {
-    console.log("❌ VALIDATION FAILED: Missing or invalid parameters");
+  if (!code || !email || !walletAddress) {
+    console.log("❌ VALIDATION FAILED: Missing required parameters");
     return res.status(400).json({
       success: false,
-      message: "Invalid verification link parameters.",
+      message: "Code, email, and wallet address are required.",
     });
   }
 
   try {
     const queryEmail = email.toLowerCase().trim();
-    console.log("7. Processed email for query:", queryEmail);
+    const queryWalletAddress = walletAddress.toLowerCase();
+    console.log("8. Processed email for query:", queryEmail);
+    console.log("9. Processed wallet for query:", queryWalletAddress);
 
     // First, check if user exists and is already verified
-    const existingUser = await User.findOne({ email: queryEmail });
-    console.log("8. User found by email:", existingUser ? "YES" : "NO");
+    const existingUser = await User.findOne({
+      email: queryEmail,
+      walletAddress: queryWalletAddress,
+    });
+    console.log(
+      "10. User found by email and wallet:",
+      existingUser ? "YES" : "NO"
+    );
 
     if (!existingUser) {
-      console.log("❌ No user found with this email");
+      console.log("❌ No user found with this email and wallet combination");
       return res.status(400).json({
         success: false,
-        message: "No user found with this email address.",
+        message:
+          "No user found with this email and wallet address combination.",
       });
     }
 
@@ -459,93 +463,67 @@ export const verifyEmail = async (req: Request, res: Response) => {
       });
     }
 
-    console.log("9. User details:");
+    console.log("11. User details:");
     console.log("   - Wallet:", existingUser.walletAddress);
     console.log("   - Email:", existingUser.email);
     console.log("   - Email Verified:", existingUser.emailVerified);
+    console.log("   - Has Verification Code:", !!existingUser.verificationCode);
+    console.log("   - Stored Code:", existingUser.verificationCode);
+    console.log("   - Received Code:", code);
+    console.log("   - Codes Match:", existingUser.verificationCode === code);
+    console.log("   - Code Expiry:", existingUser.verificationCodeExpires);
     console.log(
-      "   - Has Verification Token:",
-      !!existingUser.verificationToken
-    );
-    console.log("   - Stored Token:", existingUser.verificationToken);
-    console.log("   - Received Token:", token);
-    console.log("   - Tokens Match:", existingUser.verificationToken === token);
-    console.log("   - Token Expiry:", existingUser.verificationTokenExpires);
-    console.log(
-      "   - Token Expired:",
-      existingUser.verificationTokenExpires
-        ? existingUser.verificationTokenExpires < new Date()
+      "   - Code Expired:",
+      existingUser.verificationCodeExpires
+        ? existingUser.verificationCodeExpires < new Date()
         : "NO EXPIRY SET"
     );
 
-    // Now try to find user with valid token for verification
-    const user = await User.findOne({
-      email: queryEmail,
-      verificationToken: token,
-      verificationTokenExpires: { $gt: new Date() },
-    });
-
-    console.log(
-      "10. User found with token and valid expiry:",
-      user ? "YES" : "NO"
-    );
-
-    if (!user) {
-      console.log("❌ VERIFICATION FAILED");
-
-      // Check if token expired
-      const userWithExpiredToken = await User.findOne({
-        email: queryEmail,
-        verificationToken: token,
-      });
-
-      console.log("11. Debug scenarios:");
-      console.log(
-        "    - User exists with this token (any email):",
-        !!userWithExpiredToken
-      );
-
-      if (userWithExpiredToken) {
-        console.log("    - Token found but expired");
-        return res.status(400).json({
-          success: false,
-          message:
-            "Verification token has expired. Please request a new verification email.",
-          expired: true,
-        });
-      }
-
+    // Check if code matches and is not expired
+    if (existingUser.verificationCode !== code) {
+      console.log("❌ CODE MISMATCH");
       return res.status(400).json({
         success: false,
-        message: "Invalid verification token.",
+        message: "Invalid verification code.",
       });
     }
 
-    console.log("✅ VERIFICATION SUCCESSFUL");
+    if (
+      existingUser.verificationCodeExpires &&
+      existingUser.verificationCodeExpires < new Date()
+    ) {
+      console.log("❌ CODE EXPIRED");
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired. Please request a new code.",
+        expired: true,
+      });
+    }
+
     console.log("12. User before update:");
-    console.log("    - Email Verified:", user.emailVerified);
-    console.log("    - Verification Token:", user.verificationToken);
+    console.log("    - Email Verified:", existingUser.emailVerified);
+    console.log("    - Verification Code:", existingUser.verificationCode);
 
     // Update the user
-    user.emailVerified = true;
-    user.verificationToken = undefined;
-    user.verificationTokenExpires = undefined;
+    existingUser.emailVerified = true;
+    existingUser.verificationCode = undefined;
+    existingUser.verificationCodeExpires = undefined;
 
-    const savedUser = await user.save();
+    const savedUser = await existingUser.save();
 
     console.log("13. User after update:");
     console.log("    - Email Verified:", savedUser.emailVerified);
-    console.log("    - Verification Token:", savedUser.verificationToken);
+    console.log("    - Verification Code:", savedUser.verificationCode);
     console.log("    - Save successful:", !!savedUser);
 
     // Double-check by fetching the user again
     const verifyUpdate = await User.findOne({
-      walletAddress: user.walletAddress,
+      walletAddress: existingUser.walletAddress,
     });
     console.log("14. Double-check from DB:");
     console.log("    - Email Verified in DB:", verifyUpdate?.emailVerified);
 
-    console.log("=== EMAIL VERIFICATION DEBUG END ===");
+    console.log("=== EMAIL CODE VERIFICATION DEBUG END ===");
 
     res.status(200).json({
       success: true,
@@ -712,19 +690,21 @@ export const resendVerificationEmail = async (req: Request, res: Response) => {
       });
     }
 
-    // Generate new verification token
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-    const tokenExpiry = new Date(Date.now() + 3600 * 1000); // 1 hour from now
+    // Generate new verification code
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+    const codeExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-    // Update user with new token
-    user.verificationToken = verificationToken;
-    user.verificationTokenExpires = tokenExpiry;
+    // Update user with new code
+    user.verificationCode = verificationCode;
+    user.verificationCodeExpires = codeExpiry;
     await user.save();
 
     // Send verification email
     const { subject, htmlContent } = generateVerificationContent(
       user.email,
-      verificationToken
+      verificationCode
     );
 
     const emailResult = await sendEmail({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 // import { X } from 'lucide-react';
 import { useActiveAccount } from "thirdweb/react";
 import { useProfile } from "../hooks/useProfile";
-import { profileAPI } from "../services/api";
 import ConnectModal from "@/components/Modals/ConnectModal";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +23,6 @@ export default function ProfilePage() {
     updateEmail,
     // updateTwitter,
     // updateDiscord,
-    refetch,
   } = useProfile(address);
 
   // Form states
@@ -42,9 +40,6 @@ export default function ProfilePage() {
   // const [twitterLoading, setTwitterLoading] = useState(false);
   // const [discordLoading, setDiscordLoading] = useState(false);
 
-  // Verification state
-  const [verificationLoading, setVerificationLoading] = useState(false);
-  const verificationProcessed = useRef(false); // Prevent duplicate verification calls
   const [openConnectModal, setOpenConnectModal] = useState(false);
 
   // Success/error messages
@@ -52,7 +47,6 @@ export default function ProfilePage() {
     email?: string;
     twitter?: string;
     discord?: string;
-    verification?: string;
   }>({});
 
   // Open connect modal if wallet is not connected
@@ -64,62 +58,8 @@ export default function ProfilePage() {
     }
   }, [account?.address]);
 
-  // Check for email verification on component mount
-  useEffect(() => {
-    const handleEmailVerification = async () => {
-      // Prevent duplicate calls
-      if (verificationProcessed.current) {
-        console.log("Verification already processed, skipping...");
-        return;
-      }
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get("token");
-      const email = urlParams.get("email");
-
-      if (token && email) {
-        console.log("Email verification parameters found, processing...");
-        verificationProcessed.current = true;
-        setVerificationLoading(true);
-
-        try {
-          const response = await profileAPI.verifyEmail(token, email);
-          if (response.alreadyVerified) {
-            setMessages((prev) => ({
-              ...prev,
-              verification: "✅ Email is already verified!",
-            }));
-          } else {
-            setMessages((prev) => ({
-              ...prev,
-              verification: "✅ " + response.message,
-            }));
-          }
-
-          // Refresh profile data
-          await refetch();
-
-          // Clear URL parameters after successful verification
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname
-          );
-        } catch (err) {
-          const errorMessage =
-            err instanceof Error ? err.message : "Email verification failed";
-          setMessages((prev) => ({
-            ...prev,
-            verification: "❌ " + errorMessage,
-          }));
-        } finally {
-          setVerificationLoading(false);
-        }
-      }
-    };
-
-    handleEmailVerification();
-  }, [refetch]);
+  // Note: Email verification is now handled through the EmailVerificationModal
+  // No need for URL-based verification since we use code-based verification
 
   // Update form inputs when profile data loads
   useEffect(() => {
@@ -213,24 +153,6 @@ export default function ProfilePage() {
 
         <div className="border-b border-[#FFFFFF21] -mx-8 mb-8"></div>
 
-        {/* Verification Status */}
-        {verificationLoading && (
-          <div className="text-center text-blue-400 text-sm">
-            🔄 Verifying your email...
-          </div>
-        )}
-
-        {messages.verification && (
-          <div
-            className={`text-center text-sm p-3 rounded-lg ${
-              messages.verification.includes("✅")
-                ? "bg-green-900/20 text-green-400 border border-green-500/20"
-                : "bg-red-900/20 text-red-400 border border-red-500/20"
-            }`}>
-            {messages.verification}
-          </div>
-        )}
-
         {/* Loading State */}
         {loading && (
           <div className="space-y-6">
@@ -316,15 +238,11 @@ export default function ProfilePage() {
                       onChange={(e) => setEmailInput(e.target.value)}
                       className="flex-1 bg-transparent border-[#FFFFFF21] text-white placeholder:text-gray-500 rounded-xl h-12 pr-24"
                       placeholder="Enter your email address"
-                      disabled={emailLoading || verificationLoading}
+                      disabled={emailLoading}
                     />
                     <Button
                       onClick={handleEmailConnect}
-                      disabled={
-                        emailLoading ||
-                        !emailInput.trim() ||
-                        verificationLoading
-                      }
+                      disabled={emailLoading || !emailInput.trim()}
                       className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#3F3F3F99] hover:bg-[#3F3F3F99] text-[#F1F1F1] rounded-lg px-4 h-8 text-sm">
                       {emailLoading
                         ? "..."
@@ -538,8 +456,7 @@ export default function ProfilePage() {
                 loading ||
                 emailLoading ||
                 twitterLoading ||
-                discordLoading ||
-                verificationLoading
+                discordLoading
               }
               className="bg-[#FFFFFFE5] hover:bg-gray-100 text-black rounded-full px-8 py-3 font-medium">
               {loading ? "Loading..." : "Save changes"}
