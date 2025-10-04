@@ -1,11 +1,18 @@
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import path from "path";
+import fs from "fs";
 dotenv.config();
 
 export const sendEmail = async (options: {
   email: string;
   subject: string;
   html: string;
+  attachments?: Array<{
+    filename: string;
+    path: string;
+    cid: string;
+  }>;
 }) => {
   console.log("📧 [sendEmail] Starting email send process...");
   console.log(`📧 [sendEmail] Recipient: ${options.email}`);
@@ -44,6 +51,11 @@ export const sendEmail = async (options: {
     to: options.email,
     subject: options.subject,
     html: options.html,
+    attachments: options.attachments?.map((attachment) => ({
+      filename: attachment.filename,
+      path: attachment.path,
+      cid: attachment.cid,
+    })),
   };
 
   console.log("📧 [sendEmail] Mail options prepared:");
