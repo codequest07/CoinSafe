@@ -6,7 +6,6 @@ import { client, liskMainnet } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { getTokenDecimals } from "@/lib/utils";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
-// import { toast } from './use-toast';
 // import { config } from '@/lib/config'; // Assuming this contains Thirdweb client config
 
 interface UseWithdrawAssetParams {
@@ -19,7 +18,7 @@ interface UseWithdrawAssetParams {
   chainId?: number;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
-  toast: (props: { title: string; variant: "default" | "destructive" }) => void;
+  toast: any;
 }
 
 interface WithdrawAssetResult {
@@ -72,29 +71,20 @@ export const useWithdrawAsset = ({
             //   client: config.client, // Assuming config.client contains Thirdweb client
             // }));
           } catch (error) {
-            toast({
-              title: "Error Connecting Wallet",
-              variant: "destructive",
-            });
+            toast.error("Error Connecting Wallet");
             console.log("Error", error);
             throw new Error("Failed to connect wallet: " + error);
           }
         }
 
         if (!amount) {
-          toast({
-            title: "Please input a value for amount to Withdraw",
-            variant: "destructive",
-          });
+          toast.error("Please input a value for amount to Withdraw");
           setIsLoading(false);
           return;
         }
 
         if (!token) {
-          toast({
-            title: "Please select token to Withdraw",
-            variant: "destructive",
-          });
+          toast.error("Please select token to Withdraw");
           setIsLoading(false);
           return;
         }

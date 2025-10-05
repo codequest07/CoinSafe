@@ -68,7 +68,7 @@ export const useClaimAllAutoSafe = ({
 
           await sendTransaction(claimAllTx);
 
-          toast({ title: "Claim all successful", variant: "default" });
+          toast.success("Claim all successful");
           onSuccess?.();
         } catch (txError: any) {
           let errorMsg = "Failed to claim from savings plan";
@@ -79,7 +79,7 @@ export const useClaimAllAutoSafe = ({
           } else if (txError?.message?.includes("ZeroValueNotAllowed")) {
             errorMsg = "Amount cannot be zero";
           }
-          toast({ title: errorMsg, variant: "destructive" });
+          toast.error(errorMsg);
           throw new Error(errorMsg);
         }
       } catch (err) {

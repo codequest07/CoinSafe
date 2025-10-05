@@ -18,8 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
+import { toast } from "sonner";
 
 interface WaitlistModalProps {
   open: boolean;
@@ -37,12 +36,10 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
   const [emailError, setEmailError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     if (isSuccess) {
-      toast({
-        title: "Success!",
+      toast.success("Success!", {
         description: "You've been added to the waitlist.",
         duration: 5000,
       });
@@ -103,11 +100,11 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
         }
       } catch (error) {
         console.error("Error submitting form:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to join the waitlist. Please try again.",
-          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        toast.error("Failed to join the waitlist. Please try again.", {
+          action: {
+            label: "Try again",
+            onClick: () => console.log("try again"),
+          },
         });
       } finally {
         setIsSubmitting(false);
@@ -136,7 +133,8 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
             </p>
             <Button
               onClick={handleClose}
-              className="mt-6 bg-white hover:bg-white text-black rounded-[2rem]">
+              className="mt-6 bg-white hover:bg-white text-black rounded-[2rem]"
+            >
               Close
             </Button>
           </div>
@@ -193,7 +191,8 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                   value={formData.country}
                   onValueChange={(value) =>
                     setFormData((prev) => ({ ...prev, country: value }))
-                  }>
+                  }
+                >
                   <SelectTrigger className="bg-[#262628] border-0 text-white">
                     <SelectValue placeholder="Select a country" />
                   </SelectTrigger>
@@ -211,7 +210,8 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                   type="button"
                   variant="outline"
                   onClick={handleClose}
-                  className="bg-[#262628] hover:bg-[#262628] text-white hover:text-white border-0 rounded-[2rem]">
+                  className="bg-[#262628] hover:bg-[#262628] text-white hover:text-white border-0 rounded-[2rem]"
+                >
                   Cancel
                 </Button>
                 <Button
@@ -223,7 +223,8 @@ export function WaitlistModal({ open, onOpenChange }: WaitlistModalProps) {
                     !formData.country ||
                     !!emailError ||
                     isSubmitting
-                  }>
+                  }
+                >
                   {isSubmitting ? "Submitting..." : "Join waitlist"}
                 </Button>
               </div>

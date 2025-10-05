@@ -3,7 +3,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
 import { toBigInt } from "ethers";
-import { toast } from "./use-toast";
+import { toast } from "sonner";
 import { useRecoilState } from "recoil";
 import {
   unlockStateAtom,
@@ -124,11 +124,7 @@ export const useUnlockSafe = ({
         });
         const error = new Error("Invalid unlock state");
         setError(error);
-        toast({
-          title: "Error",
-          description: "Please ensure token and safe ID are set correctly",
-          variant: "destructive",
-        });
+        toast.error("Please ensure token and safe ID are set correctly");
         onError?.(error);
         return;
       }
@@ -151,10 +147,7 @@ export const useUnlockSafe = ({
         );
         const error = new Error("Amount must be greater than zero");
         setError(error);
-        toast({
-          title: `Error: Amount must be greater than zero`,
-          variant: "destructive",
-        });
+        toast.error(`Error: Amount must be greater than zero`)
         onError?.(error);
         return;
       }
@@ -163,11 +156,7 @@ export const useUnlockSafe = ({
       if (!currentState.token) {
         const error = new Error("Token is not set in the unlock state");
         setError(error);
-        toast({
-          title: "Error",
-          description: "Please select a valid token to unlock.",
-          variant: "destructive",
-        });
+        toast.error("Please select a valid token to unlock.");
         onError?.(error);
         return;
       }
@@ -175,11 +164,7 @@ export const useUnlockSafe = ({
       if (!currentState.safeId) {
         const error = new Error("Safe ID is not set in the unlock state");
         setError(error);
-        toast({
-          title: "Error",
-          description: "Safe ID is missing. Please try again.",
-          variant: "destructive",
-        });
+        toast.error("Safe ID is missing. Please try again.");
         onError?.(error);
         return;
       }
@@ -256,10 +241,7 @@ export const useUnlockSafe = ({
 
         const result = await sendTransaction(transaction);
 
-        toast({
-          title: "Unlock successful!",
-          variant: "default",
-        });
+        toast.error("Unlock successful!");
 
         // Set success state
         setIsSuccess(true);
@@ -301,10 +283,7 @@ export const useUnlockSafe = ({
           errorMessage = "Amount must be greater than zero.";
         }
 
-        toast({
-          title: `Error: ${errorMessage}`,
-          variant: "destructive",
-        });
+        toast.error(`Error: ${errorMessage}`)
 
         onError?.(error);
         return null;

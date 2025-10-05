@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ClaimAssets from "../Modals/ClaimAssets";
 import { useGetSafes } from "@/hooks/useGetSafes";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const ClaimCard = ({
   title,
@@ -66,19 +66,15 @@ const ClaimCard = ({
 
   const openclaimModal = () => {
     if (isLoading) {
-      toast({
-        title: "Loading safes",
+      toast.loading("Loading safes", {
         description: "Please wait while we load your safes.",
-        variant: "default",
       });
       return;
     }
 
     if (!hasMaturedSafes) {
-      toast({
-        title: "No matured safes",
-        description: "You don't have any matured safes to claim.",
-        variant: "destructive",
+      toast.error("No matured safes",{
+        description: "You don't have any matured safes to claim."
       });
       return;
     }

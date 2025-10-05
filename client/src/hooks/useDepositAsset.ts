@@ -20,7 +20,7 @@ interface UseDepositAssetParams {
   onSuccess?: () => void;
   onApprove?: () => void;
   onError?: (error: Error) => void;
-  toast: (props: { title: string; variant: "default" | "destructive" }) => void;
+  toast: any;
 }
 
 interface DepositAssetResult {
@@ -59,19 +59,13 @@ export const useDepositAsset = ({
         });
 
         if (!amount) {
-          toast({
-            title: "Please input a value for amount to deposit",
-            variant: "destructive",
-          });
+          toast.error("Please input a value for amount to deposit");
           setIsLoading(false);
           return;
         }
 
         if (!token) {
-          toast({
-            title: "Please select token to deposit",
-            variant: "destructive",
-          });
+          toast.error("Please select token to deposit");
           setIsLoading(false);
           return;
         }
@@ -138,19 +132,13 @@ export const useDepositAsset = ({
             onSuccess?.();
           } catch (error) {
             console.error("Deposit failed:", error);
-            toast({
-              title: `Deposit failed:", ${error}`,
-              variant: "destructive",
-            });
+            toast.error(`Deposit failed:", ${error}`);
             onError?.(error as Error);
           } finally {
             setIsLoading(false);
           }
         } else {
-          toast({
-            title: "No account. Connect an account",
-            variant: "destructive",
-          });
+          toast.error("No account. Connect an account");
           throw new Error(`Approve transaction failed: ${error?.message}`);
         }
       } catch (err) {

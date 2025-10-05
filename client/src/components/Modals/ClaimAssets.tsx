@@ -7,7 +7,7 @@ import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import ClaimModal from "./ClaimModal";
 import { format } from "date-fns";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export default function ClaimAssets({
   isDepositModalOpen,
@@ -86,10 +86,8 @@ export default function ClaimAssets({
     // Check if this is an Emergency Safe
     if (safe.id === 911n) {
       // Show a toast notification that Emergency Safe has a different withdrawal process
-      toast({
-        title: "Emergency Safe",
+      toast.error("Emergency Safe", {
         description: "Please use the Emergency Safe withdrawal option instead.",
-        variant: "destructive",
       });
 
       // Redirect to Emergency Safe page
@@ -100,10 +98,8 @@ export default function ClaimAssets({
     // Skip safes with invalid or missing unlockTime
     if (!safe.unlockTime) {
       console.error(`Safe ${safe.id} has no unlockTime`);
-      toast({
-        title: "Invalid Safe",
+      toast.error("Invalid Safe", {
         description: "This safe has no maturity date.",
-        variant: "destructive",
       });
       return;
     }
@@ -115,10 +111,8 @@ export default function ClaimAssets({
     const minValidDate = new Date(2020, 0, 1); // Jan 1, 2020
     if (unlockDate < minValidDate) {
       console.error(`Safe ${safe.id} has invalid date: ${unlockDate}`);
-      toast({
-        title: "Invalid Safe",
+      toast.error("Invalid Safe", {
         description: "This safe has an invalid maturity date.",
-        variant: "destructive",
       });
       return;
     }
@@ -128,13 +122,11 @@ export default function ClaimAssets({
 
     if (!isMatured) {
       // Show a toast notification that the safe hasn't matured yet
-      toast({
-        title: "Safe not matured",
+      toast.error("Safe not matured", {
         description: `This safe will mature on ${format(
           unlockDate,
           "dd MMM yyyy"
         )}`,
-        variant: "destructive",
       });
       return;
     }
@@ -144,10 +136,8 @@ export default function ClaimAssets({
 
     if (!isTargetSaving) {
       // Show a toast notification that this is not a target saving
-      toast({
-        title: "Not a Target Saving",
+      toast.error("Not a Target Saving", {
         description: "Only Target Savings can be claimed this way.",
-        variant: "destructive",
       });
       return;
     }
@@ -157,10 +147,8 @@ export default function ClaimAssets({
       safe.tokenAmounts && safe.tokenAmounts.some((token) => token.amount > 0);
 
     if (!hasTokens) {
-      toast({
-        title: "No tokens to claim",
+      toast.error("No tokens to claim", {
         description: "This safe has no tokens available to claim.",
-        variant: "destructive",
       });
       return;
     }

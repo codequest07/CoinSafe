@@ -17,7 +17,7 @@ import { CoinsafeDiamondContract } from "@/lib/contract";
 // import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { LoaderCircle } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import ApproveTxModal from "./ApproveTxModal";
 import { formatUnits } from "viem";
@@ -79,10 +79,7 @@ export default function WithdrawEmergencySafe({
       // Hide the approval modal
       setIsApproveModalOpen(false);
 
-      toast({
-        title: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     },
     toast,
   });
@@ -248,26 +245,18 @@ export default function WithdrawEmergencySafe({
               onClick={async (e) => {
                 // Validate inputs
                 if (!amount) {
-                  toast({
-                    title: "Please enter an amount",
-                    variant: "destructive",
-                  });
+                  toast.error("Please enter an amount");
                   return;
                 }
 
                 if (!token) {
-                  toast({
-                    title: "Please select a token",
-                    variant: "destructive",
-                  });
+                  toast.error("Please select a token");
                   return;
                 }
 
                 if ((amount || 0) > selectedTokenBalance) {
-                  toast({
-                    title: "Insufficient balance",
+                  toast.error("Insufficient balance", {
                     description: "Amount exceeds your available balance",
-                    variant: "destructive",
                   });
                   return;
                 }
@@ -289,24 +278,20 @@ export default function WithdrawEmergencySafe({
                     openSuccessModal();
 
                     // Show a toast notification
-                    toast({
-                      title: "Withdrawal Successful",
+                    toast.success("Withdrawal Successful", {
                       description: `Successfully withdrew ${amount} ${
                         tokenData[token]?.symbol || "tokens"
                       }`,
-                      variant: "default",
                     });
                   }, 1000);
                 } catch (error) {
                   console.error("Withdrawal failed:", error);
                   setIsApproveModalOpen(false);
-                  toast({
-                    title: "Withdrawal Failed",
+                  toast.error("Withdrawal Failed", {
                     description:
                       error instanceof Error
                         ? error.message
                         : "Unknown error occurred",
-                    variant: "destructive",
                   });
                 }
               }}

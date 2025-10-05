@@ -15,7 +15,7 @@ interface UseClaimAssetParams {
   coinSafeAbi: any;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
-  toast: (props: { title: string; variant: "default" | "destructive" }) => void;
+  toast: any;
 }
 
 interface ClaimAssetResult {
@@ -100,27 +100,14 @@ export const useClaimAsset = ({
 
         // Check for specific error types
         if (errorObj.message.includes("SafeNotMatured")) {
-          toast({
-            title: "Safe has not matured yet",
-            variant: "destructive",
-          });
+          toast.error("Safe has not matured yet");
         } else if (errorObj.message.includes("InvalidSafeId")) {
-          toast({
-            title: "Invalid safe ID",
-            variant: "destructive",
-          });
+          toast.error("Invalid safe ID");
         } else if (errorObj.message.includes("ZeroValueNotAllowed")) {
-          toast({
-            title: "No tokens to claim",
-            variant: "destructive",
-          });
+          toast("No tokens to claim");
         } else {
-          toast({
-            title: `Claim failed: ${errorObj.message}`,
-            variant: "destructive",
-          });
+          toast.error(`Claim failed: ${errorObj.message}`);
         }
-
         console.error("Claim asset error:", errorObj);
       } finally {
         setIsLoading(false);
@@ -182,22 +169,12 @@ export const useClaimAsset = ({
 
         // Check for specific error types
         if (errorObj.message.includes("SafeNotMatured")) {
-          toast({
-            title: "Safe has not matured yet",
-            variant: "destructive",
-          });
+          toast.error("Safe has not matured yet");
         } else if (errorObj.message.includes("InvalidSafeId")) {
-          toast({
-            title: "Invalid safe ID",
-            variant: "destructive",
-          });
+          toast.error("Invalid safe ID");
         } else {
-          toast({
-            title: `Claim failed: ${errorObj.message}`,
-            variant: "destructive",
-          });
+          toast.error(`Claim failed: ${errorObj.message}`);
         }
-
         console.error("Claim all assets error:", errorObj);
       } finally {
         setIsLoading(false);

@@ -8,7 +8,7 @@ import { liskMainnet } from "@/lib/config";
 import { Abi } from "viem";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useSmartAccountTransactionInterceptorContext } from "@/hooks/useSmartAccountTransactionInterceptor";
 
 interface DeactivateSafeModalProps {
@@ -63,10 +63,7 @@ export default function DeactivateSafeModal({
       await sendTransaction(deactivateTx);
     } catch (error: any) {
       console.error("Deactivate Safe failed:", error);
-      toast({
-        title: `Deactivate Safe failed:", ${error?.message || ""}`,
-        variant: "destructive",
-      });
+      toast.error(`Deactivate Safe failed:", ${error?.message || ""}`);
     } finally {
       setDeactivating(false);
     }
