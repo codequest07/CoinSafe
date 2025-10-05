@@ -191,7 +191,7 @@ export default function SavingsDetail() {
                               new Date().getTime()) /
                               (1000 * 60 * 60 * 24)
                           )} days till unlock`
-                        : "Ready to unlock"
+                        : "Matured"
                       : "Flexible"}
                   </Badge>
                 </div>
