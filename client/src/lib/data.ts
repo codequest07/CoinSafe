@@ -27,6 +27,7 @@ import MemoDashboardActive from "@/icons/DashboardActive";
 import MemoVaultActive from "@/icons/VaultActive";
 // import MemoStakingActive from "@/icons/StakingActive";
 import MemoRewardActive from "@/icons/RewardActive";
+import MemoProfile from "@/icons/Profile";
 
 export type Asset = {
   symbol: string;
@@ -62,6 +63,38 @@ export const NavLinks = [
     icon: MemoVault,
     activeIcon: MemoVaultActive,
     label: "Vault",
+  },
+  {
+    to: "/rewards",
+    icon: MemoReward,
+    activeIcon: MemoRewardActive,
+    label: "Rewards",
+  },
+];
+export const MobileNavLinks = [
+  {
+    to: "/",
+    icon: MemoDashboard,
+    activeIcon: MemoDashboardActive,
+    label: "Dashboard",
+  },
+  {
+    to: "/wallet",
+    icon: MemoPortfolio,
+    activeIcon: MemoPortfolioActive,
+    label: "Wallet",
+  },
+  {
+    to: "/vault",
+    icon: MemoVault,
+    activeIcon: MemoVaultActive,
+    label: "Vault",
+  },
+  {
+    to: "/profile",
+    icon: MemoProfile,
+    activeIcon: MemoProfile,
+    label: "Profile",
   },
   {
     to: "/rewards",
@@ -107,8 +140,6 @@ export const savings = [
     ],
   },
 ];
-
-
 
 export const vaultAssets = [
   {

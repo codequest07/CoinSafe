@@ -1,15 +1,5 @@
 import axios, { type AxiosResponse } from "axios";
-
-// Safe environment variable access
-const getApiBaseUrl = () => {
-  if (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-  return "https://coinsafe-0q0m.onrender.com/api";
-  // return "http://localhost:1234/api";
-};
-
-const API_BASE_URL = getApiBaseUrl();
+import { API_BASE_URL } from "@/lib/api-config";
 
 export interface ProfileData {
   email?: string;
@@ -105,14 +95,44 @@ class ProfileAPI {
     }
   }
 
+  async verifyEmailCode(
+    code: string,
+    email: string,
+    walletAddress: string
+  ): Promise<ApiResponse> {
+    try {
+      const response = await apiClient.post("/verify-email-code", {
+        code,
+        email,
+        walletAddress,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("❌ [verifyEmailCode] Verification failed:", error);
+      console.error("❌ [verifyEmailCode] Error details:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        status: (error as any)?.response?.status,
+        data: (error as any)?.response?.data,
+      });
+      throw error;
+    }
+  }
+
   async verifyEmail(token: string, email: string): Promise<ApiResponse> {
     try {
       const response = await apiClient.get("/verify-email", {
         params: { token, email },
       });
+
       return response.data;
     } catch (error) {
-      console.error("Verify Email Error:", error);
+      console.error("❌ [verifyEmail] Verification failed:", error);
+      console.error("❌ [verifyEmail] Error details:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        status: (error as any)?.response?.status,
+        data: (error as any)?.response?.data,
+      });
       throw error;
     }
   }

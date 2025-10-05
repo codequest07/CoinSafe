@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 // import { Coins, ExternalLinkIcon, Menu } from "lucide-react";
 import { Link, NavLink, useLocation, useParams } from "react-router-dom";
-import { NavLinks } from "@/lib/data";
+import { MobileNavLinks } from "@/lib/data";
 import MemoLogo from "@/icons/Logo";
 import SmileFace from "./Smile";
 import ExtensionCard from "./Cards/ExtensionCard";
@@ -28,6 +28,7 @@ import {
 import { client, liskMainnet } from "@/lib/config";
 import { darkTheme } from "thirdweb/react";
 import { wallets } from "@/lib/wallets";
+import { API_BASE_URL } from "@/lib/api-config";
 
 const getRandomMessage = () => {
   const messages = [
@@ -140,7 +141,7 @@ const DashHeader = () => {
   const [token, setToken] = useState("");
 
   useEffect(() => {
-    fetch("https://coinsafe-0q0m.onrender.com/api/fonbnk/generate-signature")
+    fetch(`${API_BASE_URL}/fonbnk/generate-signature`)
       .then((res) => res.json())
       .then((data) => setToken(data?.data?.signature))
       .catch((err) => console.error("Error fetching token:", err));
@@ -273,7 +274,7 @@ const DashHeader = () => {
                     <MemoLogo className="w-32 h-10" />
                   </Link>
 
-                  {NavLinks.map((link) => (
+                  {MobileNavLinks.map((link) => (
                     <NavLink
                       key={link.label}
                       to={link.to}

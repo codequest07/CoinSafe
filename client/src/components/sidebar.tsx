@@ -7,6 +7,7 @@ import ConnectModal from "./Modals/ConnectModal";
 import { useActiveAccount } from "thirdweb/react";
 import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 import { DialogHeader } from "./ui/dialog";
+import { API_BASE_URL } from "@/lib/api-config";
 // import AmountInput from "./AmountInput";
 // import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
 // import { useRecoilState } from "recoil";
@@ -120,7 +121,7 @@ const Sidebar = () => {
   const [token, setToken] = useState("");
 
   useEffect(() => {
-    fetch("https://coinsafe-0q0m.onrender.com/api/fonbnk/generate-signature")
+    fetch(`${API_BASE_URL}/fonbnk/generate-signature`)
       .then((res) => res.json())
       .then((data) => setToken(data?.data?.signature))
       .catch((err) => console.error("Error fetching token:", err));
@@ -171,10 +172,7 @@ const Sidebar = () => {
         <div className="hidden rounded-2xl border-r p-2 border-[#13131373] bg-[#13131373] md:flex flex-col">
           <div className="flex h-full max-h-fit shadow-lg rounded-xl flex-col gap-2">
             <div className="flex items-center py-12 px-4 lg:h-[60px] lg:px-6">
-              <Link
-                to="/"
-                className="flex items-center gap-2 font-semibold"
-              >
+              <Link to="/" className="flex items-center gap-2 font-semibold">
                 <MemoLogo className="w-40 h-40" />
               </Link>
             </div>
@@ -189,8 +187,7 @@ const Sidebar = () => {
                       isLinkActive(link.to)
                         ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#F1F1F1] bg-[#1E1E1E99] transition-all"
                         : "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
-                    }
-                  >
+                    }>
                     <>
                       {isLinkActive(link.to) ? (
                         <link.activeIcon className="w-5 h-5" />
@@ -210,8 +207,7 @@ const Sidebar = () => {
                   onClick={() => setOpenOnRampModal(true)}
                   className={
                     "flex items-center cursor-pointer gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
-                  }
-                >
+                  }>
                   <>
                     <Coins className="w-5 h-5" />
                     {"On-ramp"}
@@ -242,8 +238,7 @@ const Sidebar = () => {
             <div className="w-full max-w-sm">
               <label
                 htmlFor=""
-                className="text-[#CACACA] font-light text-[14px]"
-              >
+                className="text-[#CACACA] font-light text-[14px]">
                 Amount to On-ramp
               </label>
               <div className="flex items-center justify-between bg-transaprarent rounded-lg p-4 border-[1px] border-[#FFFFFF3D]">
@@ -265,8 +260,7 @@ const Sidebar = () => {
                     variant="ghost"
                     size="sm"
                     onClick={handleClear}
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
-                  >
+                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600">
                     <X className="h-4 w-4" />
                   </Button>
 
@@ -274,22 +268,19 @@ const Sidebar = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="secondary"
-                        className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md"
-                      >
+                        className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md">
                         {selectedCurrency}
                         <ChevronDown className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="w-32 bg-gray-600 text-white"
-                    >
+                      className="w-32 bg-gray-600 text-white">
                       {currencies.map((currency) => (
                         <DropdownMenuItem
                           key={currency.code}
                           onClick={() => handleCurrencySelect(currency.code)}
-                          className="cursor-pointer"
-                        >
+                          className="cursor-pointer">
                           <div className="flex flex-col">
                             <span className="font-medium">{currency.code}</span>
                             {/* <span className="text-xs text-gray-500">{currency.name}</span> */}
@@ -307,8 +298,7 @@ const Sidebar = () => {
                       ? "#"
                       : `https://pay.fonbnk.com/auth?source=o9VjcneL&network=LISK&asset=${selectedCurrency}&amount=${amount}&currency=crypto&paymentChannel=bank&countryIsoCode=NG&address=${account?.address}&signature=${token}`
                   }
-                  target="_blank"
-                >
+                  target="_blank">
                   <Button className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] rounded-[100px] border-[1px] border-[#FFFFFF05] text-[#010104] text-[14px]">
                     Proceed to On-ramp
                   </Button>

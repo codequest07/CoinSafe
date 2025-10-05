@@ -6,6 +6,7 @@ import MemoAngry from "@/icons/Angry";
 import { useActiveAccount } from "thirdweb/react";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { Link } from "react-router-dom";
+import MemoUser from "@/icons/User";
 
 export default function SmileFace() {
   const account = useActiveAccount();
@@ -14,6 +15,14 @@ export default function SmileFace() {
 
   return (
     <div className="flex items-center sm:space-x-3">
+      <div className="flex items-center space-x-2 justify-center mt-2">
+        <Link to={"/profile"}>
+          <button className="cursor-pointer">
+            <MemoUser className="w-12 h-12" />
+            {/* <img src="/assets/profile-icon.svg" alt="" /> */}
+          </button>
+        </Link>
+      </div>
       {/* Button for connected wallets */}
       <div>
         <ThirdwebConnectButton />
@@ -22,11 +31,6 @@ export default function SmileFace() {
         Connect wallet
       </Button> */}
 
-      <Link to={"/profile"}>
-        <button className="cursor-pointer">
-          <img src="/assets/profile-icon.svg" alt="" />
-        </button>
-      </Link>
       {/* Icon with hover effect */}
       {isConnected ? (
         <div
