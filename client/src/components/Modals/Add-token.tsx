@@ -70,10 +70,7 @@ export default function AddToken({
     amount: saveState.amount,
     frequency: saveState.frequency,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-    toast: (title: any) => {
-      toast.error(title);
-      // Replace with your preferred toast library (e.g., react-toastify)
-    },
+    toast: toast,
     onSuccess: () => {
       console.log("Token added successfully");
       setShowSuccessModal(true);

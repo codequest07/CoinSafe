@@ -62,12 +62,27 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
 
   const retrieveToken = async () => {
     try {
-      const registration = await navigator.serviceWorker.ready;
+      console.log("Get navigator ready......");
+      // Ensure service worker is registered before accessing ready
+      let registration: ServiceWorkerRegistration;
+      if (navigator.serviceWorker.controller) {
+        registration = await navigator.serviceWorker.ready;
+      } else {
+        registration = await navigator.serviceWorker.register(
+          "/firebase-messaging-sw.js"
+        );
+        await navigator.serviceWorker.ready;
+      }
+      console.log("Registration", registration);
+      
       const token = await getToken(messaging, {
         vapidKey: config.vapidKey,
         serviceWorkerRegistration: registration,
       });
 
+      console.log("Navigator readyyy...");
+      console.log("Registration", registration);
+      
       if (token) {
         console.log("FCM Token:", token);
         setFcmToken(token);
@@ -100,14 +115,16 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
         setIsLoading(false);
         return false;
       }
-      
-      console.log("Get navigator ready......")
+
+      console.log("Get navigator ready......");
       // Ensure service worker is registered before accessing ready
       let registration: ServiceWorkerRegistration;
       if (navigator.serviceWorker.controller) {
         registration = await navigator.serviceWorker.ready;
       } else {
-        registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+        registration = await navigator.serviceWorker.register(
+          "/firebase-messaging-sw.js"
+        );
         await navigator.serviceWorker.ready;
       }
       console.log("Navigator readyyy...");
@@ -161,6 +178,106 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
     }
   }, []);
 
+  /**
+   * Sends a test push notification using the browser Notification API.
+   */
+  const sendTestNotification = useCallback(() => {
+    if (permission !== "granted") {
+      toast.error("Notification permission not granted");
+      return;
+    }
+
+    try {
+      new Notification("Test Notification", {
+        body: "This is a test notification.",
+        icon: "/icon-192.png", // Optional: update with your app icon path
+        data: { url: "https://example.com" }, // Optional: custom data
+      });
+      toast.success("Test notification sent!");
+    } catch (err) {
+      toast.error("Failed to send test notification.");
+      console.error("Notification error:", err);
+    }
+  }, [permission]);
+
+  /**
+   * Sends a custom notification using the browser Notification API.
+   * @param title - Notification title
+   * @param options - NotificationOptions (body, icon, data, etc.)
+   */
+  const sendCustomNotification = useCallback(
+    (title: string, options?: NotificationOptions) => {
+      if (permission !== "granted") {
+        toast.error("Notification permission not granted");
+        return;
+      }
+      try {
+        new Notification(title, options);
+        toast.success("Notification sent!");
+      } catch (err) {
+        toast.error("Failed to send notification.");
+        console.error("Notification error:", err);
+      }
+    },
+    [permission]
+  );
+
+  /**
+   * Template functions for specific notification types.
+   */
+  const sendPromotionalNotification = useCallback(() => {
+    sendCustomNotification("Special Offer!", {
+      body: "Check out our latest promotions and deals.",
+      icon: "/icon-192.png",
+      data: { type: "promotional" },
+    });
+  }, [sendCustomNotification]);
+
+  const sendMorningNotification = useCallback(() => {
+    sendCustomNotification("Good Morning!", {
+      body: "Start your day with CoinSafe. Check your daily yield!",
+      icon: "/icon-192.png",
+      data: { type: "morning" },
+    });
+  }, [sendCustomNotification]);
+
+  const sendDailyYieldNotification = useCallback(
+    (yieldAmount: number) => {
+      sendCustomNotification("Daily Yield Accrued", {
+        body: `You've earned ${yieldAmount} coins today!`,
+        icon: "/icon-192.png",
+        data: { type: "daily_yield", yield: yieldAmount },
+      });
+    },
+    [sendCustomNotification]
+  );
+
+  const sendStreakUpdateNotification = useCallback(
+    (streak: number) => {
+      sendCustomNotification("Streak Update", {
+        body: `Your current streak is ${streak} days! Keep it up!`,
+        icon: "/icon-192.png",
+        data: { type: "streak_update", streak },
+      });
+    },
+    [sendCustomNotification]
+  );
+
+  /**
+   * Automated notification template.
+   * Call this function at a scheduled time (e.g., with setTimeout or a scheduler).
+   */
+  const sendAutomatedNotification = useCallback(
+    (title: string, body: string, data?: Record<string, any>) => {
+      sendCustomNotification(title, {
+        body,
+        icon: "/icon-192.png",
+        data: { type: "automated", ...data },
+      });
+    },
+    [sendCustomNotification]
+  );
+
   return {
     permission,
     fcmToken,
@@ -169,5 +286,12 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
     error,
     subscribe,
     unsubscribe,
+    sendTestNotification,
+    sendAutomatedNotification,
+    sendCustomNotification,
+    sendMorningNotification,
+    sendDailyYieldNotification,
+    sendPromotionalNotification,
+    sendStreakUpdateNotification,
   };
 };

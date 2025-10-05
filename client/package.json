@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "generate:firebase-sw": "node scripts/generate-firebase-sw.js",
+    "prebuild": "npm run generate:firebase-sw",
+    "build": "tsc && vite build",
+    "dev": "npm run generate:firebase-sw && vite",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "node server.js"

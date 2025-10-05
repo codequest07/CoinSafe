@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useActiveAccount } from "thirdweb/react";
 import { profileAPI } from "../../services/api";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import EmailVerificationSuccessModal from "./EmailVerificationSuccessModal";
 
 interface EmailVerificationModalProps {
@@ -35,19 +35,15 @@ export default function EmailVerificationModal({
 
     const codeString = code.join("");
     if (!codeString || codeString.length !== 6) {
-      toast({
-        title: "Code required",
+      toast("Code required", {
         description: "Please enter the complete 6-digit verification code",
-        variant: "destructive",
       });
       return;
     }
 
     if (!address) {
-      toast({
-        title: "Wallet not connected",
+      toast.error("Wallet not connected", {
         description: "Please connect your wallet first",
-        variant: "destructive",
       });
       return;
     }
@@ -68,11 +64,9 @@ export default function EmailVerificationModal({
       }
     } catch (error) {
       console.error("Error verifying email:", error);
-      toast({
-        title: "Verification failed",
+      toast("Verification failed", {
         description:
           error instanceof Error ? error.message : "Failed to verify email",
-        variant: "destructive",
       });
     } finally {
       setIsVerifying(false);
@@ -81,10 +75,8 @@ export default function EmailVerificationModal({
 
   const handleResendCode = async () => {
     if (!address) {
-      toast({
-        title: "Wallet not connected",
+      toast("Wallet not connected", {
         description: "Please connect your wallet first",
-        variant: "destructive",
       });
       return;
     }
@@ -94,16 +86,13 @@ export default function EmailVerificationModal({
     try {
       // You'll need to implement a resend endpoint in your backend
       // For now, we'll just show a message
-      toast({
-        title: "Code resent",
+      toast.success("Code resent", {
         description: "A new verification code has been sent to your email",
       });
     } catch (error) {
       console.error("Error resending code:", error);
-      toast({
-        title: "Failed to resend code",
+      toast.error("Failed to resend code", {
         description: "Please try again later",
-        variant: "destructive",
       });
     } finally {
       setIsResending(false);
@@ -217,7 +206,8 @@ export default function EmailVerificationModal({
                 size="sm"
                 onClick={handleResendCode}
                 disabled={isResending}
-                className="text-[12px] text-[#79E7BA] bg-transparent hover:bg-transparent border-0 hover:text-[#79E7BA]">
+                className="text-[12px] text-[#79E7BA] bg-transparent hover:bg-transparent border-0 hover:text-[#79E7BA]"
+              >
                 {isResending ? "Sending..." : "Resend Code"}
               </Button>
             </div>
@@ -226,14 +216,16 @@ export default function EmailVerificationModal({
               <Button
                 type="button"
                 onClick={onChangeEmail}
-                className="px-4 sm:px-8 h-12 text-[14px]  text-[#C7C7D1] bg-[#3F3F3F99] rounded-full hover:bg-[#3F3F3F99] hover:text-white">
+                className="px-4 sm:px-8 h-12 text-[14px]  text-[#C7C7D1] bg-[#3F3F3F99] rounded-full hover:bg-[#3F3F3F99] hover:text-white"
+              >
                 Change email address
               </Button>
 
               <Button
                 type="submit"
                 disabled={isVerifying || code.join("").length !== 6}
-                className="px-4 sm:px-8 h-12 text-[14px] rounded-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] disabled:opacity-50">
+                className="px-4 sm:px-8 h-12 text-[14px] rounded-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104] disabled:opacity-50"
+              >
                 {isVerifying ? "Linking..." : "Link email"}
               </Button>
             </div>

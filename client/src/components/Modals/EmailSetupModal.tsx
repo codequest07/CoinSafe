@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useActiveAccount } from "thirdweb/react";
 import { useProfile } from "../../hooks/useProfile";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import EmailVerificationModal from "./EmailVerificationModal";
 
 interface EmailSetupModalProps {
@@ -35,19 +35,15 @@ export default function EmailSetupModal({
     e.preventDefault();
 
     if (!email.trim()) {
-      toast({
-        title: "Email required",
+      toast.error("Email required", {
         description: "Please enter your email address",
-        variant: "destructive",
       });
       return;
     }
 
     if (!address) {
-      toast({
-        title: "Wallet not connected",
+      toast.error("Wallet not connected", {
         description: "Please connect your wallet first",
-        variant: "destructive",
       });
       return;
     }
@@ -56,18 +52,15 @@ export default function EmailSetupModal({
 
     try {
       await updateEmail(email.trim());
-      toast({
-        title: "Email added successfully",
+      toast.success("Email added successfully", {
         description: "Please check your email for a verification code",
       });
       setShowVerificationModal(true);
     } catch (error) {
       console.error("Error updating email:", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description:
           error instanceof Error ? error.message : "Failed to update email",
-        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -133,14 +126,16 @@ export default function EmailSetupModal({
               size="lg"
               onClick={handleSkip}
               disabled={isSubmitting}
-              className="text-[14px] sm:px-8 py-3 h-auto rounded-full bg-[#3F3F3F99] hover:bg-[#3F3F3F99] text-[#F1F1F1] hover:text-[#F1F1F1]">
+              className="text-[14px] sm:px-8 py-3 h-auto rounded-full bg-[#3F3F3F99] hover:bg-[#3F3F3F99] text-[#F1F1F1] hover:text-[#F1F1F1]"
+            >
               Skip for now
             </Button>
             <Button
               size="lg"
               onClick={handleSubmit}
               disabled={isSubmitting || !email.trim()}
-              className="text-[14px] sm:px-8 py-3 h-auto rounded-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104]">
+              className="text-[14px] sm:px-8 py-3 h-auto rounded-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] text-[#010104]"
+            >
               {isSubmitting ? "Adding..." : "Continue"}
             </Button>
           </div>

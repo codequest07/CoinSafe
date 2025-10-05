@@ -137,11 +137,7 @@ export default function RemoveTokenModal({
     //   "") as `0x${string}`,
     token: selectedToken as `0x${string}`,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-    toast: ({ title, variant }) => {
-      console.log(`${variant.toUpperCase()}: ${title}`);
-      toast(title);
-      // Replace with your preferred toast library (e.g., react-toastify)
-    },
+    toast: toast,
     onSuccess: () => {
       console.log("Token removed successfully");
       onSuccess();

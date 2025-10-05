@@ -9,9 +9,7 @@
     "paths": {
       "@/*": ["./src/*", "src/types/aos.d.ts"]
     },
-    "types": [
-      "vite-plugin-pwa/react"
-    ],
+    "types": ["vite-plugin-pwa/react", "vite/client"],
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -26,7 +24,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }],
-  
+  "include": ["src", "scripts"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

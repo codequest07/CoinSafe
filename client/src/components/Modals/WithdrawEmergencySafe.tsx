@@ -51,6 +51,8 @@ export default function WithdrawEmergencySafe({
   const showApprovalModal = () => {
     console.log("Showing approval modal");
     setIsApproveModalOpen(true);
+
+    setTimeout(() => setIsApproveModalOpen(false), 800);
   };
 
   const openSuccessModal = () => {
