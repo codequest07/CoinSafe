@@ -1,6 +1,7 @@
 {
     "name":"Coinsafe",
     "short_name":"Coinsafe",
+    "description": "Save",
     "icons":
         [
             { 
