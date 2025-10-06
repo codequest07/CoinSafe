@@ -5,7 +5,7 @@ import { useFCMNotifications } from "../../hooks/useFCMNotifications";
 interface PushNotificationPopupProps {
   vapidKey: string;
   onTokenReceived?: (token: string) => void;
-  autoShowDelay?: number; 
+  autoShowDelay?: number;
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
 }
 
@@ -18,11 +18,16 @@ export const PushNotificationPopup: React.FC<PushNotificationPopupProps> = ({
   const [isVisible, setIsVisible] = useState(false);
   const [isPermanentlyDismissed, setIsPermanentlyDismissed] = useState(false);
 
-  const { permission, fcmToken, isSupported, isLoading, subscribe } =
-    useFCMNotifications({
-      vapidKey,
-      onTokenReceived,
-    });
+  const {
+    permission,
+    fcmToken,
+    isSupported,
+    isLoading,
+    subscribe,
+  } = useFCMNotifications({
+    vapidKey,
+    onTokenReceived,
+  });
 
   useEffect(() => {
     // Check if user permanently dismissed

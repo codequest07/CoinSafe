@@ -35,8 +35,8 @@ import {
 import { OnlineStatusIndicator } from "./components/pwa/online-status-indicator";
 import { PWAInstallPrompt } from "./components/pwa/install-prompt";
 import { PushNotificationPopup } from "./components/pwa/push-notification-popup";
-// import { useFCMNotifications } from "./hooks/useFCMNotifications";
-// import { Button } from "./components/ui/button";
+import { useFCMNotifications } from "./hooks/useFCMNotifications";
+import { Button } from "./components/ui/button";
 
 const App = () => {
   const [, setAvailableBalance] = useRecoilState(availableBalanceState);
@@ -46,10 +46,10 @@ const App = () => {
   const [, setUserLongestStreak] = useRecoilState(userLongestStreakState);
   
   
-  // const { sendTestNotification } = useFCMNotifications({
-  //     vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-  //     onTokenReceived: () => console.log("Token"),
-  //   });
+  const { sendTestNotification } = useFCMNotifications({
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      onTokenReceived: () => console.log("Token"),
+    });
 
   const account = useActiveAccount();
 
@@ -122,7 +122,7 @@ const App = () => {
           onInstall={() => console.log("PWA Installed!")}
         />
         <OnlineStatusIndicator showWhenOnline position="top" />
-        {/* <Button onClick={sendTestNotification}>Send Test Notification</Button> */}
+        <Button onClick={sendTestNotification}>Send Test Notification</Button>
         <Routes>
           {/* <Route path="/" element={<LandingPage />} /> */}
           {/* <Route path="/" element={<Navigate to={"/dashboard"} />} /> */}

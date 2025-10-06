@@ -1,5 +1,5 @@
-import { initializeApp } from 'firebase/app';
-import { getMessaging } from 'firebase/messaging';
+import { initializeApp } from "firebase/app";
+import { getMessaging, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -15,3 +15,8 @@ export const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Cloud Messaging
 export const messaging = getMessaging(app);
+
+onMessage(messaging, (payload) => {
+  console.log("Message received. ", payload);
+  alert(JSON.stringify(payload, null, 2));
+});

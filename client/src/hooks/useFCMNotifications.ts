@@ -143,6 +143,7 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
       config.onTokenReceived?.(token);
 
       toast.success("Notifications enabled! You'll receive updates.");
+      sendCustomNotification("Notifications enabled");
 
       setIsLoading(false);
       return true;
