@@ -209,7 +209,9 @@ export default function SavingsDetail() {
               </div>
             </div>
             <p className="text-sm lg:text-base my-1 ml-[3.3rem] text-gray-300">
-              {safeDetails.isLocked
+              {safeDetails.unlockTime < new Date()
+                ? "Withdraw anytime"
+                : safeDetails.isLocked
                 ? `Next unlock date: ${safeDetails.nextUnlockDate}`
                 : "Withdraw anytime"}
             </p>

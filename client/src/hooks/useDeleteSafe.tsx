@@ -53,7 +53,7 @@ export const useDeleteSafe = ({ id, onSuccess, onError }: DeleteSafeParams) => {
         if (account) {
           await sendTransaction(transaction);
 
-          toast.success("Delete safe successful!");
+          toast.success("Safe deleted successfully!");
         }
 
         onSuccess?.();
