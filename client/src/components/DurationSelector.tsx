@@ -7,7 +7,6 @@ import { Calendar } from "./ui/calendar";
 import { useEffect, useState } from "react";
 import { getContractFeePercentage } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
-import { previousDay } from "date-fns";
 
 interface PillOption {
   value: number;
