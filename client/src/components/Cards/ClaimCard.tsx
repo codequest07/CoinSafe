@@ -32,20 +32,27 @@ const ClaimCard = ({
   };
 
   function checkSafeMatured(safe: any) {
-    const unlockDate = convertTimestampToDate(safe.unlockTime);
+    if (!safe || !safe.unlockTime) return false;
+
+    let unlockDate: Date;
+    try {
+      unlockDate = convertTimestampToDate(safe.unlockTime);
+    } catch {
+      return false;
+    }
 
     // Skip safes with invalid dates (like 1970-01-01)
     const minValidDate = new Date(2020, 0, 1); // Jan 1, 2020
-    if (unlockDate < minValidDate) return false;
+    if (!(unlockDate instanceof Date) || isNaN(unlockDate.getTime()) || unlockDate < minValidDate) return false;
 
     // Check if it's a Target Saving
-    const isTargetSaving = safe.target && safe.target !== "Emergency Safe";
+    const isTargetSaving = typeof safe.target === "string" && safe.target !== "Emergency Safe";
 
     // Check if it has matured and has tokens to claim
-    const isMatured = unlockDate <= new Date();
+    const isMatured = unlockDate < new Date();
     const hasTokens =
-      safe.tokenAmounts &&
-      safe.tokenAmounts.some((token: any) => token.amount > 0);
+      Array.isArray(safe.tokenAmounts) &&
+      safe.tokenAmounts.some((token: any) => token && typeof token.amount === "number" && token.amount > 0);
 
     return isTargetSaving && isMatured && hasTokens;
   }
