@@ -8,11 +8,12 @@ import AutoSavedAssetTable from "./AutoSavedAssetTable";
 import TargetAssetTable from "./TargetAssetTable";
 
 interface AssetTabsProps {
+  type?: 'emergency' | 'target' | 'automated';
   safeDetails?: FormattedSafeDetails;
   isLoading?: boolean;
 }
 
-export function AssetTabs({ safeDetails, isLoading }: AssetTabsProps) {
+export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
   const [activeTab, setActiveTab] = useState<"assets" | "savings">("assets");
   const location = useLocation();
   const isVaultPage = location.pathname === "/vault";
@@ -46,7 +47,7 @@ export function AssetTabs({ safeDetails, isLoading }: AssetTabsProps) {
       <div className="py-2 bg-black text-white">
         {activeTab === "assets" ? (
           isVaultPage ? (
-            <VaultAssetTable safeDetails={safeDetails} />
+            <VaultAssetTable safeDetails={safeDetails} type={type}/>
           ) : isAutoSafePage ? (
             <AutoSavedAssetTable assets={safeDetails} isLoading={isLoading} />
           ) : (

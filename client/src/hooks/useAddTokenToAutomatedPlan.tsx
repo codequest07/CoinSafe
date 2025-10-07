@@ -17,7 +17,7 @@ interface UseAddTokenToAutomatedPlanParams {
   onSuccess?: () => void;
   onApprove?: () => void;
   onError?: (error: Error) => void;
-  toast: (props: { title: string; variant: "default" | "destructive" }) => void;
+  toast: any;
 }
 
 interface AddTokenToAutomatedPlanResult {
@@ -50,35 +50,23 @@ export const useAddTokenToAutomatedPlan = ({
       try {
         // Input validation
         if (!account) {
-          toast({
-            title: "Please connect your wallet",
-            variant: "destructive",
-          });
+          toast.error("Please connect your wallet");
           throw new Error("No account connected");
         }
         if (!token) {
-          toast({ title: "Please select a token", variant: "destructive" });
+          toast.error("Please select a token");
           throw new Error("Token address is required");
         }
         if (!amount || amount <= 0) {
-          toast({
-            title: "Please enter a valid amount",
-            variant: "destructive",
-          });
+          toast.error("Please enter a valid amount");
           throw new Error("Amount must be greater than zero");
         }
         if (!frequency || frequency <= 0) {
-          toast({
-            title: "Please enter a valid frequency",
-            variant: "destructive",
-          });
+          toast.error("Please enter a valid frequency");
           throw new Error("Frequency must be greater than zero");
         }
         if (frequency > 365 * 24 * 60 * 60) {
-          toast({
-            title: "Frequency cannot exceed one year",
-            variant: "destructive",
-          });
+          toast.error("Frequency cannot exceed one year");
           throw new Error("Frequency exceeds one year");
         }
 
@@ -115,10 +103,7 @@ export const useAddTokenToAutomatedPlan = ({
 
           await sendTransaction(addTokenTx);
 
-          toast({
-            title: "Token added to plan successfully",
-            variant: "default",
-          });
+          toast.success("Token added to plan successfully")
           onSuccess?.();
         } catch (txError: any) {
           let errorMsg = "Failed to add token to plan";
@@ -133,7 +118,7 @@ export const useAddTokenToAutomatedPlan = ({
           } else if (txError?.message?.includes("PlanExpired")) {
             errorMsg = "Savings plan has expired";
           }
-          toast({ title: errorMsg, variant: "destructive" });
+          toast.error(errorMsg);
           throw new Error(errorMsg);
         }
       } catch (err) {

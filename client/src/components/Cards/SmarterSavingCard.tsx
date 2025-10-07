@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SavingsOverviewData } from "@/lib/data";
 import { SaveSenseModalManager } from "../Modals/SaveSenseModalManager";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useActiveAccount } from "thirdweb/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -39,10 +39,7 @@ export default function SmarterSavingCard({
   const handleButtonClick = (buttonText: string) => {
     if (buttonText === "Get started") {
       if (!address) {
-        toast({
-          title: "No wallet connected",
-          variant: "destructive",
-        });
+        toast.error("No wallet connected");
         setIsConnectModalOpen && setIsConnectModalOpen(true);
         return;
       }

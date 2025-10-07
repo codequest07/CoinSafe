@@ -83,8 +83,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
     // Update selected token balance
     if (AvailableBalance && value) {
       const tokenBalance = (AvailableBalance[value] as bigint) || 0n;
-      const decimals =
-        value.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
+      const decimals = getTokenDecimals(value);
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   };
@@ -101,8 +100,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
   useEffect(() => {
     if (AvailableBalance && saveState.token) {
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
-      const decimals =
-        saveState.token.toLowerCase() === tokens.usdc.toLowerCase() ? 6 : 18;
+      const decimals = getTokenDecimals(saveState.token);
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   }, [AvailableBalance, saveState.token]);
@@ -230,12 +228,14 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
           onClick={(e) => {
             e.stopPropagation();
             onClose();
-          }}></div>
+          }}
+        ></div>
         <div className="relative w-full max-w-md rounded-xl bg-[#17171C] text-white shadow-lg p-5 border border-white/15">
           {/* Close Icon */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-white">
+            className="absolute top-4 right-4 text-gray-400 hover:text-white"
+          >
             <X className="w-5 h-5" />
           </button>
 
@@ -277,12 +277,13 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                             <div
                               className={`w-7 h-7 rounded-full ${
                                 tokenData[token.token].color
-                              } flex items-center justify-center text-white font-medium`}>
+                              } flex items-center justify-center text-white font-medium`}
+                            >
                               {token.tokenSymbol?.charAt(0)}
                             </div>
                           )}
                           <div className="flex flex-col">
-                            <p className="font-medium text-white">
+                            <p className="font-medium text-white uppercase">
                               {token.tokenSymbol}
                             </p>
                             <p className="text-xs text-gray-400">
@@ -330,7 +331,8 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     e.stopPropagation();
                     onClose();
                   }}
-                  className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white ">
+                  className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white "
+                >
                   Cancel
                 </button>
                 <button
@@ -339,7 +341,8 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     extendTargetSafe(e);
                   }}
                   disabled={!details || extending}
-                  className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6">
+                  className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
+                >
                   {extending ? "Reactivating" : "Reactivate"}
                 </button>
               </div>
@@ -379,7 +382,8 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => navigate("/deposit")}>
+                      onClick={() => navigate("/deposit")}
+                    >
                       Deposit to save
                     </Button>
                   ) : (
@@ -390,7 +394,8 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                           ...prev,
                           amount: selectedTokenBalance,
                         }))
-                      }>
+                      }
+                    >
                       Max
                     </Button>
                   )}
@@ -434,7 +439,8 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     e.stopPropagation();
                     onClose();
                   }}
-                  className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white ">
+                  className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white "
+                >
                   Cancel
                 </button>
                 <button
@@ -444,7 +450,8 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     reactivateTargetSafe(e);
                   }}
                   disabled={!details || reactivating}
-                  className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6">
+                  className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
+                >
                   {extending ? "Reactivating" : "Reactivate"}
                 </button>
               </div>

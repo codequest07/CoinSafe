@@ -12,7 +12,7 @@ import { PermissionModal } from "../Modals/Permission-modal";
 import Loading from "../Modals/loading-screen";
 import SaveSenseResp from "../Modals/SaveSenseResp";
 import KitchenLoading from "../Modals/kitchen-loading";
-import { Toast } from "../ui/toast";
+import { toast } from "sonner";
 import { useApprovalStatus } from "@/hooks/useApprovalStatus";
 import { useActiveAccount } from "thirdweb/react";
 
@@ -121,10 +121,7 @@ export default function ExtensionCardCarousel({
 
   const handleGetStarted = () => {
     if (!address) {
-      Toast({
-        title: "No wallet connected",
-        variant: "destructive",
-      });
+      toast.error("No wallet connected");
       return;
     }
 
@@ -169,10 +166,7 @@ export default function ExtensionCardCarousel({
       setIsSaveSenseModalOpen(true);
     } catch (error) {
       console.error("Error fetching data:", error);
-      Toast({
-        title: "Failed to fetch data",
-        variant: "destructive",
-      });
+      toast.error("Failed to fetch data");
     } finally {
       setIsLoadingModalOpen(false);
     }

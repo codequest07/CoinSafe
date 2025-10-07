@@ -11,7 +11,7 @@ import { CoinsafeDiamondContract } from "@/lib/contract";
 // import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useWithdrawAsset } from "@/hooks/useWithdrawAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import { formatUnits } from "viem";
@@ -53,10 +53,7 @@ export default function WithdrawCard() {
       openThirdModal();
     },
     onError: (error) => {
-      toast({
-        title: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     },
     toast,
   });

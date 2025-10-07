@@ -46,9 +46,10 @@ async function checkIsTokenAutoSaved(
 
 interface VaultAssetTableProps {
   safeDetails?: FormattedSafeDetails;
+  type?: 'emergency' | 'target' | 'automated'
 }
 
-export default function VaultAssetTable({ safeDetails }: VaultAssetTableProps) {
+export default function VaultAssetTable({ safeDetails, type }: VaultAssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
     { token: string; balance: string; saved: string; available: string }[]
   >([]);
@@ -137,6 +138,7 @@ export default function VaultAssetTable({ safeDetails }: VaultAssetTableProps) {
         <VaultAssetTableContent
           assets={allAssetData}
           safeDetails={safeDetails}
+          type={type}
         />
       </div>
     </div>
@@ -149,6 +151,7 @@ function VaultAssetTableContent({
 }: {
   assets: any[];
   safeDetails?: FormattedSafeDetails;
+  type?: 'emergency' | 'target' | 'automated'
 }) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
