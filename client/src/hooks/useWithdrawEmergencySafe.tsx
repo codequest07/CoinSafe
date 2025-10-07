@@ -17,7 +17,7 @@ interface UseWithdrawEmergencySafeParams {
   chainId?: number;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
-  toast: (props: { title: string; variant: "default" | "destructive" }) => void;
+  toast: any;
 }
 
 interface WithdrawEmergencySafeResult {
@@ -71,29 +71,20 @@ export const useWithdrawEmergencySafe = ({
             //   client: config.client, // Assuming config.client contains Thirdweb client
             // }));
           } catch (error) {
-            toast({
-              title: "Error Connecting Wallet",
-              variant: "destructive",
-            });
+            toast.error("Error Connecting Wallet");
             console.log("Error", error);
             throw new Error("Failed to connect wallet: " + error);
           }
         }
 
         if (!amount) {
-          toast({
-            title: "Please input a value for amount to Withdraw",
-            variant: "destructive",
-          });
+          toast.error("Please input a value for amount to Withdraw");
           setIsLoading(false);
           return Promise.reject(new Error("No amount specified"));
         }
 
         if (!token) {
-          toast({
-            title: "Please select token to Withdraw",
-            variant: "destructive",
-          });
+          toast.error("Please select token to Withdraw");
           setIsLoading(false);
           return Promise.reject(new Error("No token selected"));
         }

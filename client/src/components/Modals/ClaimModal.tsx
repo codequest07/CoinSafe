@@ -10,7 +10,7 @@ import { LoaderCircle } from "lucide-react";
 import { useActiveAccount } from "thirdweb/react";
 import { useClaimAsset } from "@/hooks/useClaimAsset";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
 import MemoBackIcon from "@/icons/BackIcon";
 import ApproveTxModal from "./ApproveTxModal";
@@ -71,10 +71,7 @@ export default function ClaimModal({
       setShowApproveTxModal(false);
 
       // Show error toast
-      toast({
-        title: `Error: ${error.message}`,
-        variant: "destructive",
-      });
+      toast.error(`Error: ${error.message}`);
     },
     toast,
   });
@@ -120,10 +117,8 @@ export default function ClaimModal({
   const handleClaim = async () => {
     // Check if this is an Emergency Safe
     if (safeDetails?.id?.toString() === "911") {
-      toast({
-        title: "Emergency Safe",
+      toast.error("Emergency Safe", {
         description: "Please use the Emergency Safe withdrawal option instead.",
-        variant: "destructive",
       });
 
       // Redirect to Emergency Safe page
@@ -133,21 +128,17 @@ export default function ClaimModal({
 
     // For Target Savings, check if it's matured
     if (!isSafeMatured) {
-      toast({
-        title: "Safe has not matured yet",
+      toast.error("Safe has not matured yet", {
         description: "You cannot claim tokens from a safe that hasn't matured.",
-        variant: "destructive",
       });
       return;
     }
 
     // Check if this is a target saving
     if (!isTargetSaving) {
-      toast({
-        title: "Not a Target Saving",
+      toast.error("Not a Target Saving", {
         description:
           "This safe is not a target saving and cannot be claimed this way.",
-        variant: "destructive",
       });
       return;
     }
@@ -170,12 +161,9 @@ export default function ClaimModal({
       }
     } catch (error) {
       console.error("Claim process failed:", error);
-      toast({
-        title: "Error",
-        description:
-          "An error occurred during the claim process. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(
+        "An error occurred during the claim process. Please try again."
+      );
     }
   };
 

@@ -4,7 +4,7 @@ import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { Abi } from "viem";
-import { toast } from "./use-toast";
+import { toast } from "sonner";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
 // interface SaveState {
@@ -53,10 +53,7 @@ export const useDeleteSafe = ({ id, onSuccess, onError }: DeleteSafeParams) => {
         if (account) {
           await sendTransaction(transaction);
 
-          toast({
-            title: "Delete safe successful!",
-            className: "bg-[#79E7BA]",
-          });
+          toast.success("Safe deleted successfully!");
         }
 
         onSuccess?.();
@@ -76,10 +73,7 @@ export const useDeleteSafe = ({ id, onSuccess, onError }: DeleteSafeParams) => {
         }
 
         console.error("Error writing data to contract:", err);
-        toast({
-          title: "Error writing data to contract",
-          variant: "destructive",
-        });
+        toast.error("Error writing data to contract");
 
         const error = new Error(errorMessage);
         setError(error);

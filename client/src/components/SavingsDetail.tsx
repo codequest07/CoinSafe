@@ -191,7 +191,7 @@ export default function SavingsDetail() {
                               new Date().getTime()) /
                               (1000 * 60 * 60 * 24)
                           )} days till unlock`
-                        : "Ready to unlock"
+                        : "Matured"
                       : "Flexible"}
                   </Badge>
                 </div>
@@ -209,7 +209,9 @@ export default function SavingsDetail() {
               </div>
             </div>
             <p className="text-sm lg:text-base my-1 ml-[3.3rem] text-gray-300">
-              {safeDetails.isLocked
+              {safeDetails.unlockTime < new Date()
+                ? "Withdraw anytime"
+                : safeDetails.isLocked
                 ? `Next unlock date: ${safeDetails.nextUnlockDate}`
                 : "Withdraw anytime"}
             </p>
@@ -258,6 +260,8 @@ export default function SavingsDetail() {
                             safeDetails.unlockTime
                           )}`
                     }
+                    safeDetails={safeDetails}
+                    isLoading={apiLoading}
                   />
                 )}
               </div>

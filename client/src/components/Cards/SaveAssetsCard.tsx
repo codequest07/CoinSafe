@@ -23,7 +23,7 @@ import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useActiveAccount } from "thirdweb/react";
 import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
 import { liskMainnet } from "@/lib/config";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import SaveSuccessful from "../Modals/SaveSuccessful";
@@ -223,10 +223,7 @@ export default function SaveAssetsCard() {
       // }, 000);
     },
     onError: (error: { message: any }) => {
-      toast({
-        title: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     },
   });
 
@@ -249,10 +246,7 @@ export default function SaveAssetsCard() {
       // }, 4000);
     },
     onError: (error: { message: any }) => {
-      toast({
-        title: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     },
   });
 

@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
 import { useActiveAccount } from "thirdweb/react";
 import { getContract } from "thirdweb";
@@ -65,11 +65,7 @@ export default function DepositCard() {
       promptApproveModal();
     },
     onError: (error) => {
-      toast({
-        title: error.message,
-        variant: "destructive",
-        duration: 3000,
-      });
+      toast.error(error.message);
     },
     toast,
   });

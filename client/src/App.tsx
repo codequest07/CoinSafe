@@ -6,7 +6,7 @@ import Vault from "./Pages/Vault";
 import Staking from "./Pages/Staking";
 import Rewards from "./Pages/Rewards";
 import SaveSense from "./Pages/SaveSense";
-import { Toaster } from "./components/ui/toaster";
+import { Toaster } from "sonner";
 // import Faucet from "./Pages/Faucet";
 import SavingsDetail from "./components/SavingsDetail";
 import SaveAssets from "./Pages/SaveAssets";
@@ -31,6 +31,11 @@ import {
   userCurrentStreakState,
   userLongestStreakState,
 } from "./store/atoms/streak";
+import { OnlineStatusIndicator } from "./components/pwa/online-status-indicator";
+import { PWAInstallPrompt } from "./components/pwa/install-prompt";
+import { PushNotificationPopup } from "./components/pwa/push-notification-popup";
+// import { useFCMNotifications } from "./hooks/useFCMNotifications";
+// import { Button } from "./components/ui/button";
 
 const App = () => {
   const [, setAvailableBalance] = useRecoilState(availableBalanceState);
@@ -38,6 +43,12 @@ const App = () => {
   const [, setTotalBalance] = useRecoilState(totalBalanceState);
   const [, setUserCurrentStreak] = useRecoilState(userCurrentStreakState);
   const [, setUserLongestStreak] = useRecoilState(userLongestStreakState);
+  
+  
+  // const { sendTestNotification } = useFCMNotifications({
+  //     vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+  //     onTokenReceived: () => console.log("Token"),
+  //   });
 
   const account = useActiveAccount();
 
@@ -79,9 +90,21 @@ const App = () => {
 
   console.log("App Component rerendered");
 
+  const handleTokenReceived = async (token: string) => {
+    console.log("Token received:", token);
+  };
+
   return (
     <div className="bg-[#010104]">
       <SmartAccountTransactionProvider>
+        {/* Always-visible components */}
+        <PWAInstallPrompt
+          appName="Coinsafe"
+          description="Install for offline access and push notifications"
+          onInstall={() => console.log("PWA Installed!")}
+        />
+        <OnlineStatusIndicator showWhenOnline position="top" />
+        {/* <Button onClick={sendTestNotification}>Send Test Notification</Button> */}
         <Routes>
           {/* <Route path="/" element={<LandingPage />} /> */}
           {/* <Route path="/" element={<Navigate to={"/dashboard"} />} /> */}
@@ -106,8 +129,14 @@ const App = () => {
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <PushNotificationPopup
+          vapidKey={import.meta.env.VITE_FIREBASE_VAPID_KEY}
+          onTokenReceived={handleTokenReceived}
+          autoShowDelay={5000} // Show after 5 seconds
+          position="bottom-right"
+        />
       </SmartAccountTransactionProvider>
-      <Toaster />
+      <Toaster richColors closeButton/>
     </div>
   );
 };

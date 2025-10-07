@@ -25,13 +25,12 @@ const DeleteSafeModal: React.FC<DeleteSafeModalProps> = ({
     id,
     onSuccess: () => {
       //   closeAllModals();
-      toast("Safe Deleted successfully");
       onClose();
       navigate("/vault");
     },
     onError: (error) => {
       console.error("Extend Safe failed:", error);
-      toast("Error Deleting Safe");
+      toast.error("Error Deleting Safe");
       // Handle error, e.g., show a toast notification
     },
   });

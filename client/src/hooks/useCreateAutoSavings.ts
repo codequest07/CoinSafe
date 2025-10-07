@@ -3,7 +3,7 @@ import { getContract, prepareContractCall, resolveMethod } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { useActiveAccount } from "thirdweb/react";
-import { toast } from "./use-toast";
+import { toast } from "sonner";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Abi } from "viem";
 import { publicClient } from "@/lib/client";
@@ -101,10 +101,7 @@ export const useCreateAutoSavings = ({
         if (account) {
           await sendTransaction(transaction);
 
-          toast({
-            title: "Save successful! Tx Hash",
-            className: "bg-[#79E7BA]",
-          });
+          toast.success("Save successful!");
         }
 
         onSuccess?.();
@@ -127,10 +124,7 @@ export const useCreateAutoSavings = ({
         }
 
         console.error("Error writing data to contract:", err);
-        toast({
-          title: "Error writing data to contract",
-          variant: "destructive",
-        });
+        toast.error("Error writing data to contract");
 
         const error = new Error(errorMessage);
         setError(error);
@@ -175,10 +169,7 @@ export const useCreateAutoSavings = ({
         if (account) {
           await sendTransaction(transaction);
 
-          toast({
-            title: "Add token to Auto Safe successful!",
-            className: "bg-[#79E7BA]",
-          });
+          toast.success("Add token to Auto Safe successful!");
         }
 
         onSuccess?.();
@@ -201,10 +192,7 @@ export const useCreateAutoSavings = ({
         }
 
         console.error("Error writing data to contract:", err);
-        toast({
-          title: "Error writing data to contract",
-          variant: "destructive",
-        });
+        toast.error("Error writing data to contract");
 
         const error = new Error(errorMessage);
         setError(error);
@@ -239,10 +227,7 @@ export const useCreateAutoSavings = ({
         if (account) {
           await sendTransaction(transaction);
 
-          toast({
-            title: "Extend Automated plan successful!",
-            className: "bg-[#79E7BA]",
-          });
+          toast.error("Extend Automated plan successful!");
         }
 
         onSuccess?.();
@@ -262,10 +247,7 @@ export const useCreateAutoSavings = ({
         }
 
         console.error("Error writing data to contract:", err);
-        toast({
-          title: "Error writing data to contract",
-          variant: "destructive",
-        });
+        toast.error("Error writing data to contract");
 
         const error = new Error(errorMessage);
         setError(error);

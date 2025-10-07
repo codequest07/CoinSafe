@@ -19,7 +19,7 @@ import { formatUnits } from "viem";
 import { useAddTokenToAutomatedPlan } from "@/hooks/useAddTokenToAutomatedPlan";
 import { Account } from "thirdweb/wallets";
 import { useActiveAccount } from "thirdweb/react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
@@ -70,11 +70,7 @@ export default function AddToken({
     amount: saveState.amount,
     frequency: saveState.frequency,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-    toast: ({ title, variant }) => {
-      console.log(`${variant.toUpperCase()}: ${title}`);
-      toast({ title, variant });
-      // Replace with your preferred toast library (e.g., react-toastify)
-    },
+    toast: toast,
     onSuccess: () => {
       console.log("Token added successfully");
       setShowSuccessModal(true);
@@ -86,10 +82,7 @@ export default function AddToken({
     },
     onError: (err) => {
       console.error("Transaction error:", err);
-      toast({
-        title: `Transaction failed: ${err.message || "Unknown error"}`,
-        variant: "destructive",
-      });
+      toast.error(`Transaction failed: ${err.message || "Unknown error"}`);
     },
   });
 

@@ -8,6 +8,7 @@ import ManageSavingsTarget from "../Modals/ManageSavingsTarget";
 import ExtendTargetSafeModal from "../Modals/ExtendTargetSafe";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import ReactivateModal from "../Modals/ReactivateModal";
+import ReactivateModalOptions from "../Modals/ReactivateModalOptions";
 // import { useExtendSavingsTarget } from "@/hooks/useExtendSavingsTarget";
 
 const SavingsCard = ({
@@ -46,6 +47,7 @@ const SavingsCard = ({
   const [showExtendModal, setShowExtendModal] = useState(false);
   const [showReactivateWithTopUpModal, setShowReactivateWithTopUpModal] =
     useState(false);
+  const [showReactivateModalOptions, setShowReactivateModalOptions] = useState(false)
   const [showReactivateWithTokensModal, setShowReactivateWithTokensModal] =
     useState(false);
 
@@ -123,7 +125,7 @@ const SavingsCard = ({
                 onClick={() => {
                   safeDetails.totalAmountUSD <= 0
                     ? setShowReactivateWithTopUpModal(true)
-                    : setShowReactivateWithTokensModal(true);
+                    : setShowReactivateModalOptions(true);
                 }}
                 className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
               >
@@ -173,6 +175,14 @@ const SavingsCard = ({
             // Don't close the modal here - the UnlockModal will handle it
           }}
           safeId={safeId.toString()}
+        />
+      )}
+
+      {showReactivateModalOptions && (
+        <ReactivateModalOptions 
+          onClose={() => setShowReactivateModalOptions(false)}
+          onReactivateWithTopUp={() => setShowReactivateWithTopUpModal(true)}
+          onReactivateWithClaimable={() => setShowReactivateWithTokensModal(true)}
         />
       )}
 

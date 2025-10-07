@@ -4,7 +4,7 @@ import { getContract, prepareContractCall } from "thirdweb";
 import { liskMainnet } from "@/lib/config";
 import { client } from "@/lib/config";
 import { toBigInt } from "ethers";
-import { toast } from "./use-toast";
+import { toast } from "sonner";
 import { tokenDecimals } from "@/lib/utils";
 import { Abi } from "viem";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
@@ -105,20 +105,14 @@ export const useSaveAsset = ({
           const { transactionHash } = await sendTransaction(transaction);
 
           if (!transactionHash) {
-            toast({
-              title: "Save asset failed",
-              variant: "destructive",
-            });
+            toast.error("Save asset failed");
           }
 
           onSuccess?.();
         }
       } catch (error) {
         console.error("Error writing data to contract:", error);
-        toast({
-          title: "Error writing data to contract",
-          variant: "destructive",
-        });
+        toast.error("Error writing data to contract");
         // throw transactionResult;
       } finally {
         setIsPending(false);
@@ -165,20 +159,14 @@ export const useSaveAsset = ({
 
         const result = await sendTransaction(transaction);
 
-        toast({
-          title: "Top-up successful!",
-          variant: "default",
-        });
+        toast.success("Top-up successful!");
 
         onSuccess?.();
         return result;
       } catch (error: any) {
         setError(error);
 
-        toast({
-          title: `Error: ${error.message}`,
-          variant: "destructive",
-        });
+        toast.error(`Error: ${error.message}`)
 
         onError?.(error);
         throw error;
