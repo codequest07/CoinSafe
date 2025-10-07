@@ -241,7 +241,7 @@ export const useUnlockSafe = ({
 
         const result = await sendTransaction(transaction);
 
-        toast.error("Unlock successful!");
+        toast.success("Unlock successful!");
 
         // Set success state
         setIsSuccess(true);
