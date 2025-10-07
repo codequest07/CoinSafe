@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import ClaimAssets from "../Modals/ClaimAssets";
-import { useGetSafes } from "@/hooks/useGetSafes";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const ClaimCard = ({
   title,
@@ -11,6 +10,8 @@ const ClaimCard = ({
   badge,
   emphasize,
   text,
+  safeDetails,
+  isLoading,
 }: {
   title: string;
   icon?: any;
@@ -19,66 +20,54 @@ const ClaimCard = ({
   badge?: string;
   emphasize?: string;
   text: string;
+  safeDetails: any;
+  isLoading: boolean;
 }) => {
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-  const { safes, isLoading } = useGetSafes();
-  const [hasMaturedSafes, setHasMaturedSafes] = useState(false);
+  const [safeMatured, setSafeMatured] = useState(false);
 
-  // Check if there are any matured safes
+  const convertTimestampToDate = (timestamp: bigint) => {
+    // Convert from seconds to milliseconds
+    return new Date(Number(timestamp) * 1000);
+  };
+
+  function checkSafeMatured(safe: any) {
+    const unlockDate = convertTimestampToDate(safe.unlockTime);
+
+    // Skip safes with invalid dates (like 1970-01-01)
+    const minValidDate = new Date(2020, 0, 1); // Jan 1, 2020
+    if (unlockDate < minValidDate) return false;
+
+    // Check if it's a Target Saving
+    const isTargetSaving = safe.target && safe.target !== "Emergency Safe";
+
+    // Check if it has matured and has tokens to claim
+    const isMatured = unlockDate <= new Date();
+    const hasTokens =
+      safe.tokenAmounts &&
+      safe.tokenAmounts.some((token: any) => token.amount > 0);
+
+    return isTargetSaving && isMatured && hasTokens;
+  }
+
+  // Check if safe is matured
   useEffect(() => {
-    if (!safes || safes.length === 0) return;
-
-    // Function to convert timestamp to Date
-    const convertTimestampToDate = (timestamp: bigint) => {
-      // Convert from seconds to milliseconds
-      return new Date(Number(timestamp) * 1000);
-    };
-
-    // Check for matured target savings
-    const maturedSafes = safes.filter((safe) => {
-      // Skip Emergency Safe (id 911n)
-      if (safe.id === 911n) return false;
-
-      // Skip safes with invalid or missing unlockTime
-      if (!safe.unlockTime) return false;
-
-      // Convert the unlockTime to a Date object
-      const unlockDate = convertTimestampToDate(safe.unlockTime);
-
-      // Skip safes with invalid dates (like 1970-01-01)
-      const minValidDate = new Date(2020, 0, 1); // Jan 1, 2020
-      if (unlockDate < minValidDate) return false;
-
-      // Check if it's a Target Saving
-      const isTargetSaving = safe.target && safe.target !== "Emergency Safe";
-
-      // Check if it has matured and has tokens to claim
-      const isMatured = unlockDate <= new Date();
-      const hasTokens =
-        safe.tokenAmounts &&
-        safe.tokenAmounts.some((token) => token.amount > 0);
-
-      return isTargetSaving && isMatured && hasTokens;
-    });
-
-    setHasMaturedSafes(maturedSafes.length > 0);
-  }, [safes]);
+    if (!safeDetails) return;
+    const isSafeMatured = checkSafeMatured(safeDetails);
+    setSafeMatured(isSafeMatured);
+  }, []);
 
   const openclaimModal = () => {
     if (isLoading) {
-      toast({
-        title: "Loading safes",
-        description: "Please wait while we load your safes.",
-        variant: "default",
+      toast.loading("Loading safe", {
+        description: "Please wait while we load your safe.",
       });
       return;
     }
 
-    if (!hasMaturedSafes) {
-      toast({
-        title: "No matured safes",
-        description: "You don't have any matured safes to claim.",
-        variant: "destructive",
+    if (!safeMatured) {
+      toast.error("Safe not matured", {
+        description: "Your safe is not matured to claim.",
       });
       return;
     }
@@ -122,9 +111,9 @@ const ClaimCard = ({
         <div className="flex justify-end gap-2">
           <button
             onClick={openclaimModal}
-            disabled={isLoading || !hasMaturedSafes}
+            disabled={isLoading || !safeMatured}
             className={`rounded-[100px] px-8 py-[8px] h-[40px] text-sm ${
-              isLoading || !hasMaturedSafes
+              isLoading || !safeMatured
                 ? "bg-[#3F3F3F50] text-[#F1F1F150] cursor-not-allowed"
                 : "bg-[#3F3F3F99] text-[#F1F1F1] hover:bg-[#4F4F4F99]"
             }`}
@@ -136,9 +125,9 @@ const ClaimCard = ({
       </div>
 
       <ClaimAssets
-        isDepositModalOpen={isClaimModalOpen}
-        setIsDepositModalOpen={setIsClaimModalOpen}
-        onBack={() => {}}
+        isModalOpen={isClaimModalOpen}
+        setIsModalOpen={setIsClaimModalOpen}
+        safeDetails={safeDetails}
       />
     </div>
   );

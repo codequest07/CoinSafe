@@ -3,7 +3,7 @@ import { useActiveAccount } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
 import { toBigInt } from "ethers";
-import { toast } from "./use-toast";
+import { toast } from "sonner";
 import { tokenDecimals } from "@/lib/utils";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 
@@ -111,10 +111,7 @@ export const useTopUpSafe = ({
 
         const result = await sendTransaction(transaction);
 
-        toast({
-          title: "Top-up successful!",
-          variant: "default",
-        });
+        toast.success("Top-up successful!");
 
         onSuccess?.();
         return result;
@@ -122,10 +119,7 @@ export const useTopUpSafe = ({
         setError(error);
 
         console.error(error);
-        toast({
-          title: `Error: ${error?.message || "An unexpected error occured"}`,
-          variant: "destructive",
-        });
+        toast.error(`Error: ${error?.message || "An unexpected error occured"}`)
 
         onError?.(error);
         throw error;

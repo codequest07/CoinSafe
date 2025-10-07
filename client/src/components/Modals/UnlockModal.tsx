@@ -20,7 +20,7 @@ import { client, liskMainnet } from "@/lib/config";
 import { useUnlockSafe } from "@/hooks/useUnlockSafe";
 
 import { format } from "date-fns";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import ApproveTxModal from "./ApproveTxModal";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { getTokenPrice } from "@/lib";
@@ -74,12 +74,10 @@ export default function UnlockModal({
       setShowApproveTxModal(false);
 
       // Show error toast
-      toast({
-        title: `Error: ${error.message}`,
-        variant: "destructive",
-      });
+      toast.error(`Error: ${error.message}`);
     },
   });
+  ``;
 
   // Validation state
   const [validationErrors] = useState<{
@@ -265,20 +263,12 @@ export default function UnlockModal({
     try {
       // Validate input
       if (!saveState.amount || saveState.amount <= 0) {
-        toast({
-          title: "Error",
-          description: "Please enter a valid amount to unlock",
-          variant: "destructive",
-        });
+        toast.error("Please enter a valid amount to unlock");
         return;
       }
 
       if (!saveState.token) {
-        toast({
-          title: "Error",
-          description: "Please select a token to unlock",
-          variant: "destructive",
-        });
+        toast.error("Please select a token to unlock");
         return;
       }
 
@@ -292,12 +282,9 @@ export default function UnlockModal({
       } as unknown as React.FormEvent);
     } catch (error) {
       console.error("Unlock process failed:", error);
-      toast({
-        title: "Error",
-        description:
-          "An error occurred during the unlock process. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(
+        "An error occurred during the unlock process. Please try again."
+      );
     }
   }, [safeId, saveState.amount, saveState.token, setUnlockState, unlockSafe]);
 
@@ -371,11 +358,9 @@ export default function UnlockModal({
 
                     console.log(`Setting max amount: ${maxAmount}`);
                   } else {
-                    toast({
-                      title: "No balance to unlock",
+                    toast.error("No balance to unlock", {
                       description:
                         "You don't have any tokens to unlock in this safe",
-                      variant: "destructive",
                     });
                   }
                 }}

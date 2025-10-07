@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useActiveAccount } from 'thirdweb/react';
 import { useClaimAsset } from '@/hooks/useClaimAsset';
 import { CoinsafeDiamondContract, facetAbis } from '@/lib/contract';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Button } from './ui/button';
 import SuccessfulTxModal from './Modals/SuccessfulTxModal';
 
@@ -31,10 +31,7 @@ export default function ClaimTest() {
   
   const handleClaimSingle = async (e: React.FormEvent) => {
     if (!tokenAddress) {
-      toast({
-        title: 'Please enter a token address',
-        variant: 'destructive',
-      });
+      toast.error('Please enter a token address');
       return;
     }
     

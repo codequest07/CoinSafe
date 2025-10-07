@@ -13,7 +13,7 @@ interface UseRemoveTokenFromAutomatedPlanParams {
   coinSafeAddress: `0x${string}`;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
-  toast: (props: { title: string; variant: "default" | "destructive" }) => void;
+  toast: any;
 }
 
 interface RemoveTokenFromAutomatedPlanResult {
@@ -43,17 +43,11 @@ export const useRemoveTokenFromAutomatedPlan = ({
       try {
         // Input validation
         if (!account) {
-          toast({
-            title: "Please connect your wallet",
-            variant: "destructive",
-          });
+          toast.error("Please connect your wallet")
           throw new Error("No account connected");
         }
         if (!token) {
-          toast({
-            title: "Please select a token to remove",
-            variant: "destructive",
-          });
+          toast.error("Please select a token to remove")
           throw new Error("Token address is required");
         }
 
@@ -75,17 +69,14 @@ export const useRemoveTokenFromAutomatedPlan = ({
 
           await sendTransaction(removeTokenTx);
 
-          toast({
-            title: "Token removed from plan successfully",
-            variant: "default",
-          });
+          toast.success("Token removed from plan successfully")
           onSuccess?.();
         } catch (txError: any) {
           let errorMsg = "Failed to remove token from plan";
           if (txError?.message?.includes("TokenNotInPlan")) {
             errorMsg = "Selected token is not in the savings plan";
           }
-          toast({ title: errorMsg, variant: "destructive" });
+          toast.error(errorMsg);
           throw new Error(errorMsg);
         }
       } catch (err) {

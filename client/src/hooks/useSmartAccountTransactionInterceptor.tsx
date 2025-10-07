@@ -1,8 +1,9 @@
 import { useCallback, useState, useRef } from "react";
 import { useActiveAccount, useActiveWallet } from "thirdweb/react";
 import { X, Wallet } from "lucide-react";
-import React, { createContext, useContext } from "react";
+import { createContext, useContext } from "react";
 import { sendAndConfirmTransaction } from "thirdweb";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 type SendTransactionInput = any;
 
@@ -174,79 +175,83 @@ export function useSmartAccountTransactionInterceptor(): TransactionInterceptorR
     };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999] p-4 backdrop-blur-sm">
-        <div className="fixed inset-0 flex items-center justify-center bg-transparent z-50">
-          <div
-            className="absolute inset-0 bg-black/80"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleApproval(false);
-            }}
-          ></div>
-          <div className="relative w-full max-w-md rounded-xl bg-[#17171C] text-white shadow-lg p-5 border border-white/15">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-[500]">Approve transaction</h2>
-              <button
+      <Dialog open={isApproveModalOpen} onOpenChange={setApproveModalOpen}>
+        <DialogContent className="w-11/12 sm:max-w-[600px] min-h-96 text-white bg-transparent border-0">
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999] p-4 backdrop-blur-sm">
+            <div className="fixed inset-0 flex items-center justify-center bg-transparent z-50">
+              <div
+                className="absolute inset-0 bg-black/80"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleApproval(false);
                 }}
-                className="rounded-full p-1 bg-white "
-                aria-label="Close"
-              >
-                <X className="h-4 w-4 text-black" />
-              </button>
-            </div>
-
-            <div className="mt-8">
-              <div className="bg-[#1D1D1D73]/[10] rounded-lg p-4 mb-6 border border-white/15 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {account?.address && (
-                    <span className="text-sm font-mono">
-                      {account?.address?.slice(0, 8)}...
-                      {account?.address?.slice(-6)}
-                    </span>
-                  )}
+              ></div>
+              <div className="relative w-full max-w-md rounded-xl animate-in duration-500 bg-[#17171C] text-white shadow-lg p-5 border border-white/15">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-[500]">Approve transaction</h2>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleApproval(false);
+                    }}
+                    className="rounded-full p-1 bg-white "
+                    aria-label="Close"
+                  >
+                    <X className="h-4 w-4 text-black" />
+                  </button>
                 </div>
-                <div className="flex gap-2 items-center text-sm text-gray-400">
-                  <Wallet className="text-gray-400" size={18} />
-                  {getWalletDisplayName()}
+
+                <div className="mt-8">
+                  <div className="bg-[#1D1D1D73]/[10] rounded-lg p-4 mb-6 border border-white/15 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {account?.address && (
+                        <span className="text-sm font-mono">
+                          {account?.address?.slice(0, 8)}...
+                          {account?.address?.slice(-6)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2 items-center text-sm text-gray-400">
+                      <Wallet className="text-gray-400" size={18} />
+                      {getWalletDisplayName()}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 bg-[#1D1D1D73]/[10] rounded-lg p-4 mb-6 border border-white/15">
+                  <h3 className="font-medium mb-1">Smart Account Detected</h3>
+                  <p className="text-gray-400 text-sm">
+                    Your wallet requires explicit approval for transactions.
+                    This adds an extra layer of security.
+                  </p>
+                </div>
+
+                <div className="mt-8 flex justify-between">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleApproval(false);
+                    }}
+                    className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white "
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleApproval(true);
+                    }}
+                    // disabled={extending}
+                    className="rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
+                  >
+                    Sign Transaction
+                  </button>
                 </div>
               </div>
             </div>
-
-            <div className="mt-8 bg-[#1D1D1D73]/[10] rounded-lg p-4 mb-6 border border-white/15">
-              <h3 className="font-medium mb-1">Smart Account Detected</h3>
-              <p className="text-gray-400 text-sm">
-                Your wallet requires explicit approval for transactions. This
-                adds an extra layer of security.
-              </p>
-            </div>
-
-            <div className="mt-8 flex justify-between">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleApproval(false);
-                }}
-                className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white "
-              >
-                Reject
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleApproval(true);
-                }}
-                // disabled={extending}
-                className="rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
-              >
-                Sign Transaction
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     );
   }, [isApproveModalOpen, pendingTx, wallet, account, handleApproval]);
 

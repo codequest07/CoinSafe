@@ -1,5 +1,5 @@
 import React, { RefObject, useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import Loading from "./loading-screen";
 import SaveSenseResp from "./SaveSenseResp";
 import KitchenLoading from "./kitchen-loading";
@@ -30,10 +30,7 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
 
   const handleFetchData = async () => {
     if (!address) {
-      toast({
-        title: "No wallet connected",
-        variant: "destructive",
-      });
+      toast.error("No wallet connected");
       return;
     }
 
@@ -79,11 +76,9 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
       setIsSaveSenseModalOpen(true);
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast({
-        title: "Failed to fetch data",
+      toast.error("Failed to fetch data",{
         description:
           error instanceof Error ? error.message : "An unknown error occurred",
-        variant: "destructive",
       });
     } finally {
       setIsLoadingModalOpen(false);

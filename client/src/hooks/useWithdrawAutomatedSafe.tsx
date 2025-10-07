@@ -102,7 +102,7 @@ export const useWithdrawAutomatedSafe = ({
 
           await sendTransaction(withdrawTx);
 
-          toast({ title: "Withdrawal successful", variant: "default" });
+          toast.success("Withdrawal successful");
           onSuccess?.();
         } catch (txError: any) {
           let errorMsg = "Failed to withdraw from savings plan";
@@ -115,7 +115,7 @@ export const useWithdrawAutomatedSafe = ({
           } else if (txError?.message?.includes("InvalidWithdrawal")) {
             errorMsg = "Early withdrawal requires accepting the fee";
           }
-          toast({ title: errorMsg, variant: "destructive" });
+          toast.error(errorMsg);
           throw new Error(errorMsg);
         }
       } catch (err) {
