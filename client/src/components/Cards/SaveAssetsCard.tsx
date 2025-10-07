@@ -36,6 +36,8 @@ import {
   supportedTokensState,
 } from "@/store/atoms/balance";
 import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+// import { VaultAPYDisplay } from "../VaultAPYDisplay";
+import { useVaultApy } from "@/hooks/useVaultApy";
 
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
@@ -99,9 +101,10 @@ export default function SaveAssetsCard() {
   const today = startOfDay(new Date());
 
   const savingsDurationOptions = [
-    { value: 30, label: "30 days" },
-    { value: 60, label: "60 days" },
-    { value: 120, label: "120 days" },
+    { value: 30, label: "30D" },
+    { value: 60, label: "60D" },
+    { value: 120, label: "120D" },
+    { value: 365, label: "365D" },
   ];
 
   const {
@@ -381,6 +384,28 @@ export default function SaveAssetsCard() {
     run();
   }, [supportedTokens, savingsBalance]);
 
+  const [totalApy, setTotalApy] = useState<number | null>(null);
+
+  const { nativeApy, totalApr, fees, loading, error } = useVaultApy(
+    saveState.token as `0x${string}`,
+    "0x00cD58DEEbd7A2F1C55dAec715faF8aed5b27BF8"
+  );
+
+  useEffect(() => {
+    if (error) {
+      console.log("Error", error);
+    }
+    if (saveState.token && nativeApy && totalApr && fees && !loading) {
+      const computation = (
+        Number(totalApr) +
+        Number(nativeApy) -
+        Number(nativeApy) * Number(fees)
+      ).toFixed(2);
+
+      setTotalApy(Number(computation));
+    }
+  }, [saveState.token, nativeApy, totalApr, fees, loading, error]);
+
   return (
     <div className="min-h-screen md:min-h-fit flex items-center justify-center md:justify-center bg-[#010104] p-4">
       <div className="w-full max-w-md md:max-w-[600px] rounded-xl md:border-[1px] md:border-[#FFFFFF21] md:bg-[#1D1D1D73] md:p-6 text-white">
@@ -391,6 +416,16 @@ export default function SaveAssetsCard() {
           </button>
           <h1 className="text-lg font-medium">Save assets</h1>
         </div>
+
+        {/* <VaultAPYDisplay
+          vaultAddress={"0x8258F0c79465c95AFAc325D6aB18797C9DDAcf55"}
+          morphoBlueAddress={"0x00cD58DEEbd7A2F1C55dAec715faF8aed5b27BF8"}
+        /> */}
+        {/* {nativeApy && (
+          <div className="text-sm text-gray-300">
+            Native APY: <span className="text-gray-400">{nativeApy}%</span>
+          </div>
+        )} */}
 
         {/* Toggle */}
         <div className="flex rounded-full bg-[#5a5a5a] border-2 border-[#5a5a5a] p-0 mb-6">
@@ -512,6 +547,7 @@ export default function SaveAssetsCard() {
                   isCustomSelected={isCustomSelected}
                   className="mb-4"
                   isDisabled={isDurationDisabled}
+                  apy={totalApy || 0}
                 />
 
                 <div className="py-4">
