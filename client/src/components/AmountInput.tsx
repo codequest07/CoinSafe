@@ -84,7 +84,8 @@ const AmountInput = ({
           <div className="flex-shrink-0">
             <Select
               onValueChange={handleTokenSelectWithClear}
-              value={saveState.token}>
+              value={saveState.token}
+            >
               <SelectTrigger className="w-28 h-12 bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                 <div className="flex items-center">
                   {saveState.token && selectedTokenInfo?.image ? (
@@ -101,7 +102,8 @@ const AmountInput = ({
                     <div
                       className={`w-4 h-4 rounded-full ${
                         selectedTokenInfo?.color || "bg-gray-600"
-                      } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                      } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                    >
                       {selectedTokenInfo?.symbol?.charAt(0) || "?"}
                     </div>
                   ) : null}
@@ -134,7 +136,8 @@ const AmountInput = ({
                           <div
                             className={`w-4 h-4 rounded-full ${
                               tokenInfo?.color || "bg-gray-600"
-                            } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                            } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                          >
                             {tokenInfo?.symbol?.charAt(0) || "?"}
                           </div>
                         )}
