@@ -222,7 +222,7 @@ export default function DepositCard() {
                 <div className="text-sm font-[300] text-gray-300">
                   Wallet balance:{" "}
                   <span className="text-gray-400">
-                    {selectedTokenBalance} {tokenData[token]?.symbol}
+                    {selectedTokenBalance?.toFixed(3)} {tokenData[token]?.symbol}
                   </span>
                 </div>
                 {token &&
