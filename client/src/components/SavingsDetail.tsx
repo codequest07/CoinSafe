@@ -258,6 +258,8 @@ export default function SavingsDetail() {
                             safeDetails.unlockTime
                           )}`
                     }
+                    safeDetails={safeDetails}
+                    isLoading={apiLoading}
                   />
                 )}
               </div>
