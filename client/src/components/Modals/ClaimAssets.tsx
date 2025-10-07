@@ -8,7 +8,7 @@ import {
 } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { LoaderCircle } from "lucide-react";
-import { useSmartAccountTransactionInterceptor } from "@/hooks/useSmartAccountTransactionInterceptor";
+import { useSmartAccountTransactionInterceptorContext } from "@/hooks/useSmartAccountTransactionInterceptor";
 import { Abi, formatUnits } from "viem";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
@@ -37,7 +37,7 @@ export default function ClaimAssets({
   const [usdValues, setUsdValues] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
-  const { sendTransaction } = useSmartAccountTransactionInterceptor();
+  const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
   useEffect(() => {
     setLoading(true);
@@ -81,6 +81,8 @@ export default function ClaimAssets({
       if (!transactionHash) {
         toast.error("Claim asset failed");
       }
+      toast.success(`Redeemed ${tokenData[token]?.symbol} successfully`);
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error claiming token:", error);
     } finally {
@@ -109,6 +111,8 @@ export default function ClaimAssets({
       if (!transactionHash) {
         toast.error("Claim all tokens failed");
       }
+      toast.success("Claimed all tokens successfully");
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error claiming all tokens:", error);
     } finally {
@@ -143,8 +147,7 @@ export default function ClaimAssets({
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg"
-              >
+                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg">
                 <div className="flex justify-between items-center">
                   <Skeleton className="h-12 w-24" />
                   <Skeleton className="h-8 w-20" />
@@ -182,8 +185,7 @@ export default function ClaimAssets({
                         <div
                           className={`w-7 h-7 rounded-full ${
                             tokenData[token.token]?.color
-                          } flex items-center justify-center font-medium`}
-                        >
+                          } flex items-center justify-center font-medium`}>
                           {tokenData[token.token]?.symbol?.charAt(0)}
                         </div>
                       )}
@@ -216,9 +218,9 @@ export default function ClaimAssets({
                     </div>
                     <Button
                       onClick={() => handleClaimSingle(token.token)}
+                      disabled={claiming}
                       variant="link"
-                      className="text-sm text-[#79E7BA] hover:text-[#79E7BA]"
-                    >
+                      className="text-sm text-[#79E7BA] hover:text-[#79E7BA]">
                       Claim
                     </Button>
                   </div>
@@ -231,16 +233,14 @@ export default function ClaimAssets({
           <Button
             onClick={() => setIsModalOpen(false)}
             className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1] bg-[#3F3F3F99] hover:bg-[#3F3F3F99]"
-            disabled={claiming}
-          >
+            disabled={claiming}>
             Cancel
           </Button>
           <Button
             onClick={handleClaimAll}
             className="text-black px-8 rounded-[2rem]"
             variant="outline"
-            disabled={claiming}
-          >
+            disabled={claiming}>
             {claiming ? (
               <LoaderCircle className="animate-spin" />
             ) : (

@@ -26,27 +26,23 @@ const ClaimCard = ({
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const [safeMatured, setSafeMatured] = useState(false);
 
-  const convertTimestampToDate = (timestamp: bigint) => {
-    // Convert from seconds to milliseconds
-    return new Date(Number(timestamp) * 1000);
-  };
-
   function checkSafeMatured(safe: any) {
-    const unlockDate = convertTimestampToDate(safe.unlockTime);
-
-    // Skip safes with invalid dates (like 1970-01-01)
-    const minValidDate = new Date(2020, 0, 1); // Jan 1, 2020
-    if (unlockDate < minValidDate) return false;
+    if (!safe || !safe.unlockTime) return false;
 
     // Check if it's a Target Saving
-    const isTargetSaving = safe.target && safe.target !== "Emergency Safe";
+    const isTargetSaving =
+      typeof safe.target === "string" && safe.target !== "Emergency Safe";
 
     // Check if it has matured and has tokens to claim
-    const isMatured = unlockDate <= new Date();
+    const isMatured = safe.unlockTime < new Date();
     const hasTokens =
-      safe.tokenAmounts &&
-      safe.tokenAmounts.some((token: any) => token.amount > 0);
+      Array.isArray(safe.tokenAmounts) &&
+      safe.tokenAmounts.some(
+        (token: any) =>
+          token && typeof token.amount === "number" && token.amount > 0
+      );
 
+    
     return isTargetSaving && isMatured && hasTokens;
   }
 
@@ -116,8 +112,7 @@ const ClaimCard = ({
               isLoading || !safeMatured
                 ? "bg-[#3F3F3F50] text-[#F1F1F150] cursor-not-allowed"
                 : "bg-[#3F3F3F99] text-[#F1F1F1] hover:bg-[#4F4F4F99]"
-            }`}
-          >
+            }`}>
             {isLoading ? "Loading..." : "Claim all"}
           </button>
           {/* <button className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">Save</button> */}
