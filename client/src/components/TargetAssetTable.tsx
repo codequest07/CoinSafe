@@ -10,7 +10,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
-import { formatUnits } from "viem";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
@@ -21,7 +20,7 @@ import { getTokenPrice } from "@/lib";
 // import { client, liskMainnet } from "@/lib/config";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import { getTokenDecimals, tokenData } from "@/lib/utils";
+import { tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
@@ -35,7 +34,7 @@ interface AssetTableProps {
 
 export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
-    { token: string; balance: string; saved: string; available: string }[]
+    { token: string; balance: string; yield: string }[]
   >([]);
 
   const [balances] = useRecoilState(balancesState);
@@ -62,42 +61,13 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
           token: tokenInfo.token,
           // For a specific safe, the balance is the amount in the safe
           balance: tokenInfo.formattedAmount,
-          // For a specific safe, all tokens are "saved" in this safe
-          saved: tokenInfo.formattedAmount,
-          // For a specific safe, available is 0 as all tokens are locked in the safe
-          available: "0",
+          yield: "0",
         };
       });
 
       setAllAssetData(safeAssetsRes);
       return;
     }
-
-    // If no safeDetails or using global view, use the global balances
-    if (!totalTokenBalances) return;
-
-    const tokens = Object.keys(totalTokenBalances || {});
-    if (tokens.length === 0) return;
-
-    const allAssetsRes = tokens.map((token) => {
-      return {
-        token,
-        balance: formatUnits(
-          BigInt((totalTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token)
-        ),
-        saved: formatUnits(
-          BigInt((savedTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token)
-        ),
-        available: formatUnits(
-          BigInt((availableTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token)
-        ),
-      };
-    });
-
-    setAllAssetData(allAssetsRes);
   }, [
     availableTokenBalances,
     totalTokenBalances,
@@ -271,10 +241,7 @@ function AssetTableContent({
                 AMOUNT
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                IN VAULT
-              </TableHead>
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                AUTOSAVED
+                YIELD ON SAVINGS
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 <span className="sr-only">Actions</span>

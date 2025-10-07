@@ -4,6 +4,10 @@ import { CalendarIcon } from "lucide-react";
 import { Label } from "./ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "./ui/calendar";
+import { useEffect, useState } from "react";
+import { getContractFeePercentage } from "@/lib/utils";
+import { useActiveAccount } from "thirdweb/react";
+import { previousDay } from "date-fns";
 
 interface PillOption {
   value: number;
@@ -44,7 +48,17 @@ export function DurationSelector({
   //   if (!disablePastDates) return false;
   //   return date < new Date(new Date().setHours(0, 0, 0, 0));
   // };
+
   const isCustomDateDisabled = true;
+  const account = useActiveAccount();
+  const address = account?.address;
+
+  const [apys, setApys] = useState<Record<number, number>>(
+    Object.fromEntries(options.map(({ value }) => [value, apy])) as Record<
+      number,
+      number
+    >
+  );
 
   // if a date should be disabled
   const isDateDisabled = (date: Date) => {
@@ -59,6 +73,35 @@ export function DurationSelector({
     // OR if date is less than 30 days from today
     return (disablePastDates && date < today) || date < thirtyDaysFromNow;
   };
+  
+  useEffect(() => {
+    if (!address || !apy || !options) return;
+
+    const getApyByDuration = async () => {
+      try {
+        // Run all async calls in parallel
+        const results = await Promise.all(
+          options.map(async (option) => {
+            console.log(option);
+            const percent = await getContractFeePercentage(
+              option.value * 24 * 60 * 60,
+              address
+            );
+            const newApy = (100 - Number(percent)/100)/100 * apy;
+            return [option.value, newApy] as const;
+          })
+        );
+
+        // Convert results array to object
+        const apyMap = Object.fromEntries(results);
+        setApys(apyMap);
+      } catch (error) {
+        console.error("Error fetching APYs:", error);
+      }
+    };
+
+    getApyByDuration();
+  }, [options, apy, address]);
 
   return (
     <div className={`flex flex-col space-y-3`}>
@@ -94,7 +137,7 @@ export function DurationSelector({
                   {/* {`Earn up to ${apy.toFixed(2)}% APY`} */}
                   Earn up to{" "}
                   <span className="font-medium text-[#79E7BA]">
-                    {apy.toFixed(2)}%
+                    {apys[option.value].toFixed(2)}%
                   </span>{" "}
                   APY
                 </span>

@@ -3,8 +3,10 @@ import { twMerge } from "tailwind-merge";
 import { formatEther, formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
 import { getLskToUsd, getSafuToUsd, getUsdcToUsd, getUsdtToUsd } from "@/lib";
-import { liskMainnet } from "./config";
 import { TokenInfo } from "thirdweb/react";
+import { getContract, readContract } from "thirdweb";
+import { client, liskMainnet } from "@/lib/config";
+import { CoinsafeDiamondContract } from "@/lib/contract";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -209,24 +211,41 @@ export const tokenData = {
 } as any;
 
 export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
-    [liskMainnet.id]: [
-      {
-        address: tokens.usdt,
-        icon: tokenData[tokens.usdt]?.image,
-        name: tokenData[tokens.usdt]?.symbol,
-        symbol: tokenData[tokens.usdt]?.symbol,
-      },
-      {
-        address: tokens.lsk,
-        icon: tokenData[tokens.usdc]?.image,
-        name: tokenData[tokens.usdc]?.symbol,
-        symbol: tokenData[tokens.usdc]?.symbol,
-      },
-      {
-        address: tokens.lsk,
-        icon: tokenData[tokens.lsk]?.image,
-        name: tokenData[tokens.lsk]?.symbol,
-        symbol: tokenData[tokens.lsk]?.symbol,
-      },
-    ],
-  };
+  [liskMainnet.id]: [
+    {
+      address: tokens.usdt,
+      icon: tokenData[tokens.usdt]?.image,
+      name: tokenData[tokens.usdt]?.symbol,
+      symbol: tokenData[tokens.usdt]?.symbol,
+    },
+    {
+      address: tokens.lsk,
+      icon: tokenData[tokens.usdc]?.image,
+      name: tokenData[tokens.usdc]?.symbol,
+      symbol: tokenData[tokens.usdc]?.symbol,
+    },
+    {
+      address: tokens.lsk,
+      icon: tokenData[tokens.lsk]?.image,
+      name: tokenData[tokens.lsk]?.symbol,
+      symbol: tokenData[tokens.lsk]?.symbol,
+    },
+  ],
+};
+
+export const getContractFeePercentage = async (duration: number, user: string) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const feePercentage = await readContract({
+    contract: contract,
+    method:
+      "function calculateFeePercentage(uint256 duration,address user) external view returns (uint256)",
+    params: [BigInt(duration), user],
+  });
+
+  return feePercentage;
+};

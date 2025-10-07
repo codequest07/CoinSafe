@@ -23,7 +23,7 @@ export const CoinSafeContract = {
 // unkonw 0x69B417f1937EF6fF93471a247D70a245B6216ca8
 export const CoinsafeDiamondContract = {
   //mainnet address
-  address: "0xAb82eA18aA9b0F74DEc7F2e7bAdF9D47eF380ADB",
+  address: "0x1f9d3d871f5D279e939B0622eCEb130aB35c8FF2",
   // address: "0x08b59fb7ee9418470004693acf6d2c7dd0256a69",
   // old diamond address
   //address: "0xda6cf4d86ac271686ace56c554acad7bc6940667",
