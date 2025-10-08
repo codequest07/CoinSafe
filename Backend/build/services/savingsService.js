@@ -130,7 +130,7 @@ function getAllAutomatedSavingsUsers() {
             // Extract unique user addresses from the events
             const allUsers = new Set();
             for (const event of events) {
-                if ('args' in event && event.args && event.args.user) {
+                if ("args" in event && event.args && event.args.user) {
                     allUsers.add(event.args.user);
                     console.log(`👤 [getAllAutomatedSavingsUsers] User from event: ${event.args.user}`);
                 }
