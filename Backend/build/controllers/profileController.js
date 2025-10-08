@@ -16,11 +16,12 @@ exports.resendVerificationEmail = exports.testUserStatus = exports.getProfile = 
 const UserModel_1 = __importDefault(require("../Models/UserModel"));
 const email_1 = require("../services/email");
 const validator_1 = __importDefault(require("validator"));
+const path_1 = __importDefault(require("path"));
 // Helper function to generate verification link and HTML
 const generateVerificationContent = (email, code) => {
     const subject = "CoinSafe: Your Email Verification Code";
     const htmlContent = `
-       <!DOCTYPE html>
+     <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -57,6 +58,11 @@ const generateVerificationContent = (email, code) => {
         gap: 8px;
       }
 
+      .logo img {
+        height: 48px;
+        width: auto;
+      }
+
       .logo-icon {
         display: flex;
         flex-direction: column;
@@ -68,6 +74,11 @@ const generateVerificationContent = (email, code) => {
         height: 4px;
         background-color: #14b8a6;
         border-radius: 2px;
+        margin-bottom: 2px;
+      }
+
+      .logo-bar:last-child {
+        margin-bottom: 0;
       }
 
       .logo-text {
@@ -82,14 +93,14 @@ const generateVerificationContent = (email, code) => {
       }
 
       .title {
-        font-size: 32px;
+        font-size: 20px;
         font-weight: bold;
         color: #111827;
         margin: 0 0 32px 0;
       }
 
       .text {
-        font-size: 18px;
+        font-size: 16px;
         color: #6b7280;
         margin: 0 0 24px 0;
       }
@@ -106,22 +117,23 @@ const generateVerificationContent = (email, code) => {
       }
 
       .social-icon {
-        width: 40px;
-        height: 40px;
+        padding: 2px 2px;
         background-color: #000000;
-        border-radius: 50%;
+        border-radius: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
+        margin: 0 8px;
+        transition: background-color 0.2s;
       }
 
       .footer {
         border-top: 1px solid #e5e7eb;
-        padding-top: 32px;
+        padding-top: 20px;
         font-size: 14px;
         color: #9ca3af;
-        line-height: 1.5;
+        line-height: 1;
       }
 
       .footer p {
@@ -160,12 +172,13 @@ const generateVerificationContent = (email, code) => {
   <body>
     <div style="padding: 24px">
       <div class="email-container">
-        <!-- Header -->
-        <div class="header">
-          <img
-            src="https://res.cloudinary.com/dfp2rztmd/image/upload/v1752393890/logo_fppdfj.svg"
-            alt="" />
-        </div>
+          <!-- Header -->
+          <div class="header">
+            <img
+              src="cid:logo"
+              alt="CoinSafe Logo"
+              style="height: 48px; width: auto; max-width: 200px" />
+          </div>
 
         <!-- Main Content -->
         <div class="content">
@@ -174,47 +187,67 @@ const generateVerificationContent = (email, code) => {
           <p class="text">Hi there,</p>
 
           <p class="text">
-            Thank you for linking your profile with CoinSafe! Please use the verification code below to verify your email address.
+            Thank you for linking your profile with CoinSafe! Please use the
+            verification code below to verify your email address.
           </p>
 
-          <div style="text-align: center; margin: 30px 0;">
-            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; display: inline-block; font-family: monospace; font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #1f2937;">
+          <div style="text-align: center; margin: 30px 0">
+            <div
+              style="
+                background-color: #f3f4f6;
+                padding: 10px;
+                border-radius: 8px;
+                display: inline-block;
+                font-family: monospace;
+                font-size: 20px;
+                font-weight: bold;
+                letter-spacing: 4px;
+                color: #1f2937;
+              ">
               ${code}
             </div>
           </div>
 
           <p class="text">
-            Enter this code in the verification form on CoinSafe to complete your email verification.
+            Enter this code in the verification form on CoinSafe to complete
+            your email verification.
           </p>
           <p class="text">
-            This code will expire in 10 minutes. If you did not link your profile to CoinSafe, please ignore this email.
+            This code will expire in 10 minutes. If you did not link your
+            profile to CoinSafe, please ignore this email.
           </p>
           <p class="text">Best regards,<br />The CoinSafe Team!</p>
 
-          <!-- Social Media Icons -->
-          <div class="social-icons">
-            <a href="https://discord.gg/AprSgxhh" class="social-icon">
-              <!-- Discord Icon -->
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path
-                  d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
-              </svg>
-            </a>
-            <a href="https://x.com/Coinsafe_safe" class="social-icon">
-              <!-- X (Twitter) Icon -->
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path
-                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-            </a>
-            <a href="https://t.me/coinsafe_safe" class="social-icon">
-              <!-- Telegram Icon -->
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path
-                  d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-              </svg>
-            </a>
-          </div>
+            <!-- Social Media Links -->
+            <div class="social-icons">
+              <a
+                href="https://discord.gg/AprSgxhh"
+                class="social-icon"
+                style="text-decoration: none; color: white">
+                <img
+                  src="cid:discord"
+                  alt="Discord"
+                  style="width: 30px; height: 30px" />
+              </a>
+              <a
+                href="https://x.com/Coinsafe_safe"
+                class="social-icon"
+                style="text-decoration: none; color: white">
+                <img
+                  src="cid:twitter"
+                  alt="Twitter"
+                  style="width: 30px; height: 30px" />
+              </a>
+              <a
+                href="https://t.me/coinsafe_safe"
+                class="social-icon"
+                style="text-decoration: none; color: white">
+                <img
+                  src="cid:telegram"
+                  alt="Telegram"
+                  style="width: 30px; height: 30px" />
+              </a>
+            </div>
 
           <!-- Footer -->
           <div class="footer">
@@ -291,11 +324,50 @@ const updateEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         // Generate verification email content
         const { subject, htmlContent } = generateVerificationContent(email, verificationCode);
         console.log("6. Verification code generated:", verificationCode);
-        // Send email
+        // Send email with attachments (with fallback if assets not found)
+        const attachments = [];
+        const assetFiles = [
+            {
+                filename: "coinsafe-logo.svg",
+                path: path_1.default.join(process.cwd(), "src/assets/coinsafe-logo.svg"),
+                cid: "logo",
+            },
+            {
+                filename: "discord.svg",
+                path: path_1.default.join(process.cwd(), "src/assets/discord.svg"),
+                cid: "discord",
+            },
+            {
+                filename: "twitter.svg",
+                path: path_1.default.join(process.cwd(), "src/assets/twitter.svg"),
+                cid: "twitter",
+            },
+            {
+                filename: "telegram.svg",
+                path: path_1.default.join(process.cwd(), "src/assets/telegram.svg"),
+                cid: "telegram",
+            },
+        ];
+        // Check if assets exist before adding to attachments
+        for (const asset of assetFiles) {
+            try {
+                const fs = require("fs");
+                if (fs.existsSync(asset.path)) {
+                    attachments.push(asset);
+                }
+                else {
+                    console.log(`⚠️ Asset not found: ${asset.path}`);
+                }
+            }
+            catch (error) {
+                console.log(`⚠️ Error checking asset ${asset.filename}:`, error);
+            }
+        }
         const emailResult = yield (0, email_1.sendEmail)({
             email: email,
             subject: subject,
             html: htmlContent,
+            attachments: attachments,
         });
         console.log("7. Email send result:", emailResult);
         if (!emailResult.success) {
@@ -628,10 +700,50 @@ const resendVerificationEmail = (req, res) => __awaiter(void 0, void 0, void 0, 
         yield user.save();
         // Send verification email
         const { subject, htmlContent } = generateVerificationContent(user.email, verificationCode);
+        // Send email with attachments (with fallback if assets not found)
+        const attachments = [];
+        const assetFiles = [
+            {
+                filename: "coinsafe-logo.svg",
+                path: path_1.default.join(process.cwd(), "src/assets/coinsafe-logo.svg"),
+                cid: "logo",
+            },
+            {
+                filename: "discord.svg",
+                path: path_1.default.join(process.cwd(), "src/assets/discord.svg"),
+                cid: "discord",
+            },
+            {
+                filename: "twitter.svg",
+                path: path_1.default.join(process.cwd(), "src/assets/twitter.svg"),
+                cid: "twitter",
+            },
+            {
+                filename: "telegram.svg",
+                path: path_1.default.join(process.cwd(), "src/assets/telegram.svg"),
+                cid: "telegram",
+            },
+        ];
+        // Check if assets exist before adding to attachments
+        for (const asset of assetFiles) {
+            try {
+                const fs = require("fs");
+                if (fs.existsSync(asset.path)) {
+                    attachments.push(asset);
+                }
+                else {
+                    console.log(`⚠️ Asset not found: ${asset.path}`);
+                }
+            }
+            catch (error) {
+                console.log(`⚠️ Error checking asset ${asset.filename}:`, error);
+            }
+        }
         const emailResult = yield (0, email_1.sendEmail)({
             email: user.email,
             subject: subject,
             html: htmlContent,
+            attachments: attachments,
         });
         if (!emailResult.success) {
             console.error("Failed to resend verification email:", emailResult.error);

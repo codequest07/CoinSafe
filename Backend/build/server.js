@@ -24,6 +24,7 @@ const BaseRouter_1 = __importDefault(require("./Routes/BaseRouter"));
 const WaitlistRouter_1 = __importDefault(require("./Routes/WaitlistRouter"));
 const FaucetClaimRoute_1 = __importDefault(require("./Routes/FaucetClaimRoute"));
 const FonbnkRouter_1 = __importDefault(require("./Routes/FonbnkRouter"));
+const MerklRouter_1 = __importDefault(require("./Routes/MerklRouter"));
 // Models and Services
 const TransactionModel_1 = require("./Models/TransactionModel");
 const GeminiService_1 = require("./services/GeminiService");
@@ -69,6 +70,7 @@ app.use("/api/faucet", FaucetClaimRoute_1.default);
 app.use("/api/coingecko", CoinGeckoApiRouter_1.default);
 app.use("/api/profile", ProfileRoutes_1.default);
 app.use("/api/fonbnk", FonbnkRouter_1.default);
+app.use("/api/merkl", MerklRouter_1.default);
 // MongoDB Connection
 const mongodbUri = process.env.MONGO_URI || "";
 // "mongodb+srv://agbakwuruoluchicoinsafe:SDYRnmD6FrVp09fo@cluster0.g6csr.mongodb.net";
