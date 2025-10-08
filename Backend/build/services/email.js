@@ -17,6 +17,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 dotenv_1.default.config();
 const sendEmail = (options) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     console.log("📧 [sendEmail] Starting email send process...");
     console.log(`📧 [sendEmail] Recipient: ${options.email}`);
     console.log(`📧 [sendEmail] Subject: ${options.subject}`);
@@ -45,6 +46,11 @@ const sendEmail = (options) => __awaiter(void 0, void 0, void 0, function* () {
         to: options.email,
         subject: options.subject,
         html: options.html,
+        attachments: (_a = options.attachments) === null || _a === void 0 ? void 0 : _a.map((attachment) => ({
+            filename: attachment.filename,
+            path: attachment.path,
+            cid: attachment.cid,
+        })),
     };
     console.log("📧 [sendEmail] Mail options prepared:");
     console.log(`   From: ${mailOptions.from}`);

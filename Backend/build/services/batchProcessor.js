@@ -8,29 +8,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.batchAutomatedSavingsProcessor = batchAutomatedSavingsProcessor;
 const savingsService_1 = require("./savingsService");
-const email_1 = require("./email");
-const UserModel_1 = __importDefault(require("../Models/UserModel"));
 const ethers_1 = require("ethers");
 const BATCH_SIZE = 30;
 // Token addresses and their symbols for formatting (updated to match frontend contract addresses)
 const TOKEN_SYMBOLS = {
     "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": "SAFU",
-    "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda": "USDT",
-    "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": "LSK",
-    "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83": "USDC",
+    "0x05D032ac25d322df992303dCa074EE7392C117b9": "USDT",
+    "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24": "LSK",
+    "0xF242275d3a6527d877f2c927a82D9b057609cc71": "USDC",
 };
 // Token decimals mapping (updated to match frontend contract addresses)
 const TOKEN_DECIMALS = {
     "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": 18, // SAFU
-    "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda": 6, // USDT
-    "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": 18, // LSK
-    "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83": 6, // USDC
+    "0x05D032ac25d322df992303dCa074EE7392C117b9": 6, // USDT
+    "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24": 18, // LSK
+    "0xF242275d3a6527d877f2c927a82D9b057609cc71": 6, // USDC
 };
 // Function to format token amount with proper decimals
 function formatTokenAmount(amount, tokenAddress) {
@@ -73,32 +68,46 @@ function formatFrequency(frequency) {
         return `every ${years} year${years > 1 ? "s" : ""}`;
     }
 }
-// Function to generate email content with actual amounts
-function generateEmailContent(userAddress, savingsDetails) {
-    let amountsText = "";
-    let frequencyText = "";
-    if (savingsDetails &&
-        savingsDetails.tokenDetails &&
-        savingsDetails.tokenDetails.length > 0) {
-        const amounts = savingsDetails.tokenDetails.map((token) => {
-            const amountToSave = formatTokenAmount(BigInt(token.amountToSave), token.token);
-            const frequency = formatFrequency(BigInt(token.frequency));
-            return { amount: amountToSave, frequency };
-        });
-        if (amounts.length === 1) {
-            amountsText = `Auto save <span class="highlight">${amounts[0].amount}</span>`;
-            frequencyText = ` ${amounts[0].frequency}`;
-        }
-        else {
-            const amountStrings = amounts.map((item) => `${item.amount} ${item.frequency}`);
-            amountsText = `Auto save <span class="highlight">${amountStrings.join(", ")}</span>`;
-        }
+// Function to generate email content with actual amounts (DISABLED)
+/*
+function generateEmailContent(
+  userAddress: string,
+  savingsDetails: any
+): string {
+  let amountsText = "";
+  let frequencyText = "";
+
+  if (
+    savingsDetails &&
+    savingsDetails.tokenDetails &&
+    savingsDetails.tokenDetails.length > 0
+  ) {
+    const amounts = savingsDetails.tokenDetails.map((token: any) => {
+      const amountToSave = formatTokenAmount(
+        BigInt(token.amountToSave),
+        token.token
+      );
+      const frequency = formatFrequency(BigInt(token.frequency));
+      return { amount: amountToSave, frequency };
+    });
+
+    if (amounts.length === 1) {
+      amountsText = `Auto save <span class="highlight">${amounts[0].amount}</span>`;
+      frequencyText = ` ${amounts[0].frequency}`;
+    } else {
+      const amountStrings = amounts.map(
+        (item) => `${item.amount} ${item.frequency}`
+      );
+      amountsText = `Auto save <span class="highlight">${amountStrings.join(
+        ", "
+      )}</span>`;
     }
-    else {
-        amountsText = `Auto save <span class="highlight">0.0645 XRP</span> monthly`;
-        frequencyText = " monthly";
-    }
-    return `
+  } else {
+    amountsText = `Auto save <span class="highlight">0.0645 XRP</span> monthly`;
+    frequencyText = " monthly";
+  }
+
+  return `
   <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -322,9 +331,12 @@ function generateEmailContent(userAddress, savingsDetails) {
 </html>
   `;
 }
+*/
 function batchAutomatedSavingsProcessor() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("🔄 [batchProcessor] Starting automated savings batch processor...");
+        // Reset nonce tracking at the start of batch processing
+        yield (0, savingsService_1.resetNonceTracking)();
         let startIndex = 0;
         while (true) {
             console.log(`📋 [batchProcessor] Getting due plans (iteration ${startIndex / BATCH_SIZE + 1})...`);
@@ -340,60 +352,16 @@ function batchAutomatedSavingsProcessor() {
             try {
                 const result = yield (0, savingsService_1.executeBatch)(startIndex, currentBatchSize);
                 console.log("✅ [batchProcessor] Batch execution completed successfully");
-                // Send emails for successful executions
-                console.log("📧 [batchProcessor] Starting email notifications...");
-                // Since we can't get the actual addresses from the contract event,
-                // we'll send emails to all due addresses that have verified emails
-                for (const address of allDueAddresses) {
-                    console.log(`📧 [batchProcessor] Looking up user for address: ${address}`);
-                    try {
-                        const user = yield UserModel_1.default.findOne({ walletAddress: address });
-                        if (!user) {
-                            console.log(`⚠️ [batchProcessor] No user found for address: ${address}`);
-                            continue;
-                        }
-                        console.log(`👤 [batchProcessor] User found: ${user.email || "No email"}`);
-                        if (!user.email) {
-                            console.log(`⚠️ [batchProcessor] User ${address} has no email address`);
-                            continue;
-                        }
-                        if (!user.emailVerified) {
-                            console.log(`⚠️ [batchProcessor] User ${address} email not verified`);
-                            continue;
-                        }
-                        console.log(`📧 [batchProcessor] Sending email to: ${user.email}`);
-                        // Get automated savings details for this user
-                        let savingsDetails = null;
-                        try {
-                            savingsDetails = yield (0, savingsService_1.getAutomatedSavingsDetails)(address);
-                            console.log(`✅ [batchProcessor] Retrieved savings details for ${address}`);
-                        }
-                        catch (error) {
-                            console.error(`❌ [batchProcessor] Error getting savings details for ${address}:`, error);
-                            // Continue with default email content if we can't get details
-                        }
-                        const emailResult = yield (0, email_1.sendEmail)({
-                            email: user.email,
-                            subject: "Automated Savings Executed",
-                            html: generateEmailContent(address, savingsDetails),
-                        });
-                        if (emailResult.success) {
-                            console.log(`✅ [batchProcessor] Email sent successfully to ${user.email}`);
-                        }
-                        else {
-                            console.error(`❌ [batchProcessor] Failed to send email to ${user.email}: ${emailResult.error}`);
-                        }
-                    }
-                    catch (error) {
-                        console.error(`❌ [batchProcessor] Error processing user ${address}:`, error);
-                    }
-                }
-                console.log("📧 [batchProcessor] Email notification process completed");
+                // Email notifications disabled
+                console.log("📧 [batchProcessor] Email notifications disabled - skipping email sending");
                 if (remaining <= currentBatchSize) {
                     console.log("🏁 [batchProcessor] All batches processed. Process complete.");
                     break;
                 }
                 startIndex += currentBatchSize;
+                // Add a small delay between batches to prevent nonce conflicts
+                console.log("⏳ [batchProcessor] Waiting 3 seconds before next batch...");
+                yield new Promise((resolve) => setTimeout(resolve, 3000));
             }
             catch (error) {
                 console.error("❌ [batchProcessor] Error during batch processing:", error);
