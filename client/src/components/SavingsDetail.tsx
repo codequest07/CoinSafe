@@ -215,7 +215,7 @@ export default function SavingsDetail() {
                 ? `Next unlock date: ${safeDetails.nextUnlockDate}`
                 : "Withdraw anytime"}
             </p>
-          </div>
+          </div>    
         ) : (
           <div className="flex flex-col items-center justify-center py-12">
             <img
