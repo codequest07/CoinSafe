@@ -249,3 +249,37 @@ export const getContractFeePercentage = async (duration: number, user: string) =
 
   return feePercentage;
 };
+
+export const getMorphoVaultAddressForToken = async (tokenAddress: string) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const vault = await readContract({
+    contract: contract,
+    method:
+      "function getMorphoVault(address token) external view returns (address)",
+    params: [tokenAddress],
+  });
+
+  return vault;
+};
+
+export const getUserTokenYield = async (tokenAddress: string) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const vault = await readContract({
+    contract: contract,
+    method:
+      "function getMorphoVault(address token) external view returns (address)",
+    params: [tokenAddress],
+  });
+
+  return vault;
+};

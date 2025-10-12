@@ -56,6 +56,8 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
       safeDetails.tokenAmounts &&
       safeDetails.tokenAmounts.length > 0
     ) {
+      // console.log("SafeDetailss from target assets table", safeDetails);
+
       const safeAssetsRes = safeDetails.tokenAmounts.map((tokenInfo) => {
         return {
           token: tokenInfo.token,
