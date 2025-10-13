@@ -15,7 +15,7 @@ const Footer = () => {
             <Link
               target="_blank"
               rel="noopener noreferrer"
-              to={"https://discord.gg/AprSgxhh"}>
+              to={"https://discord.gg/JJ9TCfF2"}>
               <img
                 src="/assets/discord.svg"
                 alt="Discord"
