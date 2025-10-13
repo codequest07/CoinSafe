@@ -30,6 +30,8 @@ export interface SafeDetails {
   startTime: bigint;
   unlockTime: bigint;
   tokenAmounts: Token[];
+  feePercentage: number;
+  initialShares: Token[];
 }
 
 export function useGetSafes() {
