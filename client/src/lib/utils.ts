@@ -249,3 +249,47 @@ export const getContractFeePercentage = async (duration: number, user: string) =
 
   return feePercentage;
 };
+
+export const getMorphoVaultAddressForToken = async (tokenAddress: string) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const vault = await readContract({
+    contract: contract,
+    method:
+      "function getMorphoVault(address token) external view returns (address)",
+    params: [tokenAddress],
+  });
+
+  return vault;
+};
+
+export const getUserTokenYield = async (tokenAddress: string, feePercentage: number, tokenShares: bigint, principal: bigint) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const vaultAddress = await getMorphoVaultAddressForToken(tokenAddress);
+
+  if(!vaultAddress) throw new Error("Vault address not found!");
+
+  const assets = await readContract({
+    contract: contract,
+    method: "function convertSharesToAssets(uint256 shares, address vaultAddress) external view returns (uint256)",
+    params: [tokenShares, vaultAddress],
+  });
+
+  // console.log("targett safe assets yield", assets)
+
+  const effectiveYield = (100 -(Number(feePercentage)/100)) * Number(assets - principal);
+
+  // console.log("targett safe assets yield variables ", (100 -(Number(feePercentage)/100)), (assets) - (principal))
+
+  // console.log("targett safe assets calculated yield", effectiveYield)
+  return effectiveYield;
+};

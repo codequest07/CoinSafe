@@ -20,7 +20,7 @@ import { getTokenPrice } from "@/lib";
 // import { client, liskMainnet } from "@/lib/config";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import { tokenData } from "@/lib/utils";
+import { getUserTokenYield, tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
@@ -34,7 +34,7 @@ interface AssetTableProps {
 
 export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
-    { token: string; balance: string; yield: string }[]
+    { token: string; balance: string; yield: number }[]
   >([]);
 
   const [balances] = useRecoilState(balancesState);
@@ -50,24 +50,38 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
   );
 
   useEffect(() => {
-    // If safeDetails is provided, use the safe-specific token amounts
-    if (
-      safeDetails &&
-      safeDetails.tokenAmounts &&
-      safeDetails.tokenAmounts.length > 0
-    ) {
-      const safeAssetsRes = safeDetails.tokenAmounts.map((tokenInfo) => {
-        return {
-          token: tokenInfo.token,
-          // For a specific safe, the balance is the amount in the safe
-          balance: tokenInfo.formattedAmount,
-          yield: "0",
-        };
-      });
+    const fetchSafeAssets = async () => {
+      if (
+        safeDetails &&
+        safeDetails.tokenAmounts &&
+        safeDetails.tokenAmounts.length > 0
+      ) {
+        console.log("SafeDetails from target assets table", safeDetails);
 
-      setAllAssetData(safeAssetsRes);
-      return;
-    }
+        const safeAssetsRes = await Promise.all(
+          safeDetails.tokenAmounts.map(async (tokenInfo) => {
+            const effectiveYield = await getUserTokenYield(
+              tokenInfo.token,
+              safeDetails.feePercentage!,
+              tokenInfo.tokenShares!,
+              BigInt(tokenInfo.amount)!
+            );
+
+            return {
+              token: tokenInfo.token,
+              // For a specific safe, the balance is the amount in the safe
+              balance: tokenInfo.formattedAmount,
+              saved: tokenInfo.formattedAmount,
+              yield: effectiveYield,
+            };
+          })
+        );
+
+        setAllAssetData(safeAssetsRes);
+      }
+    };
+
+    fetchSafeAssets();
   }, [
     availableTokenBalances,
     totalTokenBalances,
@@ -128,9 +142,11 @@ function AssetTableContent({
           token: asset.token,
           balance: asset.balance,
           saved: asset.saved,
+          yield: asset.yield,
           balance_usd: null, // Placeholder for loading state
           saved_usd: null, // Placeholder for loading state
           autosaved: null, // Placeholder for loading state
+          yield_usd: null,
           tokenInfo: tokenData[asset.token] || {
             symbol: "Unknown",
             name: "Lisk",
@@ -154,12 +170,18 @@ function AssetTableContent({
               Number(asset.saved)
             );
 
+            const yieldUsd = await getTokenPrice(
+              asset.token,
+              Number(asset.yield)
+            );
+
             setUpdatedAssets((prev: any) => {
               const updated = [...prev];
               updated[index] = {
                 ...updated[index],
                 balance_usd: balanceUsd,
                 saved_usd: savedUsd,
+                yield_usd: yieldUsd,
               };
               return updated;
             });
@@ -282,25 +304,25 @@ function AssetTableContent({
                 <TableCell className="py-4 px-4">
                   <div className="flex flex-col">
                     <p className="text-white">
-                      {asset.balance} {asset.tokenInfo.symbol}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      ≈ $
-                      {asset.balance_usd !== null
-                        ? asset.balance_usd
-                        : "Loading..."}
-                    </p>
-                  </div>
-                </TableCell>
-                <TableCell className="py-4 px-4">
-                  <div className="flex flex-col">
-                    <p className="text-white">
                       {asset.saved} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
                       ≈ $
-                      {asset.saved_usd !== null
+                      {asset.saved !== null
                         ? asset.saved_usd
+                        : "Loading..."}
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell className="p-4 text-[#79E7BA] hover:text-[#79E7BA]/80">
+                  <div className="flex flex-col">
+                    <p className="">
+                     + {asset?.yield?.toFixed(2)} {asset.tokenInfo.symbol}
+                    </p>
+                    <p className="text-xs">
+                      ≈ $
+                      {asset.yield_usd !== null
+                        ? asset.yield_usd
                         : "Loading..."}
                     </p>
                   </div>
