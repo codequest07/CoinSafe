@@ -7,7 +7,7 @@ import { TransfersData } from "../types/ai";
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
-  private model: string = "gemini-2.5-pro-exp-03-25";
+  private model: string = "gemini-2.5-flash";
 
   constructor(apiKey: string) {
     if (!apiKey) {
@@ -17,17 +17,12 @@ export class GeminiService {
   }
 
   async getSavingsPlan(transfersData: TransfersData): Promise<string | null> {
-    console.log(
-      "Using Gemini API Key:",
-      this.genAI.apiKey ? "Set (not shown for security)" : "Not set"
-    );
-
     try {
       const generationConfig = {
         temperature: 0.9, // Adjust creativity/determinism
         topK: 1,
         topP: 1,
-        maxOutputTokens: 1000,
+        maxOutputTokens: 2000, // Increased token limit
       };
 
       const safetySettings = [
@@ -78,7 +73,23 @@ export class GeminiService {
       const response = result.response;
       const text = response.text();
 
-      console.log("Gemini API response received.");
+      // Check if response was truncated
+      if (response.candidates?.[0]?.finishReason === "MAX_TOKENS") {
+        console.warn("Response was truncated due to token limit");
+      }
+
+      // Check if we got valid text content
+      if (!text || text.trim().length === 0) {
+        // Try to get text from candidates directly if response.text() fails
+        const candidateText =
+          response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (candidateText && candidateText.trim().length > 0) {
+          return candidateText;
+        }
+
+        throw new Error("Empty response from AI service");
+      }
+
       return text;
     } catch (error) {
       console.error("Error calling Gemini API:", error);
