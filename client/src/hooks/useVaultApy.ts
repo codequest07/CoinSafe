@@ -552,7 +552,7 @@ export const useVaultApy = (
         if (merklData.totalApr !== null) {
           setTotalApr(merklData.totalApr.toFixed(2));
         } else {
-          setTotalApr(null); // Fallback if no match
+          setTotalApr("0.00"); // Fallback if no match
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch APY");
