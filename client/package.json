@@ -6,7 +6,7 @@
   "scripts": {
     "generate:firebase-sw": "node scripts/generate-firebase-sw.js",
     "prebuild": "npm run generate:firebase-sw",
-    "build": "tsc && vite build",
+    "build": "ROLLUP_DISABLE_NATIVE=1 tsc && vite build",
     "dev": "npm run generate:firebase-sw && vite",
     "lint": "eslint .",
     "preview": "vite preview",
