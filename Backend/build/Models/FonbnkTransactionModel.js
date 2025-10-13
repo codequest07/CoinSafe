@@ -86,6 +86,6 @@ const FonbnkTransactionSchema = new mongoose_1.Schema({
 // Index for efficient queries
 FonbnkTransactionSchema.index({ status: 1, createdAt: -1 });
 FonbnkTransactionSchema.index({ walletAddress: 1 });
-FonbnkTransactionSchema.index({ userId: 1 });
+// Note: userId index is automatically created by the 'sparse: true' option in the schema
 exports.FonbnkTransactionModel = mongoose_1.default.model('FonbnkTransaction', FonbnkTransactionSchema);
 //# sourceMappingURL=FonbnkTransactionModel.js.map
