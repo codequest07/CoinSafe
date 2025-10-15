@@ -20,13 +20,15 @@ import { getTokenPrice } from "@/lib";
 // import { client, liskMainnet } from "@/lib/config";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import { getUserTokenYield, tokenData } from "@/lib/utils";
+import { getTokenDecimals, getUserTokenYield, tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
 import TopUpModal from "./Modals/Top-up-modal";
 import UnlockModal from "./Modals/UnlockModal";
+import { formatUnits } from "viem";
+import { saveAtom } from "@/store/atoms/save";
 
 interface AssetTableProps {
   safeDetails?: FormattedSafeDetails;
@@ -34,7 +36,7 @@ interface AssetTableProps {
 
 export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
-    { token: string; balance: string; yield: number }[]
+    { token: string; balance: string; yield?: string }[]
   >([]);
 
   const [balances] = useRecoilState(balancesState);
@@ -60,19 +62,29 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
 
         const safeAssetsRes = await Promise.all(
           safeDetails.tokenAmounts.map(async (tokenInfo) => {
-            const effectiveYield = await getUserTokenYield(
-              tokenInfo.token,
-              safeDetails.feePercentage!,
-              tokenInfo.tokenShares!,
-              BigInt(tokenInfo.amount)!
-            );
+            let effectiveYield;
+
+            if (
+              safeDetails.id !== "911" &&
+              typeof safeDetails.target === "string" &&
+              safeDetails.target !== "Emergency Safe"
+            ) {
+              effectiveYield = await getUserTokenYield(
+                tokenInfo.token,
+                safeDetails.feePercentage!,
+                tokenInfo.tokenShares!,
+                BigInt(tokenInfo.amount)!
+              );
+            }
 
             return {
               token: tokenInfo.token,
               // For a specific safe, the balance is the amount in the safe
               balance: tokenInfo.formattedAmount,
               saved: tokenInfo.formattedAmount,
-              yield: effectiveYield,
+              yield: effectiveYield
+                ? formatUnits(effectiveYield, getTokenDecimals(tokenInfo.token))
+                : "0",
             };
           })
         );
@@ -117,6 +129,8 @@ function AssetTableContent({
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [updatedAssets, setUpdatedAssets] = useState<any>([]);
+  const [_, setSaveState] = useRecoilState(saveAtom);
+
   const navigate = useNavigate();
 
   const account = useActiveAccount();
@@ -307,17 +321,21 @@ function AssetTableContent({
                       {asset.saved} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ $
-                      {asset.saved !== null
-                        ? asset.saved_usd
-                        : "Loading..."}
+                      ≈ ${asset.saved !== null ? asset.saved_usd : "Loading..."}
                     </p>
                   </div>
                 </TableCell>
                 <TableCell className="p-4 text-[#79E7BA] hover:text-[#79E7BA]/80">
                   <div className="flex flex-col">
                     <p className="">
-                     + {asset?.yield?.toFixed(2)} {asset.tokenInfo.symbol}
+                      +{" "}
+                      {(() => {
+                        const y = Number(asset?.yield);
+                        const precision =
+                          y >= 1 ? 2 : y >= 0.01 ? 3 : y >= 0.001 ? 4 : 5;
+                        return Number(y.toFixed(precision));
+                      })()}{" "}
+                      {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs">
                       ≈ $
@@ -333,14 +351,26 @@ function AssetTableContent({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setShowTopUpModal(true)}
+                      onClick={() => {
+                        setSaveState((prevState) => ({
+                          ...prevState,
+                          token: asset.token,
+                        }));
+                        setShowTopUpModal(true);
+                      }}
                     >
                       Top Up
                     </Button>
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setShowUnlockModal(true)}
+                      onClick={() => {
+                        setSaveState((prevState) => ({
+                          ...prevState,
+                          token: asset.token,
+                        }));
+                        setShowUnlockModal(true);
+                      }}
                     >
                       Unlock
                     </Button>
