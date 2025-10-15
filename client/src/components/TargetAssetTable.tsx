@@ -328,19 +328,27 @@ function AssetTableContent({
                 <TableCell className="p-4 text-[#79E7BA] hover:text-[#79E7BA]/80">
                   <div className="flex flex-col">
                     <p className="">
-                      +{" "}
-                      {(() => {
-                        const y = Number(asset?.yield);
-                        const precision =
-                          y >= 1 ? 2 : y >= 0.01 ? 3 : y >= 0.001 ? 4 : 5;
-                        return Number(y.toFixed(precision));
-                      })()}{" "}
+                      {asset?.yield > 0 ? (
+                        <>
+                          +{" "}
+                          {(() => {
+                            const y = Number(asset?.yield);
+                            const precision =
+                              y >= 1 ? 2 : y >= 0.01 ? 3 : y >= 0.001 ? 4 : 5;
+                            return Number(y.toFixed(precision));
+                          })()}{" "}
+                        </>
+                      ) : (
+                        "0.00"
+                      )}{" "}
                       {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs">
                       ≈ $
                       {asset.yield_usd !== null
-                        ? asset.yield_usd
+                        ? asset.yield_usd > 0
+                          ? asset?.yield_usd
+                          : "0.00"
                         : "Loading..."}
                     </p>
                   </div>
