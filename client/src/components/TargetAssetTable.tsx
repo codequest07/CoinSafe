@@ -118,7 +118,7 @@ function AssetTableContent({
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [updatedAssets, setUpdatedAssets] = useState<any>([]);
   const navigate = useNavigate();
-
+  console.log("ASSETS FPR TARGET", assets);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
   const address = account?.address;
@@ -307,17 +307,14 @@ function AssetTableContent({
                       {asset.saved} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ≈ $
-                      {asset.saved !== null
-                        ? asset.saved_usd
-                        : "Loading..."}
+                      ≈ ${asset.saved !== null ? asset.saved_usd : "Loading..."}
                     </p>
                   </div>
                 </TableCell>
                 <TableCell className="p-4 text-[#79E7BA] hover:text-[#79E7BA]/80">
                   <div className="flex flex-col">
                     <p className="">
-                     + {asset?.yield?.toFixed(2)} {asset.tokenInfo.symbol}
+                      + {asset?.yield?.toFixed(2)} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs">
                       ≈ $
