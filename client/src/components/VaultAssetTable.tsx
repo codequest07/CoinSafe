@@ -293,9 +293,6 @@ function VaultAssetTableContent({
                 AMOUNT IN SAFE
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                VALUE (USD)
-              </TableHead>
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 AUTOSAVED
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
