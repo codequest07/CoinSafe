@@ -284,12 +284,12 @@ export const getUserTokenYield = async (tokenAddress: string, feePercentage: num
     params: [tokenShares, vaultAddress],
   });
 
-  // console.log("targett safe assets yield", assets)
+  console.log("targett safe assets yield", assets)
 
   const effectiveYield = (100 -(Number(feePercentage)/100)) * Number(assets - principal);
 
-  // console.log("targett safe assets yield variables ", (100 -(Number(feePercentage)/100)), (assets) - (principal))
+  console.log("targett safe assets yield variables ", (100 -(Number(feePercentage)/100)), (assets) - (principal))
 
-  // console.log("targett safe assets calculated yield", effectiveYield)
-  return effectiveYield;
+  console.log("targett safe assets calculated yield", effectiveYield)
+  return BigInt(effectiveYield);
 };
