@@ -129,10 +129,10 @@ function AssetTableContent({
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [updatedAssets, setUpdatedAssets] = useState<any>([]);
-  const [_, setSaveState] = useRecoilState(saveAtom);
+  const [, setSaveState] = useRecoilState(saveAtom);
 
   const navigate = useNavigate();
-
+  console.log("ASSETS FPR TARGET", assets);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
   const address = account?.address;
