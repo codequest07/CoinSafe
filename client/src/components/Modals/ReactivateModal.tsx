@@ -452,7 +452,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                   disabled={!details || reactivating}
                   className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
                 >
-                  {extending ? "Reactivating" : "Reactivate"}
+                  {reactivating ? "Reactivating" : "Reactivate"}
                 </button>
               </div>
             </>
