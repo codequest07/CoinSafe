@@ -4,9 +4,11 @@ import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { Abi } from "viem";
-import { toBigInt } from "ethers";
+import { parseUnits, toBigInt } from "ethers";
 import { toast } from "sonner";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
+import { formatUnits } from "viem";
+import { getTokenDecimals } from "@/lib/utils";
 
 interface SaveState {
   token: string;
@@ -60,7 +62,7 @@ export const useReactivateSavingsTarget = ({
           params: [
             safeId,
             saveState.token,
-            toBigInt(saveState.amount),
+            toBigInt(parseUnits(saveState.amount.toString(), getTokenDecimals(saveState.token))),
             toBigInt(saveState.duration),
           ],
         });
