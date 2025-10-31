@@ -7,7 +7,6 @@ import { Abi } from "viem";
 import { parseUnits, toBigInt } from "ethers";
 import { toast } from "sonner";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
-import { formatUnits } from "viem";
 import { getTokenDecimals } from "@/lib/utils";
 
 interface SaveState {
