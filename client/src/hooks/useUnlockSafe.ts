@@ -223,12 +223,13 @@ export const useUnlockSafe = ({
         const transaction = prepareContractCall({
           contract,
           method:
-            "function withdrawSavings(uint256 _safeId, address _tokenAddress, uint256 _amount, bool _acceptEarlyWithdrawalFee)",
+            "function withdrawSavings(uint256 _safeId, address _tokenAddress, uint256 _amount, bool _acceptEarlyWithdrawalFee, uint256 _avgAPR) external",
           params: [
             toBigInt(currentState.safeId),
             currentState.token,
             amountWithDecimals,
             currentState.acceptEarlyWithdrawalFee,
+            4n,
           ],
         });
 
