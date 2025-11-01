@@ -334,7 +334,7 @@ export default function UnlockModal({
                 </span>
               </div>
               <button
-                className="text-sm text-[#5b8c7b] hover:text-[#79E7BA] transition-colors"
+                className="text-sm text-[#79E7BA] transition-colors"
                 onClick={() => {
                   if (selectedTokenBalance > 0) {
                     // Get normalized balance for Max button
