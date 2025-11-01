@@ -110,7 +110,7 @@ const SavingsCard = ({
         </div>
         {isConnected && (
           <div className="flex justify-end gap-2">
-            <button
+            {/* <button
               onClick={() => {
                 console.log("Opening unlock modal for safeId:", safeId);
                 setShowUnlockModal(true);
@@ -118,7 +118,7 @@ const SavingsCard = ({
               className="rounded-[100px] px-8 py-[8px] bg-[#1E1E1E99] h-[40px] text-sm text-[#F1F1F1]"
             >
               Unlock
-            </button>
+            </button> */}
             {safeDetails &&
             new Date().getTime() > safeDetails?.unlockTime.getTime() ? (
               <button

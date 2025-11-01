@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import DeleteSafeModal from "./Modals/DeleteSafeModal";
+import RewardsCard from "./Cards/RewardsCard";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
@@ -215,7 +216,7 @@ export default function SavingsDetail() {
                 ? `Next unlock date: ${safeDetails.nextUnlockDate}`
                 : "Withdraw anytime"}
             </p>
-          </div>    
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-12">
             <img
@@ -264,6 +265,15 @@ export default function SavingsDetail() {
                     isLoading={apiLoading}
                   />
                 )}
+                <RewardsCard
+                  title="Yield rewards"
+                  campaign="Lisk"
+                  value={0.0}
+                  unit="USD"
+                  text={<>rewards on your yields (seperate from your yields)</>}
+                  safeId={Number(safeDetails.id)}
+                  safeDetails={safeDetails}
+                />
               </div>
             </div>
 

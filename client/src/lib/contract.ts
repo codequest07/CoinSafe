@@ -1,5 +1,4 @@
 import faucetAbi from "../abi/faucet.json";
-import coinSafeAbi from "../abi/coinsafe.json";
 import balanceFacetAbi from "../abi/BalanceFacet.json";
 import targetSavingsAbi from "../abi/TargetSavingsFacet.json";
 import automatedSavingsFacetAbi from "../abi/AutomatedSavingsFacet.json";
@@ -12,11 +11,6 @@ export const tokens = {
   safu: "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a",
   lsk: "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24",
 
-};
-
-export const CoinSafeContract = {
-  address: "0x727b742EAd5540703b62C7f33312335dcFd83f5A",
-  abi: coinSafeAbi,
 };
 
 // 0x08b59fb7ee9418470004693acf6d2c7dd0256a69
