@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -24,6 +57,7 @@ const BaseRouter_1 = __importDefault(require("./Routes/BaseRouter"));
 const WaitlistRouter_1 = __importDefault(require("./Routes/WaitlistRouter"));
 const FaucetClaimRoute_1 = __importDefault(require("./Routes/FaucetClaimRoute"));
 const FonbnkRouter_1 = __importDefault(require("./Routes/FonbnkRouter"));
+const MerklRouter_1 = __importDefault(require("./Routes/MerklRouter"));
 // Models and Services
 const TransactionModel_1 = require("./Models/TransactionModel");
 const GeminiService_1 = require("./services/GeminiService");
@@ -69,13 +103,13 @@ app.use("/api/faucet", FaucetClaimRoute_1.default);
 app.use("/api/coingecko", CoinGeckoApiRouter_1.default);
 app.use("/api/profile", ProfileRoutes_1.default);
 app.use("/api/fonbnk", FonbnkRouter_1.default);
+app.use("/api/merkl", MerklRouter_1.default);
 // MongoDB Connection
 const mongodbUri = process.env.MONGO_URI || "";
 // "mongodb+srv://agbakwuruoluchicoinsafe:SDYRnmD6FrVp09fo@cluster0.g6csr.mongodb.net";
 mongoose_1.default
     .connect(mongodbUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+// Removed deprecated options
 })
     .then(() => console.log("Connected to MongoDB"))
     .catch((err) => console.error("MongoDB connection error:", err));
@@ -90,6 +124,50 @@ const cronJob = node_cron_1.default.schedule("0 * * * *", () => __awaiter(void 0
     }
     catch (error) {
         console.error("❌ Scheduled batch processing failed:", error);
+    }
+}));
+// Schedule Merkl APR data collection
+// Run daily at 12:00 PM UTC
+console.log("⏰ Setting up cron job for Merkl APR data collection (daily at 12:00 PM UTC)");
+const merklCronJob = node_cron_1.default.schedule("0 12 * * *", () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("🕐 Running scheduled Merkl APR data collection...");
+    try {
+        const { MerklController } = yield Promise.resolve().then(() => __importStar(require("./controllers/MerklController")));
+        const merklController = new MerklController();
+        // Fetch data for all target opportunities
+        const defaultOpportunities = [
+            { opportunityName: "lisk", chainId: 1135 },
+            { opportunityName: "usdt0", chainId: 1135 },
+            { opportunityName: "usdc", chainId: 1135 },
+        ];
+        for (const opportunity of defaultOpportunities) {
+            try {
+                console.log(`📊 Fetching APR data for ${opportunity.opportunityName}...`);
+                // Create mock request/response objects for the controller
+                const mockReq = { body: opportunity };
+                const mockRes = {
+                    json: (data) => {
+                        if (data.success) {
+                            console.log(`✅ Successfully collected APR data for ${opportunity.opportunityName}`);
+                        }
+                        else {
+                            console.log(`⚠️ Failed to collect APR data for ${opportunity.opportunityName}: ${data.error}`);
+                        }
+                    },
+                    status: () => ({
+                        json: (data) => console.log(`❌ Error: ${data.error}`),
+                    }),
+                };
+                yield merklController.fetchAndStoreAPR(mockReq, mockRes);
+            }
+            catch (error) {
+                console.error(`❌ Error collecting APR data for ${opportunity.opportunityName}:`, error);
+            }
+        }
+        console.log("✅ Scheduled Merkl APR data collection completed");
+    }
+    catch (error) {
+        console.error("❌ Scheduled Merkl APR data collection failed:", error);
     }
 }));
 // Log cron job status

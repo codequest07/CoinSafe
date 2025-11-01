@@ -17,14 +17,13 @@ import { useBalances } from "./hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import EmergencySafe from "./Pages/EmergencySafe";
 import AutoSave from "./Pages/AutoSave";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import {
   availableBalanceState,
   savingsBalanceState,
   totalBalanceState,
 } from "./store/atoms/balance";
-import { toast } from "sonner";
 import { useWatchEvents } from "./hooks/useWatchEvents";
 import Profile from "./Pages/Profile";
 import { SmartAccountTransactionProvider } from "./hooks/useSmartAccountTransactionInterceptor";
@@ -35,6 +34,8 @@ import {
 import { OnlineStatusIndicator } from "./components/pwa/online-status-indicator";
 import { PWAInstallPrompt } from "./components/pwa/install-prompt";
 import { PushNotificationPopup } from "./components/pwa/push-notification-popup";
+import SmarterSaving from "./components/SmarterSaving";
+import ConnectModal from "./components/Modals/ConnectModal";
 // import { useFCMNotifications } from "./hooks/useFCMNotifications";
 // import { Button } from "./components/ui/button";
 
@@ -44,8 +45,8 @@ const App = () => {
   const [, setTotalBalance] = useRecoilState(totalBalanceState);
   const [, setUserCurrentStreak] = useRecoilState(userCurrentStreakState);
   const [, setUserLongestStreak] = useRecoilState(userLongestStreakState);
-  
-  
+  const [openConnectModal, setOpenConnectModal] = useState(false);
+
   // const { sendTestNotification } = useFCMNotifications({
   //     vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
   //     onTokenReceived: () => console.log("Token"),
@@ -92,29 +93,13 @@ const App = () => {
   console.log("App Component rerendered");
 
   const handleTokenReceived = async (token: string) => {
-    console.log("FCM Token:", token);
-
-    // Save token to your backend
-    try {
-      await fetch("/api/save-fcm-token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token,
-          userId: "current-user-id", // Get from auth
-        }),
-      });
-
-      toast.success("Successfully subscribed to notifications!");
-    } catch (error) {
-      console.error("Failed to save token:", error);
-      toast.error("Failed to save notification preferences");
-    }
+    console.log("Token received:", token);
   };
 
   return (
     <div className="bg-[#010104]">
       <SmartAccountTransactionProvider>
+        <SmarterSaving setIsConnectModalOpen={setOpenConnectModal} />
         {/* Always-visible components */}
         <PWAInstallPrompt
           appName="Coinsafe"
@@ -155,6 +140,13 @@ const App = () => {
         />
       </SmartAccountTransactionProvider>
       <Toaster richColors closeButton position="top-right"/>
+
+      {openConnectModal && (
+        <ConnectModal
+          isConnectModalOpen={openConnectModal}
+          setIsConnectModalOpen={setOpenConnectModal}
+        />
+      )}
     </div>
   );
 };
