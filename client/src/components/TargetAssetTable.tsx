@@ -10,9 +10,8 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
-import { formatUnits } from "viem";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
@@ -21,34 +20,26 @@ import { getTokenPrice } from "@/lib";
 // import { client, liskMainnet } from "@/lib/config";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import { getTokenDecimals, tokenData } from "@/lib/utils";
+import { tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
-import { useRecoilState } from "recoil";
-import { balancesState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
 import TopUpModal from "./Modals/Top-up-modal";
 import UnlockModal from "./Modals/UnlockModal";
+import WithdrawEmergencySafe from "./Modals/WithdrawEmergencySafe";
+import TopUpEmergencySafe from "./Modals/TopUpEmegencySafe";
 
 interface AssetTableProps {
   safeDetails?: FormattedSafeDetails;
+  isEmergencyPage?: boolean;
 }
 
-export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
+export default function TargetAssetTable({
+  safeDetails,
+  isEmergencyPage,
+}: AssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
     { token: string; balance: string; saved: string; available: string }[]
   >([]);
-
-  const [balances] = useRecoilState(balancesState);
-
-  const availableTokenBalances = useMemo(
-    () => balances.available,
-    [balances.available]
-  );
-  const totalTokenBalances = useMemo(() => balances.total, [balances.total]);
-  const savedTokenBalances = useMemo(
-    () => balances.savings,
-    [balances.savings]
-  );
 
   useEffect(() => {
     // If safeDetails is provided, use the safe-specific token amounts
@@ -72,39 +63,10 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
       setAllAssetData(safeAssetsRes);
       return;
     }
-
-    // If no safeDetails or using global view, use the global balances
-    if (!totalTokenBalances) return;
-
-    const tokens = Object.keys(totalTokenBalances || {});
-    if (tokens.length === 0) return;
-
-    const allAssetsRes = tokens.map((token) => {
-      return {
-        token,
-        balance: formatUnits(
-          BigInt((totalTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token)
-        ),
-        saved: formatUnits(
-          BigInt((savedTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token)
-        ),
-        available: formatUnits(
-          BigInt((availableTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token)
-        ),
-      };
-    });
-
-    setAllAssetData(allAssetsRes);
   }, [
-    availableTokenBalances,
-    totalTokenBalances,
-    savedTokenBalances,
     safeDetails,
   ]);
-
+  
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
       <div className="sm:mx-auto">
@@ -115,7 +77,11 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
               }`
             : "Assets"}
         </h1>
-        <AssetTableContent assets={allAssetData} safeDetails={safeDetails} />
+        <AssetTableContent
+          assets={allAssetData}
+          safeDetails={safeDetails}
+          isEmergencyPage={isEmergencyPage}
+        />
       </div>
     </div>
   );
@@ -124,9 +90,11 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
 function AssetTableContent({
   assets,
   safeDetails,
+  isEmergencyPage,
 }: {
   assets: any[];
   safeDetails?: FormattedSafeDetails;
+  isEmergencyPage?: boolean;
 }) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
@@ -145,7 +113,7 @@ function AssetTableContent({
 
   const handleTopUp = () => {
     // Handle top-up logic here
-    console.log("Top up clicked");
+    // console.log("Top up clicked");
     setShowTopUpModal(false);
   };
 
@@ -223,8 +191,8 @@ function AssetTableContent({
             <Button
               onClick={() => {
                 setShowTopUpModal(true);
-                console.log("clicked");
-                console.log(safeDetails);
+                // console.log("clicked");
+                // console.log(safeDetails);
               }}
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
             >
@@ -271,12 +239,6 @@ function AssetTableContent({
                 AMOUNT
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                IN VAULT
-              </TableHead>
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                AUTOSAVED
-              </TableHead>
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 <span className="sr-only">Actions</span>
               </TableHead>
             </TableRow>
@@ -310,19 +272,6 @@ function AssetTableContent({
                         {asset.tokenInfo.chain}
                       </p>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell className="py-4 px-4">
-                  <div className="flex flex-col">
-                    <p className="text-white">
-                      {asset.balance} {asset.tokenInfo.symbol}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      ≈ $
-                      {asset.balance_usd !== null
-                        ? asset.balance_usd
-                        : "Loading..."}
-                    </p>
                   </div>
                 </TableCell>
                 <TableCell className="py-4 px-4">
@@ -368,22 +317,42 @@ function AssetTableContent({
         isSecondModalOpen={isSecondModalOpen}
         setIsSecondModalOpen={setIsSecondModalOpen}
       />
-      {safeDetails && showTopUpModal && (
-        <TopUpModal
+      {safeDetails && showTopUpModal && isEmergencyPage ? (
+        <TopUpEmergencySafe
+          isTopUpModalOpen={showTopUpModal}
+          setIsTopUpModalOpen={setShowTopUpModal}
           onClose={() => setShowTopUpModal(false)}
-          onTopUp={handleTopUp}
-          safeId={Number(safeDetails.id)}
+          onTopUp={() => setShowTopUpModal(false)}
         />
+      ) : (
+        safeDetails && showTopUpModal && (
+          <TopUpModal
+            onClose={() => setShowTopUpModal(false)}
+            onTopUp={handleTopUp}
+            safeId={Number(safeDetails.id)}
+          />
+        )
       )}
 
-      {safeDetails && showUnlockModal && (
-        <UnlockModal
-          onClose={() => {
-            setShowUnlockModal(false);
-          }}
-          onUnlock={() => {}}
-          safeId={safeDetails?.id?.toString()}
+      {safeDetails && showUnlockModal && isEmergencyPage ? (
+        <WithdrawEmergencySafe
+          isWithdrawModalOpen={showUnlockModal}
+          setIsWithdrawModalOpen={setShowUnlockModal}
+          AvailableBalance={safeDetails.tokenAmounts.reduce((acc, token) => {
+            if (token && token.token) acc[token.token] = Number(token.amount);
+            return acc;
+          }, {} as Record<string, number>)}
         />
+      ) : (
+        safeDetails && showUnlockModal && (
+          <UnlockModal
+            onClose={() => {
+              setShowUnlockModal(false);
+            }}
+            onUnlock={() => {}}
+            safeId={safeDetails.id.toString()}
+          />
+        )
       )}
     </div>
   );
