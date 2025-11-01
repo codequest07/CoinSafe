@@ -154,7 +154,7 @@ const App = () => {
           position="bottom-right"
         />
       </SmartAccountTransactionProvider>
-      <Toaster richColors closeButton/>
+      <Toaster richColors closeButton position="top-right"/>
     </div>
   );
 };

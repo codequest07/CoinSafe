@@ -18,6 +18,7 @@ export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
   const location = useLocation();
   const isVaultPage = location.pathname === "/vault";
   const isAutoSafePage = location.pathname === "/vault/auto-safe";
+  const isEmergencyPage = location.pathname === "/vault/emergency-safe";
 
   return (
     <div className="w-full mx-auto">
@@ -51,7 +52,7 @@ export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
           ) : isAutoSafePage ? (
             <AutoSavedAssetTable assets={safeDetails} isLoading={isLoading} />
           ) : (
-            <TargetAssetTable safeDetails={safeDetails} />
+            <TargetAssetTable safeDetails={safeDetails} isEmergencyPage={isEmergencyPage}/>
           )
         ) : (
           <div className="p-4">
