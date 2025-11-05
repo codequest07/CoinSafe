@@ -1,35 +1,39 @@
-// import { useState } from "react";
+import { getSafeLSKRewards } from "@/lib/utils";
+import { useEffect, useState } from "react";
 import { ReactNode } from "react";
-
-// import { useActiveAccount } from "thirdweb/react";
-import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
+import { useActiveAccount } from "thirdweb/react";
 
 const RewardsCard = ({
   title,
   campaign,
   icon,
-  value,
-  unit,
   badge,
   emphasize,
   text,
-  // safeId = 1, // Default to 1 if not provided
-  // safeDetails,
+  safeId,
 }: {
   title: string;
   campaign?: string;
   icon?: any;
-  value: number;
-  unit: string;
   badge?: string;
   emphasize?: string;
   text?: ReactNode;
   safeId?: number;
-  safeDetails?: FormattedSafeDetails | null;
 }) => {
-  // const account = useActiveAccount();
-  // const isConnected = !!account?.address;
+  const [value, setValue] = useState(0.0);
+  const account = useActiveAccount();
 
+  useEffect(() => {
+    async function run() {
+      if (!safeId) return;
+      const reward = await getSafeLSKRewards(safeId.toString(), account);
+
+      setValue(Number(reward))
+
+      console.log("Some reward", reward);
+    }
+    run();
+  }, [safeId]);
 
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
@@ -59,7 +63,7 @@ const RewardsCard = ({
             <span className="text-[#F1F1F1] pr-2 text-3xl">
               {value.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
-            <span className="text-[#CACACA] text-xs">{unit}</span>
+            <span className="text-[#CACACA] text-xs">LSK</span>
           </div>
           <div>
             <div className="pt-2">
