@@ -109,7 +109,9 @@ ExtendTargetSafeModalProps) {
   ];
 
   const calculateEndDate = (days: number) => {
-    const currentDate = new Date();
+    const currentDate = new Date(
+      details?.unlockTime ? Number(details.unlockTime) * 1000 : Date.now()
+    );
     const futureDate = addDays(currentDate, days);
     return format(futureDate, "dd MMMM yyyy");
   };
@@ -144,7 +146,8 @@ ExtendTargetSafeModalProps) {
           onClick={(e) => {
             e.stopPropagation();
             onClose();
-          }}></div>
+          }}
+        ></div>
         <div className="relative w-full max-w-md rounded-xl bg-[#17171C] text-white shadow-lg p-5 border border-white/15">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-[500]">Extend Target</h2>
@@ -154,7 +157,8 @@ ExtendTargetSafeModalProps) {
                 onClose();
               }}
               className="rounded-full p-1 bg-white "
-              aria-label="Close">
+              aria-label="Close"
+            >
               <X className="h-4 w-4 text-black" />
             </button>
           </div>
@@ -195,7 +199,8 @@ ExtendTargetSafeModalProps) {
                 e.stopPropagation();
                 onClose();
               }}
-              className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white ">
+              className="rounded-full bg-[#FFFFFF2B]  text-[14px] px-5 py-2.5 text-white "
+            >
               Cancel
             </button>
             <button
@@ -204,7 +209,8 @@ ExtendTargetSafeModalProps) {
                 extendTargetSafe(e);
               }}
               disabled={!details || extending}
-              className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6">
+              className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
+            >
               {extending ? "Extending" : "Extend"}
             </button>
           </div>
