@@ -1,12 +1,28 @@
 import { Request, Response } from "express";
 import { MerklService, MerklOpportunity } from "../services/MerklService";
 import MerklAPRModel, { IMerklAPR } from "../Models/MerklAPRModel";
+import { APRSigningService } from "../services/APRSigningService";
 
 export class MerklController {
   private merklService: MerklService;
+  private aprSigningService: APRSigningService | null = null;
 
   constructor() {
     this.merklService = new MerklService();
+
+    // Initialize signing service (will fail gracefully if private key not set)
+    try {
+      this.aprSigningService = new APRSigningService();
+      console.log("✅ APR Signing Service initialized");
+    } catch (error) {
+      console.warn(
+        "⚠️ APR Signing Service not initialized:",
+        error instanceof Error ? error.message : "Unknown error"
+      );
+      console.warn(
+        "⚠️ APR data will be returned without signatures. Set APR_SIGNER_PRIVATE_KEY, PRIVATE_KEY, or WALLET_PRIVATE_KEY in .env to enable signing."
+      );
+    }
   }
 
   /**
@@ -583,9 +599,51 @@ export class MerklController {
         max: aprValues.length > 0 ? Math.max(...aprValues) : 0,
       };
 
-      res.json({
+      // Sign historical APR data if signing service is available
+      const signedData = await Promise.all(
+        historicalData.map(async (record) => {
+          const baseRecord = {
+            tokenSymbol: record.tokenSymbol,
+            tokenName: record.tokenName,
+            tokenAddress: record.tokenAddress,
+            chainId: record.chainId,
+            apr: record.apr,
+            timestamp: record.timestamp,
+            opportunityName: record.opportunityName,
+            createdAt: record.createdAt,
+          };
+
+          if (this.aprSigningService) {
+            try {
+              const signatureData = await this.aprSigningService.signAPR(
+                record.tokenSymbol,
+                record.tokenAddress,
+                record.chainId,
+                record.apr,
+                record.timestamp,
+                record.opportunityName
+              );
+
+              return {
+                ...baseRecord,
+                signature: signatureData.signature,
+                signer: signatureData.signer,
+                nonce: signatureData.nonce,
+                aprBasisPoints: signatureData.aprBasisPoints,
+              };
+            } catch (error) {
+              console.error("Error signing APR data:", error);
+              return baseRecord;
+            }
+          }
+
+          return baseRecord;
+        })
+      );
+
+      const response: any = {
         success: true,
-        data: historicalData,
+        data: signedData,
         statistics: stats,
         query: {
           tokenSymbol,
@@ -594,7 +652,14 @@ export class MerklController {
           endDate,
           limit,
         },
-      });
+      };
+
+      // Add signer address if signing service is available
+      if (this.aprSigningService) {
+        response.signer = this.aprSigningService.getSignerAddress();
+      }
+
+      res.json(response);
     } catch (error) {
       console.error("❌ Error fetching token historical APR data:", error);
       res.status(500).json({
@@ -765,15 +830,75 @@ export class MerklController {
         ),
       };
 
-      res.json({
+      // Sign APR data if signing service is available
+      // Filter out records without required fields (tokenSymbol, tokenAddress)
+      const validRecords = latestAPRData.filter(
+        (record) => record.tokenSymbol && record.tokenAddress
+      );
+
+      const signedData = await Promise.all(
+        validRecords.map(async (record) => {
+          const baseRecord = {
+            tokenSymbol: record.tokenSymbol,
+            tokenName: record.tokenName,
+            tokenAddress: record.tokenAddress,
+            chainId: record.chainId,
+            apr: record.apr,
+            timestamp: record.timestamp,
+            opportunityName: record.opportunityName,
+            lastUpdated: record.timestamp,
+          };
+
+          if (this.aprSigningService) {
+            try {
+              const signatureData = await this.aprSigningService.signAPR(
+                record.tokenSymbol,
+                record.tokenAddress,
+                record.chainId,
+                record.apr,
+                record.timestamp,
+                record.opportunityName
+              );
+
+              return {
+                ...baseRecord,
+                signature: signatureData.signature,
+                signer: signatureData.signer,
+                nonce: signatureData.nonce,
+                aprBasisPoints: signatureData.aprBasisPoints,
+              };
+            } catch (error) {
+              console.error(
+                `Error signing APR data for ${record.tokenSymbol}:`,
+                error
+              );
+              return baseRecord;
+            }
+          } else {
+            console.warn(
+              "⚠️ APR Signing Service not available. Returning data without signatures."
+            );
+            return baseRecord;
+          }
+        })
+      );
+
+      const response: any = {
         success: true,
-        data: latestAPRData,
+        data: signedData,
         summary,
         query: {
           chainId: chainId ? parseInt(chainId as string) : null,
           tokenSymbol: tokenSymbol || null,
         },
-      });
+      };
+
+      // Add signer address if signing service is available
+      if (this.aprSigningService) {
+        response.signer = this.aprSigningService.getSignerAddress();
+      }
+
+      res.json(response);
     } catch (error) {
       console.error("❌ Error fetching current APR data:", error);
       res.status(500).json({
