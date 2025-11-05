@@ -17,30 +17,33 @@ const axios_1 = __importDefault(require("axios"));
 function getFilteredTransactions(address, apiKey) {
     return __awaiter(this, void 0, void 0, function* () {
         // Use the provided API key or fallback to environment variable
-        const effectiveApiKey = apiKey || process.env.BASESCAN_API_KEY || process.env.ETHERSCAN_API_KEY || 'H4TPWFCD9FCZIVSPRVF3RBZFYASMBBSQ6Y';
+        const effectiveApiKey = apiKey ||
+            process.env.BASESCAN_API_KEY ||
+            process.env.ETHERSCAN_API_KEY ||
+            "H4TPWFCD9FCZIVSPRVF3RBZFYASMBBSQ6Y";
         const url = `https://api-sepolia.basescan.org/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10000&sort=asc&apikey=${effectiveApiKey}`;
         try {
             const response = yield axios_1.default.get(url);
             // console.log('Full API response:', response.data);
-            if (response.data.status !== '1' && response.data.status !== 1) {
-                console.warn('API Warning:', response.data.message, 'for address:', address);
+            if (response.data.status !== "1" && response.data.status !== 1) {
+                console.warn("API Warning:", response.data.message, "for address:", address);
                 // Return 0 instead of throwing error to prevent system crashes
                 return 0;
             }
-            const filteredTransactions = response.data.result.filter(tx => tx.isError === '0' && tx.txreceipt_status === '1');
-            console.log('Filtered transactions count:', filteredTransactions.length);
+            const filteredTransactions = response.data.result.filter((tx) => tx.isError === "0" && tx.txreceipt_status === "1");
+            console.log("Filtered transactions count:", filteredTransactions.length);
             return filteredTransactions.length;
         }
         catch (error) {
-            console.error('Error fetching or processing transactions:', error.message);
-            console.log('Error details:', error.response ? error.response.data : error);
+            console.error("Error fetching or processing transactions:", error.message);
+            console.log("Error details:", error.response ? error.response.data : error);
             return 0;
         }
     });
 }
-const address = '0x6f83585Ec485FE6bcDB7e4080eB6731C11813A65';
-const apiKey = 'H4TPWFCD9FCZIVSPRVF3RBZFYASMBBSQ6Y';
+const address = "0x6f83585Ec485FE6bcDB7e4080eB6731C11813A65";
+const apiKey = "H4TPWFCD9FCZIVSPRVF3RBZFYASMBBSQ6Y";
 getFilteredTransactions(address, apiKey)
-    .then(count => console.log(`Number of successful transactions: ${count}`))
-    .catch(error => console.error('Error:', error));
+    .then((count) => console.log(`Number of successful transactions: ${count}`))
+    .catch((error) => console.error("Error:", error));
 //# sourceMappingURL=Base.js.map

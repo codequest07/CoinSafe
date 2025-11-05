@@ -45,6 +45,20 @@ const MerklAPRSchema = new mongoose_1.Schema({
         required: true,
         index: true, // For efficient querying by chain
     },
+    tokenSymbol: {
+        type: String,
+        required: true,
+        index: true, // For efficient querying by token symbol
+    },
+    tokenName: {
+        type: String,
+        required: true,
+    },
+    tokenAddress: {
+        type: String,
+        required: true,
+        index: true, // For efficient querying by token address
+    },
     apr: {
         type: Number,
         required: true,
@@ -62,9 +76,11 @@ const MerklAPRSchema = new mongoose_1.Schema({
 }, {
     timestamps: true, // Adds createdAt and updatedAt fields
 });
-// Compound index for efficient queries by opportunity and time range
+// Compound indexes for efficient queries
 MerklAPRSchema.index({ opportunityName: 1, timestamp: -1 });
-// Compound index for queries by chain and time range
 MerklAPRSchema.index({ chainId: 1, timestamp: -1 });
+MerklAPRSchema.index({ tokenSymbol: 1, timestamp: -1 });
+MerklAPRSchema.index({ tokenAddress: 1, timestamp: -1 });
+MerklAPRSchema.index({ opportunityName: 1, tokenSymbol: 1, timestamp: -1 });
 exports.default = mongoose_1.default.model("MerklAPR", MerklAPRSchema);
 //# sourceMappingURL=MerklAPRModel.js.map

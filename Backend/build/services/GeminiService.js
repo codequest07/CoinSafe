@@ -13,7 +13,7 @@ exports.GeminiService = void 0;
 const generative_ai_1 = require("@google/generative-ai");
 class GeminiService {
     constructor(apiKey) {
-        this.model = "gemini-2.5-pro-exp-03-25";
+        this.model = "gemini-2.5-flash";
         if (!apiKey) {
             throw new Error("GEMINI_API_KEY is not set");
         }
@@ -21,13 +21,13 @@ class GeminiService {
     }
     getSavingsPlan(transfersData) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("Using Gemini API Key:", this.genAI.apiKey ? "Set (not shown for security)" : "Not set");
+            var _a, _b, _c, _d, _e, _f, _g;
             try {
                 const generationConfig = {
                     temperature: 0.9, // Adjust creativity/determinism
                     topK: 1,
                     topP: 1,
-                    maxOutputTokens: 1000,
+                    maxOutputTokens: 2000, // Increased token limit
                 };
                 const safetySettings = [
                     {
@@ -73,7 +73,19 @@ class GeminiService {
                 const result = yield model.generateContent(prompt);
                 const response = result.response;
                 const text = response.text();
-                console.log("Gemini API response received.");
+                // Check if response was truncated
+                if (((_b = (_a = response.candidates) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.finishReason) === "MAX_TOKENS") {
+                    console.warn("Response was truncated due to token limit");
+                }
+                // Check if we got valid text content
+                if (!text || text.trim().length === 0) {
+                    // Try to get text from candidates directly if response.text() fails
+                    const candidateText = (_g = (_f = (_e = (_d = (_c = response.candidates) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.content) === null || _e === void 0 ? void 0 : _e.parts) === null || _f === void 0 ? void 0 : _f[0]) === null || _g === void 0 ? void 0 : _g.text;
+                    if (candidateText && candidateText.trim().length > 0) {
+                        return candidateText;
+                    }
+                    throw new Error("Empty response from AI service");
+                }
                 return text;
             }
             catch (error) {
