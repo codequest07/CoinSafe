@@ -133,7 +133,7 @@ export async function getTokenPrice(token: string, amount: number | undefined) {
 export const jsonRpcProvider = new JsonRpcProvider("https://rpc.api.lisk.com");
 
 export async function getAvgAPR(
-  token: "usdc" | "usdt" | "lsk"
+  token?: "usdc" | "usdt" | "lsk"
 ): Promise<{ avgApr: number | undefined; signature: string | undefined }> {
   const tokenToSymbol = {
     usdc: "USDC.e",
@@ -141,17 +141,19 @@ export async function getAvgAPR(
     lsk: "LSK",
   };
 
-  const tokenSymbol = tokenToSymbol[token];
+  let url = "https://api.coinsafe.network/api/merkl/apr";
+
+  if (token) {
+    const tokenSymbol = tokenToSymbol[token];
+    url = `https://api.coinsafe.network/api/merkl/apr?tokenSymbol=${tokenSymbol}`;
+  }
 
   const options = {
     method: "GET",
   };
 
   try {
-    const res = await fetch(
-      `https://api.coinsafe.network/api/merkl/apr?tokenSymbol=${tokenSymbol}`,
-      options
-    );
+    const res = await fetch(url, options);
 
     const data = await res.json();
 

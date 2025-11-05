@@ -2,7 +2,13 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatEther, formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
-import { getLskToUsd, getSafuToUsd, getUsdcToUsd, getUsdtToUsd } from "@/lib";
+import {
+  getAvgAPR,
+  getLskToUsd,
+  getSafuToUsd,
+  getUsdcToUsd,
+  getUsdtToUsd,
+} from "@/lib";
 import { TokenInfo } from "thirdweb/react";
 import { getContract, readContract } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
@@ -233,7 +239,10 @@ export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
   ],
 };
 
-export const getContractFeePercentage = async (duration: number, user: string) => {
+export const getContractFeePercentage = async (
+  duration: number,
+  user: string
+) => {
   const contract = getContract({
     client: client,
     address: CoinsafeDiamondContract.address,
@@ -267,7 +276,12 @@ export const getMorphoVaultAddressForToken = async (tokenAddress: string) => {
   return vault;
 };
 
-export const getUserTokenYield = async (tokenAddress: string, feePercentage: number, tokenShares: bigint, principal: bigint) => {
+export const getUserTokenYield = async (
+  tokenAddress: string,
+  feePercentage: number,
+  tokenShares: bigint,
+  principal: bigint
+) => {
   const contract = getContract({
     client: client,
     address: CoinsafeDiamondContract.address,
@@ -276,20 +290,46 @@ export const getUserTokenYield = async (tokenAddress: string, feePercentage: num
 
   const vaultAddress = await getMorphoVaultAddressForToken(tokenAddress);
 
-  if(!vaultAddress) throw new Error("Vault address not found!");
+  if (!vaultAddress) throw new Error("Vault address not found!");
 
   const assets = await readContract({
     contract: contract,
-    method: "function convertSharesToAssets(uint256 shares, address vaultAddress) external view returns (uint256)",
+    method:
+      "function convertSharesToAssets(uint256 shares, address vaultAddress) external view returns (uint256)",
     params: [tokenShares, vaultAddress],
   });
 
-  console.log("targett safe assets yield", assets)
+  // console.log("targett safe assets yield", assets)
 
-  const effectiveYield = (100 -(Number(feePercentage)/100)) * Number(assets - principal);
+  const effectiveYield =
+    (100 - Number(feePercentage) / 100) * Number(assets - principal);
 
-  console.log("targett safe assets yield variables ", (100 -(Number(feePercentage)/100)), (assets) - (principal))
+  // console.log("targett safe assets yield variables ", (100 -(Number(feePercentage)/100)), (assets) - (principal))
 
-  console.log("targett safe assets calculated yield", effectiveYield)
+  // console.log("targett safe assets calculated yield", effectiveYield)
   return BigInt(effectiveYield);
+};
+
+export const getSafeLSKRewards = async (safeId: string, account: any) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const { avgApr } = await getAvgAPR();
+
+  console.log("SafeId, AvgApr", safeId, BigInt(avgApr?.toFixed() || "1"));
+
+  const rewards = await readContract({
+    contract: contract,
+    method:
+      "function previewWithdrawalLSKRewards(uint256 _safeId, uint256 _avgAPR ) external view returns (uint256 projectedLSK,uint256 availableLSK,uint256 claimableLSK,uint256 claimableWithFeeApplied)",
+    params: [BigInt(safeId), BigInt(avgApr?.toFixed() || "1")],
+    from: account?.address,
+  });
+
+  console.log("Rewards hereeee", rewards);
+
+  return formatEther(rewards[0]);
 };

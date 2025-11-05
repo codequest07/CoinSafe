@@ -268,11 +268,8 @@ export default function SavingsDetail() {
                 <RewardsCard
                   title="Yield rewards"
                   campaign="Lisk"
-                  value={0.0}
-                  unit="USD"
                   text={<>rewards on your yields (seperate from your yields)</>}
                   safeId={Number(safeDetails.id)}
-                  safeDetails={safeDetails}
                 />
               </div>
             </div>
