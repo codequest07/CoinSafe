@@ -159,7 +159,9 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
   ];
 
   const calculateEndDate = (days: number) => {
-    const currentDate = new Date();
+    const currentDate = new Date(
+      details?.unlockTime ? Number(details.unlockTime) : Date.now()
+    );
     const futureDate = addDays(currentDate, days);
     return format(futureDate, "dd MMMM yyyy");
   };
