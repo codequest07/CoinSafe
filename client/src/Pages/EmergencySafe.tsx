@@ -182,7 +182,7 @@ const EmergencySafe = () => {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-black text-white p-0 md:p-6">
       <div className="max-w-5xl mx-auto">
         {isLoading ? (
           <div className="mb-8">
@@ -231,7 +231,7 @@ const EmergencySafe = () => {
             Error loading safe details. Please try again.
           </div>
         ) : !safeDetails && !isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12">
+          <div className="flex flex-col items-center justify-center p-2 md:p-0 py-12">
             <img
               src="/assets/not-found.gif"
               alt="Safe not found"
@@ -257,7 +257,7 @@ const EmergencySafe = () => {
                   <ArrowLeft className="h-6 w-6" />
                 </Button>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl">{safeDetails.target}</h1>
+                  <h1 className="text-xl md:text-2xl">{safeDetails.target}</h1>
                   <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
                     Flexible
                   </Badge>
@@ -270,8 +270,21 @@ const EmergencySafe = () => {
           )
         )}
 
+        <div className="flex w-full md:hidden p-2 pb-4">
+          {isConnected && (
+            <div className="flex w-full md:hidden gap-2">
+              <button
+                onClick={() => setShowTopUpModal(true)}
+                className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104] w-full"
+              >
+                Top up
+              </button>
+            </div>
+          )}
+        </div>
+
         {safeDetails && !isLoading && (
-          <div className="flex gap-4 pr-4 pb-2">
+          <div className="flex flex-col w-full md:flex-row gap-4 pr-0 md:pr-4 pb-2">
             <div className="flex-1 flex gap-2">
               <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
                 <div className="flex justify-between items-center pb-4">
@@ -298,7 +311,7 @@ const EmergencySafe = () => {
                     </div>
                   </div>
                   {isConnected && (
-                    <div className="flex justify-end gap-2">
+                    <div className="hidden md:flex justify-end gap-2">
                       <button
                         onClick={() => setShowTopUpModal(true)}
                         className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
@@ -318,7 +331,7 @@ const EmergencySafe = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-end">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end">
                 <div>
                   <div>
                     <span className="text-[#F1F1F1] pr-2 text-3xl">
@@ -336,7 +349,7 @@ const EmergencySafe = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-start py-2 md:py-0 md:justify-end gap-2">
                   <button
                     onClick={() => setShowWithdrawModal(true)}
                     className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"
