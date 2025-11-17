@@ -153,6 +153,42 @@ const merklCronJob = cron.schedule("0 12 * * *", async () => {
   }
 });
 
+// Schedule Merkl rewards claiming
+// Run daily at 2:00 AM UTC (adjust time as needed)
+console.log(
+  "⏰ Setting up cron job for Merkl rewards claiming (daily at 2:00 AM UTC)"
+);
+const merklClaimCronJob = cron.schedule("0 2 * * *", async () => {
+  console.log("🕐 Running scheduled Merkl rewards claiming...");
+  try {
+    const { MerklClaimService } = await import("./services/MerklClaimService");
+    const claimService = new MerklClaimService();
+
+    const result = await claimService.claimRewards();
+
+    if (result.success) {
+      if (result.txHash) {
+        console.log(
+          `✅ Merkl rewards claimed successfully! Tx: ${result.txHash}`
+        );
+        if (result.claimedTokens && result.claimedTokens.length > 0) {
+          console.log(
+            `📦 Claimed ${
+              result.claimedTokens.length
+            } reward(s): ${result.claimedTokens.join(", ")}`
+          );
+        }
+      } else {
+        console.log(`ℹ️ ${result.message || "No rewards to claim"}`);
+      }
+    } else {
+      console.error(`❌ Failed to claim Merkl rewards: ${result.error}`);
+    }
+  } catch (error) {
+    console.error("❌ Scheduled Merkl rewards claiming failed:", error);
+  }
+});
+
 // Log cron job status
 console.log("�� Cron job scheduled successfully");
 

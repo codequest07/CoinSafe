@@ -221,4 +221,13 @@ router.get("/apr/period", (req, res) => {
   merklController.getAPRByPeriod(req, res);
 });
 
+/**
+ * @route POST /api/merkl/claim
+ * @desc Claim Merkl rewards
+ * @access Public (consider adding admin authentication in production)
+ */
+router.post("/claim", (req, res) => {
+  merklController.claimMerklRewards(req, res);
+});
+
 export default router;

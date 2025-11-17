@@ -1203,4 +1203,41 @@ export class MerklController {
       });
     }
   }
+
+  /**
+   * Claim Merkl rewards
+   * @param req - Express request object
+   * @param res - Express response object
+   */
+  async claimMerklRewards(req: Request, res: Response): Promise<void> {
+    try {
+      const { MerklClaimService } = await import(
+        "../services/MerklClaimService"
+      );
+      const claimService = new MerklClaimService();
+
+      const result = await claimService.claimRewards();
+
+      if (result.success) {
+        res.json({
+          success: true,
+          message: result.message || "Merkl rewards claimed successfully",
+          txHash: result.txHash,
+          claimedTokens: result.claimedTokens,
+          claimedAmounts: result.claimedAmounts,
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          error: result.error || "Failed to claim rewards",
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error in claimMerklRewards:", error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Internal server error",
+      });
+    }
+  }
 }
