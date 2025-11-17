@@ -193,19 +193,19 @@ const EmergencySafe = () => {
                 <Skeleton className="h-6 w-32 rounded-full" />
               </div>
             </div>
-            <Skeleton className="h-4 w-64 ml-[3.3rem] mt-1" />
+            <Skeleton className="h-4 w-64 ml-[3.3rem] mt-1 mb-4" />
 
-            <div className="flex gap-4 pr-4 pb-2 mt-6">
+            <div className="flex-col lg:flex-row flex gap-4 sm:pr-4 pb-2">
               <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
                 <div className="flex justify-between items-center pb-4">
                   <Skeleton className="h-4 w-32" />
                 </div>
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col gap-2 sm:flex-row justify-between sm:items-end">
                   <div>
                     <Skeleton className="h-8 w-40 mb-2" />
                     <Skeleton className="h-3 w-48" />
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex sm:justify-end gap-2">
                     <Skeleton className="h-10 w-24 rounded-full" />
                   </div>
                 </div>
@@ -214,12 +214,12 @@ const EmergencySafe = () => {
                 <div className="flex justify-between items-center pb-4">
                   <Skeleton className="h-4 w-32" />
                 </div>
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col gap-2 sm:flex-row justify-between sm:items-end">
                   <div>
                     <Skeleton className="h-8 w-40 mb-2" />
                     <Skeleton className="h-3 w-48" />
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex sm:justify-end gap-2">
                     <Skeleton className="h-10 w-24 rounded-full" />
                   </div>
                 </div>
@@ -271,7 +271,7 @@ const EmergencySafe = () => {
         )}
 
         {safeDetails && !isLoading && (
-          <div className="flex gap-4 pr-4 pb-2">
+          <div className="flex-col lg:flex-row flex gap-4 sm:pr-4 pb-2">
             <div className="flex-1 flex gap-2">
               <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
                 <div className="flex justify-between items-center pb-4">
@@ -279,7 +279,7 @@ const EmergencySafe = () => {
                     Savings Balance
                   </div>
                 </div>
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col gap-2 sm:flex-row justify-between sm:items-end">
                   <div>
                     <div>
                       <span className="text-[#F1F1F1] pr-2 text-3xl">
@@ -298,7 +298,7 @@ const EmergencySafe = () => {
                     </div>
                   </div>
                   {isConnected && (
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-start  sm:justify-end gap-2">
                       <button
                         onClick={() => setShowTopUpModal(true)}
                         className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
@@ -318,7 +318,7 @@ const EmergencySafe = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-end">
+              <div className="flex flex-col gap-2 sm:flex-row justify-between sm:items-end">
                 <div>
                   <div>
                     <span className="text-[#F1F1F1] pr-2 text-3xl">
@@ -336,7 +336,7 @@ const EmergencySafe = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-end gap-2">
+                <div className="flex sm:justify-end gap-2">
                   <button
                     onClick={() => setShowWithdrawModal(true)}
                     className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"

@@ -159,7 +159,9 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
   ];
 
   const calculateEndDate = (days: number) => {
-    const currentDate = new Date();
+    const currentDate = new Date(
+      details?.unlockTime ? Number(details.unlockTime) : Date.now()
+    );
     const futureDate = addDays(currentDate, days);
     return format(futureDate, "dd MMMM yyyy");
   };
@@ -452,7 +454,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                   disabled={!details || reactivating}
                   className="disabled:cursor-not-allowed disabled:opacity-70 rounded-full bg-white text-[14px] py-2.5 transition text-black px-6"
                 >
-                  {extending ? "Reactivating" : "Reactivate"}
+                  {reactivating ? "Reactivating" : "Reactivate"}
                 </button>
               </div>
             </>

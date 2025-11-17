@@ -178,10 +178,8 @@ const SuccessfulTxModal = ({
         descriptionContent = (
           <>
             You have successfully removed{" "}
-            <span className="text-[#20FFAF] font-semibold">
-              {token}
-            </span>{" "}
-            from your autosavings
+            <span className="text-[#20FFAF] font-semibold">{token}</span> from
+            your autosavings
           </>
         );
         break;
@@ -207,7 +205,8 @@ const SuccessfulTxModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className="max-w-[360px] sm:max-w-[410px] p-6 border-1 border-[#FFFFFF21] text-white bg-[#17171C] rounded-lg shadow-lg z-50"
-        noX={true}>
+        noX={true}
+      >
         <DialogTitle className="text-center">{transactionTitle}</DialogTitle>
 
         <div className="flex flex-col items-center space-y-6">
