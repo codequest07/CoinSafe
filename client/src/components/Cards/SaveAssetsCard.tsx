@@ -548,6 +548,7 @@ export default function SaveAssetsCard() {
                   className="mb-4"
                   isDisabled={isDurationDisabled}
                   apy={totalApy || 0}
+                  isLoading={loading}
                 />
 
                 <div className="py-4">
