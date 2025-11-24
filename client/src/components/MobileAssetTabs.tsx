@@ -1,12 +1,11 @@
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import VaultAssetTable from "./VaultAssetTable";
-// import TransactionHistory from "./TransactionHistory";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
+import MobileSavingsCards from "./MobileSavingsCards";
+import VaultAssetTable from "./VaultAssetTable";
 import AutoSavedAssetTable from "./AutoSavedAssetTable";
 import TargetAssetTable from "./TargetAssetTable";
-import MobileAssetTabs from "./MobileAssetTabs";
 
 interface AssetTabsProps {
   type?: "emergency" | "target" | "automated";
@@ -14,15 +13,28 @@ interface AssetTabsProps {
   isLoading?: boolean;
 }
 
-export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
-  const [activeTab, setActiveTab] = useState<"assets" | "savings">("assets");
+const MobileAssetTabs = ({ safeDetails, isLoading, type }: AssetTabsProps) => {
+  const [activeTab, setActiveTab] = useState<"targets" | "assets" | "savings">(
+    "targets"
+  );
   const location = useLocation();
   const isVaultPage = location.pathname === "/vault";
   const isAutoSafePage = location.pathname === "/vault/auto-safe";
 
   return (
     <div className="w-full mx-auto">
-      <div className="hidden md:flex w-full mx-auto border-b border-[#FFFFFF21] bg-black text-white overflow-x-auto">
+      <div className="flex w-full mx-auto border-b border-[#FFFFFF21] bg-black text-white overflow-x-auto hide-scrollbar">
+        <button
+          onClick={() => setActiveTab("targets")}
+          className={cn(
+            "px-4 py-2 text-sm font-medium transition-colors flex-shrink-0",
+            activeTab === "targets"
+              ? "border-b-2 border-[#79E7BA]"
+              : "text-gray-400 hover:text-gray-200"
+          )}
+        >
+          My Targets
+        </button>
         <button
           onClick={() => setActiveTab("assets")}
           className={cn(
@@ -47,8 +59,13 @@ export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
         </button>
       </div>
 
-      <div className="hidden md:block py-2 bg-black text-white">
-        {activeTab === "assets" ? (
+      <div className="py-2 bg-black text-white">
+        {activeTab === "targets" ? (
+          <div>
+            {/* <h3 className="text-lg font-medium">My Targets</h3> */}
+            <MobileSavingsCards />
+          </div>
+        ) : activeTab === "assets" ? (
           isVaultPage ? (
             <VaultAssetTable safeDetails={safeDetails} type={type} />
           ) : isAutoSafePage ? (
@@ -90,14 +107,8 @@ export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
           </div>
         )}
       </div>
-
-      <div className="md:hidden">
-        <MobileAssetTabs
-          safeDetails={safeDetails}
-          isLoading={isLoading}
-          type={type}
-        />
-      </div>
     </div>
   );
-}
+};
+
+export default MobileAssetTabs;

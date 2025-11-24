@@ -7,6 +7,7 @@ import { Calendar } from "./ui/calendar";
 import { useEffect, useState } from "react";
 import { getContractFeePercentage } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
+import { Skeleton } from "./ui/skeleton";
 
 interface PillOption {
   value: number;
@@ -26,6 +27,7 @@ interface PillSelectorProps {
   label?: string;
   unlockDate?: string;
   apy?: number;
+  isLoading?: boolean;
 }
 
 export function DurationSelector({
@@ -41,6 +43,7 @@ export function DurationSelector({
   label,
   unlockDate,
   apy,
+  isLoading,
 }: PillSelectorProps) {
   // // if a date should be disabled
   // const isDateDisabled = (date: Date) => {
@@ -72,7 +75,7 @@ export function DurationSelector({
     // OR if date is less than 30 days from today
     return (disablePastDates && date < today) || date < thirtyDaysFromNow;
   };
-  
+
   useEffect(() => {
     if (!address || !apy || !options) return;
 
@@ -86,7 +89,7 @@ export function DurationSelector({
               option.value * 24 * 60 * 60,
               address
             );
-            const newApy = (100 - Number(percent)/100)/100 * apy;
+            const newApy = ((100 - Number(percent) / 100) / 100) * apy;
             return [option.value, newApy] as const;
           })
         );
@@ -130,18 +133,34 @@ export function DurationSelector({
             <span className="text-[#ffffff] font-medium text-sm">
               {option.label}
             </span>
-            {apy ? (
+            {isLoading ? (
               <>
-                <span className="text-[#C7C7D1] font-light text-[10px]">
-                  {/* {`Earn up to ${apy.toFixed(2)}% APY`} */}
-                  Earn up to{" "}
-                  <span className="font-medium text-[#79E7BA]">
-                    {apys[option.value].toFixed(2)}%
-                  </span>{" "}
+                <span className="inline-flex items-center gap-1 text-[#C7C7D1] font-light text-[10px]">
+                  Earn up to
+                  <Skeleton className="h-3 w-6 rounded">
+                    <span className="font-medium text-[#79E7BA] invisible">
+                      88.88%
+                    </span>
+                  </Skeleton>
                   APY
                 </span>
               </>
-            ) : null}
+            ) : (
+              <>
+                {apy ? (
+                  <>
+                    <span className="text-[#C7C7D1] font-light text-[10px]">
+                      {/* {`Earn up to ${apy.toFixed(2)}% APY`} */}
+                      Earn up to{" "}
+                      <span className="font-medium text-[#79E7BA]">
+                        {apys[option.value].toFixed(2)}%
+                      </span>{" "}
+                      APY
+                    </span>
+                  </>
+                ) : null}
+              </>
+            )}
           </button>
         ))}
 

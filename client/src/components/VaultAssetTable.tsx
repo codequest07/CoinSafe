@@ -24,6 +24,7 @@ import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
+import MobileAssetTable from "./MobileAssetTable";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
@@ -130,7 +131,7 @@ export default function VaultAssetTable({
 
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
-      <div className="sm:mx-auto">
+      <div className="hidden md:block sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">
           {safeDetails
             ? `Assets in ${
@@ -139,6 +140,22 @@ export default function VaultAssetTable({
             : "Assets"}
         </h1>
         <VaultAssetTableContent
+          assets={allAssetData}
+          safeDetails={safeDetails}
+          type={type}
+        />
+      </div>
+
+      {/* Mobile display for assets */}
+      <div className="flex flex-col md:hidden sm:mx-auto">
+        <h1 className="text-xl font-semibold mb-4">
+          {safeDetails
+            ? `Assets in ${
+                safeDetails.target ? safeDetails.target : "Auto safe"
+              }`
+            : "Assets"}
+        </h1>
+        <MobileAssetTable
           assets={allAssetData}
           safeDetails={safeDetails}
           type={type}
