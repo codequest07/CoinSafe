@@ -1,3 +1,5 @@
+import MemoAlertIcon from "@/icons/AlertIcon";
+
 type Props = {
   className?: string;
 };
@@ -5,12 +7,8 @@ type Props = {
 const UsdtSavingsBanner = ({ className = "" }: Props) => (
   <div
     className={`mb-6 rounded-[6px] bg-[#FFA3481A] text-[#FFA448] px-4 py-3 text-sm flex flex-col items-center justify-center gap-3 ${className}`}>
-    <div className="w-4 h-4">
-      {/* using emoji to avoid extra icon import; swap if design requires */}
-      <span role="img" aria-label="alert">
-        ⚠️
-      </span>
-    </div>
+    <MemoAlertIcon className="w-4 h-4 text-[#FFA448]" />
+
     <p className="leading-relaxed text-[12px] text-center">
       We recommend swapping your USDT to USDT0 to enjoy our savings rewards.
       While you can still save in USDT, saving in USDT0 allows you to earn the
