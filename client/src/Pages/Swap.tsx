@@ -233,7 +233,7 @@ const Swap = () => {
   );
 
   return (
-    <div className="min-h-screen md:min-h-fit flex items-center justify-center md:justify-center bg-[#010104] p-4">
+    <div className="min-h-screen md:min-h-fit flex md:items-center justify-center md:justify-center bg-[#010104] p-4">
       <div className="w-full max-w-md md:max-w-[600px] rounded-xl md:border-[1px] md:border-[#FFFFFF21] md:bg-[#1D1D1D73] md:p-6 text-white">
         {/* Header */}
         <div className="flex items-center gap-2 mb-6">
@@ -349,8 +349,8 @@ const Swap = () => {
           {canQuote && (
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm text-[#E5E5E5]">
-                <div className="flex items-center gap-2">
-                  <span>
+                <div className="flex items-center sm:gap-2">
+                  <span className="text-xs sm:text-sm">
                     1 {tokenData[toToken]?.symbol || "USDC"} = 0.000328852 ETH
                     ($1.00)
                   </span>

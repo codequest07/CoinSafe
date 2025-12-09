@@ -279,12 +279,12 @@ export const SavingsOverviewData: SavingsCardData[] = [
     buttonText: "Get started",
     icon: MemoMagicPen,
   },
-  {
-    title: "Even more seamless",
-    description: "Get our extension for more seamless saving while you spend",
-    buttonText: "Download",
-    icon: MemoChrome,
-  },
+  // {
+  //   title: "Even more seamless",
+  //   description: "Get our extension for more seamless saving while you spend",
+  //   buttonText: "Download",
+  //   icon: MemoChrome,
+  // },
 ];
 
 export const TransactionHistoryData = [
