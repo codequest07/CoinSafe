@@ -38,6 +38,8 @@ import {
 import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
 // import { VaultAPYDisplay } from "../VaultAPYDisplay";
 import { useVaultApy } from "@/hooks/useVaultApy";
+import UsdtWarningModal from "../Modals/UsdtWarningModal";
+import UsdtSavingsBanner from "./UsdtSavingsBanner";
 
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
@@ -178,12 +180,17 @@ export default function SaveAssetsCard() {
     transactionPercentage?: string;
     frequency?: string;
   }>({});
+  const [showUsdtModal, setShowUsdtModal] = useState(false);
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
     setDecimals(getTokenDecimals(value));
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
+
+    if (value === tokens.usdt) {
+      setShowUsdtModal(true);
+    }
   };
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -436,8 +443,7 @@ export default function SaveAssetsCard() {
               saveType === "one-time"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             One-time save
           </button>
           <button
@@ -447,12 +453,12 @@ export default function SaveAssetsCard() {
               saveType === "auto"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}
-          >
+            )}>
             Autosave
           </button>
         </div>
 
+        <UsdtSavingsBanner />
         {saveType === "one-time" && (
           <>
             {/* Amount */}
@@ -482,8 +488,7 @@ export default function SaveAssetsCard() {
                 <Button
                   variant="link"
                   className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                  onClick={() => navigate("/deposit")}
-                >
+                  onClick={() => navigate("/deposit")}>
                   Deposit to save
                 </Button>
               ) : (
@@ -494,8 +499,7 @@ export default function SaveAssetsCard() {
                       ...prev,
                       amount: selectedTokenBalance,
                     }))
-                  }
-                >
+                  }>
                   Save all
                 </Button>
               )}
@@ -576,8 +580,7 @@ export default function SaveAssetsCard() {
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -607,8 +610,7 @@ export default function SaveAssetsCard() {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}
-                  >
+                    }`}>
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -667,8 +669,7 @@ export default function SaveAssetsCard() {
                     <Link to={"/vault/auto-safe"}>
                       <Button
                         variant="link"
-                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      >
+                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0">
                         View your Automated Safe here
                       </Button>
                     </Link>
@@ -707,8 +708,7 @@ export default function SaveAssetsCard() {
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0 self-start sm:self-auto"
-                            onClick={() => navigate("/deposit")}
-                          >
+                            onClick={() => navigate("/deposit")}>
                             Deposit to save
                           </Button>
                         ) : (
@@ -719,8 +719,7 @@ export default function SaveAssetsCard() {
                                 ...prev,
                                 amount: selectedTokenBalance,
                               }))
-                            }
-                          >
+                            }>
                             Max
                           </Button>
                         )}
@@ -786,8 +785,7 @@ export default function SaveAssetsCard() {
               <div className="flex justify-between sm:gap-3 sm:justify-end mt-6">
                 <Button
                   onClick={() => navigate(-1)}
-                  className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]"
-                >
+                  className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
                   Cancel
                 </Button>
                 <div>
@@ -795,8 +793,7 @@ export default function SaveAssetsCard() {
                     onClick={handleSaveAsset}
                     className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
                     variant="outline"
-                    disabled={isLoading || autoSavingsLoading}
-                  >
+                    disabled={isLoading || autoSavingsLoading}>
                     {isLoading || autoSavingsLoading ? (
                       <LoaderCircle className="animate-spin" />
                     ) : hasAutoSafe ? (
@@ -815,8 +812,7 @@ export default function SaveAssetsCard() {
             <div className="flex justify-between sm:gap-3 sm:justify-end mt-6">
               <Button
                 onClick={() => navigate(-1)}
-                className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]"
-              >
+                className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
                 Cancel
               </Button>
               <div>
@@ -824,8 +820,7 @@ export default function SaveAssetsCard() {
                   onClick={handleSaveAsset}
                   className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
                   variant="outline"
-                  disabled={isLoading}
-                >
+                  disabled={isLoading}>
                   {isLoading ? (
                     <LoaderCircle className="animate-spin" />
                   ) : (
@@ -863,6 +858,15 @@ export default function SaveAssetsCard() {
         }}
         additionalDetails={{
           frequency: getFrequencyLabel(saveState.frequency.toString()),
+        }}
+      />
+
+      <UsdtWarningModal
+        open={showUsdtModal}
+        onClose={() => setShowUsdtModal(false)}
+        onSwap={() => {
+          setShowUsdtModal(false);
+          navigate("/swap");
         }}
       />
     </div>
