@@ -34,6 +34,7 @@ import {
 import { OnlineStatusIndicator } from "./components/pwa/online-status-indicator";
 import { PWAInstallPrompt } from "./components/pwa/install-prompt";
 import { PushNotificationPopup } from "./components/pwa/push-notification-popup";
+import Swap from "./Pages/Swap";
 // import { useFCMNotifications } from "./hooks/useFCMNotifications";
 // import { Button } from "./components/ui/button";
 
@@ -121,6 +122,7 @@ const App = () => {
             <Route path="/vault/auto-safe" element={<AutoSave />} />
             <Route path="/staking" element={<Staking />} />
             <Route path="/rewards" element={<Rewards />} />
+            <Route path="/swap" element={<Swap />} />
             <Route path="/SaveSense" element={<SaveSense />} />
             {/* Test */}
             <Route path="/save-assets" element={<SaveAssets />} />

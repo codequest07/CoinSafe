@@ -28,6 +28,8 @@ import MemoVaultActive from "@/icons/VaultActive";
 // import MemoStakingActive from "@/icons/StakingActive";
 import MemoRewardActive from "@/icons/RewardActive";
 import MemoProfile from "@/icons/Profile";
+import MemoSwap from "@/icons/Swap";
+import MemoSwapActive from "@/icons/SwapActive";
 
 export type Asset = {
   symbol: string;
@@ -65,6 +67,12 @@ export const NavLinks = [
     label: "Vault",
   },
   {
+    to: "/swap",
+    icon: MemoSwap,
+    activeIcon: MemoSwapActive,
+    label: "Swap",
+  },
+  {
     to: "/rewards",
     icon: MemoReward,
     activeIcon: MemoRewardActive,
@@ -89,6 +97,12 @@ export const MobileNavLinks = [
     icon: MemoVault,
     activeIcon: MemoVaultActive,
     label: "Vault",
+  },
+  {
+    to: "/swap",
+    icon: MemoSwap,
+    activeIcon: MemoSwapActive,
+    label: "Swap",
   },
   {
     to: "/profile",
