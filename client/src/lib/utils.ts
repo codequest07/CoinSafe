@@ -214,6 +214,12 @@ export const tokenData = {
     color: "bg-[#d54f]",
     image: "/assets/tokens/usdt.jpg",
   },
+  "0x43F2376D5D03553aE72F4A8093bbe9de4336EB08": {
+    symbol: "USD0",
+    chain: "Lisk",
+    color: "bg-[#d54f]",
+    image: "/assets/tokens/usdt0.png",
+  },
 } as any;
 
 export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
