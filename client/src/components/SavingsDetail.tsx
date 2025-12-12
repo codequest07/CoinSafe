@@ -270,6 +270,8 @@ export default function SavingsDetail() {
                   campaign="Lisk"
                   text={<>rewards on your yields (seperate from your yields)</>}
                   safeId={Number(safeDetails.id)}
+                  safeStartDate={safeDetails.startTime.toISOString().slice(0, 10)}
+                  safeEndDate={safeDetails.unlockTime.toISOString().slice(0, 10)}
                 />
               </div>
             </div>

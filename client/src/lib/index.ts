@@ -52,14 +52,7 @@ export const getUsdtToUsd = async (usdt: number) => {
     );
     const data = await res.json();
 
-    console.log("=====================================");
-    console.log("USDT", data);
-    console.log("=====================================");
-
     if (data?.tether?.usd) {
-      console.log("=====================================");
-      console.log("USDT", data);
-      console.log("=====================================");
       return data.tether.usd * usdt;
     } else {
       throw new Error("USDT data or USD price not available");
@@ -87,9 +80,6 @@ export const getUsdcToUsd = async (usdc: number) => {
     const data = await res.json();
 
     if (data?.["usd-coin"]?.usd) {
-      console.log("=====================================");
-      console.log("USDT", data);
-      console.log("=====================================");
       return data["usd-coin"].usd * usdc;
     } else {
       throw new Error("USDC data or USD price not available");
@@ -132,36 +122,98 @@ export async function getTokenPrice(token: string, amount: number | undefined) {
 
 export const jsonRpcProvider = new JsonRpcProvider("https://rpc.api.lisk.com");
 
-export async function getAvgAPR(
-  token?: "usdc" | "usdt" | "lsk"
-): Promise<{ avgApr: number | undefined; signature: string | undefined }> {
-  const tokenToSymbol = {
-    usdc: "USDC.e",
-    usdt: "USD₮0",
-    lsk: "LSK",
-  };
+export type SupportedToken = "usdc" | "usdt" | "lsk";
 
-  let url = "https://api.coinsafe.network/api/merkl/apr";
+const tokenToSymbol: Record<SupportedToken, string> = {
+  usdc: "USDC.e",
+  usdt: "USD₮0",
+  lsk: "LSK",
+};
 
-  if (token) {
-    const tokenSymbol = tokenToSymbol[token];
-    url = `https://api.coinsafe.network/api/merkl/apr?tokenSymbol=${tokenSymbol}`;
+interface AprResponse {
+  avgApr: number | undefined;
+  signature: string | undefined;
+}
+
+interface PeriodAprResponse {
+  avgApr: number | undefined;
+  success: boolean;
+  signature: number | undefined;
+}
+
+export async function getAvgAPR(opts?: {
+  period?: "hour" | "day" | "week" | "month";
+  chainId?: number;
+  startDate?: string; // ISO format
+  endDate?: string; // ISO format
+  token?: SupportedToken;
+}): Promise<AprResponse | PeriodAprResponse> {
+  const baseUrl = "https://api.coinsafe.network/api/merkl";
+
+  const { period, chainId, startDate, endDate, token } = opts || {};
+
+  const isPeriodRequest = period || startDate || endDate || chainId;
+
+  // ---------------------------
+  // 📌 CASE 1: Fetch HISTORICAL APR (period)
+  // ---------------------------
+  if (isPeriodRequest) {
+    const params = new URLSearchParams();
+
+    if (period) params.append("groupBy", period);
+    if (chainId) params.append("chainId", chainId.toString());
+    if (startDate) params.append("startDate", startDate);
+    if (endDate) params.append("endDate", endDate);
+
+    if (token) {
+      params.append("tokenSymbol", tokenToSymbol[token]);
+    }
+
+    const url = `${baseUrl}/apr/period?${params.toString()}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(`Fetching historical APR failed: ${data.error}`);
+      }
+
+      // console.log("Dataaaaaaaaaaa", data)
+
+      return {
+        success: data.success,
+        avgApr: data?.summary?.overallStatistics?.mean,
+        signature: "",
+      }; // Full period response (includes summary + all periods)
+    } catch (error) {
+      console.error("Error fetching historical APR:", error);
+      return {
+        success: false,
+        avgApr: undefined,
+        signature: undefined,
+      };
+    }
   }
 
-  const options = {
-    method: "GET",
-  };
+  // ---------------------------
+  // 📌 CASE 2: Fetch CURRENT APR
+  // ---------------------------
+  let url = `${baseUrl}/apr`;
+  if (token) {
+    url = `${url}?tokenSymbol=${tokenToSymbol[token]}`;
+  }
 
   try {
-    const res = await fetch(url, options);
-
+    const res = await fetch(url);
     const data = await res.json();
 
-    if (!data.success) throw Error(`Fetching token apr failed: ${data.error}`);
+    if (!data.success)
+      throw new Error(`Fetching token apr failed: ${data.error}`);
 
     return {
       avgApr: data.summary.averageAPR,
-      signature: data.data[0].signature,
+      signature: data.data?.[0]?.signature,
     };
   } catch (error) {
     console.error("Error fetching avgApr:", error);

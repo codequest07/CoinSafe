@@ -11,6 +11,8 @@ const RewardsCard = ({
   emphasize,
   text,
   safeId,
+  safeStartDate,
+  safeEndDate
 }: {
   title: string;
   campaign?: string;
@@ -19,6 +21,8 @@ const RewardsCard = ({
   emphasize?: string;
   text?: ReactNode;
   safeId?: number;
+  safeStartDate?: string;
+  safeEndDate?: string;
 }) => {
   const [value, setValue] = useState(0.0);
   const account = useActiveAccount();
@@ -26,7 +30,7 @@ const RewardsCard = ({
   useEffect(() => {
     async function run() {
       if (!safeId) return;
-      const reward = await getSafeLSKRewards(safeId.toString(), account);
+      const reward = await getSafeLSKRewards(safeId.toString(), account, safeStartDate!, safeEndDate!);
 
       setValue(Number(reward))
 

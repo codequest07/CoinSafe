@@ -61,7 +61,7 @@ export function useGetSafeById(id: string | undefined) {
 
 
       if (!safe) return;
-      console.log("Safeeeeeeeee============:", safe); 
+      // console.log("Safeeeeeeeee============:", safe); 
       
       // Format the safe data
       const startTime = new Date(Number(safe.startTime) * 1000);

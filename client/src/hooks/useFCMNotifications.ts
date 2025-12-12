@@ -55,6 +55,12 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
             }
           : undefined,
       });
+
+      new Notification(payload.notification?.title || "", {
+        body: payload.notification?.body,
+        icon: payload.notification?.image || "/icon-192.png", // Optional: update with your app icon path
+        data: payload.data || { url: "https://example.com" }, // Optional: custom data
+      });
     });
 
     return () => unsubscribe();
@@ -74,7 +80,7 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
         await navigator.serviceWorker.ready;
       }
       console.log("Registration", registration);
-      
+
       const token = await getToken(messaging, {
         vapidKey: config.vapidKey,
         serviceWorkerRegistration: registration,
@@ -82,7 +88,7 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
 
       console.log("Navigator readyyy...");
       console.log("Registration", registration);
-      
+
       if (token) {
         console.log("FCM Token:", token);
         setFcmToken(token);
@@ -127,8 +133,8 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
         );
         await navigator.serviceWorker.ready;
       }
-      console.log("Navigator readyyy...");
-      console.log("Registration", registration);
+      // console.log("Navigator readyyy...");
+      // console.log("Registration", registration);
       const token = await getToken(messaging, {
         vapidKey: config.vapidKey,
         serviceWorkerRegistration: registration,

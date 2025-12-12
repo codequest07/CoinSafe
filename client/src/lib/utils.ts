@@ -310,16 +310,41 @@ export const getUserTokenYield = async (
   return BigInt(effectiveYield);
 };
 
-export const getSafeLSKRewards = async (safeId: string, account: any) => {
+export const getSafeLSKRewards = async (
+  safeId: string,
+  account: any,
+  safeStartDate: string,
+  safeEndDate: string
+) => {
   const contract = getContract({
     client: client,
     address: CoinsafeDiamondContract.address,
     chain: liskMainnet,
   });
 
-  const { avgApr } = await getAvgAPR();
+  console.log("Start date", safeStartDate);
+  console.log("Start date", safeEndDate);
+
+  const res = await getAvgAPR({
+    token: "lsk",
+    startDate: safeStartDate,
+    endDate:
+      new Date(safeEndDate).getTime() > Date.now()
+        ? new Date().toISOString().slice(0, 10)
+        : safeEndDate,
+  });
+
+  const { avgApr } = await getAvgAPR({
+    startDate: safeStartDate || new Date().toISOString().slice(0, 10),
+    endDate:
+      new Date(safeEndDate).getTime() > Date.now()
+        ? new Date().toISOString().slice(0, 10)
+        : safeEndDate,
+  });
 
   console.log("SafeId, AvgApr", safeId, BigInt(avgApr?.toFixed() || "1"));
+
+  console.log("avgApr", res.avgApr);
 
   const rewards = await readContract({
     contract: contract,
@@ -331,5 +356,17 @@ export const getSafeLSKRewards = async (safeId: string, account: any) => {
 
   console.log("Rewards hereeee", rewards);
 
-  return formatEther(rewards[0]);
+  console.log(
+    "Rewards hereeee, 0,1,2,3",
+    "\n\nProjected LSK",
+    formatEther(rewards[0]),
+    "\n\nAvailable LSK",
+    formatEther(rewards[1]),
+    "\n\nClaimable LSK",
+    formatEther(rewards[2]),
+    "\n\nClaimable with fee applied LSK",
+    formatEther(rewards[3])
+  );
+
+  return formatEther(rewards[3]);
 };

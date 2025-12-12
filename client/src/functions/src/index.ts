@@ -1,35 +1,67 @@
+/**
+ * Import function triggers from their respective submodules:
+ *
+ * import {onCall} from "firebase-functions/v2/https";
+ * import {onDocumentWritten} from "firebase-functions/v2/firestore";
+ *
+ * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ */
+
+import { setGlobalOptions } from "firebase-functions";
+import { onRequest } from "firebase-functions/https";
+import * as logger from "firebase-functions/logger";
+
+// Start writing functions
+// https://firebase.google.com/docs/functions/typescript
+
+// For cost control, you can set the maximum number of containers that can be
+// running at the same time. This helps mitigate the impact of unexpected
+// traffic spikes by instead downgrading performance. This limit is a
+// per-function limit. You can override the limit for each function using the
+// `maxInstances` option in the function's options, e.g.
+// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
+// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
+// functions should each use functions.runWith({ maxInstances: 10 }) instead.
+// In the v1 API, each function can only serve one request per container, so
+// this will be the maximum concurrent request count.
+setGlobalOptions({ maxInstances: 10 });
+
+export const helloWorld = onRequest((_, response) => {
+  logger.info("Hello logs!", { structuredData: true });
+  response.send("Hello from Firebase!");
+});
+
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
 /**
- * Send daily morning notification at 8 AM
- * Runs every day at 8:00 AM in your timezone
+ * Send daily morning notification at 8 AM - Tailored for CoinSafe: Motivational saving reminder
+ * Runs every day at 8:00 AM in Africa/Lagos timezone
+ * Sends to all subscribed users (only FCM tokens stored)
+ * Includes a random motivational quote or fact about saving/investing in real life or Web3/blockchain
  */
 export const sendDailyMorningNotification = functions.pubsub
   .schedule("0 8 * * *") // Cron format: minute hour day month weekday
-  .timeZone("America/New_York") // Change to your timezone
+  .timeZone("Africa/Lagos")
   .onRun(async () => {
-    console.log("Sending daily morning notifications...");
+    console.log("Sending daily morning notifications for CoinSafe...");
 
     try {
-      // Get all users with FCM tokens from Firestore
-      const usersSnapshot = await admin
+      // Get all tokens from Firestore (no user data, just tokens)
+      const tokensSnapshot = await admin
         .firestore()
-        .collection("users")
+        .collection("fcm_tokens")
         .where("fcmToken", "!=", null)
-        .where("notificationsEnabled", "==", true)
         .get();
 
       const tokens: string[] = [];
-      const userPreferences: { [token: string]: any } = {};
 
-      usersSnapshot.forEach((doc) => {
+      tokensSnapshot.forEach((doc) => {
         const data = doc.data();
         if (data.fcmToken) {
           tokens.push(data.fcmToken);
-          userPreferences[data.fcmToken] = data.preferences || {};
         }
       });
 
@@ -38,20 +70,38 @@ export const sendDailyMorningNotification = functions.pubsub
         return null;
       }
 
-      // Create the notification message
+      // Array of motivational quotes/facts (mix of real-life saving/investing and Web3/blockchain)
+      const motivations = [
+        "Have you saved something today? 'The habit of saving is itself an education; it fosters every virtue, teaches self-denial, cultivates the sense of order.' – T.T. Munger",
+        "Have you saved something today? Did you know? Compounding interest can turn $100 monthly savings into over $200,000 in 30 years at 7% return.",
+        "Have you saved something today? In Web3, blockchain ensures your savings are secure, transparent, and immutable – no middlemen needed!",
+        "Have you saved something today? 'Invest in yourself. Your career is the engine of your wealth.' – Paul Clitheroe. Start with small savings habits.",
+        "Have you saved something today? Fact: DeFi on blockchain offers yields up to 10%+ on stablecoins, beating traditional bank savings rates.",
+        "Have you saved something today? 'The stock market is a device for transferring money from the impatient to the patient.' – Warren Buffett.",
+        "Have you saved something today? Blockchain buzz: With Ethereum's upgrades, gas fees are lower, making micro-savings in crypto more accessible.",
+        "Have you saved something today? Real-life tip: Automate your savings – set it and forget it to build wealth effortlessly.",
+        "Have you saved something today? Web3 insight: Tokenized assets let you save in fractions of real estate or art, democratizing investing.",
+        "Have you saved something today? 'Do not save what is left after spending, but spend what is left after saving.' – Warren Buffett.",
+      ];
+
+      // Pick a random motivation
+      const randomMotivation =
+        motivations[Math.floor(Math.random() * motivations.length)];
+
+      // Create the CoinSafe-tailored notification message
       const message: admin.messaging.MulticastMessage = {
         notification: {
-          title: "☀️ Good Morning!",
-          body: "Start your day right. Check out what's new today!",
+          title: "☀️ Good Morning from CoinSafe!",
+          body: randomMotivation,
         },
         data: {
-          type: "daily_reminder",
-          url: "/dashboard",
+          type: "daily_morning_reminder",
+          url: "/save-assets", // Direct to saving feature
           timestamp: Date.now().toString(),
         },
         webpush: {
           fcmOptions: {
-            link: "https://yourapp.com/dashboard",
+            link: "https://app.coinsafe.network/save-assets",
           },
           notification: {
             icon: "/icon-192.png",
@@ -86,343 +136,116 @@ export const sendDailyMorningNotification = functions.pubsub
   });
 
 /**
- * Send evening reminder at 8 PM
+ * Custom notifications triggered externally - Callable function to send ad-hoc messages
+ * Allows external trigger (e.g., from admin) to send custom notification to all subscribed users
+ * Takes title, body, and url as input
  */
-export const sendDailyEveningNotification = functions.pubsub
-  .schedule("0 20 * * *")
-  .timeZone("America/New_York")
-  .onRun(async () => {
-    console.log("Sending daily evening notifications...");
+export const sendCustomNotification = functions.https.onCall(
+  async (data, ) => {
+    // Optional: Add auth check if only admins can trigger
+    // if (!context.auth || !isAdmin(context.auth.uid)) { throw new functions.https.HttpsError("permission-denied", "Unauthorized"); }
 
-    const usersSnapshot = await admin
-      .firestore()
-      .collection("users")
-      .where("fcmToken", "!=", null)
-      .where("notificationsEnabled", "==", true)
-      .where("eveningReminders", "==", true) // User preference
-      .get();
+    const { title, body, url } = data;
 
-    const tokens = usersSnapshot.docs
-      .map((doc) => doc.data().fcmToken)
-      .filter(Boolean);
-
-    if (tokens.length === 0) return null;
-
-    const message: admin.messaging.MulticastMessage = {
-      notification: {
-        title: "🌙 Evening Check-in",
-        body: "Review your progress and plan for tomorrow",
-      },
-      data: {
-        type: "evening_reminder",
-        url: "/progress",
-      },
-      webpush: {
-        fcmOptions: {
-          link: "https://yourapp.com/progress",
-        },
-      },
-      tokens: tokens,
-    };
-
-    const response = await admin.messaging().sendEachForMulticast(message);
-
-    const successCount = response.responses.filter((r) => r.success).length;
-    const failureCount = response.responses.filter((r) => !r.success).length;
-
-    console.log(
-      `Successfully sent ${successCount} notifications, ` +
-        `${failureCount} failed`
-    );
-
-    // Clean up invalid tokens
-    if (failureCount > 0) {
-      await cleanupInvalidTokens(response.responses, tokens);
-    }
-
-    console.log(
-      `Evening notifications sent: ${response.successCount} successful`
-    );
-
-    return null;
-  });
-
-/**
- * Weekly summary every Monday at 9 AM
- */
-export const sendWeeklySummary = functions.pubsub
-  .schedule("0 9 * * 1") // Every Monday
-  .timeZone("America/New_York")
-  .onRun(async () => {
-    console.log("Sending weekly summary...");
-
-    const usersSnapshot = await admin
-      .firestore()
-      .collection("users")
-      .where("fcmToken", "!=", null)
-      .where("weeklyDigest", "==", true)
-      .get();
-
-    const notifications = usersSnapshot.docs.map(async (doc) => {
-      const data = doc.data();
-
-      // Personalized message based on user data
-      return admin.messaging().send({
-        notification: {
-          title: "📊 Your Weekly Summary",
-          body: `You had ${
-            data.weeklyStats?.activities || 0
-          } activities this week!`,
-        },
-        data: {
-          type: "weekly_summary",
-          url: "/stats",
-        },
-        token: data.fcmToken,
-      });
-    });
-
-    await Promise.allSettled(notifications);
-    return null;
-  });
-
-/**
- * Custom time-based reminders for individual users
- */
-export const sendCustomReminders = functions.pubsub
-  .schedule("*/30 * * * *") // Every 30 minutes
-  .onRun(async () => {
-    // const now = new Date();
-    // const currentTime = now.getHours() * 60 + now.getMinutes();
-
-    // Get users with scheduled reminders for this time slot
-    const remindersSnapshot = await admin
-      .firestore()
-      .collection("reminders")
-      .where("enabled", "==", true)
-      .where("nextScheduledTime", "<=", admin.firestore.Timestamp.now())
-      .get();
-
-    const notifications = remindersSnapshot.docs.map(async (doc) => {
-      const reminder = doc.data();
-
-      try {
-        await admin.messaging().send({
-          notification: {
-            title: reminder.title || "Reminder",
-            body: reminder.message,
-          },
-          data: {
-            type: "custom_reminder",
-            reminderId: doc.id,
-            url: reminder.url || "/",
-          },
-          token: reminder.fcmToken,
-        });
-
-        // Update next scheduled time based on frequency
-        const nextTime = calculateNextReminderTime(reminder);
-        await doc.ref.update({
-          nextScheduledTime: nextTime,
-          lastSent: admin.firestore.Timestamp.now(),
-        });
-      } catch (error) {
-        console.error(`Failed to send reminder ${doc.id}:`, error);
-      }
-    });
-
-    await Promise.allSettled(notifications);
-    return null;
-  });
-
-// ============================================
-// 2. USER TIMEZONE-AWARE NOTIFICATIONS
-// ============================================
-
-/**
- * Send notification at user's local time (e.g., 8 AM in their timezone)
- * Runs every hour and sends to users whose local time is 8 AM
- */
-export const sendTimezoneAwareNotifications = functions.pubsub
-  .schedule("0 * * * *") // Every hour
-  .onRun(async () => {
-    const currentHour = new Date().getUTCHours();
-
-    // Query users whose timezone makes it 8 AM right now
-    const usersSnapshot = await admin
-      .firestore()
-      .collection("users")
-      .where("fcmToken", "!=", null)
-      .where("notificationsEnabled", "==", true)
-      .where("preferredNotificationHour", "==", 8)
-      .get();
-
-    const notifications = usersSnapshot.docs
-      .filter((doc) => {
-        const userData = doc.data();
-        const userTimezone = userData.timezone || "America/New_York";
-        const userLocalHour = convertUTCToTimezone(currentHour, userTimezone);
-        return userLocalHour === 8;
-      })
-      .map((doc) => {
-        const userData = doc.data();
-        return admin.messaging().send({
-          notification: {
-            title: "Good Morning!",
-            body: "Time to start your day!",
-          },
-          token: userData.fcmToken,
-        });
-      });
-
-    await Promise.allSettled(notifications);
-    return null;
-  });
-
-// ============================================
-// 3. API ENDPOINTS TO MANAGE NOTIFICATIONS
-// ============================================
-
-/**
- * Save FCM token when user subscribes
- */
-export const saveFCMToken = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "User must be authenticated"
-    );
-  }
-
-  const { token, preferences } = data;
-  const userId = context.auth.uid;
-
-  await admin
-    .firestore()
-    .collection("users")
-    .doc(userId)
-    .set(
-      {
-        fcmToken: token,
-        notificationsEnabled: true,
-        preferences: preferences || {},
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
-
-  return { success: true };
-});
-
-/**
- * Update notification preferences
- */
-export const updateNotificationPreferences = functions.https.onCall(
-  async (data, context) => {
-    if (!context.auth) {
+    if (!title || !body) {
       throw new functions.https.HttpsError(
-        "unauthenticated",
-        "User must be authenticated"
+        "invalid-argument",
+        "Title and body are required"
       );
     }
 
-    const userId = context.auth.uid;
-    const {
-      morningReminders,
-      eveningReminders,
-      weeklyDigest,
-      timezone,
-      preferredTime,
-    } = data;
+    try {
+      // Get all tokens from Firestore
+      const tokensSnapshot = await admin
+        .firestore()
+        .collection("fcm_tokens")
+        .where("fcmToken", "!=", null)
+        .get();
 
-    await admin
-      .firestore()
-      .collection("users")
-      .doc(userId)
-      .update({
-        morningReminders: morningReminders ?? true,
-        eveningReminders: eveningReminders ?? true,
-        weeklyDigest: weeklyDigest ?? true,
-        timezone: timezone || "America/New_York",
-        preferredNotificationHour: preferredTime || 8,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      const tokens: string[] = [];
+
+      tokensSnapshot.forEach((doc) => {
+        const tokenData = doc.data();
+        if (tokenData.fcmToken) {
+          tokens.push(tokenData.fcmToken);
+        }
       });
 
-    return { success: true };
+      if (tokens.length === 0) {
+        return { success: true, message: "No users to notify" };
+      }
+
+      const message: admin.messaging.MulticastMessage = {
+        notification: {
+          title: title,
+          body: body,
+        },
+        data: {
+          type: "custom_notification",
+          url: url || "/",
+          timestamp: Date.now().toString(),
+        },
+        webpush: {
+          fcmOptions: {
+            link: `https://app.coinsafe.network${url || "/"}`,
+          },
+          notification: {
+            icon: "/icon-192.png",
+            badge: "/icon-96.png",
+            requireInteraction: false,
+          },
+        },
+        tokens: tokens,
+      };
+
+      const response = await admin.messaging().sendEachForMulticast(message);
+
+      const successCount = response.responses.filter((r) => r.success).length;
+      const failureCount = response.responses.filter((r) => !r.success).length;
+
+      console.log(
+        `Successfully sent ${successCount} custom notifications, ` +
+          `${failureCount} failed`
+      );
+
+      // Clean up invalid tokens
+      if (failureCount > 0) {
+        await cleanupInvalidTokens(response.responses, tokens);
+      }
+
+      return { success: true, sent: successCount };
+    } catch (error) {
+      console.error("Error sending custom notification:", error);
+      throw new functions.https.HttpsError(
+        "internal",
+        "Error sending notification"
+      );
+    }
   }
 );
 
 /**
- * Create custom reminder
+ * Save FCM token when user subscribes (only token saved, no auth or other data)
  */
-export const createReminder = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
+export const saveFCMToken = functions.https.onCall(async (data, context) => {
+  const { token } = data;
+  console.log(context)
+
+  if (!token) {
     throw new functions.https.HttpsError(
-      "unauthenticated",
-      "User must be authenticated"
+      "invalid-argument",
+      "Token is required"
     );
   }
 
-  const userId = context.auth.uid;
-  const { title, message, time, frequency, url } = data;
+  // Save to a dedicated collection with auto-generated ID
+  const tokenRef = admin.firestore().collection("fcm_tokens").doc();
 
-  // Get user's FCM token
-  const userDoc = await admin.firestore().collection("users").doc(userId).get();
-  const userData = userDoc.data();
+  await tokenRef.set({
+    fcmToken: token,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
 
-  if (!userData?.fcmToken) {
-    throw new functions.https.HttpsError(
-      "failed-precondition",
-      "User has not enabled notifications"
-    );
-  }
-
-  const reminderData = {
-    userId,
-    fcmToken: userData.fcmToken,
-    title,
-    message,
-    time, // Format: "08:00"
-    frequency, // 'daily', 'weekly', 'monthly'
-    url: url || "/",
-    enabled: true,
-    nextScheduledTime: calculateNextReminderTime({ time, frequency }),
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-  };
-
-  const reminderRef = await admin
-    .firestore()
-    .collection("reminders")
-    .add(reminderData);
-
-  return { success: true, reminderId: reminderRef.id };
-});
-
-/**
- * Delete reminder
- */
-export const deleteReminder = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "User must be authenticated"
-    );
-  }
-
-  const { reminderId } = data;
-  const userId = context.auth.uid;
-
-  const reminderDoc = await admin
-    .firestore()
-    .collection("reminders")
-    .doc(reminderId)
-    .get();
-
-  if (!reminderDoc.exists || reminderDoc.data()?.userId !== userId) {
-    throw new functions.https.HttpsError("permission-denied", "Unauthorized");
-  }
-
-  await reminderDoc.ref.delete();
   return { success: true };
 });
 
@@ -452,56 +275,18 @@ async function cleanupInvalidTokens(
     console.log(`Cleaning up ${invalidTokens.length} invalid tokens`);
 
     const batch = admin.firestore().batch();
-    const usersSnapshot = await admin
+    const tokensSnapshot = await admin
       .firestore()
-      .collection("users")
+      .collection("fcm_tokens")
       .where("fcmToken", "in", invalidTokens)
       .get();
 
-    usersSnapshot.docs.forEach((doc) => {
-      batch.update(doc.ref, { fcmToken: null });
+    tokensSnapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref); // Delete invalid token docs
     });
 
     await batch.commit();
   }
-}
-
-function calculateNextReminderTime(reminder: any): admin.firestore.Timestamp {
-  const now = new Date();
-  const [hours, minutes] = reminder.time.split(":").map(Number);
-
-  const nextTime = new Date();
-  nextTime.setHours(hours, minutes, 0, 0);
-
-  // If time has passed today, schedule for next occurrence
-  if (nextTime <= now) {
-    switch (reminder.frequency) {
-      case "daily":
-        nextTime.setDate(nextTime.getDate() + 1);
-        break;
-      case "weekly":
-        nextTime.setDate(nextTime.getDate() + 7);
-        break;
-      case "monthly":
-        nextTime.setMonth(nextTime.getMonth() + 1);
-        break;
-    }
-  }
-
-  return admin.firestore.Timestamp.fromDate(nextTime);
-}
-
-function convertUTCToTimezone(utcHour: number, timezone: string): number {
-  const date = new Date();
-  date.setUTCHours(utcHour);
-
-  const localTime = date.toLocaleString("en-US", {
-    timeZone: timezone,
-    hour: "numeric",
-    hour12: false,
-  });
-
-  return parseInt(localTime, 10);
 }
 
 // ============================================
