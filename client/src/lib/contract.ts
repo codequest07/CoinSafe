@@ -7,10 +7,10 @@ import fundingFacetAbi from "../abi/FundingFacet.json";
 
 export const tokens = {
   usdt: "0x05D032ac25d322df992303dCa074EE7392C117b9",
+  usdt0: "0x43F2376D5D03553aE72F4A8093bbe9de4336EB08",
   usdc: "0xF242275d3a6527d877f2c927a82D9b057609cc71",
   safu: "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a",
   lsk: "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24",
-
 };
 
 // 0x08b59fb7ee9418470004693acf6d2c7dd0256a69
