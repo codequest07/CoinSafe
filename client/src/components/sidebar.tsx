@@ -19,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { ChevronDown, Coins, X } from "lucide-react";
+import { ArrowDownToLine, ChevronDown, Coins, X } from "lucide-react";
 // import { useNavigate } from "react-router-dom";
 // import { Coins, ExternalLinkIcon } from "lucide-react";
 
@@ -28,6 +28,13 @@ const currencies = [
   { code: "USDC", name: "Bitcoin", rate: 45000 },
   // { code: "ETH", name: "Ethereum", rate: 2800 },
   // { code: "ADA", name: "Cardano", rate: 0.45 },
+];
+
+const paymentChannels = [
+  { code: "bank", name: "Bank Transfer" },
+  { code: "mobile_money", name: "Mobile Money" },
+  { code: "airtime", name: "Airtime" },
+  { code: "paybill", name: "Paybill" },
 ];
 
 const Sidebar = () => {
@@ -39,6 +46,11 @@ const Sidebar = () => {
   const [, setUsdValue] = useState<number>(0);
   const [openOnRampModal, setOpenOnRampModal] = useState(false);
 
+  // Off-ramp state
+  const [offRampAmount, setOffRampAmount] = useState<string>("");
+  const [offRampCurrency, setOffRampCurrency] = useState("USDT");
+  const [offRampPaymentChannel, setOffRampPaymentChannel] = useState("bank");
+  const [openOffRampModal, setOpenOffRampModal] = useState(false);
   // const navigate = useNavigate()
 
   /**
@@ -166,6 +178,39 @@ const Sidebar = () => {
     return currentPath.startsWith(path) && path !== "/";
   };
 
+  /**
+   * Handles input changes for the off-ramp amount field
+   */
+  const handleOffRampAmountChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+      setOffRampAmount(value);
+    }
+  };
+
+  /**
+   * Handles currency selection for off-ramp
+   */
+  const handleOffRampCurrencySelect = (currencyCode: string) => {
+    setOffRampCurrency(currencyCode);
+  };
+
+  /**
+   * Handles payment channel selection for off-ramp
+   */
+  const handlePaymentChannelSelect = (channelCode: string) => {
+    setOffRampPaymentChannel(channelCode);
+  };
+
+  /**
+   * Clears the off-ramp input field
+   */
+  const handleOffRampClear = () => {
+    setOffRampAmount("0.00");
+  };
+
   return (
     <main>
       <div className="grid min-h-screen w-full md:grid-cols-[240px_1fr] lg:grid-cols-[280px_1fr]">
@@ -187,7 +232,8 @@ const Sidebar = () => {
                       isLinkActive(link.to)
                         ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#F1F1F1] bg-[#1E1E1E99] transition-all"
                         : "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
-                    }>
+                    }
+                  >
                     <>
                       {isLinkActive(link.to) ? (
                         <link.activeIcon className="w-5 h-5" />
@@ -207,12 +253,23 @@ const Sidebar = () => {
                   onClick={() => setOpenOnRampModal(true)}
                   className={
                     "flex items-center cursor-pointer gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
-                  }>
+                  }
+                >
                   <>
                     <Coins className="w-5 h-5" />
                     {"On-ramp"}
                     {/* <span><ExternalLinkIcon className="w-5 h-5" /></span> */}
                   </>
+                </div>
+
+                <div
+                  onClick={() => setOpenOffRampModal(true)}
+                  className={
+                    "flex items-center cursor-pointer gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] hover:text-[#F1F1F1] transition-all"
+                  }
+                >
+                  <ArrowDownToLine className="w-5 h-5" />
+                  {"Off-ramp"}
                 </div>
               </nav>
             </div>
@@ -238,7 +295,8 @@ const Sidebar = () => {
             <div className="w-full max-w-sm">
               <label
                 htmlFor=""
-                className="text-[#CACACA] font-light text-[14px]">
+                className="text-[#CACACA] font-light text-[14px]"
+              >
                 Amount to On-ramp
               </label>
               <div className="flex items-center justify-between bg-transaprarent rounded-lg p-4 border-[1px] border-[#FFFFFF3D]">
@@ -260,7 +318,8 @@ const Sidebar = () => {
                     variant="ghost"
                     size="sm"
                     onClick={handleClear}
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600">
+                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+                  >
                     <X className="h-4 w-4" />
                   </Button>
 
@@ -268,19 +327,22 @@ const Sidebar = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="secondary"
-                        className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md">
+                        className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md"
+                      >
                         {selectedCurrency}
                         <ChevronDown className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="w-32 bg-gray-600 text-white">
+                      className="w-32 bg-gray-600 text-white"
+                    >
                       {currencies.map((currency) => (
                         <DropdownMenuItem
                           key={currency.code}
                           onClick={() => handleCurrencySelect(currency.code)}
-                          className="cursor-pointer">
+                          className="cursor-pointer"
+                        >
                           <div className="flex flex-col">
                             <span className="font-medium">{currency.code}</span>
                             {/* <span className="text-xs text-gray-500">{currency.name}</span> */}
@@ -298,9 +360,148 @@ const Sidebar = () => {
                       ? "#"
                       : `https://pay.fonbnk.com/auth?source=o9VjcneL&network=LISK&asset=${selectedCurrency}&amount=${amount}&currency=crypto&paymentChannel=bank&countryIsoCode=NG&address=${account?.address}&signature=${token}`
                   }
-                  target="_blank">
+                  target="_blank"
+                >
                   <Button className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] rounded-[100px] border-[1px] border-[#FFFFFF05] text-[#010104] text-[14px]">
                     Proceed to On-ramp
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Off-ramp Modal */}
+      {openOffRampModal && (
+        <Dialog open={openOffRampModal} onOpenChange={setOpenOffRampModal}>
+          <DialogContent className="max-w-[390px] sm:max-w-[400px] border-[1px] border-[#FFFFFF3D] rounded-lg text-white bg-[#17171C] bg-opacity-100 p-4 absolute left-1/2 top-[30%]">
+            <DialogHeader>
+              <DialogTitle className="py-4">Off-ramp Details</DialogTitle>
+            </DialogHeader>
+            <div className="w-full max-w-sm space-y-4">
+              {/* Amount Input */}
+              <div>
+                <label
+                  htmlFor=""
+                  className="text-[#CACACA] font-light text-[14px]"
+                >
+                  Amount to Off-ramp
+                </label>
+                <div className="flex items-center justify-between rounded-lg p-4 bg-[#17171C] border-[1px] border-[#FFFFFF3D]">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={offRampAmount}
+                      onChange={handleOffRampAmountChange}
+                      className="text-2xl font-medium bg-transparent border-none outline-none w-full"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleOffRampClear}
+                      className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md"
+                        >
+                          {offRampCurrency}
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-32 bg-gray-600 text-white"
+                      >
+                        {currencies.map((currency) => (
+                          <DropdownMenuItem
+                            key={currency.code}
+                            onClick={() =>
+                              handleOffRampCurrencySelect(currency.code)
+                            }
+                            className="cursor-pointer"
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                {currency.code}
+                              </span>
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Channel Selection */}
+              <div className="bg-[#17171C] z-20">
+                <label
+                  htmlFor=""
+                  className="text-[#CACACA] font-light text-[14px] mb-2 block"
+                >
+                  Payment Method
+                </label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      className="w-full flex items-center justify-between border-[1px] border-[#FFFFFF3D] bg-transparent text-[#F1F1F1] hover:bg-gray-800 p-4 text-[14px] rounded-lg"
+                    >
+                      <span>
+                        {
+                          paymentChannels.find(
+                            (ch) => ch.code === offRampPaymentChannel
+                          )?.name
+                        }
+                      </span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[350px] bg-gray-600 text-white"
+                  >
+                    {paymentChannels.map((channel) => (
+                      <DropdownMenuItem
+                        key={channel.code}
+                        onClick={() => handlePaymentChannelSelect(channel.code)}
+                        className="cursor-pointer p-3"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium">{channel.name}</span>
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Proceed Button */}
+              <div className="pt-2 flex justify-end">
+                <Link
+                  to={
+                    !offRampAmount
+                      ? "#"
+                      : `https://sandbox-pay.fonbnk.com/offramp?source=o9VjcneL&network=LISK&asset=${offRampCurrency}&amount=${offRampAmount}&currency=crypto&paymentChannel=${offRampPaymentChannel}&countryIsoCode=NG&signature=${token}&hideSwitch=true`
+                  }
+                  target="_blank"
+                >
+                  <Button
+                    disabled={!offRampAmount || parseFloat(offRampAmount) === 0}
+                    className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] rounded-[100px] border-[1px] border-[#FFFFFF05] text-[#010104] text-[14px] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Proceed to Off-ramp
                   </Button>
                 </Link>
               </div>
