@@ -7,6 +7,7 @@ import {
   getLskToUsd,
   getSafuToUsd,
   getUsdcToUsd,
+  getUsdt0ToUsd,
   getUsdtToUsd,
 } from "@/lib";
 import { TokenInfo } from "thirdweb/react";
@@ -82,6 +83,8 @@ export const convertTokenAmountToUsd = async (
       return await getLskToUsd(Number(formatUnits(amount, tokenDecimals)));
     case tokens.usdc:
       return await getUsdcToUsd(Number(formatUnits(amount, tokenDecimals)));
+    case tokens.usdt0: 
+      return await getUsdt0ToUsd(Number(formatUnits(amount, tokenDecimals)))
     default:
       console.error("Unknown token address:", token);
       return 0;
@@ -214,6 +217,12 @@ export const tokenData = {
     color: "bg-[#d54f]",
     image: "/assets/tokens/usdt.jpg",
   },
+  "0x43F2376D5D03553aE72F4A8093bbe9de4336EB08": {
+    symbol: "USDT0",
+    chain: "Lisk",
+    color: "bg-[#d5f]",
+    image: "/assets/tokens/usdt0.png",
+  },
 } as any;
 
 export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
@@ -235,6 +244,12 @@ export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
       icon: tokenData[tokens.lsk]?.image,
       name: tokenData[tokens.lsk]?.symbol,
       symbol: tokenData[tokens.lsk]?.symbol,
+    },
+    {
+      address: tokens.usdt0,
+      icon: tokenData[tokens.usdt0]?.image,
+      name: tokenData[tokens.usdt0]?.symbol,
+      symbol: tokenData[tokens.usdt0]?.symbol,
     },
   ],
 };

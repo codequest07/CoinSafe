@@ -40,7 +40,7 @@ export default function SmarterSavingCard({
     if (buttonText === "Get started") {
       if (!address) {
         toast.error("No wallet connected");
-        setIsConnectModalOpen && setIsConnectModalOpen(true);
+        setIsConnectModalOpen?.(true);
         return;
       }
 

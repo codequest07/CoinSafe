@@ -6,6 +6,7 @@ import KitchenLoading from "./kitchen-loading";
 import { PermissionModal } from "./Permission-modal";
 import { useApproval } from "@/contexts/ApprovalContext";
 import { useActiveAccount } from "thirdweb/react";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface SaveSenseModalManagerProps {
   trigger?: RefObject<{ fetchData: () => void; download: () => void }>;
@@ -47,17 +48,13 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
     setSaveSenseData(null); // Reset previous data
 
     try {
-      const response = await fetch(
-        `https://save-senseee.vercel.app/api/ai/savings-plan`,
-        // `http://localhost:1234/api/ai/savings-plan`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ address }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/ai/savings-plan`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ address }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -76,7 +73,7 @@ export const SaveSenseModalManager: React.FC<SaveSenseModalManagerProps> = ({
       setIsSaveSenseModalOpen(true);
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("Failed to fetch data",{
+      toast.error("Failed to fetch data", {
         description:
           error instanceof Error ? error.message : "An unknown error occurred",
       });
