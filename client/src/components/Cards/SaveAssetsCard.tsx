@@ -393,8 +393,16 @@ export default function SaveAssetsCard() {
 
   const [totalApy, setTotalApy] = useState<number | null>(null);
 
+  // Map USDT0 to USDT for APY calculation, but exclude USDT itself from showing APY
+  const apyTokenAddress =
+    saveState.token === tokens.usdt0
+      ? tokens.usdt
+      : saveState.token === tokens.usdt
+      ? null // Don't calculate APY for USDT
+      : saveState.token;
+
   const { nativeApy, totalApr, fees, loading, error } = useVaultApy(
-    saveState.token as `0x${string}`,
+    (apyTokenAddress || tokens.usdt) as `0x${string}`,
     "0x00cD58DEEbd7A2F1C55dAec715faF8aed5b27BF8"
   );
 
@@ -402,6 +410,13 @@ export default function SaveAssetsCard() {
     if (error) {
       console.log("Error", error);
     }
+
+    // Skip APY calculation for USDT
+    if (saveState.token === tokens.usdt) {
+      setTotalApy(null);
+      return;
+    }
+
     if (saveState.token && nativeApy && totalApr && fees && !loading) {
       const computation = (
         Number(totalApr) +
@@ -443,7 +458,8 @@ export default function SaveAssetsCard() {
               saveType === "one-time"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}>
+            )}
+          >
             One-time save
           </button>
           <button
@@ -453,7 +469,8 @@ export default function SaveAssetsCard() {
               saveType === "auto"
                 ? "bg-[#79E7BA33] text-white"
                 : "text-gray-300"
-            )}>
+            )}
+          >
             Autosave
           </button>
         </div>
@@ -488,7 +505,8 @@ export default function SaveAssetsCard() {
                 <Button
                   variant="link"
                   className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                  onClick={() => navigate("/deposit")}>
+                  onClick={() => navigate("/deposit")}
+                >
                   Deposit to save
                 </Button>
               ) : (
@@ -499,7 +517,8 @@ export default function SaveAssetsCard() {
                       ...prev,
                       amount: selectedTokenBalance,
                     }))
-                  }>
+                  }
+                >
                   Save all
                 </Button>
               )}
@@ -580,7 +599,8 @@ export default function SaveAssetsCard() {
                       selectedOption === "by-frequency"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}>
+                    }`}
+                  >
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -610,7 +630,8 @@ export default function SaveAssetsCard() {
                       selectedOption === "per-transaction"
                         ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
                         : ""
-                    }`}>
+                    }`}
+                  >
                     <div>
                       <div className="flex gap-2">
                         <input
@@ -669,7 +690,8 @@ export default function SaveAssetsCard() {
                     <Link to={"/vault/auto-safe"}>
                       <Button
                         variant="link"
-                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0">
+                        className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                      >
                         View your Automated Safe here
                       </Button>
                     </Link>
@@ -708,7 +730,8 @@ export default function SaveAssetsCard() {
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0 self-start sm:self-auto"
-                            onClick={() => navigate("/deposit")}>
+                            onClick={() => navigate("/deposit")}
+                          >
                             Deposit to save
                           </Button>
                         ) : (
@@ -719,7 +742,8 @@ export default function SaveAssetsCard() {
                                 ...prev,
                                 amount: selectedTokenBalance,
                               }))
-                            }>
+                            }
+                          >
                             Max
                           </Button>
                         )}
@@ -785,7 +809,8 @@ export default function SaveAssetsCard() {
               <div className="flex justify-between sm:gap-3 sm:justify-end mt-6">
                 <Button
                   onClick={() => navigate(-1)}
-                  className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
+                  className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]"
+                >
                   Cancel
                 </Button>
                 <div>
@@ -793,7 +818,8 @@ export default function SaveAssetsCard() {
                     onClick={handleSaveAsset}
                     className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
                     variant="outline"
-                    disabled={isLoading || autoSavingsLoading}>
+                    disabled={isLoading || autoSavingsLoading}
+                  >
                     {isLoading || autoSavingsLoading ? (
                       <LoaderCircle className="animate-spin" />
                     ) : hasAutoSafe ? (
@@ -812,7 +838,8 @@ export default function SaveAssetsCard() {
             <div className="flex justify-between sm:gap-3 sm:justify-end mt-6">
               <Button
                 onClick={() => navigate(-1)}
-                className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
+                className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]"
+              >
                 Cancel
               </Button>
               <div>
@@ -820,7 +847,8 @@ export default function SaveAssetsCard() {
                   onClick={handleSaveAsset}
                   className="text-black px-8 rounded-[2rem] w-full sm:w-auto"
                   variant="outline"
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <LoaderCircle className="animate-spin" />
                   ) : (
