@@ -20,6 +20,7 @@ interface DisplaySafe {
   // token: string;
   status: "Flexible" | "Locked";
   unlockDate: string;
+  isLocked?: boolean;
 }
 
 export default function SavingsCards() {
@@ -39,6 +40,7 @@ export default function SavingsCards() {
     isLoading: automatedSafeLoading,
     error: automatedSafeError,
   } = useAutomatedSafeForUser(userAddress as `0x${string}`);
+  console.log("SAFE::::::::::", safes);
 
   const hasActiveAutoSavings =
     details?.tokenDetails?.some(
@@ -151,18 +153,26 @@ export default function SavingsCards() {
 
           const status = Number(safe.duration) > 0 ? "Locked" : "Flexible";
 
+          console.log("Unlock time::::::::::", Number(safe.unlockTime));
+          console.log("New Date::::::::::", new Date().getTime());
+
+          console.log(
+            "Is locked::::::::::",
+            Number(safe.unlockTime) > new Date().getTime() ? true : false
+          );
           return {
             id: safe.id.toString(),
             name: safe.target,
             amount: totalAmount,
             status: status as "Locked" | "Flexible",
+            isLocked: Number(safe.unlockTime) > new Date().getTime(),
             unlockDate: safe.unlockTime
               ? `Unlocks on ${formattedDate}`
               : "Unlocks Anytime",
           };
         }) || []
       );
-
+      console.log("SAFE LIST::::::::::", safeList);
       setDisplaySafes(safeList);
     };
 
@@ -289,7 +299,11 @@ export default function SavingsCards() {
                         bg-[#79E7BA33] font-[400] text-[#F1F1F1] rounded-xl flex items-center p-1 px-2 hover:bg-[#79E7BA33]
                       `}
                       >
-                        {safe.status}
+                        {safe.id === "911"
+                          ? safe.status
+                          : safe.id !== "911" && !safe.isLocked
+                          ? "Matured"
+                          : safe.status}
                       </Badge>
                     </div>
                     <div className="flex items-baseline">
