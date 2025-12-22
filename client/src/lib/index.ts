@@ -156,6 +156,10 @@ export async function getTokenPrice(token: string, amount: number | undefined) {
         const usdcPrice = await getUsdcToUsd(amount);
         return usdcPrice.toFixed(2);
       }
+      case tokens.usdt0: {
+        const usdt0Price = await getUsdt0ToUsd(amount);
+        return usdt0Price.toFixed(2);
+      }
       default:
         return "0.00";
     }
