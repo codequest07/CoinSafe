@@ -41,10 +41,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FonbnkService = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const uuid_1 = require("uuid");
+const crypto_1 = __importDefault(require("crypto"));
 class FonbnkService {
     constructor(config) {
         this.config = config;
@@ -54,9 +58,9 @@ class FonbnkService {
                 : "https://pay.fonbnk.com";
     }
     /**
-     * Generate a JWT signature for Fonbnk payment URL
+     * Generate a JWT signature for Fonbnk payment URL (on-ramp legacy flow)
      */
-    generateSignature(customData) {
+    generateJwtSignature(customData) {
         const payload = Object.assign({ uid: (0, uuid_1.v4)() }, customData);
         return jwt.sign(payload, this.config.signatureSecret, {
             algorithm: "HS256",
@@ -66,9 +70,34 @@ class FonbnkService {
      * Create a payment URL for on-ramp
      */
     createPaymentUrl(params = {}) {
-        const signature = this.generateSignature(params.customData);
+        const signature = this.generateJwtSignature(params.customData);
         const urlParams = new URLSearchParams(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ source: this.config.source, signature: signature }, (params.amount && { amount: params.amount.toString() })), (params.currency && { currency: params.currency })), (params.country && { country: params.country })), (params.walletAddress && { walletAddress: params.walletAddress })), (params.redirectUrl && { redirectUrl: params.redirectUrl })));
         return `${this.baseUrl}/?${urlParams.toString()}`;
+    }
+    /**
+     * Generate HMAC request signature for Fonbnk API/off-ramp flows
+     * canonical format: `${timestamp}:${METHOD}:${path}:${bodyHash}`
+     */
+    generateRequestSignature({ method = "GET", path = "/", body = "", timestamp = Date.now().toString(), }) {
+        const bodyHash = crypto_1.default
+            .createHash("sha256")
+            .update(body || "")
+            .digest("hex");
+        const canonical = `${timestamp}:${method.toUpperCase()}:${path}:${bodyHash}`;
+        const signature = crypto_1.default
+            .createHmac("sha256", this.config.signatureSecret)
+            .update(canonical)
+            .digest("hex");
+        return {
+            signature,
+            timestamp,
+            headers: {
+                "x-fonbnk-key": this.config.apiKey || "",
+                "x-fonbnk-timestamp": timestamp,
+                "x-fonbnk-signature": signature,
+                "content-type": "application/json",
+            },
+        };
     }
     /**
      * Verify webhook signature

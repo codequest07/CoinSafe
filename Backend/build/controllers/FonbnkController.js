@@ -18,6 +18,7 @@ class FonbnkController {
         const config = {
             signatureSecret: process.env.FONBNK_SIGNATURE_SECRET || "",
             source: process.env.FONBNK_SOURCE || "",
+            apiKey: process.env.FONBNK_API_KEY || "",
             environment: (process.env.FONBNK_ENVIRONMENT || "sandbox"),
         };
         this.fonbnkService = new FonbnkService_1.FonbnkService(config);
@@ -217,30 +218,23 @@ class FonbnkController {
         });
     }
     /**
-     * Generate JWT signature for Fonbnk
+     * Generate request signature for Fonbnk (HMAC)
      */
     generateSignature(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { customData } = req.query;
-                // Parse custom data if provided
-                let parsedCustomData = {};
-                if (customData && typeof customData === "string") {
-                    try {
-                        parsedCustomData = JSON.parse(customData);
-                    }
-                    catch (e) {
-                        console.warn("Invalid custom data format:", customData);
-                    }
-                }
-                // Generate signature using the service
-                const signature = this.fonbnkService.generateSignature(parsedCustomData);
+                const { method = "GET", path = "/", body = "", timestamp, } = req.body || {};
+                const { signature, headers } = this.fonbnkService.generateRequestSignature({
+                    method,
+                    path,
+                    body,
+                    timestamp,
+                });
                 res.json({
                     success: true,
                     data: {
                         signature,
-                        timestamp: new Date().toISOString(),
-                        customData: parsedCustomData,
+                        headers,
                     },
                 });
             }
