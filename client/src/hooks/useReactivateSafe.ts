@@ -7,6 +7,8 @@ import { Abi } from "viem";
 import { toBigInt } from "ethers";
 import { toast } from "sonner";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
+import { getTokenDecimals } from "@/lib/utils";
+import { parseUnits } from "ethers";
 
 interface SaveState {
   token: string;
@@ -45,6 +47,20 @@ export const useReactivateSavingsTarget = ({
       try {
         setIsLoading(true);
 
+        if (!saveState.token) {
+          const error = new Error("Token is required");
+          setError(error);
+          onError?.(error);
+          return;
+        }
+
+        if (!saveState.amount || saveState.amount <= 0) {
+          const error = new Error("Amount must be greater than 0");
+          setError(error);
+          onError?.(error);
+          return;
+        }
+
         const contract = getContract({
           client,
           chain: liskMainnet,
@@ -52,15 +68,18 @@ export const useReactivateSavingsTarget = ({
           abi: facetAbis.targetSavingsFacet as Abi,
         });
 
-        console.log(saveState);
-
         const transaction = prepareContractCall({
           contract,
           method: resolveMethod("reactivateSafe"),
           params: [
             safeId,
             saveState.token,
-            toBigInt(saveState.amount),
+            toBigInt(
+              parseUnits(
+                saveState.amount?.toString(),
+                getTokenDecimals(saveState.token)
+              )
+            ),
             toBigInt(saveState.duration),
           ],
         });
@@ -84,7 +103,7 @@ export const useReactivateSavingsTarget = ({
           }
         }
 
-        console.error("Error writing data to contract:", err);
+        // console.error("Error writing data to contract:", err);
         toast.error("Error writing data to contract");
 
         const error = new Error(errorMessage);
