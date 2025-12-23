@@ -36,13 +36,13 @@ async function checkIsTokenAutoSaved(
     chain: liskMainnet,
   });
 
-  const balance = await readContract({
+  const enabled = await readContract({
     contract: contract,
     method:
       "function isAutosaveEnabledForToken(address _user, address _token) external view returns (bool)",
     params: [userAddress, tokenAddress],
   });
-  return balance;
+  return enabled;
 }
 
 interface VaultAssetTableProps {
