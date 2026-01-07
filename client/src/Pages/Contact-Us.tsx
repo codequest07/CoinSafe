@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import AppLogo from "@/icons/AppLogo";
 
 export default function ContactUs() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,15 +62,15 @@ export default function ContactUs() {
     <>
       <Navbar />
 
-      <div className="min-h-screen bg-black text-white mt-20 p-8 md:p-16">
+      <div className="min-h-screen bg-black text-white mt-20 p-8 md:p-10">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col items-center justify-center space-y-8">
+          <div className="flex flex-col max-w-2xl mx-auto items-center justify-center space-y-8">
             {/* Heading */}
-            <div className="text-center space-y-4">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-normal text-white">
+            <div className="space-y-4">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-normal text-[#F1F1F1]">
                 HAVE SOMETHING TO SHARE WITH US?
               </h1>
-              <p className="text-base md:text-lg text-white">
+              <p className="text-base md:text-[20px] font-[200] text-white">
                 Send us a message, and we will get back to you!
               </p>
             </div>
@@ -87,8 +85,8 @@ export default function ContactUs() {
                   <Input
                     id="name"
                     name="name"
-                    defaultValue="Nwamaka"
-                    className="bg-[#3F3F3F] border-white border text-white h-12"
+                    placeholder="Nwamaka"
+                    className="bg-transparent border-[#FFFFFF3D] border text-white h-12"
                   />
                 </div>
 
@@ -100,8 +98,8 @@ export default function ContactUs() {
                     id="email"
                     name="email"
                     type="email"
-                    defaultValue="akah.nwamaka.d@gmail.com"
-                    className="bg-[#3F3F3F] border-white border text-white h-12"
+                    placeholder="akah.nwamaka.d@gmail.com"
+                    className="bg-transparent border-[#FFFFFF3D] border text-white h-12"
                   />
                 </div>
 
@@ -111,9 +109,9 @@ export default function ContactUs() {
                   </Label>
                   <Textarea
                     id="message"
+                    placeholder="I have a question about the app..."
                     name="message"
-                    defaultValue="akah.nwamaka.d@gmail.com"
-                    className="bg-[#3F3F3F] border-white border text-white min-h-32 resize-none"
+                    className="bg-transparent border-[#FFFFFF3D] border text-white min-h-32 resize-none"
                   />
                 </div>
 
@@ -130,53 +128,7 @@ export default function ContactUs() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-black border-t border-[#FFFFFF17]">
-        <div className="flex flex-col md:flex-row justify-between items-center max-w-[1240px] mx-auto px-4 py-6 md:py-8">
-          <div className="mb-4 md:mb-0">
-            <Link to={"/"}>
-              <AppLogo />
-            </Link>
-          </div>
-          <div className="flex gap-4">
-            <div className="border border-white p-3 md:p-4">
-              <Link
-                target="_blank"
-                rel="noopener noreferrer"
-                to={"https://discord.gg/9cNTQWXE"}>
-                <img
-                  src="/assets/discord.svg"
-                  alt="Discord"
-                  className="w-6 h-6 md:w-8 md:h-8"
-                />
-              </Link>
-            </div>
-            <div className="border border-white p-3 md:p-4">
-              <Link
-                target="_blank"
-                rel="noopener noreferrer"
-                to={"https://x.com/Coinsafe_safe"}>
-                <img
-                  src="/assets/x.svg"
-                  alt="X"
-                  className="w-6 h-6 md:w-8 md:h-8"
-                />
-              </Link>
-            </div>
-            <div className="border border-white p-3 md:p-4">
-              <Link
-                target="_blank"
-                rel="noopener noreferrer"
-                to={"https://t.me/coinsafe_safe"}>
-                <img
-                  src="/assets/telegram.svg"
-                  alt="Telegram"
-                  className="w-6 h-6 md:w-8 md:h-8"
-                />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

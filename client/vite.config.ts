@@ -43,11 +43,40 @@ function firebaseServiceWorkerPlugin() {
   };
 }
 
+// Plugin to handle PWA plugin 404 errors (stale references)
+function pwaPluginStub() {
+  return {
+    name: "pwa-plugin-stub",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        // Intercept requests for non-existent PWA plugin endpoints
+        if (req.url?.includes("@vite-plugin-pwa")) {
+          res.statusCode = 404;
+          res.end();
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), firebaseServiceWorkerPlugin()],
+  plugins: [react(), firebaseServiceWorkerPlugin(), pwaPluginStub()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  optimizeDeps: {
+    include: ["eventemitter3"],
+    esbuildOptions: {
+      target: "esnext",
+    },
+  },
+  build: {
+    commonjsOptions: {
+      include: [/eventemitter3/, /node_modules/],
     },
   },
 });
