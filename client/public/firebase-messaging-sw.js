@@ -1,13 +1,15 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
+// Firebase configuration from environment variables
+// These will be replaced at build time by Vite
 const app = firebase.initializeApp({
-  apiKey: 'AIzaSyAnzPavw8TC7mS-fM5oGxPUMgH9sQUtOcQ',
-  authDomain: 'coinsafe-web-app.firebaseapp.com',
-  projectId: 'coinsafe-web-app',
-  storageBucket: 'coinsafe-web-app.firebasestorage.app',
-  messagingSenderId: '584353435531',
-  appId: '1:584353435531:web:9535e32ab1b60160cfe98e',
+  apiKey: '__VITE_FIREBASE_API_KEY__',
+  authDomain: '__VITE_FIREBASE_AUTH_DOMAIN__',
+  projectId: '__VITE_FIREBASE_PROJECT_ID__',
+  storageBucket: '__VITE_FIREBASE_STORAGE_BUCKET__',
+  messagingSenderId: '__VITE_FIREBASE_MESSAGING_SENDER_ID__',
+  appId: '__VITE_FIREBASE_APP_ID__',
 });
 
 const messaging = firebase.messaging(app);

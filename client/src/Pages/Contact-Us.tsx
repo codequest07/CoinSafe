@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import AppLogo from "@/icons/AppLogo";
 
 export default function ContactUs() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,75 +64,119 @@ export default function ContactUs() {
     <>
       <Navbar />
 
-      <div className="min-h-screen bg-black text-white  mt-20 p-8 md:p-16">
+      <div className="min-h-screen bg-black text-white mt-20 p-8 md:p-16">
         <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-1 gap-12 md:gap-16 items-start">
-            <div className="grid md:grid-cols-2 gap-12  items-end">
-              {/* Left side - Heading */}
-              <div className="space-y-6">
-                <h1 className="text-4xl bg-gradient-to-r from-[#F1F1F1] to-[#8B8B8B] bg-clip-text text-transparent font-[500] md:text-5xl  leading-tight">
-                  Have something to share with us?
-                </h1>
-              </div>
-
-              {/* Right side - Form */}
-              <div className="space-y-8">
-                <p className="text-base text-[#CACACA]">
-                  Send us a message, and we will get back to you!
-                </p>
-              </div>
+          <div className="flex flex-col items-center justify-center space-y-8">
+            {/* Heading */}
+            <div className="text-center space-y-4">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-normal text-white">
+                HAVE SOMETHING TO SHARE WITH US?
+              </h1>
+              <p className="text-base md:text-lg text-white">
+                Send us a message, and we will get back to you!
+              </p>
             </div>
-            <div className="space-y-8">
+
+            {/* Form */}
+            <div className="w-full max-w-2xl">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm text-gray-300">
+                  <Label htmlFor="name" className="text-sm text-white">
                     Name
                   </Label>
                   <Input
                     id="name"
                     name="name"
-                    placeholder="Nwamaka"
-                    className="bg-transparent border-[#FFFFFF3D] border-2 text-white placeholder:text-gray-400 focus:border-gray-400 h-12"
+                    defaultValue="Nwamaka"
+                    className="bg-[#3F3F3F] border-white border text-white h-12"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm text-gray-300">
+                  <Label htmlFor="email" className="text-sm text-white">
                     Email address
                   </Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="akah.nwamaka.d@gmail.com"
-                    className="bg-transparent border-[#FFFFFF3D] border-2 text-white placeholder:text-gray-400 focus:border-[#FFFFFF3D] h-12"
+                    defaultValue="akah.nwamaka.d@gmail.com"
+                    className="bg-[#3F3F3F] border-white border text-white h-12"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="message" className="text-sm text-gray-300">
+                  <Label htmlFor="message" className="text-sm text-white">
                     Your message to us
                   </Label>
                   <Textarea
                     id="message"
                     name="message"
-                    placeholder="akah.nwamaka.d@gmail.com"
-                    className="bg-transparent border-[#FFFFFF3D] border-2 text-white placeholder:text-gray-400 focus:border-[#FFFFFF3D] min-h-32 resize-none"
+                    defaultValue="akah.nwamaka.d@gmail.com"
+                    className="bg-[#3F3F3F] border-white border text-white min-h-32 resize-none"
                   />
                 </div>
 
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-[#FFFFFFE5] rounded-[2rem] text-black hover:bg-gray-200 px-8 py-3 h-auto disabled:disabled:opacity-50">
-                  {isSubmitting ? "Sending..." : "Send Message"}
+                  className="bg-[#CACACA] rounded-full text-black hover:bg-gray-300 px-8 py-3 h-auto w-full md:w-auto disabled:opacity-50">
+                  {isSubmitting ? "Sending..." : "Submit"}
                 </Button>
               </form>
             </div>
           </div>
         </div>
       </div>
-      <Footer />
+
+      {/* Footer */}
+      <footer className="bg-black border-t border-[#FFFFFF17]">
+        <div className="flex flex-col md:flex-row justify-between items-center max-w-[1240px] mx-auto px-4 py-6 md:py-8">
+          <div className="mb-4 md:mb-0">
+            <Link to={"/"}>
+              <AppLogo />
+            </Link>
+          </div>
+          <div className="flex gap-4">
+            <div className="border border-white p-3 md:p-4">
+              <Link
+                target="_blank"
+                rel="noopener noreferrer"
+                to={"https://discord.gg/9cNTQWXE"}>
+                <img
+                  src="/assets/discord.svg"
+                  alt="Discord"
+                  className="w-6 h-6 md:w-8 md:h-8"
+                />
+              </Link>
+            </div>
+            <div className="border border-white p-3 md:p-4">
+              <Link
+                target="_blank"
+                rel="noopener noreferrer"
+                to={"https://x.com/Coinsafe_safe"}>
+                <img
+                  src="/assets/x.svg"
+                  alt="X"
+                  className="w-6 h-6 md:w-8 md:h-8"
+                />
+              </Link>
+            </div>
+            <div className="border border-white p-3 md:p-4">
+              <Link
+                target="_blank"
+                rel="noopener noreferrer"
+                to={"https://t.me/coinsafe_safe"}>
+                <img
+                  src="/assets/telegram.svg"
+                  alt="Telegram"
+                  className="w-6 h-6 md:w-8 md:h-8"
+                />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </>
   );
 }

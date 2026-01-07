@@ -70,7 +70,6 @@ app.use("/api/fonbnk", FonbnkRouter);
 
 // MongoDB Connection
 const mongodbUri = process.env.MONGO_URI || "";
-// "mongodb+srv://agbakwuruoluchicoinsafe:SDYRnmD6FrVp09fo@cluster0.g6csr.mongodb.net";
 
 mongoose
   .connect(mongodbUri, {
