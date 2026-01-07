@@ -9,6 +9,7 @@ const App = () => {
     <div className="bg-[#010104]">
       <Routes>
         <Route path="/" element={<LandingPage />} />
+
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
