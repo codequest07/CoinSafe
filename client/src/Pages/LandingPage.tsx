@@ -1,12 +1,12 @@
 import FeatureCards from "@/components/FeatureCards";
 import Footer from "@/components/Footer";
-import LandingFeatures from "@/components/LandingFeatures";
-// import Hero from "@/components/Hero";
 import LatestHero from "@/components/LatestHero";
 import Navbar from "@/components/Navbar";
-import PoweredBy from "@/components/PoweredBy";
-import ToolsSection from "@/components/Tools-section";
-import TrackProgress from "@/components/TrackProgress";
+import StatsStrip from "@/components/StatsStrip";
+import CoinGrowSection from "@/components/CoinGrowSection";
+import SecurityAuditSection from "@/components/SecurityAuditSection";
+import SecurityFeatures from "@/components/SecurityFeatures";
+import TrustSection from "@/components/TrustSection";
 
 const LandingPage = () => {
   return (
@@ -16,10 +16,11 @@ const LandingPage = () => {
         <div className="mt-12">
           <LatestHero />
           <FeatureCards />
-          <ToolsSection />
-          <LandingFeatures />
-          <TrackProgress />
-          <PoweredBy />
+          <StatsStrip />
+          <CoinGrowSection />
+          <SecurityAuditSection />
+          <SecurityFeatures />
+          <TrustSection />
           <Footer />
         </div>
       </main>
