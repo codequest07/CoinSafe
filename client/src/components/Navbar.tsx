@@ -50,7 +50,7 @@ export default function Navbar() {
               FAUCET
             </Link> */}
             <Link
-              to="/contact"
+              to="/contact-us"
               className="hover:text-[#79E7BA] transition-colors">
               CONTACT US
             </Link>
