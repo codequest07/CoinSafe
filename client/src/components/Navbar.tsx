@@ -12,7 +12,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-black fixed z-10 top-0 w-full py-4 sm:px-16 px-4 flex justify-between items-center">
+      <nav className="bg-black fixed z-50 top-0 w-full py-4 sm:px-16 px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center space-x-2">
           <AppLogo className="" />
           {/* MemoNavX */}
