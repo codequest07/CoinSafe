@@ -7,10 +7,22 @@ import CoinGrowSection from "@/components/CoinGrowSection";
 import SecurityAuditSection from "@/components/SecurityAuditSection";
 import SecurityFeatures from "@/components/SecurityFeatures";
 import TrustSection from "@/components/TrustSection";
+import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 const LandingPage = () => {
+  useEffect(() => {
+    document.documentElement.style.scrollBehavior = "smooth";
+    return () => {
+      document.documentElement.style.scrollBehavior = "auto";
+    };
+  }, []);
+
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}>
       <main>
         <Navbar />
         <div className="mt-12">
@@ -24,7 +36,7 @@ const LandingPage = () => {
           <Footer />
         </div>
       </main>
-    </div>
+    </motion.div>
   );
 };
 
