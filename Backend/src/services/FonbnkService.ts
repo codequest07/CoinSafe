@@ -186,4 +186,43 @@ export class FonbnkService {
       throw new Error(`Failed to get order status: ${error}`);
     }
   }
+
+  /**
+   * Initiate an off-ramp transaction
+   * @param params Off-ramp transaction parameters
+   */
+  async initiateOffRamp(params: {
+    amount: number;
+    currency: string;
+    walletAddress: string;
+    network: string;
+    asset: string;
+    paymentChannel: string;
+    countryIsoCode: string;
+    customData?: Record<string, any>;
+  }) {
+    const path = "/offramp/initiate";
+    const method = "POST";
+    const body = JSON.stringify(params);
+    const { signature, timestamp, headers } = this.generateRequestSignature({
+      method,
+      path,
+      body,
+    });
+
+    try {
+      const response = await axios.post(`${this.baseUrl}${path}`, params, {
+        headers: {
+          ...headers,
+          "x-fonbnk-key": this.config.apiKey || "",
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error("Error initiating off-ramp:", error.response?.data || error.message);
+      throw new Error(
+        `Failed to initiate off-ramp: ${error.response?.data?.message || error.message}`
+      );
+    }
+  }
 }

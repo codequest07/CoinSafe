@@ -50,12 +50,21 @@ router.get('/order/:orderId', (req, res) => {
 });
 
 /**
- * @route GET /api/fonbnk/generate-signature
- * @desc Generate JWT signature for Fonbnk
+ * @route POST /api/fonbnk/generate-signature
+ * @desc Generate HMAC request signature for Fonbnk API requests
  * @access Public
  */
-router.get('/generate-signature', (req, res) => {
+router.post('/generate-signature', (req, res) => {
   fonbnkController.generateSignature(req, res);
+});
+
+/**
+ * @route POST /api/fonbnk/offramp/initiate
+ * @desc Initiate an off-ramp transaction
+ * @access Public
+ */
+router.post('/offramp/initiate', (req, res) => {
+  fonbnkController.initiateOffRamp(req, res);
 });
 
 export default router; 

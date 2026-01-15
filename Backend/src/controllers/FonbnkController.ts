@@ -375,4 +375,57 @@ export class FonbnkController {
       console.error("Error handling pending payment:", error);
     }
   }
+
+  /**
+   * Initiate an off-ramp transaction
+   */
+  async initiateOffRamp(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        amount,
+        currency,
+        walletAddress,
+        network,
+        asset,
+        paymentChannel,
+        countryIsoCode,
+        customData,
+      } = req.body;
+
+      if (
+        !amount ||
+        !currency ||
+        !walletAddress ||
+        !network ||
+        !asset ||
+        !paymentChannel ||
+        !countryIsoCode
+      ) {
+        res.status(400).json({
+          success: false,
+          error: "Missing required off-ramp parameters",
+        });
+        return;
+      }
+
+      const result = await this.fonbnkService.initiateOffRamp({
+        amount,
+        currency,
+        walletAddress,
+        network,
+        asset,
+        paymentChannel,
+        countryIsoCode,
+        customData,
+      });
+
+      res.json({ success: true, data: result });
+    } catch (error: any) {
+      console.error("Error in off-ramp initiation controller:", error);
+      res.status(500).json({
+        success: false,
+        error: error.message || "Failed to initiate off-ramp",
+      });
+    }
+  }
 }
