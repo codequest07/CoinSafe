@@ -1,7 +1,8 @@
 import path from "path";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, ViteDevServer } from "vite";
 import { readFileSync, writeFileSync, existsSync } from "fs";
+import type { IncomingMessage, ServerResponse } from "http";
 
 // Plugin to replace Firebase env vars in service worker during build
 function firebaseServiceWorkerPlugin() {
@@ -47,8 +48,8 @@ function firebaseServiceWorkerPlugin() {
 function pwaPluginStub() {
   return {
     name: "pwa-plugin-stub",
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
         // Intercept requests for non-existent PWA plugin endpoints
         if (req.url?.includes("@vite-plugin-pwa")) {
           res.statusCode = 404;
