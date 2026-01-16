@@ -131,12 +131,20 @@ const Sidebar = () => {
   const isConnected = !!account?.address;
 
   const [token, setToken] = useState("");
+  const [offRampToken, setOffRampToken] = useState("");
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/fonbnk/generate-signature`)
       .then((res) => res.json())
       .then((data) => setToken(data?.data?.signature))
       .catch((err) => console.error("Error fetching token:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/fonbnk/generate-signature`)
+      .then((res) => res.json())
+      .then((data) => setOffRampToken(data?.data?.signature))
+      .catch((err) => console.error("Error fetching off ramp token:", err));
   }, []);
 
   //   const token = jsonwebtoken.sign(
@@ -493,7 +501,7 @@ const Sidebar = () => {
                   to={
                     !offRampAmount
                       ? "#"
-                      : `https://sandbox-pay.fonbnk.com/offramp?source=o9VjcneL&network=LISK&asset=${offRampCurrency}&amount=${offRampAmount}&currency=crypto&paymentChannel=${offRampPaymentChannel}&countryIsoCode=NG&signature=${token}&hideSwitch=true`
+                      : `https://sandbox-pay.fonbnk.com/offramp?source=o9VjcneL&network=LISK&asset=${offRampCurrency}&amount=${offRampAmount}&currency=crypto&paymentChannel=${offRampPaymentChannel}&countryIsoCode=NG&signature=${offRampToken}&hideSwitch=true`
                   }
                   target="_blank"
                 >
