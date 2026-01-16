@@ -1,10 +1,12 @@
 import * as jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
+import crypto from "crypto";
 
 export interface FonbnkConfig {
   signatureSecret: string;
   source: string;
+  apiKey?: string;
   environment: "sandbox" | "production";
 }
 
@@ -41,9 +43,9 @@ export class FonbnkService {
   }
 
   /**
-   * Generate a JWT signature for Fonbnk payment URL
+   * Generate a JWT signature for Fonbnk payment URL (on-ramp legacy flow)
    */
-  public generateSignature(customData?: Record<string, any>): string {
+  public generateJwtSignature(customData?: Record<string, any>): string {
     const payload = {
       uid: uuid(),
       ...customData,
@@ -58,7 +60,7 @@ export class FonbnkService {
    * Create a payment URL for on-ramp
    */
   createPaymentUrl(params: PaymentUrlParams = {}): string {
-    const signature = this.generateSignature(params.customData);
+    const signature = this.generateJwtSignature(params.customData);
 
     const urlParams = new URLSearchParams({
       source: this.config.source,
@@ -71,6 +73,43 @@ export class FonbnkService {
     });
 
     return `${this.baseUrl}/?${urlParams.toString()}`;
+  }
+
+  /**
+   * Generate HMAC request signature for Fonbnk API/off-ramp flows
+   * canonical format: `${timestamp}:${METHOD}:${path}:${bodyHash}`
+   */
+  public generateRequestSignature({
+    method = "GET",
+    path = "/",
+    body = "",
+    timestamp = Date.now().toString(),
+  }: {
+    method?: string;
+    path?: string;
+    body?: string;
+    timestamp?: string;
+  }) {
+    const bodyHash = crypto
+      .createHash("sha256")
+      .update(body || "")
+      .digest("hex");
+    const canonical = `${timestamp}:${method.toUpperCase()}:${path}:${bodyHash}`;
+    const signature = crypto
+      .createHmac("sha256", this.config.signatureSecret)
+      .update(canonical)
+      .digest("hex");
+
+    return {
+      signature,
+      timestamp,
+      headers: {
+        "x-fonbnk-key": this.config.apiKey || "",
+        "x-fonbnk-timestamp": timestamp,
+        "x-fonbnk-signature": signature,
+        "content-type": "application/json",
+      },
+    };
   }
 
   /**
