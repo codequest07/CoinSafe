@@ -4,6 +4,7 @@ import targetSavingsAbi from "../abi/TargetSavingsFacet.json";
 import automatedSavingsFacetAbi from "../abi/AutomatedSavingsFacet.json";
 import emergencySavingsFacetAbi from "../abi/EmergencySavingsFacet.json";
 import fundingFacetAbi from "../abi/FundingFacet.json";
+import swapFacetAbi from "../abi/SwapFacet.json";
 
 export const tokens = {
   usdt: "0x05D032ac25d322df992303dCa074EE7392C117b9",
@@ -34,4 +35,5 @@ export const facetAbis = {
   automatedSavingsFacet: automatedSavingsFacetAbi,
   targetSavingsFacet: targetSavingsAbi,
   emergencySavingsFacet: emergencySavingsFacetAbi,
+  swapFacet: swapFacetAbi,
 };
