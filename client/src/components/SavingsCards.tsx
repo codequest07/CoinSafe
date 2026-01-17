@@ -142,8 +142,12 @@ export default function SavingsCards() {
           let formattedDate = "N/A";
 
           if (safe.unlockTime) {
+            console.log(
+              "Type of unlock time::::::::::",
+              typeof safe.unlockTime
+            );
             const unlockDate = new Date(Number(safe.unlockTime) * 1000);
-
+            console.log("UNLOCK DATE::::::::::", unlockDate);
             formattedDate = unlockDate.toLocaleDateString("en-US", {
               day: "numeric",
               month: "long",

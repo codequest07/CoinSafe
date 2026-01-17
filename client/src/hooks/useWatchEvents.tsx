@@ -10,6 +10,12 @@ type EventHandlerWithFee = (
   amountInUsdToDeduct: number,
   amountInUsdToAdd: number
 ) => void;
+type SwapEventHandler = (
+  tokenIn: string,
+  tokenOut: string,
+  amountInUsd: number,
+  amountOutUsd: number
+) => void;
 
 interface UseContractEventsProps {
   address: string;
@@ -19,6 +25,7 @@ interface UseContractEventsProps {
   onClaim?: EventHandler;
   onSavingsWithdrawn?: EventHandlerWithFee;
   onStreakUpdate?: StreakEventHandler;
+  onSwap?: SwapEventHandler;
 }
 
 export const useWatchEvents = ({
@@ -29,6 +36,7 @@ export const useWatchEvents = ({
   onClaim,
   onSavingsWithdrawn,
   onStreakUpdate,
+  onSwap,
 }: UseContractEventsProps) => {
   // Create event handler function
   const createEventHandler = (
@@ -51,7 +59,7 @@ export const useWatchEvents = ({
           }
           return;
         }
-        
+
         const amountInUsd = await convertTokenAmountToUsd(token, amount);
         if (amountInUsd === 0) return;
 
@@ -70,6 +78,27 @@ export const useWatchEvents = ({
     };
   };
 
+  // Swap event handler (special case - handles both tokenIn and tokenOut)
+  const swapEventHandler = useMemo(() => {
+    if (!onSwap) return () => {};
+    return async (logs: any) => {
+      try {
+        console.log("Swap event logs:", logs);
+        const log = logs[0];
+        const { tokenIn, tokenOut, amountIn, amountOut } = log;
+
+        const amountInUsd = await convertTokenAmountToUsd(tokenIn, amountIn);
+        const amountOutUsd = await convertTokenAmountToUsd(tokenOut, amountOut);
+
+        if (amountInUsd === 0 && amountOutUsd === 0) return;
+
+        onSwap(tokenIn, tokenOut, amountInUsd, amountOutUsd);
+      } catch (error) {
+        console.error("Error processing swap event logs:", error);
+      }
+    };
+  }, [onSwap]);
+
   // All event handlers
   const eventHandlers = useMemo(
     () => ({
@@ -79,8 +108,17 @@ export const useWatchEvents = ({
       claim: createEventHandler(onClaim),
       savingsWithdrawn: createEventHandler(onSavingsWithdrawn),
       streakUpdate: createEventHandler(onStreakUpdate),
+      swap: swapEventHandler,
     }),
-    [onDeposit, onWithdraw, onSave, onClaim, onSavingsWithdrawn, onStreakUpdate]
+    [
+      onDeposit,
+      onWithdraw,
+      onSave,
+      onClaim,
+      onSavingsWithdrawn,
+      onStreakUpdate,
+      swapEventHandler,
+    ]
   );
 
   // short helper to handle events
@@ -153,7 +191,7 @@ export const useWatchEvents = ({
         handleEvent(user, eventHandlers.save, { token, amount }),
       abi: facetAbis.automatedSavingsFacet,
     },
-    // needs review 
+    // needs review
     {
       event: "TokenCancelledFromAutomatedPlan",
       handler: (user: string, token: string) =>
@@ -238,13 +276,30 @@ export const useWatchEvents = ({
         ),
       abi: facetAbis.automatedSavingsFacet,
     },
+
+    // Swap events
+    {
+      event: "SwapExecuted",
+      handler: (
+        user: string,
+        tokenIn: string,
+        tokenOut: string,
+        amountIn: bigint,
+        amountOut: bigint
+      ) => {
+        if (user !== address) return;
+        eventHandlers.swap([{ tokenIn, tokenOut, amountIn, amountOut }]);
+      },
+      abi: facetAbis.swapFacet,
+    },
   ];
 
   useEffect(() => {
     const contracts = eventMappings.map(({ event, handler, abi }) => {
+      const abiArray = (abi as any)?.abi || abi;
       const contract = new Contract(
         CoinsafeDiamondContract.address as `0x${string}`,
-        abi,
+        abiArray,
         jsonRpcProvider
       );
       contract.on(event, handler);
