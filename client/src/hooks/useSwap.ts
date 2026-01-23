@@ -41,7 +41,7 @@ export interface UseSwapResult {
 
 /**
  * Hook for executing swaps (both single-hop and multi-hop)
- * 
+ *
  * @example
  * ```tsx
  * const { swap, isLoading, error } = useSwap({
@@ -50,7 +50,7 @@ export interface UseSwapResult {
  *   onError: (err) => toast.error(err.message),
  *   toast,
  * });
- * 
+ *
  * // Execute swap
  * await swap({
  *   tokenIn: "0x...",
@@ -98,14 +98,6 @@ export function useSwap({
         return;
       }
 
-      if (amountOutMin <= 0n) {
-        const err = new Error("Invalid minimum output amount");
-        setError(err);
-        toast?.error("Invalid minimum output amount");
-        onError?.(err);
-        return;
-      }
-
       setIsLoading(true);
       setError(null);
 
@@ -121,10 +113,12 @@ export function useSwap({
         const tokenInDecimals = getTokenDecimals(tokenIn);
         const amountStr = amountIn.toString();
         let amountInBigInt: bigint;
-        
+
         if (amountStr.includes(".")) {
           const [whole, fraction] = amountStr.split(".");
-          const paddedFraction = fraction.padEnd(tokenInDecimals, "0").slice(0, tokenInDecimals);
+          const paddedFraction = fraction
+            .padEnd(tokenInDecimals, "0")
+            .slice(0, tokenInDecimals);
           amountInBigInt = BigInt(whole + paddedFraction);
         } else {
           amountInBigInt = BigInt(amountStr + "0".repeat(tokenInDecimals));
@@ -134,9 +128,10 @@ export function useSwap({
         const swapDeadline = deadline || calculateDeadline(20);
 
         // Determine if this is a single-hop or multi-hop swap
-        const isMultiHop = !!intermediate && 
-                          intermediate !== tokenIn && 
-                          intermediate !== tokenOut;
+        const isMultiHop =
+          !!intermediate &&
+          intermediate !== tokenIn &&
+          intermediate !== tokenOut;
 
         let swapTx;
 
@@ -176,7 +171,7 @@ export function useSwap({
 
         if (result?.transactionHash) {
           toast?.success(
-            `Swap successful! Transaction: ${result.transactionHash.slice(0, 10)}...`
+            `Swap successful! Transaction: ${result.transactionHash.slice(0, 10)}...`,
           );
           onSuccess?.();
         } else {
@@ -184,9 +179,7 @@ export function useSwap({
         }
       } catch (err) {
         const error =
-          err instanceof Error
-            ? err
-            : new Error("Swap failed: " + String(err));
+          err instanceof Error ? err : new Error("Swap failed: " + String(err));
         setError(error);
         console.error("Swap error:", err);
 
@@ -195,7 +188,8 @@ export function useSwap({
         if (error.message.includes("InsufficientFunds")) {
           errorMessage = "Insufficient balance for swap";
         } else if (error.message.includes("InsufficientOutputAmount")) {
-          errorMessage = "Slippage tolerance exceeded. Try increasing slippage.";
+          errorMessage =
+            "Slippage tolerance exceeded. Try increasing slippage.";
         } else if (error.message.includes("Deadline")) {
           errorMessage = "Transaction deadline exceeded. Please try again.";
         } else if (error.message.includes("InvalidTokenAddress")) {
@@ -210,7 +204,7 @@ export function useSwap({
         setIsLoading(false);
       }
     },
-    [account, sendTransaction, onSuccess, onError, toast]
+    [account, sendTransaction, onSuccess, onError, toast],
   );
 
   return {
