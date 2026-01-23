@@ -6,26 +6,24 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { tokenData } from "@/lib/utils";
+import { tokenData, getTokenDecimals } from "@/lib/utils";
 import { useRecoilValue } from "recoil";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AmountInput from "@/components/AmountInput";
 import { formatUnits } from "viem";
-import { getTokenDecimals } from "@/lib/utils";
 import MemoSwapArrow from "@/icons/SwapArrow";
+import { useActiveAccount } from "thirdweb/react";
+import { useSwap } from "@/hooks/useSwap";
+import { useSwapQuote, SingleHopQuoteParams } from "@/hooks/useSwapQuote";
+import { formatSwapQuote, calculateSlippageBps } from "@/lib/swap-utils";
+import { toast } from "sonner";
 
 type TokenOption = {
   address: string;
   symbol: string;
   image?: string;
-};
-
-const priceHints: Record<string, number> = {
-  LSK: 1.12,
-  USDC: 1,
-  USDT: 1,
 };
 
 const getTokenOption = (address: string): TokenOption => ({
@@ -34,10 +32,9 @@ const getTokenOption = (address: string): TokenOption => ({
   image: tokenData?.[address]?.image,
 });
 
-const getPriceHint = (symbol: string) => priceHints[symbol] || 1;
-
 const Swap = () => {
   const navigate = useNavigate();
+  const account = useActiveAccount();
   const supportedTokens = useRecoilValue(supportedTokensState);
   const balances = useRecoilValue(balancesState);
   const validationErrors = {} as Record<string, string>;
@@ -47,7 +44,7 @@ const Swap = () => {
       (supportedTokens?.length
         ? supportedTokens
         : Object.keys(tokenData || {})) as string[],
-    [supportedTokens]
+    [supportedTokens],
   );
 
   const [fromToken, setFromToken] = useState<string>("");
@@ -55,6 +52,9 @@ const Swap = () => {
   const [fromAmount, setFromAmount] = useState<string>("");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
+  const [slippage] = useState("0.5");
+
+  // Maintained for AmountInput compatibility
   const [saveState, setSaveState] = useState({
     target: "",
     token: "",
@@ -73,7 +73,7 @@ const Swap = () => {
       (prev) =>
         prev ||
         tokenOptions[1] ||
-        (tokenOptions.length > 1 ? tokenOptions[1] : tokenOptions[0])
+        (tokenOptions.length > 1 ? tokenOptions[1] : tokenOptions[0]),
     );
     setSaveState((prev) => ({
       ...prev,
@@ -81,16 +81,13 @@ const Swap = () => {
     }));
   }, [tokenOptions]);
 
-  const fromTokenData = getTokenOption(fromToken);
-  const toTokenData = getTokenOption(toToken);
-
   const handleSwitch = () => {
     setFromToken(toToken);
     setToToken(fromToken);
   };
 
   const handlePercentFill = (percent: number) => {
-    const value = ((selectedTokenBalance * percent) / 100).toFixed(2);
+    const value = ((selectedTokenBalance * percent) / 100).toFixed(6); // Increased precision
     setFromAmount(value);
     setSaveState((prev) => ({
       ...prev,
@@ -133,52 +130,100 @@ const Swap = () => {
     setToToken(value);
   };
 
+  // Update selected token balance
   useEffect(() => {
     if (!fromToken) return;
     const available = balances?.available as Record<string, bigint> | undefined;
-    if (!available) return;
+    if (!available) {
+      setSelectedTokenBalance(0);
+      return;
+    }
     const rawBalance = available[fromToken] || 0n;
     const decimals = getTokenDecimals(fromToken);
     setSelectedTokenBalance(Number(formatUnits(rawBalance, decimals)));
   }, [balances, fromToken]);
 
-  const estimatedToAmount = useMemo(() => {
-    if (!fromAmount || !fromToken || !toToken) return "0.00";
-    const numeric = Number(fromAmount);
-    const rate =
-      getPriceHint(fromTokenData.symbol) / getPriceHint(toTokenData.symbol);
+  // Hook Setup
+  const { swap, isLoading: isSwapLoading } = useSwap({
+    account,
+    onSuccess: () => {
+      setFromAmount("");
+      // Add any additional success logic here if needed
+    },
+    toast,
+  });
 
-    if (Number.isNaN(numeric)) return "0.00";
-    return (numeric * rate).toFixed(4);
-  }, [
-    fromAmount,
-    fromToken,
-    toToken,
-    fromTokenData.symbol,
-    toTokenData.symbol,
-  ]);
+  const quoteParams: SingleHopQuoteParams | null = useMemo(() => {
+    if (
+      !fromToken ||
+      !toToken ||
+      !fromAmount ||
+      Number(fromAmount) <= 0 ||
+      fromToken === toToken
+    )
+      return null;
+
+    return {
+      tokenIn: fromToken,
+      tokenOut: toToken,
+      amountIn: fromAmount,
+      slippageBps: calculateSlippageBps(Number(slippage)),
+    };
+  }, [fromToken, toToken, fromAmount, slippage]);
+
+  // Debounce quote params to avoid excessive calls
+  const [debouncedParams, setDebouncedParams] =
+    useState<SingleHopQuoteParams | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedParams(quoteParams);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [quoteParams]);
+
+  const {
+    quote,
+    isLoading: isQuoteLoading,
+    error: quoteError,
+  } = useSwapQuote(debouncedParams);
+
+  const formattedQuote = useMemo(() => {
+    if (!quote) return null;
+    return formatSwapQuote(
+      quote,
+      getTokenDecimals(fromToken),
+      getTokenDecimals(toToken),
+    );
+  }, [quote, fromToken, toToken]);
+
+  const estimatedToAmount = formattedQuote?.expectedAmountOut || "0.00";
 
   const insufficientBalance =
     Number(fromAmount || 0) > 0 &&
     Number(fromAmount || 0) > selectedTokenBalance;
 
-  const canQuote =
-    Number(fromAmount) > 0 &&
+  const handleSwapClick = async () => {
+    if (!fromToken || !toToken) return;
+
+    await swap({
+      tokenIn: fromToken,
+      tokenOut: toToken,
+      amountIn: fromAmount,
+      amountOutMin: quote?.minAmountOut || 0n,
+    });
+  };
+
+  const canSwap =
+    !isQuoteLoading &&
+    !insufficientBalance &&
     !!fromToken &&
     !!toToken &&
-    fromToken !== toToken &&
-    tokenOptions.length > 0 &&
-    !insufficientBalance;
-
-  useEffect(() => {
-    if (!canQuote) {
-      setShowDetails(false);
-    }
-  }, [canQuote, fromAmount, fromToken, toToken]);
+    Number(fromAmount) > 0;
 
   const renderTokenSelect = (
     value: string,
-    onChange: (val: string) => void
+    onChange: (val: string) => void,
   ) => (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-32 h-12 bg-[#1E1E1E] border border-[#2A2A2A] text-white">
@@ -208,7 +253,8 @@ const Swap = () => {
             <SelectItem
               key={address}
               value={address}
-              className="flex items-center gap-2">
+              className="flex items-center gap-2"
+            >
               <div className="flex items-center gap-2">
                 {option.image ? (
                   <span className="w-5 h-5 rounded-full overflow-hidden">
@@ -247,7 +293,8 @@ const Swap = () => {
           <div
             className={`rounded-[8px] border ${
               insufficientBalance ? "border-[#FF6B6B]" : "border-[#1E1E1E]"
-            } bg-[#111114] p-4 sm:p-5`}>
+            } bg-[#111114] p-4 sm:p-5`}
+          >
             <div className="flex items-center justify-between text-sm text-[#B5B5B5]">
               <span>Swap from</span>
               <div className="flex items-center gap-2">
@@ -257,7 +304,8 @@ const Swap = () => {
                     variant="secondary"
                     size="sm"
                     onClick={() => handlePercentFill(pct)}
-                    className="h-8 rounded-full border border-[#2E2E2E] bg-[#1C1C1F] text-xs text-white">
+                    className="h-8 rounded-full border border-[#2E2E2E] bg-[#1C1C1F] text-xs text-white"
+                  >
                     {pct}%
                   </Button>
                 ))}
@@ -265,7 +313,8 @@ const Swap = () => {
                   variant="secondary"
                   size="sm"
                   onClick={() => handlePercentFill(100)}
-                  className="h-8 rounded-full border border-[#2E2E2E] bg-[#1C1C1F] text-xs text-white">
+                  className="h-8 rounded-full border border-[#2E2E2E] bg-[#1C1C1F] text-xs text-white"
+                >
                   Max
                 </Button>
               </div>
@@ -299,13 +348,19 @@ const Swap = () => {
                   size="sm"
                   className="h-8 px-3 text-xs text-[#79E7BA]"
                   onClick={() => {
-                    const value = selectedTokenBalance.toString();
-                    setFromAmount(value);
+                    const available = balances?.available as
+                      | Record<string, bigint>
+                      | undefined;
+                    const rawBalance = available?.[fromToken] || 0n;
+                    const decimals = getTokenDecimals(fromToken);
+                    const formatted = formatUnits(rawBalance, decimals);
+                    setFromAmount(formatted);
                     setSaveState((prev) => ({
                       ...prev,
-                      amount: selectedTokenBalance,
+                      amount: Number(formatted),
                     }));
-                  }}>
+                  }}
+                >
                   Max
                 </Button>
               </div>
@@ -317,7 +372,8 @@ const Swap = () => {
               variant="secondary"
               size="icon"
               onClick={handleSwitch}
-              className="rounded-[8px] bg-[#1F1F20] border-[4px] border-[#0D0D0F] text-white hover:bg-[#242428]">
+              className="rounded-[8px] bg-[#1F1F20] border-[4px] border-[#0D0D0F] text-white hover:bg-[#242428]"
+            >
               <MemoSwapArrow className="w-5 h-5" />
             </Button>
           </div>
@@ -329,12 +385,19 @@ const Swap = () => {
 
             <div className="mt-4 flex items-center gap-3">
               <div className="flex-1">
-                <input
-                  value={estimatedToAmount}
-                  readOnly
-                  className="w-full bg-transparent text-3xl font-semibold text-white outline-none"
-                />
-                <p className="text-xs text-[#7B7B7B] mt-1">≈ $0.00</p>
+                {isQuoteLoading ? (
+                  <div className="flex items-center gap-2 text-white/50">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Calculating...</span>
+                  </div>
+                ) : (
+                  <input
+                    value={estimatedToAmount}
+                    readOnly
+                    className="w-full bg-transparent text-3xl font-semibold text-white outline-none"
+                  />
+                )}
+                {/* <p className="text-xs text-[#7B7B7B] mt-1">≈ $0.00</p> */}
               </div>
               {renderTokenSelect(toToken, handleToTokenSelect)}
             </div>
@@ -346,20 +409,31 @@ const Swap = () => {
             </div>
           )}
 
-          {canQuote && (
+          {quoteError && (
+            <div className="rounded-[8px]  bg-[#1F1F20] text-red-400 text-center py-3 px-4 text-sm">
+              {quoteError.message}
+            </div>
+          )}
+
+          {quote && (
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm text-[#E5E5E5]">
                 <div className="flex items-center sm:gap-2">
                   <span className="text-xs sm:text-sm">
-                    1 {tokenData[toToken]?.symbol || "USDC"} = 0.000328852 ETH
-                    ($1.00)
+                    1 {tokenData[fromToken]?.symbol} ≈{" "}
+                    {(
+                      Number(formattedQuote?.expectedAmountOut) /
+                      Number(fromAmount)
+                    ).toFixed(4)}{" "}
+                    {tokenData[toToken]?.symbol}
                   </span>
-                  <span className="text-[#9FA0A3]">•</span>
-                  <span>&lt;$0.01</span>
+                  {/* <span className="text-[#9FA0A3]">•</span>
+                  <span>&lt;$0.01</span> */}
                 </div>
                 <button
                   className="flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-[#1E1E1E] border border-[#2A2A2A] text-white"
-                  onClick={() => setShowDetails((prev) => !prev)}>
+                  onClick={() => setShowDetails((prev) => !prev)}
+                >
                   <span>{showDetails ? "Show less" : "Show more"}</span>
                   {showDetails ? (
                     <ChevronUp className="w-4 h-4" />
@@ -371,39 +445,55 @@ const Swap = () => {
 
               {showDetails && (
                 <div className="grid grid-cols-2 gap-y-2 text-sm text-[#E5E5E5]">
-                  <span className="flex items-center gap-2 text-[#B5B5B5]">
-                    Fee (0.25%)
+                  {/* <span className="flex items-center gap-2 text-[#B5B5B5]">
+                    Fee
                   </span>
-                  <span className="text-right text-[#E5E5E5]">&lt;$0.01</span>
+                  <span className="text-right text-[#E5E5E5]">0.3%</span> */}
 
                   <span className="flex items-center gap-2 text-[#B5B5B5]">
-                    Network cost
+                    Min Received
                   </span>
-                  <span className="text-right text-[#E5E5E5]">&lt;$0.01</span>
+                  <span className="text-right text-[#E5E5E5]">
+                    {formattedQuote?.minAmountOut} {tokenData[toToken]?.symbol}
+                  </span>
 
                   <span className="flex items-center gap-2 text-[#B5B5B5]">
                     Order routing
                   </span>
-                  <span className="text-right text-[#E5E5E5]">Uniswap API</span>
+                  <span className="text-right text-[#E5E5E5]">
+                    Coinsafe Router
+                  </span>
 
                   <span className="flex items-center gap-2 text-[#B5B5B5]">
-                    Price impact
+                    Slippage
                   </span>
-                  <span className="text-right text-[#E5E5E5]">-0.05%</span>
-
-                  <span className="flex items-center gap-2 text-[#B5B5B5]">
-                    Max slippage
+                  <span className="text-right text-[#E5E5E5]">
+                    {formattedQuote?.slippagePercentage}%
                   </span>
-                  <span className="text-right text-[#E5E5E5]">Auto • 2.5%</span>
                 </div>
               )}
             </div>
           )}
           <div className="mt-6">
             <Button
-              disabled={!canQuote}
-              className="w-full h-12 rounded-full bg-[#1E1E1E]  border border-[#2A2A2A] text-[#E5E5E5] hover:bg-[#242428]">
-              {canQuote ? "Review quote" : "Review quote"}
+              disabled={!canSwap || isSwapLoading}
+              onClick={handleSwapClick}
+              className="w-full h-12 rounded-full bg-[#1E1E1E]  border border-[#2A2A2A] text-[#E5E5E5] hover:bg-[#242428]"
+            >
+              {isSwapLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Swapping...</span>
+                </div>
+              ) : !account ? (
+                "Connect Wallet"
+              ) : quoteError ? (
+                "Cannot Quote"
+              ) : insufficientBalance ? (
+                "Insufficient Balance"
+              ) : (
+                "Swap"
+              )}
             </Button>
           </div>
         </div>

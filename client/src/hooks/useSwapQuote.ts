@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { getContract, readContract } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
@@ -53,18 +53,22 @@ export interface UseSwapQuoteResult {
  * Hook for fetching single-hop swap quotes
  */
 export function useSwapQuote(
-  params: SingleHopQuoteParams | null
+  params: SingleHopQuoteParams | null,
 ): UseSwapQuoteResult {
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const contract = getContract({
-    client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
-    abi: facetAbis.swapFacet as unknown as Abi,
-  });
+  const contract = useMemo(
+    () =>
+      getContract({
+        client,
+        address: CoinsafeDiamondContract.address,
+        chain: liskMainnet,
+        abi: facetAbis.swapFacet as unknown as Abi,
+      }),
+    [],
+  );
 
   const fetchQuote = useCallback(async () => {
     if (!params) {
@@ -72,11 +76,13 @@ export function useSwapQuote(
       return;
     }
 
-    const { tokenIn, tokenOut, amountIn, stable = false, slippageBps = 50 } = params;
+    const { tokenIn, tokenOut, amountIn, stable, slippageBps = 50 } = params;
 
     // Validate inputs
     if (!tokenIn || !tokenOut || !amountIn || Number(amountIn) <= 0) {
-      setError(new Error("Invalid swap parameters"));
+      // setError(new Error("Invalid swap parameters"));
+      // Silent fail/reset for incomplete inputs
+      setQuote(null);
       return;
     }
 
@@ -96,31 +102,63 @@ export function useSwapQuote(
 
       if (amountStr.includes(".")) {
         const [whole, fraction] = amountStr.split(".");
-        const paddedFraction = fraction.padEnd(tokenInDecimals, "0").slice(0, tokenInDecimals);
+        const paddedFraction = fraction
+          .padEnd(tokenInDecimals, "0")
+          .slice(0, tokenInDecimals);
         amountInBigInt = BigInt(whole + paddedFraction);
       } else {
         amountInBigInt = BigInt(amountStr + "0".repeat(tokenInDecimals));
       }
 
-      // Call the contract's getSwapQuote function
-      const result = await readContract({
-        contract,
-        method:
-          "function getSwapQuote(address tokenIn, address tokenOut, uint256 amountIn, bool stable, uint256 slippageBps) external view returns ((uint256 amountIn, uint256 expectedAmountOut, uint256 minAmountOut, uint256 slippageBps) quote)",
-        params: [
-          tokenIn as `0x${string}`,
-          tokenOut as `0x${string}`,
-          amountInBigInt,
-          stable,
-          BigInt(slippageBps),
-        ],
-      });
+      const fetchRate = async (isStable: boolean) => {
+        return (await readContract({
+          contract,
+          method:
+            "function getSwapQuote(address tokenIn, address tokenOut, uint256 amountIn, bool stable, uint256 slippageBps) external view returns ((uint256 amountIn, uint256 expectedAmountOut, uint256 minAmountOut, uint256 slippageBps) quote)",
+          params: [
+            tokenIn as `0x${string}`,
+            tokenOut as `0x${string}`,
+            amountInBigInt,
+            isStable,
+            BigInt(slippageBps),
+          ],
+        })) as SwapQuote;
+      };
 
-      // The result is a tuple, extract it
-      const quoteResult = result as SwapQuote;
-      setQuote(quoteResult);
+      let quoteResult: SwapQuote | null = null;
+      let lastError: unknown;
+
+      // Logic:
+      // 1. If stable is explicitly provided, use it.
+      // 2. If not provided, try stable=false (volatile) first.
+      // 3. If that fails, try stable=true (stable).
+
+      try {
+        const useStable = stable ?? false;
+        quoteResult = await fetchRate(useStable);
+      } catch (err) {
+        lastError = err;
+        // If stable was NOT explicitly set, try the other option
+        if (stable === undefined) {
+          try {
+            console.log("Failed to fetch volatile quote, trying stable...");
+            quoteResult = await fetchRate(true);
+            lastError = null; // Clear error if this succeeds
+          } catch (retryErr) {
+            console.error("Failed to fetch stable quote as well:", retryErr);
+            lastError = retryErr;
+          }
+        }
+      }
+
+      if (quoteResult) {
+        setQuote(quoteResult);
+      } else {
+        throw lastError || new Error("Failed to fetch quote");
+      }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Failed to fetch swap quote");
+      const error =
+        err instanceof Error ? err : new Error("Failed to fetch swap quote");
       setError(error);
       console.error("Error fetching swap quote:", err);
       setQuote(null);
@@ -146,18 +184,22 @@ export function useSwapQuote(
  * Hook for fetching multi-hop swap quotes
  */
 export function useMultiHopSwapQuote(
-  params: MultiHopQuoteParams | null
+  params: MultiHopQuoteParams | null,
 ): UseSwapQuoteResult {
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const contract = getContract({
-    client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
-    abi: facetAbis.swapFacet as unknown as Abi,
-  });
+  const contract = useMemo(
+    () =>
+      getContract({
+        client,
+        address: CoinsafeDiamondContract.address,
+        chain: liskMainnet,
+        abi: facetAbis.swapFacet as unknown as Abi,
+      }),
+    [],
+  );
 
   const fetchQuote = useCallback(async () => {
     if (!params) {
@@ -176,8 +218,15 @@ export function useMultiHopSwapQuote(
     } = params;
 
     // Validate inputs
-    if (!tokenIn || !intermediate || !tokenOut || !amountIn || Number(amountIn) <= 0) {
-      setError(new Error("Invalid swap parameters"));
+    if (
+      !tokenIn ||
+      !intermediate ||
+      !tokenOut ||
+      !amountIn ||
+      Number(amountIn) <= 0
+    ) {
+      // Silent reset
+      setQuote(null);
       return;
     }
 
@@ -197,7 +246,9 @@ export function useMultiHopSwapQuote(
 
       if (amountStr.includes(".")) {
         const [whole, fraction] = amountStr.split(".");
-        const paddedFraction = fraction.padEnd(tokenInDecimals, "0").slice(0, tokenInDecimals);
+        const paddedFraction = fraction
+          .padEnd(tokenInDecimals, "0")
+          .slice(0, tokenInDecimals);
         amountInBigInt = BigInt(whole + paddedFraction);
       } else {
         amountInBigInt = BigInt(amountStr + "0".repeat(tokenInDecimals));
@@ -223,7 +274,10 @@ export function useMultiHopSwapQuote(
       const quoteResult = result as SwapQuote;
       setQuote(quoteResult);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Failed to fetch multi-hop swap quote");
+      const error =
+        err instanceof Error
+          ? err
+          : new Error("Failed to fetch multi-hop swap quote");
       setError(error);
       console.error("Error fetching multi-hop swap quote:", err);
       setQuote(null);
