@@ -63,7 +63,7 @@ export function useSwapQuote(
     client,
     address: CoinsafeDiamondContract.address,
     chain: liskMainnet,
-        abi: facetAbis.swapFacet as unknown as Abi,
+    abi: facetAbis.swapFacet as unknown as Abi,
   });
 
   const fetchQuote = useCallback(async () => {
@@ -93,7 +93,7 @@ export function useSwapQuote(
       const tokenInDecimals = getTokenDecimals(tokenIn);
       const amountStr = amountIn.toString();
       let amountInBigInt: bigint;
-      
+
       if (amountStr.includes(".")) {
         const [whole, fraction] = amountStr.split(".");
         const paddedFraction = fraction.padEnd(tokenInDecimals, "0").slice(0, tokenInDecimals);
@@ -156,7 +156,7 @@ export function useMultiHopSwapQuote(
     client,
     address: CoinsafeDiamondContract.address,
     chain: liskMainnet,
-        abi: facetAbis.swapFacet as unknown as Abi,
+    abi: facetAbis.swapFacet as unknown as Abi,
   });
 
   const fetchQuote = useCallback(async () => {
@@ -194,7 +194,7 @@ export function useMultiHopSwapQuote(
       const tokenInDecimals = getTokenDecimals(tokenIn);
       const amountStr = amountIn.toString();
       let amountInBigInt: bigint;
-      
+
       if (amountStr.includes(".")) {
         const [whole, fraction] = amountStr.split(".");
         const paddedFraction = fraction.padEnd(tokenInDecimals, "0").slice(0, tokenInDecimals);
