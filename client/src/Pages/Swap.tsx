@@ -19,6 +19,7 @@ import { useSwap } from "@/hooks/useSwap";
 import { useSwapQuote, SingleHopQuoteParams } from "@/hooks/useSwapQuote";
 import { formatSwapQuote, calculateSlippageBps } from "@/lib/swap-utils";
 import { toast } from "sonner";
+import { tokens } from "@/lib/contract";
 
 type TokenOption = {
   address: string;
@@ -41,9 +42,11 @@ const Swap = () => {
 
   const tokenOptions = useMemo(
     () =>
-      (supportedTokens?.length
-        ? supportedTokens
-        : Object.keys(tokenData || {})) as string[],
+      (
+        (supportedTokens?.length
+          ? supportedTokens
+          : Object.keys(tokenData || {})) as string[]
+      ).filter((t) => t.toLowerCase() !== tokens.lsk.toLowerCase()),
     [supportedTokens],
   );
 
