@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 
 const TrustSection = () => {
   const ref = useRef(null);
@@ -65,8 +66,15 @@ const TrustSection = () => {
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.95 }}
           transition={{ duration: 0.2 }}>
-          <Button className="bg-white text-[#0F0F13] hover:bg-white/90 rounded-full px-6 py-3 h-[44px]">
-            Start saving
+          <Button
+            asChild
+            className="bg-white text-[#0F0F13] hover:bg-white/90 rounded-full px-5 py-3 h-[44px] w-fit">
+            <Link
+              to="https://app.coinsafe.network/"
+              target="_blank"
+              rel="noopener noreferrer">
+              Start saving
+            </Link>
           </Button>
         </motion.div>
       </motion.div>

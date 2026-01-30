@@ -69,8 +69,8 @@ export default function Hero() {
               </h1>
 
               <p className="text-base font-[400] sm:text-[24px] text-[#CACACA] md:max-w-2xl">
-                Automate your savings so they happen in the background, or
-                deposit manually when it suits you.
+                The smartest way to organize, grow, and secure your crypto
+                assets—on your own terms.
               </p>
             </motion.div>
             <motion.div
@@ -95,10 +95,16 @@ export default function Hero() {
                 whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.2 }}>
                 <Button
+                  asChild
                   size="lg"
                   variant="default"
                   className="bg-[#262628] hover:bg-[#262628]  w-[177px] cursor-pointer h-[56px] text-[#F1F1F1] rounded-[100px]  sm:w-auto">
-                  View documentation
+                  <Link
+                    to="https://coinsafe.gitbook.io/coinsafe-docs/getting-started/how-coinsafe-works"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    View documentation
+                  </Link>
                 </Button>
               </motion.div>
             </motion.div>

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const CoinGrowSection = () => {
   const ref = useRef(null);
@@ -109,15 +110,23 @@ const CoinGrowSection = () => {
           animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}>
           <p className="text-sm sm:text-[20px] text-[#010104] max-w-[34rem] font-[400] leading-relaxed">
-            We understand your goals and targets so we built a system to help
-            you organize and ace them all, easy peasy!
+            No complex strategies or hidden fees. Just a clean, secure interface
+            designed to help you organize your capital and maximize your returns
+            without the headache.
           </p>
           <motion.div
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2 }}>
-            <Button className="bg-[#FFFFFFE5] text-[#0F0F13] w-[155px] h-[50px] hover:bg-white/90 rounded-[100px] px-6 py-3">
-              Start saving
+            <Button
+              asChild
+              className="bg-[#FFFFFFE5] text-[#0F0F13] w-[155px] h-[50px] hover:bg-white/90 rounded-[100px] px-6 py-3">
+              <Link
+                to="https://app.coinsafe.network/"
+                target="_blank"
+                rel="noopener noreferrer">
+                Start saving
+              </Link>
             </Button>
           </motion.div>
         </motion.div>

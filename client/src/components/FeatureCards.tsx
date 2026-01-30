@@ -1,5 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 
 const FeatureCards = () => {
   const ref = useRef(null);
@@ -78,8 +79,9 @@ const FeatureCards = () => {
               variants={itemVariants}>
               <div className="max-w-[24.5rem]">
                 <p className="text-base sm:text-lg text-[#C6C6C6] max-w-2xl leading-relaxed">
-                  We understand your goals and targets so we built a system to
-                  help you organize and ace them all, easy peesy!
+                  Stop guessing and start hitting your targets. Coinsafe gives
+                  you a clear bird's-eye view of your wealth, organized by what
+                  matters most to you.
                 </p>
               </div>
               <div className="pt-4">
@@ -88,7 +90,12 @@ const FeatureCards = () => {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.2 }}>
-                  Start saving
+                  <Link
+                    to="https://app.coinsafe.network/"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    Start saving
+                  </Link>
                 </motion.button>
               </div>
             </motion.main>

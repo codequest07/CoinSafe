@@ -1,14 +1,11 @@
 import { Button } from "@/components/ui/button";
-import MemoMoneyChange from "@/icons/MoneyChange";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 
-const auditors = [
-  "Audit firm",
-  "Audit firm",
-  "Audit firm",
-  "Audit firm",
-  "Audit firm",
+const auditors: Array<{ label: string; logoSrc: string }> = [
+  { label: "Guild Audits", logoSrc: "/assets/%20guildaudit.svg" },
+  { label: "Pelz Audits", logoSrc: "/assets/Pelz.svg" },
 ];
 
 const SecurityAuditSection = () => {
@@ -80,9 +77,7 @@ const SecurityAuditSection = () => {
         <motion.h2
           className="text-[36px] sm:text-[44px] lg:text-[52px] font-[500] text-[#F1F1F1] leading-tight"
           variants={itemVariants}>
-          WE PASSED THE VIBE
-          <br />
-          CHECK FOR SECURITY,
+          WE PASSED THE <br /> SECURITY CHECK,
         </motion.h2>
         <motion.p
           className="text-lg sm:text-[30px] font-[300] text-[#CACACA]"
@@ -94,33 +89,48 @@ const SecurityAuditSection = () => {
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
           variants={itemVariants}>
           <p className="text-sm sm:text-[18px] text-[#C6C6C6] max-w-[26rem] leading-relaxed">
-            We've been audited by reputable audit firms, to ensure our smart
-            contracts and systems are safe for you to keep your money in!
+            We don't ask for your trust; we earn it. Coinsafe is non-custodial
+            and fully audited, ensuring your manual deposits are always safe,
+            accessible, and under your control.
           </p>
           <motion.div
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2 }}>
-            <Button className="bg-[#FFFFFFE5] text-[#0F0F13] hover:bg-white/90 rounded-full px-5 py-3 h-[44px]">
-              Start saving
+            <Button
+              asChild
+              className="bg-white text-[#0F0F13] hover:bg-white/90 rounded-full px-5 py-3 h-[44px] w-fit">
+              <Link
+                to="https://app.coinsafe.network/"
+                target="_blank"
+                rel="noopener noreferrer">
+                Start saving
+              </Link>
             </Button>
           </motion.div>
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 pt-6"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6"
           variants={containerVariants}>
-          {auditors.map((label, idx) => (
+          {auditors.map(({ label, logoSrc }, idx) => (
             <motion.div
               key={`${label}-${idx}`}
-              className="flex flex-col items-center gap-2"
+              className="flex items-center gap-4 rounded-2xl bg-[#272727B2] border border-white/5 px-6 py-5"
               variants={auditorVariants}
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}>
-              <span className="w-12 h-12 rounded-full bg-[#79E7BA] text-[#0A0A0A] flex items-center justify-center">
-                <MemoMoneyChange className="w-5 h-5" />
+              <span className="w-14 h-14 rounded-full overflow-hidden bg-black/20 flex items-center justify-center">
+                <img
+                  src={logoSrc}
+                  alt={label}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
               </span>
-              <span className="text-sm text-[#C6C6C6]">{label}</span>
+              <span className="text-lg sm:text-xl font-[400] text-[#F1F1F1]">
+                {label}
+              </span>
             </motion.div>
           ))}
         </motion.div>

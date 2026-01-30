@@ -2,9 +2,9 @@ import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 
 const stats = [
-  { value: 100, suffix: "+", label: "Unique wallets" },
-  { value: 100, suffix: "+", label: "Dollars locked" },
-  { value: 5, suffix: "+", label: "Audits passed" },
+  { value: 20, suffix: "+", label: "Unique wallets" },
+  { value: 500, suffix: "+", label: "Dollars locked" },
+  { value: 2, suffix: "+", label: "Audits passed" },
 ];
 
 const CountUp = ({

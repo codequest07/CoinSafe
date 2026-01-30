@@ -1,26 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 
 const features = [
   {
-    title: "GET SMART RECOMMENDATIONS",
-    desc: "We've been audited by reputable audit firms, to ensure our smart contracts and systems are safe for you to keep your money in!",
+    title: "Visual Goal Tracking",
+    desc: "Create dedicated vaults for your big moves. See exactly how close you are to your next milestone in real-time.",
     bg: "bg-[#A9D9B8]",
   },
   {
-    title: "SAVE TOWARDS TARGETS",
-    desc: "We've been audited by reputable audit firms, to ensure our smart contracts and systems are safe for you to keep your money in!",
+    title: "High-Yield Vaults",
+    desc: "Don’t let your assets sit idle. Deposit into secure, audited vaults and watch your balance grow with competitive DeFi yields.",
     bg: "bg-[#C2A9D9]",
   },
   {
-    title: "EARN YIELDS ON SAVINGS",
-    desc: "We've been audited by reputable audit firms, to ensure our smart contracts and systems are safe for you to keep your money in!",
+    title: "Asset Organization",
+    desc: "One dashboard, zero clutter. Manage multiple streams and targets without jumping between different apps or protocols.",
     bg: "bg-[#D9D7A9]",
   },
   {
-    title: "SAVE TOWARDS TARGETS",
-    desc: "We've been audited by reputable audit firms, to ensure our smart contracts and systems are safe for you to keep your money in!",
+    title: "Security First",
+    desc: "Built on battle-tested smart contracts. You keep 100% control of your keys and your funds, always.",
     bg: "bg-[#8BD7E9]",
   },
 ];
@@ -94,8 +95,15 @@ const SecurityFeatures = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2 }}>
-            <Button className="bg-white text-[#0F0F13] hover:bg-white/90 rounded-full px-5 py-3 h-[44px] w-fit">
-              Start saving
+            <Button
+              asChild
+              className="bg-white text-[#0F0F13] hover:bg-white/90 rounded-full px-5 py-3 h-[44px] w-fit">
+              <Link
+                to="https://app.coinsafe.network/"
+                target="_blank"
+                rel="noopener noreferrer">
+                Start saving
+              </Link>
             </Button>
           </motion.div>
         </motion.div>
@@ -110,7 +118,7 @@ const SecurityFeatures = () => {
               variants={cardVariants}
               whileHover={{ scale: 1.02, y: -4 }}
               transition={{ duration: 0.2 }}>
-              <h3 className="text-base sm:text-[19px] font-[600] text-[#010104]">
+              <h3 className="text-base sm:text-[19px] uppercase font-[600] text-[#010104]">
                 {item.title}
               </h3>
               <p className="text-xs sm:text-[15px] text-[#010104] leading-relaxed max-w-md">
