@@ -1,8 +1,8 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IFonbnkTransaction extends Document {
   orderId: string;
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "completed" | "failed" | "cancelled";
   amount: number;
   currency: string;
   walletAddress: string;
@@ -15,61 +15,64 @@ export interface IFonbnkTransaction extends Document {
   country?: string;
 }
 
-const FonbnkTransactionSchema = new Schema<IFonbnkTransaction>({
-  orderId: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
+const FonbnkTransactionSchema = new Schema<IFonbnkTransaction>(
+  {
+    orderId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "completed", "failed", "cancelled"],
+      default: "pending",
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
+    currency: {
+      type: String,
+      required: true,
+      default: "NGN",
+    },
+    walletAddress: {
+      type: String,
+      required: true,
+    },
+    transactionId: {
+      type: String,
+      sparse: true,
+    },
+    customData: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+    userId: {
+      type: String,
+      sparse: true,
+    },
+    redirectUrl: {
+      type: String,
+    },
+    country: {
+      type: String,
+      default: "NG",
+    },
   },
-  status: {
-    type: String,
-    enum: ['pending', 'completed', 'failed', 'cancelled'],
-    default: 'pending',
-    required: true
-  },
-  amount: {
-    type: Number,
-    required: true
-  },
-  currency: {
-    type: String,
-    required: true,
-    default: 'NGN'
-  },
-  walletAddress: {
-    type: String,
-    required: true
-  },
-  transactionId: {
-    type: String,
-    sparse: true
-  },
-  customData: {
-    type: Schema.Types.Mixed,
-    default: {}
-  },
-  userId: {
-    type: String,
-    sparse: true
-  },
-  redirectUrl: {
-    type: String
-  },
-  country: {
-    type: String,
-    default: 'NG'
+  {
+    timestamps: true,
   }
-}, {
-  timestamps: true
-});
+);
 
 // Index for efficient queries
 FonbnkTransactionSchema.index({ status: 1, createdAt: -1 });
 FonbnkTransactionSchema.index({ walletAddress: 1 });
-FonbnkTransactionSchema.index({ userId: 1 });
+// Note: userId index is automatically created by the 'sparse: true' option in the schema
 
 export const FonbnkTransactionModel = mongoose.model<IFonbnkTransaction>(
-  'FonbnkTransaction',
+  "FonbnkTransaction",
   FonbnkTransactionSchema
-); 
+);

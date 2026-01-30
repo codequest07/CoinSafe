@@ -2,27 +2,15 @@ import { Request, Response } from "express";
 import { MerklService, MerklOpportunity } from "../services/MerklService";
 import MerklAPRModel, { IMerklAPR } from "../Models/MerklAPRModel";
 import { APRSigningService } from "../services/APRSigningService";
+import { ethers } from "ethers";
 
 export class MerklController {
   private merklService: MerklService;
-  private aprSigningService: APRSigningService | null = null;
+  private aprSigningService: APRSigningService;
 
   constructor() {
     this.merklService = new MerklService();
-
-    // Initialize signing service (will fail gracefully if private key not set)
-    try {
-      this.aprSigningService = new APRSigningService();
-      console.log("✅ APR Signing Service initialized");
-    } catch (error) {
-      console.warn(
-        "⚠️ APR Signing Service not initialized:",
-        error instanceof Error ? error.message : "Unknown error"
-      );
-      console.warn(
-        "⚠️ APR data will be returned without signatures. Set APR_SIGNER_PRIVATE_KEY, PRIVATE_KEY, or WALLET_PRIVATE_KEY in .env to enable signing."
-      );
-    }
+    this.aprSigningService = new APRSigningService();
   }
 
   /**
@@ -48,7 +36,7 @@ export class MerklController {
       const opportunity: MerklOpportunity | null =
         await this.merklService.fetchOpportunityByName(
           opportunityName,
-          chainId
+          chainId,
         );
 
       if (!opportunity) {
@@ -76,7 +64,7 @@ export class MerklController {
 
       if (existingRecords.length > 0) {
         console.log(
-          `📊 APR data already exists for ${opportunity.name} today (${existingRecords.length} tokens)`
+          `📊 APR data already exists for ${opportunity.name} today (${existingRecords.length} tokens)`,
         );
         res.json({
           success: true,
@@ -127,13 +115,13 @@ export class MerklController {
             savedRecords.push(savedRecord);
 
             console.log(
-              `✅ APR data stored for ${token.symbol} (${token.name}): ${tokenAPR}%`
+              `✅ APR data stored for ${token.symbol} (${token.name}): ${tokenAPR}%`,
             );
           } else {
             console.log(
               `⏭️ Skipping ${
                 token.symbol
-              } - not in target tokens (${targetTokens.join(", ")})`
+              } - not in target tokens (${targetTokens.join(", ")})`,
             );
           }
         }
@@ -143,12 +131,12 @@ export class MerklController {
 
       if (savedRecords.length === 0) {
         console.log(
-          `⚠️ No target tokens found in opportunity: ${opportunity.name}`
+          `⚠️ No target tokens found in opportunity: ${opportunity.name}`,
         );
         res.json({
           success: true,
           message: `No target tokens (${targetTokens.join(
-            ", "
+            ", ",
           )}) found in this opportunity`,
           data: [],
         });
@@ -227,7 +215,7 @@ export class MerklController {
         .sort({ timestamp: -1 })
         .limit(parseInt(limit as string))
         .select(
-          "opportunityName chainId tokenSymbol tokenName tokenAddress apr timestamp createdAt"
+          "opportunityName chainId tokenSymbol tokenName tokenAddress apr timestamp createdAt",
         );
 
       // Calculate statistics
@@ -385,7 +373,7 @@ export class MerklController {
         try {
           const opportunity = await this.merklService.fetchOpportunityByName(
             opp.opportunityName,
-            opp.chainId
+            opp.chainId,
           );
 
           if (opportunity) {
@@ -584,7 +572,7 @@ export class MerklController {
         .sort({ timestamp: -1 })
         .limit(parseInt(limit as string))
         .select(
-          "opportunityName chainId tokenSymbol tokenName tokenAddress apr timestamp createdAt"
+          "opportunityName chainId tokenSymbol tokenName tokenAddress apr timestamp createdAt",
         );
 
       const aprValues = historicalData.map((record) => record.apr);
@@ -599,51 +587,9 @@ export class MerklController {
         max: aprValues.length > 0 ? Math.max(...aprValues) : 0,
       };
 
-      // Sign historical APR data if signing service is available
-      const signedData = await Promise.all(
-        historicalData.map(async (record) => {
-          const baseRecord = {
-            tokenSymbol: record.tokenSymbol,
-            tokenName: record.tokenName,
-            tokenAddress: record.tokenAddress,
-            chainId: record.chainId,
-            apr: record.apr,
-            timestamp: record.timestamp,
-            opportunityName: record.opportunityName,
-            createdAt: record.createdAt,
-          };
-
-          if (this.aprSigningService) {
-            try {
-              const signatureData = await this.aprSigningService.signAPR(
-                record.tokenSymbol,
-                record.tokenAddress,
-                record.chainId,
-                record.apr,
-                record.timestamp,
-                record.opportunityName
-              );
-
-              return {
-                ...baseRecord,
-                signature: signatureData.signature,
-                signer: signatureData.signer,
-                nonce: signatureData.nonce,
-                aprBasisPoints: signatureData.aprBasisPoints,
-              };
-            } catch (error) {
-              console.error("Error signing APR data:", error);
-              return baseRecord;
-            }
-          }
-
-          return baseRecord;
-        })
-      );
-
-      const response: any = {
+      res.json({
         success: true,
-        data: signedData,
+        data: historicalData,
         statistics: stats,
         query: {
           tokenSymbol,
@@ -652,14 +598,7 @@ export class MerklController {
           endDate,
           limit,
         },
-      };
-
-      // Add signer address if signing service is available
-      if (this.aprSigningService) {
-        response.signer = this.aprSigningService.getSignerAddress();
-      }
-
-      res.json(response);
+      });
     } catch (error) {
       console.error("❌ Error fetching token historical APR data:", error);
       res.status(500).json({
@@ -826,79 +765,19 @@ export class MerklController {
         lowestAPR: aprValues.length > 0 ? Math.min(...aprValues) : 0,
         totalRecords: latestAPRData.reduce(
           (sum, record) => sum + record.recordCount,
-          0
+          0,
         ),
       };
 
-      // Sign APR data if signing service is available
-      // Filter out records without required fields (tokenSymbol, tokenAddress)
-      const validRecords = latestAPRData.filter(
-        (record) => record.tokenSymbol && record.tokenAddress
-      );
-
-      const signedData = await Promise.all(
-        validRecords.map(async (record) => {
-          const baseRecord = {
-            tokenSymbol: record.tokenSymbol,
-            tokenName: record.tokenName,
-            tokenAddress: record.tokenAddress,
-            chainId: record.chainId,
-            apr: record.apr,
-            timestamp: record.timestamp,
-            opportunityName: record.opportunityName,
-            lastUpdated: record.timestamp,
-          };
-
-          if (this.aprSigningService) {
-            try {
-              const signatureData = await this.aprSigningService.signAPR(
-                record.tokenSymbol,
-                record.tokenAddress,
-                record.chainId,
-                record.apr,
-                record.timestamp,
-                record.opportunityName
-              );
-
-              return {
-                ...baseRecord,
-                signature: signatureData.signature,
-                signer: signatureData.signer,
-                nonce: signatureData.nonce,
-                aprBasisPoints: signatureData.aprBasisPoints,
-              };
-            } catch (error) {
-              console.error(
-                `Error signing APR data for ${record.tokenSymbol}:`,
-                error
-              );
-              return baseRecord;
-            }
-          } else {
-            console.warn(
-              "⚠️ APR Signing Service not available. Returning data without signatures."
-            );
-            return baseRecord;
-          }
-        })
-      );
-
-      const response: any = {
+      res.json({
         success: true,
-        data: signedData,
+        data: latestAPRData,
         summary,
         query: {
           chainId: chainId ? parseInt(chainId as string) : null,
           tokenSymbol: tokenSymbol || null,
         },
-      };
-
-      // Add signer address if signing service is available
-      if (this.aprSigningService) {
-        response.signer = this.aprSigningService.getSignerAddress();
-      }
-
-      res.json(response);
+      });
     } catch (error) {
       console.error("❌ Error fetching current APR data:", error);
       res.status(500).json({
@@ -1087,7 +966,7 @@ export class MerklController {
       aprDataByPeriod.forEach((record) => {
         // Calculate median in JavaScript
         const sortedValues = (record.aprValues || []).sort(
-          (a: number, b: number) => a - b
+          (a: number, b: number) => a - b,
         );
         const median =
           sortedValues.length > 0
@@ -1131,7 +1010,7 @@ export class MerklController {
 
       // Calculate overall statistics for the queried data only
       const allAPRValues = aprDataByPeriod.flatMap(
-        (record) => record.aprValues || []
+        (record) => record.aprValues || [],
       );
       const overallMean =
         allAPRValues.length > 0
@@ -1142,7 +1021,7 @@ export class MerklController {
         allAPRValues.length > 0
           ? allAPRValues.reduce(
               (sum, val) => sum + Math.pow(val - overallMean, 2),
-              0
+              0,
             ) /
             (allAPRValues.length - 1)
           : 0;
@@ -1165,7 +1044,7 @@ export class MerklController {
               ? Math.round(
                   allAPRValues.sort((a, b) => a - b)[
                     Math.floor(allAPRValues.length / 2)
-                  ] * 10000
+                  ] * 10000,
                 ) / 10000
               : 0,
           min: allAPRValues.length > 0 ? Math.min(...allAPRValues) : 0,
@@ -1205,35 +1084,124 @@ export class MerklController {
   }
 
   /**
-   * Claim Merkl rewards
-   * @param req - Express request object
-   * @param res - Express response object
+   * Get a short-lived signed APR payload for on-chain APRValidator checks.
+   *
+   * Contract expects:
+   * - nonce: milliseconds
+   * - signature over keccak256(abi.encodePacked(tokenAddress, aprBasisPoints, nonce))
+   *
+   * @route GET /api/merkl/apr/signed
+   * @query tokenAddress?: string (0x..; if omitted, uses 0x000.. for claimAll-style signature)
+   * @query tokenSymbol?: string (e.g. "USDC.e") optional helper for lookup
+   * @query chainId?: number optional filter
    */
-  async claimMerklRewards(req: Request, res: Response): Promise<void> {
+  async getSignedAPR(req: Request, res: Response): Promise<void> {
     try {
-      const { MerklClaimService } = await import(
-        "../services/MerklClaimService"
-      );
-      const claimService = new MerklClaimService();
+      const { tokenAddress, tokenSymbol, chainId } = req.query as {
+        tokenAddress?: string;
+        tokenSymbol?: string;
+        chainId?: string;
+      };
 
-      const result = await claimService.claimRewards();
+      const chainIdNum = chainId ? parseInt(chainId, 10) : undefined;
 
-      if (result.success) {
-        res.json({
-          success: true,
-          message: result.message || "Merkl rewards claimed successfully",
-          txHash: result.txHash,
-          claimedTokens: result.claimedTokens,
-          claimedAmounts: result.claimedAmounts,
-        });
-      } else {
-        res.status(500).json({
+      // If not provided, allow signing "global" APR for claimAll() which uses token=address(0)
+      const resolvedTokenAddress = tokenAddress
+        ? tokenAddress
+        : "0x0000000000000000000000000000000000000000";
+
+      if (!ethers.isAddress(resolvedTokenAddress)) {
+        res.status(400).json({
           success: false,
-          error: result.error || "Failed to claim rewards",
+          error: "Invalid tokenAddress",
         });
+        return;
       }
+
+      // Resolve APR percent from DB (stored as % like 12.34). Then convert to basis points.
+      // For claimAll-style signature (token=0x0), we use the overall average across latest token APRs.
+      let aprPercent: number | null = null;
+
+      if (ethers.getAddress(resolvedTokenAddress) === ethers.ZeroAddress) {
+        const filter: any = {};
+        if (chainIdNum) filter.chainId = chainIdNum;
+
+        const latest = await MerklAPRModel.aggregate([
+          { $match: filter },
+          { $sort: { timestamp: -1 } },
+          {
+            $group: {
+              _id: {
+                tokenSymbol: "$tokenSymbol",
+                tokenAddress: "$tokenAddress",
+              },
+              latestAPR: { $first: "$apr" },
+            },
+          },
+        ]);
+
+        const aprValues = latest
+          .map((r: any) => Number(r.latestAPR))
+          .filter((n: number) => Number.isFinite(n));
+        aprPercent =
+          aprValues.length > 0
+            ? aprValues.reduce((a: number, b: number) => a + b, 0) /
+              aprValues.length
+            : 0;
+      } else {
+        const addr = ethers.getAddress(resolvedTokenAddress);
+
+        const or: any[] = [{ tokenAddress: addr }];
+        if (tokenSymbol) or.push({ tokenSymbol });
+
+        const filter: any = { $or: or };
+        if (chainIdNum) filter.chainId = chainIdNum;
+
+        const latestRecord = await MerklAPRModel.findOne(filter)
+          .sort({ timestamp: -1 })
+          .select("apr tokenSymbol tokenAddress chainId timestamp");
+
+        if (!latestRecord) {
+          res.status(404).json({
+            success: false,
+            error:
+              "No APR data found for token. Run /api/merkl/fetch (or wait for daily cron) to populate data.",
+          });
+          return;
+        }
+
+        aprPercent = Number(latestRecord.apr);
+      }
+
+      if (aprPercent === null || !Number.isFinite(aprPercent)) {
+        res.status(500).json({ success: false, error: "APR lookup failed" });
+        return;
+      }
+
+      // Convert % to basis points (e.g. 18.90% => 1890 bps)
+      let aprBasisPoints = Math.round(aprPercent * 100);
+      if (aprBasisPoints < 0) aprBasisPoints = 0;
+      if (aprBasisPoints > 5000) aprBasisPoints = 5000; // contract MAX_APR
+
+      const nonce = Date.now(); // ms (contract expects ms, then converts /1000)
+
+      const signed = await this.aprSigningService.signApr({
+        tokenAddress: resolvedTokenAddress,
+        aprBasisPoints,
+        nonce,
+      });
+
+      res.json({
+        success: true,
+        data: {
+          ...signed,
+          aprPercent,
+          chainId: chainIdNum ?? null,
+          tokenSymbol: tokenSymbol ?? null,
+        },
+      });
     } catch (error) {
-      console.error("❌ Error in claimMerklRewards:", error);
+      console.error("❌ Error generating signed APR:", error);
       res.status(500).json({
         success: false,
         error: error instanceof Error ? error.message : "Internal server error",

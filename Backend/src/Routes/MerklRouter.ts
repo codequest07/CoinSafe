@@ -222,12 +222,17 @@ router.get("/apr/period", (req, res) => {
 });
 
 /**
- * @route POST /api/merkl/claim
- * @desc Claim Merkl rewards
- * @access Public (consider adding admin authentication in production)
+ * @route GET /api/merkl/apr/signed
+ * @desc Get short-lived signed APR payload for on-chain verification
+ * @access Public
+ * @query { tokenAddress?: string, tokenSymbol?: string, chainId?: number }
+ *
+ * Notes:
+ * - If tokenAddress is omitted, tokenAddress defaults to 0x000.. (for claimAll-style signature)
+ * - Returns { aprBasisPoints, nonce(ms), signature, signer }
  */
-router.post("/claim", (req, res) => {
-  merklController.claimMerklRewards(req, res);
+router.get("/apr/signed", (req, res) => {
+  merklController.getSignedAPR(req, res);
 });
 
 export default router;

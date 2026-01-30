@@ -9,8 +9,6 @@ export interface IMerklAPR extends Document {
   apr: number;
   timestamp: Date;
   rawData?: any; // Store complete API response for future use
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 const MerklAPRSchema: Schema = new Schema(
@@ -28,7 +26,7 @@ const MerklAPRSchema: Schema = new Schema(
     tokenSymbol: {
       type: String,
       required: true,
-      index: true, // For efficient querying by token symbol
+      index: true,
     },
     tokenName: {
       type: String,
@@ -37,7 +35,7 @@ const MerklAPRSchema: Schema = new Schema(
     tokenAddress: {
       type: String,
       required: true,
-      index: true, // For efficient querying by token address
+      index: true,
     },
     apr: {
       type: Number,
@@ -56,14 +54,17 @@ const MerklAPRSchema: Schema = new Schema(
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
-  }
+  },
 );
 
-// Compound indexes for efficient queries
+// Compound index for efficient queries by opportunity and time range
 MerklAPRSchema.index({ opportunityName: 1, timestamp: -1 });
+
+// Compound index for queries by chain and time range
 MerklAPRSchema.index({ chainId: 1, timestamp: -1 });
+
+// Token-centric indices (used for signed APR lookup)
 MerklAPRSchema.index({ tokenSymbol: 1, timestamp: -1 });
 MerklAPRSchema.index({ tokenAddress: 1, timestamp: -1 });
-MerklAPRSchema.index({ opportunityName: 1, tokenSymbol: 1, timestamp: -1 });
 
 export default mongoose.model<IMerklAPR>("MerklAPR", MerklAPRSchema);

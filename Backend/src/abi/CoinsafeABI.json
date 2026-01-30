@@ -1,420 +1,638 @@
 [
-  { "inputs": [], "type": "error", "name": "FeeExceedsMax" },
-  { "inputs": [], "type": "error", "name": "FeePercentageTooHigh" },
-  { "inputs": [], "type": "error", "name": "InvalidDurationTier" },
-  { "inputs": [], "type": "error", "name": "InvalidFeeCollectorAddress" },
-  { "inputs": [], "type": "error", "name": "InvalidFeePercentage" },
-  { "inputs": [], "type": "error", "name": "InvalidInput" },
-  { "inputs": [], "type": "error", "name": "InvalidProof" },
-  { "inputs": [], "type": "error", "name": "InvalidTokenAddress" },
-  { "inputs": [], "type": "error", "name": "NotDiamondOwner" },
+  { "inputs": [], "name": "AutomatedPlanExist", "type": "error" },
+  { "inputs": [], "name": "AutomatedSafeDoesNotExist", "type": "error" },
+  { "inputs": [], "name": "CountIsZero", "type": "error" },
+  { "inputs": [], "name": "DurationTooShort", "type": "error" },
   {
-    "inputs": [
-      { "internalType": "address", "name": "token", "type": "address" }
-    ],
-    "type": "error",
-    "name": "SafeERC20FailedOperation"
-      },
-  { "inputs": [], "type": "error", "name": "TokenAlreadyAccepted" },
-  { "inputs": [], "type": "error", "name": "TokenNotAccepted" },
-  { "inputs": [], "type": "error", "name": "ZeroValueNotAllowed" },
+    "inputs": [],
+    "name": "FrequencyLargerThanOrEqualToDuration",
+    "type": "error"
+  },
+  { "inputs": [], "name": "InsufficientBalanceForFirstSave", "type": "error" },
+  { "inputs": [], "name": "InsufficientFunds", "type": "error" },
+  { "inputs": [], "name": "InvalidInput", "type": "error" },
+  { "inputs": [], "name": "InvalidTokenAddress", "type": "error" },
+  { "inputs": [], "name": "InvalidWithdrawal", "type": "error" },
+  { "inputs": [], "name": "PlanDoesNotExist", "type": "error" },
+  { "inputs": [], "name": "PlanExpired", "type": "error" },
+  { "inputs": [], "name": "PlanNotMatured", "type": "error" },
+  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
+  { "inputs": [], "name": "SafeIsArchived", "type": "error" },
+  { "inputs": [], "name": "SafeNotEmpty", "type": "error" },
+  { "inputs": [], "name": "StartIndexOutOfBounds", "type": "error" },
+  { "inputs": [], "name": "TokenAlreadyInPlan", "type": "error" },
+  { "inputs": [], "name": "TokenNotInPlan", "type": "error" },
+  { "inputs": [], "name": "ZeroValueNotAllowed", "type": "error" },
   {
+    "anonymous": false,
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "newFeePercentage",
-        "type": "uint256",
-        "indexed": false
-  },
-  {
+        "indexed": true,
         "internalType": "address",
-        "name": "newFeeCollector",
-        "type": "address",
-        "indexed": false
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "extension",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isUnlocked",
+        "type": "bool"
       }
     ],
-    "type": "event",
-    "name": "FeeConfigurationUpdated",
-    "anonymous": false
+    "name": "AutomatedDurationExtended",
+    "type": "event"
   },
   {
+    "anonymous": false,
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "duration",
-        "type": "uint256",
-        "indexed": false
-      },
-      {
-        "internalType": "uint256",
-        "name": "oldFee",
-        "type": "uint256",
-        "indexed": false
-      },
-      {
-        "internalType": "uint256",
-        "name": "newFee",
-        "type": "uint256",
-        "indexed": false
-      }
-    ],
-    "type": "event",
-    "name": "FeeUpdated",
-    "anonymous": false
-  },
-  {
-    "inputs": [
-      {
+        "indexed": true,
         "internalType": "address",
-        "name": "recipient",
-        "type": "address",
-        "indexed": true
+        "name": "user",
+        "type": "address"
       },
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "amount",
-        "type": "uint256",
-        "indexed": false
-      }
-    ],
-    "type": "event",
-    "name": "LSKRewardsClaimed",
-    "anonymous": false
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint8",
-        "name": "baseThreshold",
-        "type": "uint8",
-        "indexed": false
+        "type": "uint256"
       },
       {
-        "internalType": "uint8",
-        "name": "mediumThreshold",
-        "type": "uint8",
-        "indexed": false
-      },
-      {
-        "internalType": "uint8",
-        "name": "ultraThreshold",
-        "type": "uint8",
-        "indexed": false
-      },
-      {
-        "internalType": "uint8",
-        "name": "baseMultiplier",
-        "type": "uint8",
-        "indexed": false
-      },
-      {
-        "internalType": "uint8",
-        "name": "mediumMultiplier",
-        "type": "uint8",
-        "indexed": false
-      },
-      {
-        "internalType": "uint8",
-        "name": "ultraMultiplier",
-        "type": "uint8",
-        "indexed": false
-      }
-    ],
-    "type": "event",
-    "name": "MultipliersUpdated",
-    "anonymous": false
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint8",
-        "name": "creatorWeight",
-        "type": "uint8",
-        "indexed": false
-      },
-      {
-        "internalType": "uint8",
-        "name": "stackersWeight",
-        "type": "uint8",
-        "indexed": false
-      },
-      {
-        "internalType": "uint8",
-        "name": "pilotWeight",
-        "type": "uint8",
-        "indexed": false
-      }
-    ],
-    "type": "event",
-    "name": "PointWeightsUpdated",
-    "anonymous": false
-  },
-  {
-    "inputs": [
-      {
+        "indexed": false,
         "internalType": "uint256",
-        "name": "newFeePercentage",
-        "type": "uint256",
-        "indexed": false
-      },
-      {
-        "internalType": "address",
-        "name": "newFeeCollector",
-        "type": "address",
-        "indexed": false
+        "name": "frequency",
+        "type": "uint256"
       }
     ],
-    "type": "event",
-    "name": "PrematureFeeConfigurationUpdated",
-    "anonymous": false
+    "name": "AutomatedPlanCreated",
+    "type": "event"
   },
   {
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
         "internalType": "address",
-        "name": "token",
-        "type": "address",
-        "indexed": true
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "AutomatedPlanTerminated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
       },
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "frequency",
+        "type": "uint256"
+      }
+    ],
+    "name": "AutomatedPlanUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "AutomatedSavingExecuted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "fee",
+        "type": "uint256"
+      }
+    ],
+    "name": "AutomatedSavingsFeeCharged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "executedCount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "skippedCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "BatchAutomatedSavingsExecuted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ClaimedFromAutomatedSafe",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newLongestStreak",
+        "type": "uint256"
+      }
+    ],
+    "name": "LongestStreakUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "points",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "multiplier",
+        "type": "uint256"
+      }
+    ],
+    "name": "PointsAwarded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "currentStreak",
+        "type": "uint256"
+      }
+    ],
+    "name": "StreakIncremented",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "StreakReset",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "StreakStarted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "TokenCancelledFromAutomatedPlan",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "txCount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "txId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "string",
-        "name": "symbol",
-        "type": "string",
-        "indexed": false
+        "name": "typeOfTransaction",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
       }
     ],
-    "type": "event",
-    "name": "TokenAdded",
-    "anonymous": false
+    "name": "TransactionHistoryUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "WithdrawalFromAutomatedSafe",
+    "type": "event"
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "token",
-        "type": "address",
-        "indexed": true
-      }
+      { "internalType": "address", "name": "_user", "type": "address" }
     ],
-    "type": "event",
-    "name": "TokenRemoved",
-    "anonymous": false
+    "name": "activateSafe",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
       { "internalType": "address", "name": "_token", "type": "address" },
-      { "internalType": "string", "name": "_symbol", "type": "string" },
-      { "internalType": "uint8", "name": "_decimals", "type": "uint8" }
+      { "internalType": "uint256", "name": "_amountToSave", "type": "uint256" },
+      { "internalType": "uint256", "name": "_frequency", "type": "uint256" }
     ],
+    "name": "addTokenToAutomatedPlan",
+    "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "addAcceptedToken"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "durations",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "newFees",
-        "type": "uint256[]"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "batchUpdateFeeTiers"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "users",
-        "type": "address[]"
-      },
-      {
-        "internalType": "address[]",
-        "name": "tokens",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "amounts",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "bytes32[][]",
-        "name": "proofs",
-        "type": "bytes32[][]"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "claimMerklRewards"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "name": "getContractBalance",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ]
+    "type": "function"
   },
   {
     "inputs": [],
+    "name": "claimAllAutomatedSafe",
+    "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "initializeFees"
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_tokenAddress", "type": "address" }
+    ],
+    "name": "claimAutomatedSafe",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "claimableBalanceAutomatedSafe",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "token", "type": "address" },
+          { "internalType": "uint256", "name": "amount", "type": "uint256" }
+        ],
+        "internalType": "struct LibDiamond.Token[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_token", "type": "address" },
+      { "internalType": "uint256", "name": "_amountToSave", "type": "uint256" },
+      { "internalType": "uint256", "name": "_frequency", "type": "uint256" },
+      { "internalType": "uint256", "name": "_duration", "type": "uint256" }
+    ],
+    "name": "createAutomatedSavingsPlan",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_user", "type": "address" }
+    ],
+    "name": "deactivateSafe",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_additionalTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "extendAutomatedPlanDuration",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_startIndex", "type": "uint256" },
+      { "internalType": "uint256", "name": "_count", "type": "uint256" }
+    ],
+    "name": "getAndExecuteAutomatedSavingsPlansDue",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "dueAddresses",
+        "type": "address[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "skippedAddresses",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_user", "type": "address" }
+    ],
+    "name": "getAutomatedSafeForUser",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "bool", "name": "isArchived", "type": "bool" },
+          { "internalType": "uint256", "name": "duration", "type": "uint256" },
+          { "internalType": "uint256", "name": "startTime", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "unlockTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address[]",
+            "name": "tokens",
+            "type": "address[]"
+          },
+          {
+            "components": [
+              { "internalType": "address", "name": "token", "type": "address" },
+              {
+                "internalType": "uint256",
+                "name": "amountToSave",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "frequency",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "amountSaved",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct TokenSavingsDetailsMemory[]",
+            "name": "tokenDetails",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct AutomatedSavingsPlanDetails",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAutomatedSavingsDuePlans",
+    "outputs": [
+      { "internalType": "address[]", "name": "", "type": "address[]" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_user", "type": "address" },
+      { "internalType": "uint8", "name": "_totalEvents", "type": "uint8" }
+    ],
+    "name": "getScheduledSavings",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "token", "type": "address" },
+          { "internalType": "uint256", "name": "amount", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "scheduledDate",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct LibDiamond.ScheduledSaving[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_user", "type": "address" },
+      { "internalType": "address", "name": "_token", "type": "address" }
+    ],
+    "name": "isAutosaveEnabledForToken",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [
       { "internalType": "address", "name": "_token", "type": "address" }
     ],
+    "name": "removeTokenFromAutomatedPlan",
+    "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "removeAcceptedToken"
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "terminateAutomatedPlan",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      {
-        "internalType": "uint256",
-        "name": "minAmount",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "setMinAmountForPoints"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_newFeePercentage",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_newFeeCollector",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "updateFeeConfiguration"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "duration",
-        "type": "uint256"
-      },
-      { "internalType": "uint256", "name": "newFee", "type": "uint256" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "updateFeeTier"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint8",
-        "name": "_baseThreshold",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_mediumThreshold",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_ultraThreshold",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_baseMultiplier",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_mediumMultiplier",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_ultraMultiplier",
-        "type": "uint8"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "updateMultipliers"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint8",
-        "name": "_creatorWeight",
-        "type": "uint8"
-      },
-          {
-        "internalType": "uint8",
-        "name": "_stackersWeight",
-        "type": "uint8"
-              },
-      { "internalType": "uint8", "name": "_pilotWeight", "type": "uint8" }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "updatePointWeights"
-  },
-  {
-    "inputs": [
-          {
-            "internalType": "uint256",
-        "name": "_newFeePercentage",
-            "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_newFeeCollector",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "updatePrematureWithdrawalFeeConfiguration"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
-      {
-        "internalType": "address",
-        "name": "_vaultAddress",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "updateTokenToVaultAddress"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "_token", "type": "address" },
+      { "internalType": "address", "name": "_tokenAddress", "type": "address" },
       { "internalType": "uint256", "name": "_amount", "type": "uint256" },
-      { "internalType": "address", "name": "_to", "type": "address" }
+      {
+        "internalType": "bool",
+        "name": "_acceptEarlyWithdrawalFee",
+        "type": "bool"
+      }
     ],
+    "name": "withdrawAutomatedSafe",
+    "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "withdrawFunds"
+    "type": "function"
   }
 ]
