@@ -1,4 +1,3 @@
-import SmarterSavingCard from "@/components/Cards/SmarterSavingCard";
 import VaultCard from "@/components/Cards/VaultCard";
 import SavingsCards from "@/components/SavingsCards";
 import { useActiveAccount } from "thirdweb/react";
@@ -26,12 +25,10 @@ const Vault = () => {
     <div className="w-full relative px-0 sm:px-4 overflow-x-hidden">
       <MobileHeader />
       <section className="w-full">
-        <div className="w-full">
-          <SmarterSavingCard />
-        </div>
         <button
           onClick={openFirstModal}
-          className="rounded-[100px] sm:hidden w-full max-w-[100%] mx-auto my-4 block px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
+          className="rounded-[100px] sm:hidden w-full max-w-[100%] mx-auto my-4 block px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
+        >
           Save
         </button>
         <div className="flex flex-col sm:flex-row gap-2 pb-2 w-full">
@@ -55,7 +52,7 @@ const Vault = () => {
         /> */}
         </div>
 
-        <div className="w-full max-w-full overflow-x-hidden">
+        <div className="hidden md:block w-full max-w-full overflow-x-hidden">
           <SavingsCards />
         </div>
 

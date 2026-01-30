@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import ApproveTxModal from "./ApproveTxModal";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { getTokenPrice } from "@/lib";
+import MemoInformationIcon from "@/icons/Information";
 
 interface UnlockModalProps {
   onClose?: () => void;
@@ -314,6 +315,16 @@ export default function UnlockModal({
               </button>
             </div>
 
+            {safeDetails && safeDetails.unlockTime > new Date() && (
+              <div className="bg-[#FFA3481A] p-4 rounded-lg mt-4 flex flex-col items-center justify-center gap-2">
+                <MemoInformationIcon className="w-6 h-6"/>
+                <p className="text-[#FFA448] text-center text-sm">
+                  Unlocking this safe before its maturity date will lead to the
+                  loss of all accumulated interest and savings reward.
+                </p>
+              </div>
+            )}
+
             <div className="space-y-2 mt-8">
               <AmountInput
                 amount={saveState.amount}
@@ -334,7 +345,7 @@ export default function UnlockModal({
                 </span>
               </div>
               <button
-                className="text-sm text-[#5b8c7b] hover:text-[#79E7BA] transition-colors"
+                className="text-sm text-[#79E7BA] transition-colors"
                 onClick={() => {
                   if (selectedTokenBalance > 0) {
                     // Get normalized balance for Max button

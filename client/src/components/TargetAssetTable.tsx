@@ -10,7 +10,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
-import { formatUnits } from "viem";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
@@ -21,13 +20,15 @@ import { getTokenPrice } from "@/lib";
 // import { client, liskMainnet } from "@/lib/config";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import { getTokenDecimals, tokenData } from "@/lib/utils";
+import { getTokenDecimals, getUserTokenYield, tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
 import TopUpModal from "./Modals/Top-up-modal";
 import UnlockModal from "./Modals/UnlockModal";
+import { formatUnits } from "viem";
+import { saveAtom } from "@/store/atoms/save";
 
 interface AssetTableProps {
   safeDetails?: FormattedSafeDetails;
@@ -35,7 +36,7 @@ interface AssetTableProps {
 
 export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
-    { token: string; balance: string; saved: string; available: string }[]
+    { token: string; balance: string; yield?: string }[]
   >([]);
 
   const [balances] = useRecoilState(balancesState);
@@ -51,53 +52,48 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
   );
 
   useEffect(() => {
-    // If safeDetails is provided, use the safe-specific token amounts
-    if (
-      safeDetails &&
-      safeDetails.tokenAmounts &&
-      safeDetails.tokenAmounts.length > 0
-    ) {
-      const safeAssetsRes = safeDetails.tokenAmounts.map((tokenInfo) => {
-        return {
-          token: tokenInfo.token,
-          // For a specific safe, the balance is the amount in the safe
-          balance: tokenInfo.formattedAmount,
-          // For a specific safe, all tokens are "saved" in this safe
-          saved: tokenInfo.formattedAmount,
-          // For a specific safe, available is 0 as all tokens are locked in the safe
-          available: "0",
-        };
-      });
+    const fetchSafeAssets = async () => {
+      if (
+        safeDetails &&
+        safeDetails.tokenAmounts &&
+        safeDetails.tokenAmounts.length > 0
+      ) {
+        console.log("SafeDetails from target assets table", safeDetails);
 
-      setAllAssetData(safeAssetsRes);
-      return;
-    }
+        const safeAssetsRes = await Promise.all(
+          safeDetails.tokenAmounts.map(async (tokenInfo) => {
+            let effectiveYield;
 
-    // If no safeDetails or using global view, use the global balances
-    if (!totalTokenBalances) return;
+            if (
+              safeDetails.id !== "911" &&
+              typeof safeDetails.target === "string" &&
+              safeDetails.target !== "Emergency Safe"
+            ) {
+              effectiveYield = await getUserTokenYield(
+                tokenInfo.token,
+                safeDetails.feePercentage!,
+                tokenInfo.tokenShares!,
+                BigInt(tokenInfo.amount)!
+              );
+            }
 
-    const tokens = Object.keys(totalTokenBalances || {});
-    if (tokens.length === 0) return;
+            return {
+              token: tokenInfo.token,
+              // For a specific safe, the balance is the amount in the safe
+              balance: tokenInfo.formattedAmount,
+              saved: tokenInfo.formattedAmount,
+              yield: effectiveYield
+                ? formatUnits(effectiveYield, getTokenDecimals(tokenInfo.token))
+                : "0",
+            };
+          })
+        );
 
-    const allAssetsRes = tokens.map((token) => {
-      return {
-        token,
-        balance: formatUnits(
-          BigInt((totalTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token)
-        ),
-        saved: formatUnits(
-          BigInt((savedTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token)
-        ),
-        available: formatUnits(
-          BigInt((availableTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token)
-        ),
-      };
-    });
+        setAllAssetData(safeAssetsRes);
+      }
+    };
 
-    setAllAssetData(allAssetsRes);
+    fetchSafeAssets();
   }, [
     availableTokenBalances,
     totalTokenBalances,
@@ -133,8 +129,10 @@ function AssetTableContent({
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [updatedAssets, setUpdatedAssets] = useState<any>([]);
-  const navigate = useNavigate();
+  const [, setSaveState] = useRecoilState(saveAtom);
 
+  const navigate = useNavigate();
+  console.log("ASSETS FPR TARGET", assets);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
   const address = account?.address;
@@ -158,9 +156,11 @@ function AssetTableContent({
           token: asset.token,
           balance: asset.balance,
           saved: asset.saved,
+          yield: asset.yield,
           balance_usd: null, // Placeholder for loading state
           saved_usd: null, // Placeholder for loading state
           autosaved: null, // Placeholder for loading state
+          yield_usd: null,
           tokenInfo: tokenData[asset.token] || {
             symbol: "Unknown",
             name: "Lisk",
@@ -184,12 +184,18 @@ function AssetTableContent({
               Number(asset.saved)
             );
 
+            const yieldUsd = await getTokenPrice(
+              asset.token,
+              Number(asset.yield)
+            );
+
             setUpdatedAssets((prev: any) => {
               const updated = [...prev];
               updated[index] = {
                 ...updated[index],
                 balance_usd: balanceUsd,
                 saved_usd: savedUsd,
+                yield_usd: yieldUsd,
               };
               return updated;
             });
@@ -271,10 +277,7 @@ function AssetTableContent({
                 AMOUNT
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                IN VAULT
-              </TableHead>
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                AUTOSAVED
+                YIELD ON SAVINGS
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 <span className="sr-only">Actions</span>
@@ -315,25 +318,37 @@ function AssetTableContent({
                 <TableCell className="py-4 px-4">
                   <div className="flex flex-col">
                     <p className="text-white">
-                      {asset.balance} {asset.tokenInfo.symbol}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      ≈ $
-                      {asset.balance_usd !== null
-                        ? asset.balance_usd
-                        : "Loading..."}
-                    </p>
-                  </div>
-                </TableCell>
-                <TableCell className="py-4 px-4">
-                  <div className="flex flex-col">
-                    <p className="text-white">
                       {asset.saved} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
+                      ≈ ${asset.saved !== null ? asset.saved_usd : "Loading..."}
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell className="p-4 text-[#79E7BA] hover:text-[#79E7BA]/80">
+                  <div className="flex flex-col">
+                    <p className="">
+                      {asset?.yield > 0 ? (
+                        <>
+                          +{" "}
+                          {(() => {
+                            const y = Number(asset?.yield);
+                            const precision =
+                              y >= 1 ? 2 : y >= 0.01 ? 3 : y >= 0.001 ? 4 : 5;
+                            return Number(y.toFixed(precision));
+                          })()}{" "}
+                        </>
+                      ) : (
+                        "0.00"
+                      )}{" "}
+                      {asset.tokenInfo.symbol}
+                    </p>
+                    <p className="text-xs">
                       ≈ $
-                      {asset.saved_usd !== null
-                        ? asset.saved_usd
+                      {asset.yield_usd !== null
+                        ? asset.yield_usd > 0
+                          ? asset?.yield_usd
+                          : "0.00"
                         : "Loading..."}
                     </p>
                   </div>
@@ -344,14 +359,26 @@ function AssetTableContent({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setShowTopUpModal(true)}
+                      onClick={() => {
+                        setSaveState((prevState) => ({
+                          ...prevState,
+                          token: asset.token,
+                        }));
+                        setShowTopUpModal(true);
+                      }}
                     >
                       Top Up
                     </Button>
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setShowUnlockModal(true)}
+                      onClick={() => {
+                        setSaveState((prevState) => ({
+                          ...prevState,
+                          token: asset.token,
+                        }));
+                        setShowUnlockModal(true);
+                      }}
                     >
                       Unlock
                     </Button>

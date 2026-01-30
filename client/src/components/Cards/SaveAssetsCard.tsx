@@ -36,6 +36,10 @@ import {
   supportedTokensState,
 } from "@/store/atoms/balance";
 import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+// import { VaultAPYDisplay } from "../VaultAPYDisplay";
+import { useVaultApy } from "@/hooks/useVaultApy";
+import UsdtWarningModal from "../Modals/UsdtWarningModal";
+import UsdtSavingsBanner from "./UsdtSavingsBanner";
 
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
@@ -99,9 +103,10 @@ export default function SaveAssetsCard() {
   const today = startOfDay(new Date());
 
   const savingsDurationOptions = [
-    { value: 30, label: "30 days" },
-    { value: 60, label: "60 days" },
-    { value: 120, label: "120 days" },
+    { value: 30, label: "30D" },
+    { value: 60, label: "60D" },
+    { value: 120, label: "120D" },
+    { value: 365, label: "365D" },
   ];
 
   const {
@@ -175,12 +180,17 @@ export default function SaveAssetsCard() {
     transactionPercentage?: string;
     frequency?: string;
   }>({});
+  const [showUsdtModal, setShowUsdtModal] = useState(false);
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
     setDecimals(getTokenDecimals(value));
 
     setSaveState((prevState) => ({ ...prevState, token: value }));
+
+    if (value === tokens.usdt) {
+      setShowUsdtModal(true);
+    }
   };
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -381,6 +391,43 @@ export default function SaveAssetsCard() {
     run();
   }, [supportedTokens, savingsBalance]);
 
+  const [totalApy, setTotalApy] = useState<number | null>(null);
+
+  // Map USDT0 to USDT for APY calculation, but exclude USDT itself from showing APY
+  const apyTokenAddress =
+    saveState.token === tokens.usdt0
+      ? tokens.usdt
+      : saveState.token === tokens.usdt
+      ? null // Don't calculate APY for USDT
+      : saveState.token;
+
+  const { nativeApy, totalApr, fees, loading, error } = useVaultApy(
+    (apyTokenAddress || tokens.usdt) as `0x${string}`,
+    "0x00cD58DEEbd7A2F1C55dAec715faF8aed5b27BF8"
+  );
+
+  useEffect(() => {
+    if (error) {
+      console.log("Error", error);
+    }
+
+    // Skip APY calculation for USDT
+    if (saveState.token === tokens.usdt) {
+      setTotalApy(null);
+      return;
+    }
+
+    if (saveState.token && nativeApy && totalApr && fees && !loading) {
+      const computation = (
+        Number(totalApr) +
+        Number(nativeApy) -
+        Number(nativeApy) * Number(fees)
+      ).toFixed(2);
+
+      setTotalApy(Number(computation));
+    }
+  }, [saveState.token, nativeApy, totalApr, fees, loading, error]);
+
   return (
     <div className="min-h-screen md:min-h-fit flex items-center justify-center md:justify-center bg-[#010104] p-4">
       <div className="w-full max-w-md md:max-w-[600px] rounded-xl md:border-[1px] md:border-[#FFFFFF21] md:bg-[#1D1D1D73] md:p-6 text-white">
@@ -391,6 +438,16 @@ export default function SaveAssetsCard() {
           </button>
           <h1 className="text-lg font-medium">Save assets</h1>
         </div>
+
+        {/* <VaultAPYDisplay
+          vaultAddress={"0x8258F0c79465c95AFAc325D6aB18797C9DDAcf55"}
+          morphoBlueAddress={"0x00cD58DEEbd7A2F1C55dAec715faF8aed5b27BF8"}
+        /> */}
+        {/* {nativeApy && (
+          <div className="text-sm text-gray-300">
+            Native APY: <span className="text-gray-400">{nativeApy}%</span>
+          </div>
+        )} */}
 
         {/* Toggle */}
         <div className="flex rounded-full bg-[#5a5a5a] border-2 border-[#5a5a5a] p-0 mb-6">
@@ -418,6 +475,7 @@ export default function SaveAssetsCard() {
           </button>
         </div>
 
+        <UsdtSavingsBanner />
         {saveType === "one-time" && (
           <>
             {/* Amount */}
@@ -512,6 +570,8 @@ export default function SaveAssetsCard() {
                   isCustomSelected={isCustomSelected}
                   className="mb-4"
                   isDisabled={isDurationDisabled}
+                  apy={totalApy || 0}
+                  isLoading={loading}
                 />
 
                 <div className="py-4">
@@ -826,6 +886,15 @@ export default function SaveAssetsCard() {
         }}
         additionalDetails={{
           frequency: getFrequencyLabel(saveState.frequency.toString()),
+        }}
+      />
+
+      <UsdtWarningModal
+        open={showUsdtModal}
+        onClose={() => setShowUsdtModal(false)}
+        onSwap={() => {
+          setShowUsdtModal(false);
+          navigate("/swap");
         }}
       />
     </div>

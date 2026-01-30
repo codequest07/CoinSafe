@@ -2,9 +2,18 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatEther, formatUnits } from "viem";
 import { tokens } from "@/lib/contract";
-import { getLskToUsd, getSafuToUsd, getUsdcToUsd, getUsdtToUsd } from "@/lib";
-import { liskMainnet } from "./config";
+import {
+  getAvgAPR,
+  getLskToUsd,
+  getSafuToUsd,
+  getUsdcToUsd,
+  getUsdt0ToUsd,
+  getUsdtToUsd,
+} from "@/lib";
 import { TokenInfo } from "thirdweb/react";
+import { getContract, readContract } from "thirdweb";
+import { client, liskMainnet } from "@/lib/config";
+import { CoinsafeDiamondContract } from "@/lib/contract";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -74,6 +83,8 @@ export const convertTokenAmountToUsd = async (
       return await getLskToUsd(Number(formatUnits(amount, tokenDecimals)));
     case tokens.usdc:
       return await getUsdcToUsd(Number(formatUnits(amount, tokenDecimals)));
+    case tokens.usdt0: 
+      return await getUsdt0ToUsd(Number(formatUnits(amount, tokenDecimals)))
     default:
       console.error("Unknown token address:", token);
       return 0;
@@ -206,27 +217,134 @@ export const tokenData = {
     color: "bg-[#d54f]",
     image: "/assets/tokens/usdt.jpg",
   },
+  "0x43F2376D5D03553aE72F4A8093bbe9de4336EB08": {
+    symbol: "USDT0",
+    chain: "Lisk",
+    color: "bg-[#d5f]",
+    image: "/assets/tokens/usdt0.png",
+  },
 } as any;
 
 export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
-    [liskMainnet.id]: [
-      {
-        address: tokens.usdt,
-        icon: tokenData[tokens.usdt]?.image,
-        name: tokenData[tokens.usdt]?.symbol,
-        symbol: tokenData[tokens.usdt]?.symbol,
-      },
-      {
-        address: tokens.lsk,
-        icon: tokenData[tokens.usdc]?.image,
-        name: tokenData[tokens.usdc]?.symbol,
-        symbol: tokenData[tokens.usdc]?.symbol,
-      },
-      {
-        address: tokens.lsk,
-        icon: tokenData[tokens.lsk]?.image,
-        name: tokenData[tokens.lsk]?.symbol,
-        symbol: tokenData[tokens.lsk]?.symbol,
-      },
-    ],
-  };
+  [liskMainnet.id]: [
+    {
+      address: tokens.usdt,
+      icon: tokenData[tokens.usdt]?.image,
+      name: tokenData[tokens.usdt]?.symbol,
+      symbol: tokenData[tokens.usdt]?.symbol,
+    },
+    {
+      address: tokens.lsk,
+      icon: tokenData[tokens.usdc]?.image,
+      name: tokenData[tokens.usdc]?.symbol,
+      symbol: tokenData[tokens.usdc]?.symbol,
+    },
+    {
+      address: tokens.lsk,
+      icon: tokenData[tokens.lsk]?.image,
+      name: tokenData[tokens.lsk]?.symbol,
+      symbol: tokenData[tokens.lsk]?.symbol,
+    },
+    {
+      address: tokens.usdt0,
+      icon: tokenData[tokens.usdt0]?.image,
+      name: tokenData[tokens.usdt0]?.symbol,
+      symbol: tokenData[tokens.usdt0]?.symbol,
+    },
+  ],
+};
+
+export const getContractFeePercentage = async (
+  duration: number,
+  user: string
+) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const feePercentage = await readContract({
+    contract: contract,
+    method:
+      "function calculateFeePercentage(uint256 duration,address user) external view returns (uint256)",
+    params: [BigInt(duration), user],
+  });
+
+  return feePercentage;
+};
+
+export const getMorphoVaultAddressForToken = async (tokenAddress: string) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const vault = await readContract({
+    contract: contract,
+    method:
+      "function getMorphoVault(address token) external view returns (address)",
+    params: [tokenAddress],
+  });
+
+  return vault;
+};
+
+export const getUserTokenYield = async (
+  tokenAddress: string,
+  feePercentage: number,
+  tokenShares: bigint,
+  principal: bigint
+) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const vaultAddress = await getMorphoVaultAddressForToken(tokenAddress);
+
+  if (!vaultAddress) throw new Error("Vault address not found!");
+
+  const assets = await readContract({
+    contract: contract,
+    method:
+      "function convertSharesToAssets(uint256 shares, address vaultAddress) external view returns (uint256)",
+    params: [tokenShares, vaultAddress],
+  });
+
+  // console.log("targett safe assets yield", assets)
+
+  const effectiveYield =
+    (100 - Number(feePercentage) / 100) * Number(assets - principal);
+
+  // console.log("targett safe assets yield variables ", (100 -(Number(feePercentage)/100)), (assets) - (principal))
+
+  // console.log("targett safe assets calculated yield", effectiveYield)
+  return BigInt(effectiveYield);
+};
+
+export const getSafeLSKRewards = async (safeId: string, account: any) => {
+  const contract = getContract({
+    client: client,
+    address: CoinsafeDiamondContract.address,
+    chain: liskMainnet,
+  });
+
+  const { avgApr } = await getAvgAPR();
+
+  console.log("SafeId, AvgApr", safeId, BigInt(avgApr?.toFixed() || "1"));
+
+  const rewards = await readContract({
+    contract: contract,
+    method:
+      "function previewWithdrawalLSKRewards(uint256 _safeId, uint256 _avgAPR ) external view returns (uint256 projectedLSK,uint256 availableLSK,uint256 claimableLSK,uint256 claimableWithFeeApplied)",
+    params: [BigInt(safeId), BigInt(avgApr?.toFixed() || "1")],
+    from: account?.address,
+  });
+
+  console.log("Rewards hereeee", rewards);
+
+  return formatEther(rewards[0]);
+};

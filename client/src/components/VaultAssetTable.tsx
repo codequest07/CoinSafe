@@ -24,6 +24,7 @@ import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
+import MobileAssetTable from "./MobileAssetTable";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
@@ -35,21 +36,24 @@ async function checkIsTokenAutoSaved(
     chain: liskMainnet,
   });
 
-  const balance = await readContract({
+  const enabled = await readContract({
     contract: contract,
     method:
       "function isAutosaveEnabledForToken(address _user, address _token) external view returns (bool)",
     params: [userAddress, tokenAddress],
   });
-  return balance;
+  return enabled;
 }
 
 interface VaultAssetTableProps {
   safeDetails?: FormattedSafeDetails;
-  type?: 'emergency' | 'target' | 'automated'
+  type?: "emergency" | "target" | "automated";
 }
 
-export default function VaultAssetTable({ safeDetails, type }: VaultAssetTableProps) {
+export default function VaultAssetTable({
+  safeDetails,
+  type,
+}: VaultAssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
     { token: string; balance: string; saved: string; available: string }[]
   >([]);
@@ -127,7 +131,7 @@ export default function VaultAssetTable({ safeDetails, type }: VaultAssetTablePr
 
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
-      <div className="sm:mx-auto">
+      <div className="hidden md:block sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">
           {safeDetails
             ? `Assets in ${
@@ -136,6 +140,22 @@ export default function VaultAssetTable({ safeDetails, type }: VaultAssetTablePr
             : "Assets"}
         </h1>
         <VaultAssetTableContent
+          assets={allAssetData}
+          safeDetails={safeDetails}
+          type={type}
+        />
+      </div>
+
+      {/* Mobile display for assets */}
+      <div className="flex flex-col md:hidden sm:mx-auto">
+        <h1 className="text-xl font-semibold mb-4">
+          {safeDetails
+            ? `Assets in ${
+                safeDetails.target ? safeDetails.target : "Auto safe"
+              }`
+            : "Assets"}
+        </h1>
+        <MobileAssetTable
           assets={allAssetData}
           safeDetails={safeDetails}
           type={type}
@@ -151,7 +171,7 @@ function VaultAssetTableContent({
 }: {
   assets: any[];
   safeDetails?: FormattedSafeDetails;
-  type?: 'emergency' | 'target' | 'automated'
+  type?: "emergency" | "target" | "automated";
 }) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
@@ -257,13 +277,15 @@ function VaultAssetTableContent({
           {safeDetails ? (
             <Button
               onClick={() => setIsFirstModalOpen(true)}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
+            >
               Top Up Safe
             </Button>
           ) : isConnected ? (
             <Button
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-              onClick={() => navigate("/deposit")}>
+              onClick={() => navigate("/deposit")}
+            >
               Deposit
             </Button>
           ) : (
@@ -293,10 +315,10 @@ function VaultAssetTableContent({
                 AMOUNT IN SAFE
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                VALUE (USD)
+                AUTOSAVED
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
-                AUTOSAVED
+                CLAIMABLE AMOUNT
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 <span className="sr-only">Actions</span>
@@ -319,7 +341,8 @@ function VaultAssetTableContent({
                       </div>
                     ) : (
                       <div
-                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
+                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
+                      >
                         {asset.tokenInfo.symbol?.charAt(0)}
                       </div>
                     )}
@@ -371,22 +394,14 @@ function VaultAssetTableContent({
                   </div>
                 </TableCell>
                 <TableCell className="py-4 px-4">
-                  {Number(asset.available) > 0 && asset.isMature ? (
-                    <div className="flex flex-col">
-                      <p className="text-white">
-                        {asset.available} {asset.tokenInfo.symbol}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        ≈ $
-                        {asset.balance_usd !== null
-                          ? asset.balance_usd
-                          : "Loading..."}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="text-center">-</div>
-                  )}
+                  <div className="flex items-center gap-2 justify-start">
+                    {safeDetails?.unlockTime &&
+                    safeDetails?.unlockTime < new Date()
+                      ? safeDetails?.totalAmountUSD ?? 0.0
+                      : "—"}
+                  </div>
                 </TableCell>
+
                 {/* Claim button cell - temporarily commented out
                 <TableCell className="py-4 px-4 text-right">
                   {Number(asset.available) > 0 && asset.isMature ? (

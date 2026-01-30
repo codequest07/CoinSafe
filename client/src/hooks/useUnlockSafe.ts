@@ -12,8 +12,9 @@ import {
   unlockSuccessState,
   UnlockState,
 } from "@/store/atoms/unlock";
-import { tokenDecimals } from "@/lib/utils";
+import { tokenData, tokenDecimals } from "@/lib/utils";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
+import { getAvgAPR } from "@/lib";
 
 // Using the UnlockState interface from the Recoil atom
 
@@ -147,7 +148,7 @@ export const useUnlockSafe = ({
         );
         const error = new Error("Amount must be greater than zero");
         setError(error);
-        toast.error(`Error: Amount must be greater than zero`)
+        toast.error(`Error: Amount must be greater than zero`);
         onError?.(error);
         return;
       }
@@ -220,15 +221,27 @@ export const useUnlockSafe = ({
           amountWithDecimals.toString()
         );
 
+        const { avgApr } = await getAvgAPR(
+          tokenData[currentState.token]?.symbol.toLowerCase()
+        );
+
+        // console.log(
+        //   "Average APR",
+        //   BigInt(avgApr?.toFixed() || "1"),
+        //   "Signature",
+        //   signature
+        // );
+
         const transaction = prepareContractCall({
           contract,
           method:
-            "function withdrawSavings(uint256 _safeId, address _tokenAddress, uint256 _amount, bool _acceptEarlyWithdrawalFee)",
+            "function withdrawSavings(uint256 _safeId, address _tokenAddress, uint256 _amount, bool _acceptEarlyWithdrawalFee, uint256 _avgAPR) external",
           params: [
             toBigInt(currentState.safeId),
             currentState.token,
             amountWithDecimals,
             currentState.acceptEarlyWithdrawalFee,
+            BigInt(avgApr?.toFixed() || "1"),
           ],
         });
 
@@ -241,7 +254,7 @@ export const useUnlockSafe = ({
 
         const result = await sendTransaction(transaction);
 
-        toast.error("Unlock successful!");
+        toast.success("Unlock successful!");
 
         // Set success state
         setIsSuccess(true);
@@ -283,7 +296,7 @@ export const useUnlockSafe = ({
           errorMessage = "Amount must be greater than zero.";
         }
 
-        toast.error(`Error: ${errorMessage}`)
+        toast.error(`Error: ${errorMessage}`);
 
         onError?.(error);
         return null;

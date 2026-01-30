@@ -17,7 +17,7 @@ import { useBalances } from "./hooks/useBalances";
 import { useActiveAccount } from "thirdweb/react";
 import EmergencySafe from "./Pages/EmergencySafe";
 import AutoSave from "./Pages/AutoSave";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import {
   availableBalanceState,
@@ -34,6 +34,9 @@ import {
 import { OnlineStatusIndicator } from "./components/pwa/online-status-indicator";
 import { PWAInstallPrompt } from "./components/pwa/install-prompt";
 import { PushNotificationPopup } from "./components/pwa/push-notification-popup";
+import Swap from "./Pages/Swap";
+import SmarterSaving from "./components/SmarterSaving";
+import ConnectModal from "./components/Modals/ConnectModal";
 // import { useFCMNotifications } from "./hooks/useFCMNotifications";
 // import { Button } from "./components/ui/button";
 
@@ -43,8 +46,8 @@ const App = () => {
   const [, setTotalBalance] = useRecoilState(totalBalanceState);
   const [, setUserCurrentStreak] = useRecoilState(userCurrentStreakState);
   const [, setUserLongestStreak] = useRecoilState(userLongestStreakState);
-  
-  
+  const [openConnectModal, setOpenConnectModal] = useState(false);
+
   // const { sendTestNotification } = useFCMNotifications({
   //     vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
   //     onTokenReceived: () => console.log("Token"),
@@ -97,6 +100,7 @@ const App = () => {
   return (
     <div className="bg-[#010104]">
       <SmartAccountTransactionProvider>
+        <SmarterSaving setIsConnectModalOpen={setOpenConnectModal} />
         {/* Always-visible components */}
         <PWAInstallPrompt
           appName="Coinsafe"
@@ -121,6 +125,7 @@ const App = () => {
             <Route path="/vault/auto-safe" element={<AutoSave />} />
             <Route path="/staking" element={<Staking />} />
             <Route path="/rewards" element={<Rewards />} />
+            <Route path="/swap" element={<Swap />} />
             <Route path="/SaveSense" element={<SaveSense />} />
             {/* Test */}
             <Route path="/save-assets" element={<SaveAssets />} />
@@ -136,7 +141,14 @@ const App = () => {
           position="bottom-right"
         />
       </SmartAccountTransactionProvider>
-      <Toaster richColors closeButton/>
+      <Toaster richColors closeButton />
+
+      {openConnectModal && (
+        <ConnectModal
+          isConnectModalOpen={openConnectModal}
+          setIsConnectModalOpen={setOpenConnectModal}
+        />
+      )}
     </div>
   );
 };

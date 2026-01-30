@@ -18,8 +18,9 @@ interface DisplaySafe {
   name: string;
   amount: number;
   // token: string;
-  status: "Flexible" | "Locked";
+  status: "Flexible" | "Locked" | "Matured";
   unlockDate: string;
+  isLocked?: boolean;
 }
 
 export default function SavingsCards() {
@@ -39,6 +40,7 @@ export default function SavingsCards() {
     isLoading: automatedSafeLoading,
     error: automatedSafeError,
   } = useAutomatedSafeForUser(userAddress as `0x${string}`);
+  console.log("SAFE::::::::::", safes);
 
   const hasActiveAutoSavings =
     details?.tokenDetails?.some(
@@ -139,9 +141,32 @@ export default function SavingsCards() {
 
           let formattedDate = "N/A";
 
+          console.log("THE SAFE::::::", safe);
           if (safe.unlockTime) {
-            const unlockDate = new Date(Number(safe.unlockTime) * 1000);
+            console.log(
+              "Type of unlock time::::::::::",
+              typeof safe.unlockTime
+            );
 
+            // 1763029433n
+            // 1763029433
+            // Today 1769621412902
+            console.log("UNLOCK TIME", Number(safe.unlockTime));
+            console.log("TODAYYYYY:::::", Date.now());
+
+            // {safeDetails.isLocked
+            //   ?
+            //     safeDetails.unlockTime > new Date()
+            //     ? `${Math.ceil(
+            //         (safeDetails.unlockTime.getTime() -
+            //           new Date().getTime()) /
+            //           (1000 * 60 * 60 * 24)
+            //       )} days till unlock`
+            //     : "Matured"
+            //   : "Flexible"}
+
+            const unlockDate = new Date(Number(safe.unlockTime) * 1000);
+            console.log("UNLOCK DATE::::::::::", unlockDate);
             formattedDate = unlockDate.toLocaleDateString("en-US", {
               day: "numeric",
               month: "long",
@@ -149,20 +174,40 @@ export default function SavingsCards() {
             });
           }
 
-          const status = Number(safe.duration) > 0 ? "Locked" : "Flexible";
+          // const status = Number(safe.duration) > 0 ? "Locked" : "Flexible";
 
+          const status =
+            Number(safe.duration) > 0
+              ? Number(safe.unlockTime) > Date.now()
+                ? "Locked"
+                : "Matured"
+              : "Flexible";
+
+          console.log("Unlock time::::::::::", Number(safe.unlockTime));
+          console.log("New Date::::::::::", new Date().getTime());
+
+          console.log(
+            "Is locked::::::::::",
+            Number(safe.unlockTime) * 1000 > new Date().getTime() ? true : false
+          );
+          console.log("DATE GET TIME", new Date().getTime());
+          console.log(
+            "IS IT LOCKED????????",
+            Number(safe.unlockTime) * 1000 > Date.now() ? true : false
+          );
           return {
             id: safe.id.toString(),
             name: safe.target,
             amount: totalAmount,
-            status: status as "Locked" | "Flexible",
+            status: status as "Locked" | "Flexible" | "Matured",
+            isLocked: Number(safe.unlockTime) > new Date().getTime(),
             unlockDate: safe.unlockTime
               ? `Unlocks on ${formattedDate}`
               : "Unlocks Anytime",
           };
         }) || []
       );
-
+      console.log("SAFE LIST::::::::::", safeList);
       setDisplaySafes(safeList);
     };
 
@@ -289,6 +334,11 @@ export default function SavingsCards() {
                         bg-[#79E7BA33] font-[400] text-[#F1F1F1] rounded-xl flex items-center p-1 px-2 hover:bg-[#79E7BA33]
                       `}
                       >
+                        {/* {safe.id === "911"
+                          ? safe.status
+                          : safe.id !== "911" && !safe.isLocked
+                          ? "Matured"
+                          : safe.status} */}
                         {safe.status}
                       </Badge>
                     </div>

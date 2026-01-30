@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import DeleteSafeModal from "./Modals/DeleteSafeModal";
+import RewardsCard from "./Cards/RewardsCard";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
@@ -264,6 +265,12 @@ export default function SavingsDetail() {
                     isLoading={apiLoading}
                   />
                 )}
+                <RewardsCard
+                  title="Yield rewards"
+                  campaign="Lisk"
+                  text={<>rewards on your yields (seperate from your yields)</>}
+                  safeId={Number(safeDetails.id)}
+                />
               </div>
             </div>
 

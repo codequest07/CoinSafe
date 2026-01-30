@@ -7,6 +7,7 @@ import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
 export interface FormattedSafeDetails {
   id: string;
   target: string;
+  feePercentage?: number;
   duration: number;
   startTime: Date;
   unlockTime: Date;
@@ -16,6 +17,7 @@ export interface FormattedSafeDetails {
     tokenSymbol: string;
     amount: number;
     formattedAmount: string;
+    tokenShares?: bigint;
   }[];
   totalAmountUSD: number;
   isLocked: boolean;
@@ -112,6 +114,7 @@ export function useGetSafeById(id: string | undefined) {
               maximumFractionDigits: 6,
             }
           ),
+          tokenShares: safe.initialShares.find(token => token.token == token.token)?.amount
         };
       });
 
@@ -160,6 +163,7 @@ export function useGetSafeById(id: string | undefined) {
         id: safe.id.toString(),
         target: safe.target,
         duration: Number(safe.duration),
+        feePercentage: safe.feePercentage,
         startTime,
         unlockTime,
         nextUnlockDate: formatDate(nextUnlockDate),
