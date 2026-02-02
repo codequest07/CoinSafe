@@ -78,7 +78,6 @@ export default function UnlockModal({
       toast.error(`Error: ${error.message}`);
     },
   });
-  ``;
 
   // Validation state
   const [validationErrors] = useState<{
@@ -142,7 +141,7 @@ export default function UnlockModal({
       console.log(
         `Breaking fee: ${feeAmount} ${tokenSymbol} (${breakingFeePercentage}% of ${
           saveState.amount
-        }) ≈ $${usdValue.toFixed(2)}`
+        }) ≈ $${usdValue.toFixed(2)}`,
       );
     };
 
@@ -194,13 +193,13 @@ export default function UnlockModal({
     if (safeDetails?.tokenAmounts && Array.isArray(safeDetails.tokenAmounts)) {
       try {
         const tokenInfo = safeDetails.tokenAmounts.find(
-          (t) => t?.token?.toLowerCase() === value?.toLowerCase()
+          (t) => t?.token?.toLowerCase() === value?.toLowerCase(),
         );
 
         if (tokenInfo && typeof tokenInfo.amount === "number") {
           setSelectedTokenBalance(Number(tokenInfo.formattedAmount));
           console.log(
-            `Token ${value} balance in safe: ${tokenInfo.amount} ${tokenInfo.tokenSymbol}`
+            `Token ${value} balance in safe: ${tokenInfo.amount} ${tokenInfo.tokenSymbol}`,
           );
         } else {
           setSelectedTokenBalance(0);
@@ -230,7 +229,7 @@ export default function UnlockModal({
         amount: _amount,
       }));
     },
-    [setSaveState, setUnlockState]
+    [setSaveState, setUnlockState],
   );
 
   const validateAndSyncState = async () => {
@@ -284,7 +283,7 @@ export default function UnlockModal({
     } catch (error) {
       console.error("Unlock process failed:", error);
       toast.error(
-        "An error occurred during the unlock process. Please try again."
+        "An error occurred during the unlock process. Please try again.",
       );
     }
   }, [safeId, saveState.amount, saveState.token, setUnlockState, unlockSafe]);
@@ -306,7 +305,7 @@ export default function UnlockModal({
                 onClick={(e) => {
                   e.stopPropagation();
                   // handleApproval(false);
-                  onClose && onClose();
+                  if (onClose) onClose();
                 }}
                 className="rounded-full p-1 bg-white "
                 aria-label="Close"
@@ -317,7 +316,7 @@ export default function UnlockModal({
 
             {safeDetails && safeDetails.unlockTime > new Date() && (
               <div className="bg-[#FFA3481A] p-4 rounded-lg mt-4 flex flex-col items-center justify-center gap-2">
-                <MemoInformationIcon className="w-6 h-6"/>
+                <MemoInformationIcon className="w-6 h-6" />
                 <p className="text-[#FFA448] text-center text-sm">
                   Unlocking this safe before its maturity date will lead to the
                   loss of all accumulated interest and savings reward.
@@ -418,7 +417,7 @@ export default function UnlockModal({
                         {Math.ceil(
                           (safeDetails.unlockTime.getTime() -
                             new Date().getTime()) /
-                            (1000 * 60 * 60 * 24)
+                            (1000 * 60 * 60 * 24),
                         )}{" "}
                         days left
                       </Badge>
