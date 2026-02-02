@@ -12,9 +12,9 @@ import {
   unlockSuccessState,
   UnlockState,
 } from "@/store/atoms/unlock";
-import { tokenData, tokenDecimals } from "@/lib/utils";
+import { tokenDecimals } from "@/lib/utils";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
-import { getAvgAPR } from "@/lib";
+import { getSignedApr } from "@/lib/apr-api";
 
 // Using the UnlockState interface from the Recoil atom
 
@@ -31,7 +31,7 @@ interface UseUnlockSafeResult {
   error: Error | null;
   isSuccess: boolean;
   setUnlockState: (
-    stateOrUpdater: Partial<UnlockState> | ((prev: UnlockState) => UnlockState)
+    stateOrUpdater: Partial<UnlockState> | ((prev: UnlockState) => UnlockState),
   ) => void;
   resetUnlockState: () => void;
 }
@@ -144,7 +144,7 @@ export const useUnlockSafe = ({
       if (!currentState.amount || currentState.amount <= 0) {
         console.error(
           "useUnlockSafe - Amount validation failed:",
-          currentState.amount
+          currentState.amount,
         );
         const error = new Error("Amount must be greater than zero");
         setError(error);
@@ -213,35 +213,37 @@ export const useUnlockSafe = ({
 
         const amountWithDecimals = getAmountWithDecimals(
           currentState.amount,
-          currentState.token
+          currentState.token,
         );
 
         console.log(
           "Using amount with decimals:",
-          amountWithDecimals.toString()
+          amountWithDecimals.toString(),
         );
 
-        const { avgApr } = await getAvgAPR(
-          tokenData[currentState.token]?.symbol.toLowerCase()
-        );
+        // Fetch signed APR data from the backend
+        console.log("Fetching signed APR data for token:", currentState.token);
+        const aprData = await getSignedApr(currentState.token);
+        console.log("APR data received:", {
+          avgAPR: aprData.avgAPR.toString(),
+          aprNonce: aprData.aprNonce.toString(),
+          signatureLength: aprData.aprSignature.length,
+        });
 
-        // console.log(
-        //   "Average APR",
-        //   BigInt(avgApr?.toFixed() || "1"),
-        //   "Signature",
-        //   signature
-        // );
-
+        // Prepare the contract call with new signature:
+        // function withdrawSavings(uint256 _safeId, address _tokenAddress, uint256 _amount, bool _acceptEarlyWithdrawalFee, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
         const transaction = prepareContractCall({
           contract,
           method:
-            "function withdrawSavings(uint256 _safeId, address _tokenAddress, uint256 _amount, bool _acceptEarlyWithdrawalFee, uint256 _avgAPR) external",
+            "function withdrawSavings(uint256 _safeId, address _tokenAddress, uint256 _amount, bool _acceptEarlyWithdrawalFee, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external",
           params: [
             toBigInt(currentState.safeId),
             currentState.token,
             amountWithDecimals,
             currentState.acceptEarlyWithdrawalFee,
-            BigInt(avgApr?.toFixed() || "1"),
+            aprData.avgAPR,
+            aprData.aprNonce,
+            aprData.aprSignature,
           ],
         });
 
@@ -250,6 +252,8 @@ export const useUnlockSafe = ({
           token: currentState.token,
           amount: amountWithDecimals.toString(),
           acceptFee: currentState.acceptEarlyWithdrawalFee,
+          avgAPR: aprData.avgAPR.toString(),
+          aprNonce: aprData.aprNonce.toString(),
         });
 
         const result = await sendTransaction(transaction);
@@ -294,6 +298,8 @@ export const useUnlockSafe = ({
           }
         } else if (errorMessage.includes("ZeroValueNotAllowed")) {
           errorMessage = "Amount must be greater than zero.";
+        } else if (errorMessage.includes("Failed to fetch signed APR")) {
+          errorMessage = "Failed to fetch APR data. Please try again.";
         }
 
         toast.error(`Error: ${errorMessage}`);
@@ -312,7 +318,7 @@ export const useUnlockSafe = ({
       onSuccess,
       onError,
       setUnlockState,
-    ]
+    ],
   );
 
   return {
@@ -324,7 +330,7 @@ export const useUnlockSafe = ({
     setUnlockState: (
       stateOrUpdater:
         | Partial<UnlockState>
-        | ((prev: UnlockState) => UnlockState)
+        | ((prev: UnlockState) => UnlockState),
     ) => {
       if (typeof stateOrUpdater === "function") {
         // If it's a function updater, pass it directly
