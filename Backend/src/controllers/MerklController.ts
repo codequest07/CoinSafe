@@ -6,11 +6,24 @@ import { ethers } from "ethers";
 
 export class MerklController {
   private merklService: MerklService;
-  private aprSigningService: APRSigningService;
+  private aprSigningService: APRSigningService | null = null;
 
   constructor() {
     this.merklService = new MerklService();
-    this.aprSigningService = new APRSigningService();
+    // Initialize signing service (fails gracefully if key not set)
+    try {
+      this.aprSigningService = new APRSigningService();
+      console.log("✅ APR Signing Service initialized");
+    } catch (error) {
+      console.warn(
+        "⚠️ APR Signing Service not initialized:",
+        error instanceof Error ? error.message : "Unknown error",
+      );
+      console.warn(
+        "⚠️ Signed APR endpoint will be disabled. Set APR_SIGNER_PRIVATE_KEY to enable it.",
+      );
+      this.aprSigningService = null;
+    }
   }
 
   /**
@@ -1097,6 +1110,15 @@ export class MerklController {
    */
   async getSignedAPR(req: Request, res: Response): Promise<void> {
     try {
+      if (!this.aprSigningService) {
+        res.status(503).json({
+          success: false,
+          error:
+            "Signed APR is not configured. Set APR_SIGNER_PRIVATE_KEY (or PRIVATE_KEY / WALLET_PRIVATE_KEY) to enable /api/merkl/apr/signed.",
+        });
+        return;
+      }
+
       const { tokenAddress, tokenSymbol, chainId } = req.query as {
         tokenAddress?: string;
         tokenSymbol?: string;
