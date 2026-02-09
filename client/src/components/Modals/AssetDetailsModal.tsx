@@ -1,5 +1,5 @@
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
-import { X, Check } from "lucide-react";
+import { X } from "lucide-react";
 
 interface Asset {
   token: string;
@@ -83,7 +83,7 @@ export function AssetDetailsModal({
         </div>
 
         {/* Autosaved Status */}
-        <div className="mb-6 flex items-center justify-between">
+        {/* <div className="mb-6 flex items-center justify-between">
           <span className="text-sm text-gray-400">Autosaved</span>
           <div className="flex items-center gap-2">
             {asset.autosaved ? (
@@ -101,10 +101,8 @@ export function AssetDetailsModal({
                 </div>
               </>
             )}
-            {/* <span className="text-sm font-medium text-emerald-500">Yes</span>
-            <Check className="w-5 h-5 text-emerald-500" /> */}
           </div>
-        </div>
+        </div> */}
 
         {/* Claimable Amount */}
         <div className="mb-6 flex items-center justify-between">

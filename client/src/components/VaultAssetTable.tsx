@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { Check, X } from "lucide-react";
+// import { Check, X } from "lucide-react";
 import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
@@ -314,9 +314,9 @@ function VaultAssetTableContent({
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 AMOUNT IN SAFE
               </TableHead>
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+              {/* <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 AUTOSAVED
-              </TableHead>
+              </TableHead> */}
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 CLAIMABLE AMOUNT
               </TableHead>
@@ -374,7 +374,7 @@ function VaultAssetTableContent({
                     </p>
                   </div>
                 </TableCell>
-                <TableCell className="py-4 px-4">
+                {/* <TableCell className="py-4 px-4">
                   <div className="flex items-center gap-2">
                     {asset.autosaved ? (
                       <>
@@ -392,7 +392,7 @@ function VaultAssetTableContent({
                       </>
                     )}
                   </div>
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="py-4 px-4">
                   <div className="flex items-center gap-2 justify-start">
                     {safeDetails?.unlockTime &&
