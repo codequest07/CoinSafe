@@ -15,6 +15,18 @@ import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { toast } from "sonner";
 import { getSignedApr, getSignedAprForClaimAll } from "@/lib/apr-api";
+import { getMorphoVaultAddressForToken } from "@/lib/utils";
+import { readContract } from "thirdweb";
+
+const morphoVaultAbi = [
+  {
+    inputs: [{ name: "owner", type: "address" }],
+    name: "maxWithdraw",
+    outputs: [{ name: "maxAssets", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const;
 
 interface Token {
   token: string;
@@ -60,6 +72,61 @@ export default function ClaimAssets({
     fetchUsdValues();
   }, [safeDetails]);
 
+  const checkLiquidity = async (
+    tokenAddress: string,
+    amount: bigint
+  ): Promise<boolean> => {
+    try {
+      const vaultAddress = await getMorphoVaultAddressForToken(tokenAddress);
+
+      if (
+        !vaultAddress ||
+        vaultAddress === "0x0000000000000000000000000000000000000000"
+      ) {
+        return true; // Not a Morpho vault or invalid address, skip check
+      }
+
+      const contract = getContract({
+        client,
+        chain: liskMainnet,
+        address: vaultAddress,
+        abi: morphoVaultAbi as Abi,
+      });
+
+      const maxWithdrawable = await readContract({
+        contract,
+        method: "function maxWithdraw(address owner) view returns (uint256)",
+        params: [CoinsafeDiamondContract.address],
+      });
+
+      console.log(
+        `Liquidity Check: Token ${tokenAddress}, User Amount: ${formatUnits(
+          amount,
+          getTokenDecimals(tokenAddress)
+        )}, Max Withdrawable: ${formatUnits(
+          maxWithdrawable,
+          getTokenDecimals(tokenAddress)
+        )}`
+      );
+
+      if (amount > maxWithdrawable) {
+        const tokenSymbol = tokenData[tokenAddress]?.symbol || "Token";
+        toast.error(
+          `Withdrawals for ${tokenSymbol} are temporarily limited by vault liquidity. Please try again later.`
+        );
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error checking liquidity:", error);
+      // Fail open or closed? If we can't check, typically we might want to warn but let it try,
+      // or fail safe. Letting it try allows the contract to fail if needed.
+      // But given the task is to prevent the error, let's log and proceed cautiously.
+      return true;
+    }
+  };
+
   const handleClaimSingle = async (token: string) => {
     setClaiming(true);
     try {
@@ -94,6 +161,16 @@ export default function ClaimAssets({
         ],
       });
 
+      // Find the specific token amount for the liquidity check
+      const tokenAmount = safeDetails.tokenAmounts.find(
+        (t) => t.token.toLowerCase() === token.toLowerCase()
+      );
+
+      if (tokenAmount) {
+        const hasLiquidity = await checkLiquidity(token, tokenAmount.amount);
+        if (!hasLiquidity) return;
+      }
+
       const { transactionHash } = await sendTransaction(claimTx);
 
       if (!transactionHash) {
@@ -117,6 +194,15 @@ export default function ClaimAssets({
   const handleClaimAll = async () => {
     setClaiming(true);
     try {
+      // Check liquidity for ALL tokens first
+      for (const token of safeDetails.tokenAmounts) {
+        const hasLiquidity = await checkLiquidity(token.token, token.amount);
+        if (!hasLiquidity) {
+          setClaiming(false);
+          return;
+        }
+      }
+
       const contract = getContract({
         client: client,
         chain: liskMainnet,
