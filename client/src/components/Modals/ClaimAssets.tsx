@@ -14,6 +14,7 @@ import { getContract, prepareContractCall } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { toast } from "sonner";
+import { getSignedApr, getSignedAprForClaimAll } from "@/lib/apr-api";
 import { getMorphoVaultAddressForToken } from "@/lib/utils";
 import { readContract } from "thirdweb";
 
@@ -59,7 +60,7 @@ export default function ClaimAssets({
       for (const token of safeDetails.tokenAmounts) {
         const usdValue = await convertTokenAmountToUsd(
           token.token,
-          token.amount
+          token.amount,
         );
         values[token.token] = usdValue;
       }
@@ -136,11 +137,28 @@ export default function ClaimAssets({
         abi: facetAbis.targetSavingsFacet as Abi,
       });
 
+      // Fetch signed APR data from the backend
+      console.log("Fetching signed APR data for token:", token);
+      const aprData = await getSignedApr(token);
+      console.log("APR data received:", {
+        avgAPR: aprData.avgAPR.toString(),
+        aprNonce: aprData.aprNonce.toString(),
+        signatureLength: aprData.aprSignature.length,
+      });
+
+      // Prepare the contract call for claim with new signature:
+      // function claim(uint256 _safeId, address _tokenAddress, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
       const claimTx = prepareContractCall({
         contract,
         method:
-          "function claim(uint256 _safeId, address _tokenAddress) external",
-        params: [BigInt(safeDetails.id), token],
+          "function claim(uint256 _safeId, address _tokenAddress, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external",
+        params: [
+          BigInt(safeDetails.id),
+          token,
+          aprData.avgAPR,
+          aprData.aprNonce,
+          aprData.aprSignature,
+        ],
       });
 
       // Find the specific token amount for the liquidity check
@@ -162,6 +180,12 @@ export default function ClaimAssets({
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error claiming token:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("Failed to fetch signed APR")
+      ) {
+        toast.error("Failed to fetch APR data. Please try again.");
+      }
     } finally {
       setClaiming(false);
     }
@@ -186,10 +210,27 @@ export default function ClaimAssets({
         abi: facetAbis.targetSavingsFacet as Abi,
       });
 
+      // Fetch signed APR data for claimAll (no specific token)
+      console.log("Fetching signed APR data for claimAll");
+      const aprData = await getSignedAprForClaimAll();
+      console.log("APR data received for claimAll:", {
+        avgAPR: aprData.avgAPR.toString(),
+        aprNonce: aprData.aprNonce.toString(),
+        signatureLength: aprData.aprSignature.length,
+      });
+
+      // Prepare the contract call for claimAll with new signature:
+      // function claimAll(uint256 _safeId, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
       const claimAllTx = prepareContractCall({
         contract,
-        method: "function claimAll(uint256 _safeId) external",
-        params: [BigInt(safeDetails.id)],
+        method:
+          "function claimAll(uint256 _safeId, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external",
+        params: [
+          BigInt(safeDetails.id),
+          aprData.avgAPR,
+          aprData.aprNonce,
+          aprData.aprSignature,
+        ],
       });
 
       const { transactionHash } = await sendTransaction(claimAllTx);
@@ -201,6 +242,12 @@ export default function ClaimAssets({
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error claiming all tokens:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("Failed to fetch signed APR")
+      ) {
+        toast.error("Failed to fetch APR data. Please try again.");
+      }
     } finally {
       setClaiming(false);
     }
@@ -233,7 +280,8 @@ export default function ClaimAssets({
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg">
+                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg"
+              >
                 <div className="flex justify-between items-center">
                   <Skeleton className="h-12 w-24" />
                   <Skeleton className="h-8 w-20" />
@@ -271,7 +319,8 @@ export default function ClaimAssets({
                         <div
                           className={`w-7 h-7 rounded-full ${
                             tokenData[token.token]?.color
-                          } flex items-center justify-center font-medium`}>
+                          } flex items-center justify-center font-medium`}
+                        >
                           {tokenData[token.token]?.symbol?.charAt(0)}
                         </div>
                       )}
@@ -289,7 +338,7 @@ export default function ClaimAssets({
                         <p className="">
                           {formatUnits(
                             token.amount,
-                            getTokenDecimals(token.token)
+                            getTokenDecimals(token.token),
                           )}{" "}
                           {tokenData[token.token]?.symbol}
                         </p>
@@ -306,7 +355,8 @@ export default function ClaimAssets({
                       onClick={() => handleClaimSingle(token.token)}
                       disabled={claiming}
                       variant="link"
-                      className="text-sm text-[#79E7BA] hover:text-[#79E7BA]">
+                      className="text-sm text-[#79E7BA] hover:text-[#79E7BA]"
+                    >
                       Claim
                     </Button>
                   </div>
@@ -319,14 +369,16 @@ export default function ClaimAssets({
           <Button
             onClick={() => setIsModalOpen(false)}
             className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1] bg-[#3F3F3F99] hover:bg-[#3F3F3F99]"
-            disabled={claiming}>
+            disabled={claiming}
+          >
             Cancel
           </Button>
           <Button
             onClick={handleClaimAll}
             className="text-black px-8 rounded-[2rem]"
             variant="outline"
-            disabled={claiming}>
+            disabled={claiming}
+          >
             {claiming ? (
               <LoaderCircle className="animate-spin" />
             ) : (

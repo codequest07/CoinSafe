@@ -5,6 +5,7 @@ import { client, liskMainnet } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { toBigInt } from "ethers";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
+import { getSignedApr, getSignedAprForClaimAll } from "@/lib/apr-api";
 
 interface UseClaimAssetParams {
   address?: `0x${string}`;
@@ -66,7 +67,7 @@ export const useClaimAsset = ({
 
         if (!token) {
           throw new Error(
-            "Token address is required for claiming a specific token"
+            "Token address is required for claiming a specific token",
           );
         }
 
@@ -76,12 +77,28 @@ export const useClaimAsset = ({
 
         console.log(`Claiming token ${token} from safe #${safeId}`);
 
-        // Prepare the contract call for claim
+        // Fetch signed APR data from the backend
+        console.log("Fetching signed APR data for token:", token);
+        const aprData = await getSignedApr(token);
+        console.log("APR data received:", {
+          avgAPR: aprData.avgAPR.toString(),
+          aprNonce: aprData.aprNonce.toString(),
+          signatureLength: aprData.aprSignature.length,
+        });
+
+        // Prepare the contract call for claim with new signature:
+        // function claim(uint256 _safeId, address _tokenAddress, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
         const transaction = prepareContractCall({
           contract,
           method:
-            "function claim(uint256 _safeId, address _tokenAddress) external",
-          params: [toBigInt(safeId), token],
+            "function claim(uint256 _safeId, address _tokenAddress, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external",
+          params: [
+            toBigInt(safeId),
+            token,
+            aprData.avgAPR,
+            aprData.aprNonce,
+            aprData.aprSignature,
+          ],
         });
 
         if (account) {
@@ -104,7 +121,9 @@ export const useClaimAsset = ({
         } else if (errorObj.message.includes("InvalidSafeId")) {
           toast.error("Invalid safe ID");
         } else if (errorObj.message.includes("ZeroValueNotAllowed")) {
-          toast("No tokens to claim");
+          toast.error("No tokens to claim");
+        } else if (errorObj.message.includes("Failed to fetch signed APR")) {
+          toast.error("Failed to fetch APR data. Please try again.");
         } else {
           toast.error(`Claim failed: ${errorObj.message}`);
         }
@@ -125,7 +144,8 @@ export const useClaimAsset = ({
       connect,
       contract,
       account,
-    ]
+      sendTransaction,
+    ],
   );
 
   // Claim all tokens from a safe
@@ -146,11 +166,27 @@ export const useClaimAsset = ({
 
         console.log(`Claiming all tokens from safe #${safeId}`);
 
-        // Prepare the contract call for claimAll
+        // Fetch signed APR data for claimAll (no specific token)
+        console.log("Fetching signed APR data for claimAll");
+        const aprData = await getSignedAprForClaimAll();
+        console.log("APR data received for claimAll:", {
+          avgAPR: aprData.avgAPR.toString(),
+          aprNonce: aprData.aprNonce.toString(),
+          signatureLength: aprData.aprSignature.length,
+        });
+
+        // Prepare the contract call for claimAll with new signature:
+        // function claimAll(uint256 _safeId, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
         const transaction = prepareContractCall({
           contract,
-          method: "function claimAll(uint256 _safeId) external",
-          params: [toBigInt(safeId)],
+          method:
+            "function claimAll(uint256 _safeId, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external",
+          params: [
+            toBigInt(safeId),
+            aprData.avgAPR,
+            aprData.aprNonce,
+            aprData.aprSignature,
+          ],
         });
 
         if (account) {
@@ -172,6 +208,8 @@ export const useClaimAsset = ({
           toast.error("Safe has not matured yet");
         } else if (errorObj.message.includes("InvalidSafeId")) {
           toast.error("Invalid safe ID");
+        } else if (errorObj.message.includes("Failed to fetch signed APR")) {
+          toast.error("Failed to fetch APR data. Please try again.");
         } else {
           toast.error(`Claim failed: ${errorObj.message}`);
         }
@@ -191,7 +229,8 @@ export const useClaimAsset = ({
       connect,
       contract,
       account,
-    ]
+      sendTransaction,
+    ],
   );
 
   return {

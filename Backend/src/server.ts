@@ -12,6 +12,7 @@ import BaseRouter from "./Routes/BaseRouter";
 import WaitlistRouter from "./Routes/WaitlistRouter";
 import faucetRouter from "./Routes/FaucetClaimRoute";
 import FonbnkRouter from "./Routes/FonbnkRouter";
+import MerklRouter from "./Routes/MerklRouter";
 
 // Models and Services
 import { TransactionModel } from "./Models/TransactionModel";
@@ -67,6 +68,7 @@ app.use("/api/faucet", faucetRouter);
 app.use("/api/coingecko", CoinGeckoApiRouter);
 app.use("/api/profile", profileRoutes);
 app.use("/api/fonbnk", FonbnkRouter);
+app.use("/api/merkl", MerklRouter);
 
 // MongoDB Connection
 const mongodbUri = process.env.MONGO_URI || "";
@@ -74,8 +76,7 @@ const mongodbUri = process.env.MONGO_URI || "";
 
 mongoose
   .connect(mongodbUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    // Removed deprecated options
   } as ConnectOptions)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
@@ -92,6 +93,63 @@ const cronJob = cron.schedule("0 * * * *", async () => {
     console.log("✅ Scheduled batch processing completed");
   } catch (error) {
     console.error("❌ Scheduled batch processing failed:", error);
+  }
+});
+
+// Schedule Merkl APR data collection
+// Run daily at 12:00 PM UTC
+console.log(
+  "⏰ Setting up cron job for Merkl APR data collection (daily at 12:00 PM UTC)"
+);
+const merklCronJob = cron.schedule("0 12 * * *", async () => {
+  console.log("🕐 Running scheduled Merkl APR data collection...");
+  try {
+    const { MerklController } = await import("./controllers/MerklController");
+    const merklController = new MerklController();
+
+    // Fetch data for all target opportunities
+    const defaultOpportunities = [
+      { opportunityName: "lisk", chainId: 1135 },
+      { opportunityName: "usdt0", chainId: 1135 },
+      { opportunityName: "usdc", chainId: 1135 },
+    ];
+
+    for (const opportunity of defaultOpportunities) {
+      try {
+        console.log(
+          `📊 Fetching APR data for ${opportunity.opportunityName}...`
+        );
+        // Create mock request/response objects for the controller
+        const mockReq = { body: opportunity };
+        const mockRes = {
+          json: (data: any) => {
+            if (data.success) {
+              console.log(
+                `✅ Successfully collected APR data for ${opportunity.opportunityName}`
+              );
+            } else {
+              console.log(
+                `⚠️ Failed to collect APR data for ${opportunity.opportunityName}: ${data.error}`
+              );
+            }
+          },
+          status: () => ({
+            json: (data: any) => console.log(`❌ Error: ${data.error}`),
+          }),
+        };
+
+        await merklController.fetchAndStoreAPR(mockReq as any, mockRes as any);
+      } catch (error) {
+        console.error(
+          `❌ Error collecting APR data for ${opportunity.opportunityName}:`,
+          error
+        );
+      }
+    }
+
+    console.log("✅ Scheduled Merkl APR data collection completed");
+  } catch (error) {
+    console.error("❌ Scheduled Merkl APR data collection failed:", error);
   }
 });
 
