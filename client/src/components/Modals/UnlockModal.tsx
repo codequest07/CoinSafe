@@ -174,6 +174,38 @@ export default function UnlockModal({
     }
   }, [safeDetails, safeId, setUnlockState]);
 
+  // Sync selected token balance when safeDetails loads (so balance shows immediately on open)
+  useEffect(() => {
+    if (!safeDetails?.tokenAmounts || !Array.isArray(safeDetails.tokenAmounts))
+      return;
+
+    const tokenAmounts = safeDetails.tokenAmounts;
+    const currentToken = saveState.token?.toLowerCase();
+
+    if (currentToken) {
+      // Already have a token selected: just sync balance and decimals
+      const tokenInfo = tokenAmounts.find(
+        (t) => t?.token?.toLowerCase() === currentToken,
+      );
+      if (tokenInfo != null && typeof tokenInfo.amount === "number") {
+        setSelectedTokenBalance(Number(tokenInfo.formattedAmount));
+        setDecimals(getTokenDecimals(tokenInfo.token));
+      } else {
+        setSelectedTokenBalance(0);
+      }
+      return;
+    }
+
+    // No token selected: default to first token in safe so balance loads immediately
+    const first = tokenAmounts[0];
+    if (first?.token) {
+      setDecimals(getTokenDecimals(first.token));
+      setSelectedTokenBalance(Number(first.formattedAmount));
+      setSaveState((prev) => ({ ...prev, token: first.token }));
+      setUnlockState((prev: UnlockState) => ({ ...prev, token: first.token }));
+    }
+  }, [safeDetails, saveState.token, setSaveState, setUnlockState]);
+
   const handleTokenSelect = (value: string) => {
     if (!value) {
       console.error("Token value is null or undefined");
