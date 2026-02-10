@@ -462,7 +462,7 @@ export default function SaveAssetsCard() {
           >
             One-time save
           </button>
-          <button
+          {/* <button
             onClick={() => setSaveType("auto")}
             className={cn(
               "flex-1 py-1 text-sm px-4 rounded-full text-center transition-colors",
@@ -472,7 +472,7 @@ export default function SaveAssetsCard() {
             )}
           >
             Autosave
-          </button>
+          </button> */}
         </div>
 
         <UsdtSavingsBanner />
