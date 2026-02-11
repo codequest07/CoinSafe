@@ -6,7 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { publicClient } from "@/lib/client";
 import { liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis, tokens } from "@/lib/contract";
-import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
+import { getTokenDecimals } from "@/lib/utils";
+import { useTokenPrices } from "@/lib/price-service";
 import {
   savingsBalanceState,
   supportedTokensState,
@@ -89,14 +90,33 @@ const EmergencySafe = () => {
 
   // Token address to symbol mapping
   const tokenSymbols: Record<string, string> = useMemo(() => {
-    const mapping = Object.entries(tokens).reduce((acc, [symbol, address]) => {
-      if (typeof address === "string") {
-        acc[address.toLowerCase()] = symbol;
-      }
-      return acc;
-    }, {} as Record<string, string>);
+    const mapping = Object.entries(tokens).reduce(
+      (acc, [symbol, address]) => {
+        if (typeof address === "string") {
+          acc[address.toLowerCase()] = symbol;
+        }
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
     return mapping;
   }, []);
+
+  // 1. Fetch prices
+  const priceQueries = useTokenPrices(supportedTokens);
+
+  const tokenPriceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    supportedTokens.forEach((token, index) => {
+      // Note: supportedTokens might differ in casing from what's in tokens object?
+      // But here we use the exact string from supportedTokens to key the map.
+      const query = priceQueries[index];
+      if (query.data !== undefined) {
+        map[token] = query.data;
+      }
+    });
+    return map;
+  }, [supportedTokens, priceQueries]);
 
   useEffect(() => {
     async function run() {
@@ -107,10 +127,13 @@ const EmergencySafe = () => {
 
         // Format token amounts
         setTokenAmounts(
-          safe.tokenAmounts.reduce((acc, token) => {
-            if (token && token.token) acc[token.token] = token.amount;
-            return acc;
-          }, {} as Record<string, unknown>)
+          safe.tokenAmounts.reduce(
+            (acc, token) => {
+              if (token && token.token) acc[token.token] = token.amount;
+              return acc;
+            },
+            {} as Record<string, unknown>,
+          ),
         );
 
         const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
@@ -130,7 +153,7 @@ const EmergencySafe = () => {
             tokenSymbol: symbol,
             amount: Number(token.amount),
             formattedAmount: Number(
-              formatUnits(token.amount, getTokenDecimals(token.token))
+              formatUnits(token.amount, getTokenDecimals(token.token)),
             ).toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 6,
@@ -138,25 +161,46 @@ const EmergencySafe = () => {
           };
         });
 
-        // Calculate total amount in USD using asynchronous getTokenPrice function
+        // Calculate total amount in USD using price map
         let totalAmountUSD = 0;
 
         try {
-          const tokenPrices = await Promise.all(
-            formattedTokenAmounts.map(async (token) => {
-              if (!token || !token.tokenSymbol) {
-                return 0;
-              }
-              const price = await convertTokenAmountToUsd(
-                token.token,
-                BigInt(token.amount)
-              );
-              return price;
-            })
-          );
-          totalAmountUSD = tokenPrices.reduce((sum, value) => sum + value, 0);
+          totalAmountUSD = formattedTokenAmounts.reduce((sum, token) => {
+            if (!token || !token.tokenSymbol) return sum;
+
+            const price = tokenPriceMap[token.token] || 0;
+            // We have token.amount as "number" (from Number(bigint)) in formattedTokenAmounts?
+            // Wait, formattedTokenAmounts has amount: Number(token.amount) which might lose precision for large bigints but
+            // token.amount in safe.tokenAmounts is bigint.
+
+            // Let's use the raw BigInt from safe.tokenAmounts if possible, but formattedTokenAmounts is easier here.
+            // The original code used convertTokenAmountToUsd which takes token address and bigint amount.
+            // Here we can use the price * formatted amount (which is basically amount / 10^decimals).
+
+            // token.amount in formattedTokenAmounts is Number(bigint).
+            // Wait, if I use Number(bigint), that's the raw unit amount, not formatted?
+            // Yes: Number(token.amount).
+            // Wait, convertTokenAmountToUsd takes BigInt amount.
+            // formatUnits(amount, decimals) gives string "1.5".
+
+            // Correct logic:
+            // Value = (Amount / 10^Decimals) * Price
+
+            const decimals = getTokenDecimals(token.token);
+            // We can reconstruct exact value using safe.tokenAmounts corresponding entry?
+            // Or just use the formattedTokenAmounts data if we trust Number().
+
+            // Let's use the helper to get numeric value from BigInt amount in safe.tokenAmounts
+            const rawToken = safe.tokenAmounts.find(
+              (t) => t.token === token.token,
+            );
+            if (!rawToken) return sum;
+
+            const amountVal = Number(formatUnits(rawToken.amount, decimals));
+            return sum + amountVal * price;
+          }, 0);
         } catch (error) {
-          console.error("Error fetching token prices:", error);
+          console.error("Error calculating token prices:", error);
         }
 
         setSafeDetails({
@@ -173,9 +217,13 @@ const EmergencySafe = () => {
         setIsLoading(false);
       }
     }
-    run();
+
+    // Only run when we have price map or savingsBalance changes
+    if (Object.keys(tokenPriceMap).length > 0 || supportedTokens.length === 0) {
+      run();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savingsBalance]);
+  }, [savingsBalance, tokenPriceMap]);
 
   // const [isLoading, setIsLoading] = useState(true);
   const [showTopUpModal, setShowTopUpModal] = useState(false);

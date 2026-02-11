@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import SavingOption from "./Modals/SavingOption";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { getTokenPrice } from "@/lib";
+import { useTokenPrices } from "@/lib/price-service";
 // import { getContract, readContract } from "thirdweb";
 // import { client, liskMainnet } from "@/lib/config";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
@@ -63,10 +63,8 @@ export default function TargetAssetTable({
       setAllAssetData(safeAssetsRes);
       return;
     }
-  }, [
-    safeDetails,
-  ]);
-  
+  }, [safeDetails]);
+
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
       <div className="sm:mx-auto">
@@ -100,15 +98,32 @@ function AssetTableContent({
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
-  const [updatedAssets, setUpdatedAssets] = useState<any>([]);
   const navigate = useNavigate();
 
   const account = useActiveAccount();
   const isConnected = !!account?.address;
-  const address = account?.address;
+
+  // 1. Get unique token IDs from assets to fetch prices
+  const uniqueTokenIds = useMemo(() => {
+    return Array.from(new Set(assets.map((a) => a.token))).filter((t) => !!t);
+  }, [assets]);
+
+  // 2. Fetch prices using SWR hook
+  const priceQueries = useTokenPrices(uniqueTokenIds);
+
+  const tokenPriceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    uniqueTokenIds.forEach((id, index) => {
+      const query = priceQueries[index];
+      if (query.data !== undefined) {
+        map[id] = query.data;
+      }
+    });
+    return map;
+  }, [uniqueTokenIds, priceQueries]);
 
   const hasNonZeroAssets = assets.some(
-    (asset) => Number.parseFloat(asset.balance) > 0
+    (asset) => Number.parseFloat(asset.balance) > 0,
   );
 
   const handleTopUp = () => {
@@ -117,61 +132,43 @@ function AssetTableContent({
     setShowTopUpModal(false);
   };
 
-  useEffect(() => {
-    if (!assets || !address) return;
+  // 3. Compute updated assets derived from assets + price map
+  const updatedAssets = useMemo(() => {
+    return assets.map((asset) => {
+      const unitPrice = tokenPriceMap[asset.token] ?? 0;
 
-    async function updateAssets(assets: any[]) {
-      try {
-        const transformedAssets: any[] = assets.map((asset: any) => ({
-          token: asset.token,
-          balance: asset.balance,
-          saved: asset.saved,
-          balance_usd: null, // Placeholder for loading state
-          saved_usd: null, // Placeholder for loading state
-          autosaved: null, // Placeholder for loading state
-          tokenInfo: tokenData[asset.token] || {
-            symbol: "Unknown",
-            name: "Lisk",
-            color: "bg-[#440]",
-          },
-        }));
+      // Helper to calc value
+      const calcValue = (amountStr: string) => {
+        const amount = Number(amountStr);
+        if (isNaN(amount)) return null;
+        return (amount * unitPrice).toFixed(2);
+      };
 
-        setUpdatedAssets(transformedAssets);
+      const balanceUsd = safeDetails ? null : calcValue(asset.balance);
+      const savedUsd = calcValue(asset.saved);
 
-        // Fetch additional data asynchronously
-        assets.forEach(async (asset: any, index: number) => {
-          try {
-            // For safe-specific view, we only need the saved USD value
-            // For global view, we need both balance and saved USD values
-            const balanceUsd = safeDetails
-              ? null
-              : await getTokenPrice(asset.token, Number(asset.balance));
+      // Loading state check: provided we have the token ID, query.isLoading could be used
+      // But here we just check if unitPrice is present or if query is still loading.
+      // For simplicity, if unitPrice is 0 it might mean loading OR 0 value.
+      // We can check the specific query loading state if we want strict "Loading..." text.
+      // but checking unitPrice presence in map (or map having entry) is safer.
+      const isLoadingPrice = tokenPriceMap[asset.token] === undefined;
 
-            const savedUsd = await getTokenPrice(
-              asset.token,
-              Number(asset.saved)
-            );
-
-            setUpdatedAssets((prev: any) => {
-              const updated = [...prev];
-              updated[index] = {
-                ...updated[index],
-                balance_usd: balanceUsd,
-                saved_usd: savedUsd,
-              };
-              return updated;
-            });
-          } catch {
-            // Silent error handling
-          }
-        });
-      } catch {
-        // Silent error handling
-      }
-    }
-
-    if (address && assets.length > 0) updateAssets(assets);
-  }, [assets, address, safeDetails]);
+      return {
+        token: asset.token,
+        balance: asset.balance,
+        saved: asset.saved,
+        balance_usd: isLoadingPrice ? null : balanceUsd,
+        saved_usd: isLoadingPrice ? null : savedUsd,
+        autosaved: null,
+        tokenInfo: tokenData[asset.token] || {
+          symbol: "Unknown",
+          name: "Lisk",
+          color: "bg-[#440]",
+        },
+      };
+    });
+  }, [assets, tokenPriceMap, safeDetails]);
 
   if (!assets || assets.length === 0 || !hasNonZeroAssets) {
     return (
@@ -184,8 +181,8 @@ function AssetTableContent({
             {safeDetails
               ? `No assets found in this safe.`
               : isConnected
-              ? "Too much empty space? fill it up with deposits!"
-              : "No wallet connected, connect your wallet to get the best of coinsafe"}
+                ? "Too much empty space? fill it up with deposits!"
+                : "No wallet connected, connect your wallet to get the best of coinsafe"}
           </h3>
           {safeDetails ? (
             <Button
@@ -325,7 +322,8 @@ function AssetTableContent({
           onTopUp={() => setShowTopUpModal(false)}
         />
       ) : (
-        safeDetails && showTopUpModal && (
+        safeDetails &&
+        showTopUpModal && (
           <TopUpModal
             onClose={() => setShowTopUpModal(false)}
             onTopUp={handleTopUp}
@@ -338,13 +336,17 @@ function AssetTableContent({
         <WithdrawEmergencySafe
           isWithdrawModalOpen={showUnlockModal}
           setIsWithdrawModalOpen={setShowUnlockModal}
-          AvailableBalance={safeDetails.tokenAmounts.reduce((acc, token) => {
-            if (token && token.token) acc[token.token] = Number(token.amount);
-            return acc;
-          }, {} as Record<string, number>)}
+          AvailableBalance={safeDetails.tokenAmounts.reduce(
+            (acc, token) => {
+              if (token && token.token) acc[token.token] = Number(token.amount);
+              return acc;
+            },
+            {} as Record<string, number>,
+          )}
         />
       ) : (
-        safeDetails && showUnlockModal && (
+        safeDetails &&
+        showUnlockModal && (
           <UnlockModal
             onClose={() => {
               setShowUnlockModal(false);
