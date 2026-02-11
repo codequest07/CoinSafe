@@ -16,7 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { Check, X } from "lucide-react";
+// import { Check, X } from "lucide-react";
 import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
@@ -292,9 +292,9 @@ function AssetTableContent({
                   </TableHead>
                 </>
               )}
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+              {/* <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 AUTOSAVED
-              </TableHead>
+              </TableHead> */}
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 <span className="sr-only">Actions</span>
               </TableHead>
@@ -386,7 +386,7 @@ function AssetTableContent({
                           </TableCell>
                         </>
                       )}
-                      <TableCell className="py-4 px-4">
+                      {/* <TableCell className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           {asset.autosaved ? (
                             <>
@@ -404,7 +404,7 @@ function AssetTableContent({
                             </>
                           )}
                         </div>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell className="py-4 px-4 text-right">
                         <div className="flex justify-end gap-4">
                           <Button
@@ -516,7 +516,7 @@ function AssetTableContent({
                         </TableCell>
                       </>
                     )}
-                    <TableCell className="py-4 px-4">
+                    {/* <TableCell className="py-4 px-4">
                       <div className="flex items-center gap-2">
                         {asset.autosaved ? (
                           <>
@@ -534,7 +534,7 @@ function AssetTableContent({
                           </>
                         )}
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell className="py-4 px-4 text-right">
                       <div className="flex justify-end gap-4">
                         <Button
