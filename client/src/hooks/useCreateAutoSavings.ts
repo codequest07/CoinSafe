@@ -1,14 +1,15 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall, resolveMethod } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
+import { client } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "sonner";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { facetAbis } from "@/lib/contract";
 import { Abi } from "viem";
-import { publicClient } from "@/lib/client";
+import { getPublicClient } from "@/lib/client";
 import { tokenDecimals } from "@/lib/utils";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 interface SaveState {
   token: string;
@@ -46,6 +47,7 @@ export const useCreateAutoSavings = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain, diamondAddress } = useChainConfig();
 
   const account = useActiveAccount();
 
@@ -76,8 +78,8 @@ export const useCreateAutoSavings = ({
 
         const contract = getContract({
           client,
-          chain: liskMainnet,
-          address: CoinsafeDiamondContract.address,
+          chain: chain,
+          address: diamondAddress,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
 
@@ -133,7 +135,7 @@ export const useCreateAutoSavings = ({
         setIsLoading(false);
       }
     },
-    [address, saveState, onSuccess, onError]
+    [address, saveState, onSuccess, onError, chain, diamondAddress]
   );
 
   const addTokenToAutoSafe = useCallback(
@@ -145,8 +147,8 @@ export const useCreateAutoSavings = ({
 
         const contract = getContract({
           client,
-          chain: liskMainnet,
-          address: CoinsafeDiamondContract.address,
+          chain: chain,
+          address: diamondAddress,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
 
@@ -201,7 +203,7 @@ export const useCreateAutoSavings = ({
         setIsLoading(false);
       }
     },
-    [address, saveState, onSuccess, onError]
+    [address, saveState, onSuccess, onError, chain, diamondAddress]
   );
 
   const extendAutoSafe = useCallback(
@@ -213,8 +215,8 @@ export const useCreateAutoSavings = ({
 
         const contract = getContract({
           client,
-          chain: liskMainnet,
-          address: CoinsafeDiamondContract.address,
+          chain: chain,
+          address: diamondAddress,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
 
@@ -256,18 +258,19 @@ export const useCreateAutoSavings = ({
         setIsLoading(false);
       }
     },
-    [address, saveState, onSuccess, onError]
+    [address, saveState, onSuccess, onError, chain, diamondAddress]
   );
 
   const hasCreatedAutoSafe = async (supportedTokens: string[]) => {
     const rawTxs = supportedTokens.map((token) => ({
-      address: CoinsafeDiamondContract.address,
+      address: diamondAddress as `0x${string}`,
       abi: facetAbis.automatedSavingsFacet as Abi,
       functionName: "isAutosaveEnabledForToken",
       args: [address, token],
     }));
 
-    const results = await publicClient.multicall({
+    const currentPublicClient = getPublicClient(chain.id);
+    const results = await currentPublicClient.multicall({
       contracts: rawTxs,
     });
 
@@ -305,3 +308,4 @@ export const useCreateAutoSavings = ({
     error,
   };
 };
+

@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getContract, readContract } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { Abi } from "viem";
 import { getTokenDecimals } from "@/lib/utils";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 /**
  * SwapQuote structure matching the contract
@@ -58,16 +59,17 @@ export function useSwapQuote(
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { chain, diamondAddress } = useChainConfig();
 
   const contract = useMemo(
     () =>
       getContract({
         client,
-        address: CoinsafeDiamondContract.address,
-        chain: liskMainnet,
+        address: diamondAddress,
+        chain: chain,
         abi: facetAbis.swapFacet as unknown as Abi,
       }),
-    [],
+    [chain, diamondAddress],
   );
 
   const fetchQuote = useCallback(async () => {
@@ -189,16 +191,17 @@ export function useMultiHopSwapQuote(
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { chain, diamondAddress } = useChainConfig();
 
   const contract = useMemo(
     () =>
       getContract({
         client,
-        address: CoinsafeDiamondContract.address,
-        chain: liskMainnet,
+        address: diamondAddress,
+        chain: chain,
         abi: facetAbis.swapFacet as unknown as Abi,
       }),
-    [],
+    [chain, diamondAddress],
   );
 
   const fetchQuote = useCallback(async () => {

@@ -1,4 +1,7 @@
 import { createThirdwebClient, defineChain } from "thirdweb";
+import { base } from "thirdweb/chains";
+
+export { base };
 
 export const liskSepolia = defineChain({
   id: 4202, // Lisk Sepolia chain ID
