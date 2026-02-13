@@ -15,7 +15,7 @@ import {
   getTokenDecimals,
   tokenData,
 } from "@/lib/utils";
-import { Check, Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { formatUnits } from "viem";
 import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
