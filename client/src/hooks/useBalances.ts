@@ -7,14 +7,14 @@ import {
   balancesState,
   loadingState,
 } from "../store/atoms/balance";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { facetAbis } from "@/lib/contract";
 import { useEffect } from "react";
 import { getValidNumberValue } from "@/lib/utils";
 import { convertTokenAmountToUsd } from "@/lib/utils";
 import { getContract, readContract } from "thirdweb";
-import { liskMainnet } from "@/lib/config";
 import { client } from "@/lib/config";
 import { Abi } from "viem";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 export const useBalances = (address: string) => {
   const setAvailableBalance = useSetRecoilState(availableBalanceState);
@@ -24,10 +24,12 @@ export const useBalances = (address: string) => {
   const setBalances = useSetRecoilState(balancesState);
   const setLoading = useSetRecoilState(loadingState);
 
+  const { chain, diamondAddress } = useChainConfig();
+
   const contract = getContract({
     client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
+    address: diamondAddress,
+    chain: chain,
     abi: facetAbis.fundingFacet as unknown as Abi,
   });
 
@@ -39,8 +41,8 @@ export const useBalances = (address: string) => {
         // console.log("Fetching supported tokens for address:", address);
         const fundingFacetContract = getContract({
           client,
-          address: CoinsafeDiamondContract.address,
-          chain: liskMainnet,
+          address: diamondAddress,
+          chain: chain,
           abi: facetAbis.fundingFacet as unknown as Abi,
         });
 
@@ -69,7 +71,7 @@ export const useBalances = (address: string) => {
     }
 
     fetchSupportedTokens();
-  }, [address, setSupportedTokens]);
+  }, [address, setSupportedTokens, chain, diamondAddress]);
 
   useEffect(() => {
     if (!address) return;

@@ -1,8 +1,9 @@
 import { useReadContract } from "thirdweb/react";
 import { getContract } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { Abi } from "viem";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 interface Token {
   token: string;
@@ -17,10 +18,11 @@ interface ClaimableBalanceResult {
 }
 
 export const useClaimableBalanceAutomatedSafe = (): ClaimableBalanceResult => {
+  const { chain, diamondAddress } = useChainConfig();
   const contract = getContract({
     client,
-    chain: liskMainnet,
-    address: CoinsafeDiamondContract.address,
+    chain: chain,
+    address: diamondAddress,
     abi: facetAbis.automatedSavingsFacet as Abi,
   });
 

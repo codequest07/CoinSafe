@@ -3,8 +3,7 @@ import { useCallback, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { ActionType, PointWeights, PointsSystemHookReturn } from "../types";
 import { client } from "@/lib/config";
-import { liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { facetAbis } from "@/lib/contract";
 import {
   userPointsState,
   userMultiplierState,
@@ -12,12 +11,14 @@ import {
   pointsLoadingState,
   pointsErrorState,
 } from "@/store/atoms/points";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 export function usePointsSystem(): PointsSystemHookReturn {
+  const { chain, diamondAddress } = useChainConfig();
   const contract = getContract({
     client,
-    chain: liskMainnet,
-    address: CoinsafeDiamondContract.address,
+    chain: chain,
+    address: diamondAddress,
     abi: facetAbis.balanceFacet as any,
   });
 

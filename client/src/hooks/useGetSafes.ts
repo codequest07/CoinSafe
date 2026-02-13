@@ -3,8 +3,8 @@ import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
 import { useRecoilState } from "recoil";
 
-import { liskMainnet, client } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import {
   safesState,
@@ -16,7 +16,9 @@ import {
   savingsBalanceState,
   supportedTokensState,
 } from "@/store/atoms/balance";
-import { publicClient } from "@/lib/client";
+import { getPublicClient } from "@/lib/client";
+import { useChainConfig } from "@/hooks/useChainConfig";
+
 // Define the SafeDetails interface based on the provided struct
 interface Token {
   token: string;
@@ -47,15 +49,16 @@ export function useGetSafes() {
   const account = useActiveAccount();
   const [savingsBalance] = useRecoilState(savingsBalanceState);
   const address = account?.address;
+  const { chain, diamondAddress } = useChainConfig();
 
   const contract = useMemo(() => {
     return getContract({
       client,
-      address: CoinsafeDiamondContract.address,
-      chain: liskMainnet,
+      address: diamondAddress,
+      chain: chain,
       abi: facetAbis.targetSavingsFacet as Abi,
     });
-  }, []); // <-- Only create once
+  }, [diamondAddress, chain]);
 
   // Track if we've loaded data at least once
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
@@ -68,14 +71,14 @@ export function useGetSafes() {
     // // Create a contract instance specifically for emergency savings
     // const emergencyContract = getContract({
     //   client,
-    //   address: CoinsafeDiamondContract.address,
-    //   chain: liskMainnet,
+    //   address: diamondAddress,
+    //   chain: chain,
     //   abi: facetAbis.emergencySavingsFacet as Abi,
     // });
 
     // Prepare multicall requests
     const rawTxs = supportedTokens.map((token: string) => ({
-      address: CoinsafeDiamondContract.address,
+      address: diamondAddress as `0x${string}`,
       abi: facetAbis.emergencySavingsFacet as Abi,
       args: [address, token],
       functionName: "getEmergencySafeBalance",
@@ -84,9 +87,9 @@ export function useGetSafes() {
     // console.log("Preparing multicall with contracts:", rawTxs);
 
     try {
-      const results = await publicClient.multicall({
+      const currentPublicClient = getPublicClient(chain.id);
+      const results = await currentPublicClient.multicall({
         contracts: rawTxs,
-        chain: liskMainnet,
       });
 
       // console.log("Multicall results:", results);
@@ -195,12 +198,16 @@ export function useGetSafes() {
       lastFetchTime,
       setLastFetchTime,
       supportedTokens,
+      chain, // Add chain dependency
+      diamondAddress, // Add diamondAddress dependency
     ]
   );
 
+  // Re-fetch when chain, diamond address, or balance changes
   useEffect(() => {
     fetchSafes(true);
-  }, [savingsBalance]);
+  }, [savingsBalance, chain.id, diamondAddress]);
+
   // Add an effect to monitor supportedTokens changes
   useEffect(() => {
     // console.log("supportedTokens changed in useGetSafes:", supportedTokens);

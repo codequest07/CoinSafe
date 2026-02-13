@@ -16,7 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { Check, X } from "lucide-react";
+// import { Check, X } from "lucide-react";
 import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";

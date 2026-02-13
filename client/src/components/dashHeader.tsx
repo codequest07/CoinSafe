@@ -15,9 +15,14 @@ import { Skeleton } from "./ui/skeleton";
 import { useStreakSystem } from "@/hooks/useStreakSystem";
 import { useRecoilValue } from "recoil";
 import { userCurrentStreakState } from "@/store/atoms/streak";
-import { useActiveAccount, useConnectModal } from "thirdweb/react";
+import {
+  useActiveAccount,
+  useConnectModal,
+  useSwitchActiveWalletChain,
+  useActiveWalletChain,
+} from "thirdweb/react";
 import WalletAvatar from "./WalletAvatar";
-import { ChevronDown, Coins, Menu, X } from "lucide-react";
+import { ChevronDown, Coins, Menu, X, Network } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import {
   DropdownMenu,
@@ -25,10 +30,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { client, liskMainnet } from "@/lib/config";
+import { client, liskMainnet, base } from "@/lib/config";
 import { darkTheme } from "thirdweb/react";
 import { wallets } from "@/lib/wallets";
 import { API_BASE_URL } from "@/lib/api-config";
+
 
 const getRandomMessage = () => {
   const messages = [
@@ -50,6 +56,8 @@ const currencies = [
   // { code: "ADA", name: "Cardano", rate: 0.45 },
 ];
 
+const chains = [liskMainnet, base];
+
 const DashHeader = () => {
   const location = useLocation();
   const params = useParams();
@@ -57,12 +65,17 @@ const DashHeader = () => {
   const account = useActiveAccount();
   const address = account?.address;
   const isConnected = !!account?.address;
+  
+  const switchChain = useSwitchActiveWalletChain();
+  const activeChain = useActiveWalletChain();
+
 
   const [amount, setAmount] = useState<string>("0.00");
   const [selectedCurrency, setSelectedCurrency] = useState("LSK");
   const [, setUsdValue] = useState<number>(0);
   const [openOnRampModal, setOpenOnRampModal] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isSwitchingChain, setIsSwitchingChain] = useState(false);
 
   /**
    * Calculates USD equivalent when amount or currency changes
@@ -230,6 +243,20 @@ const DashHeader = () => {
     }
   };
 
+  const handleSwitchChain = async (chainId: number) => {
+    setIsSwitchingChain(true);
+    try {
+      const chainToSwitch = chains.find((c) => c.id === chainId);
+      if (chainToSwitch) {
+        await switchChain(chainToSwitch);
+      }
+    } catch (error) {
+      console.error("Failed to switch chain:", error);
+    } finally {
+      setIsSwitchingChain(false);
+    }
+  };
+
   // Reset localIsConnecting when connection is successful
   useEffect(() => {
     if (isConnected && localIsConnecting) {
@@ -262,7 +289,6 @@ const DashHeader = () => {
                 </Button>
               </SheetTrigger>
 
-              {/* Mobile Navigation Sidebar */}
               <SheetContent
                 side="right"
                 className="flex flex-col bg-[#010104] border-[#010104] w-full max-w-none">
@@ -273,6 +299,41 @@ const DashHeader = () => {
                     className="flex items-center gap-2 font-semibold">
                     <MemoLogo className="w-32 h-10" />
                   </Link>
+
+                  {/* Chain Switcher for Mobile */}
+                  {isConnected && (
+                    <div className="my-2 px-2">
+                      <p className="text-sm text-gray-500 mb-2">Network</p>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            className="w-full justify-between bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white"
+                          >
+                            <span className="flex items-center gap-2">
+                               <Network className="h-4 w-4" />
+                               {activeChain?.name || "Select Network"}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-full bg-[#1A1A1E] border-[#333] text-white">
+                          {chains.map((c) => (
+                            <DropdownMenuItem
+                              key={c.id}
+                              onClick={() => {
+                                handleSwitchChain(c.id);
+                                setIsSheetOpen(false);
+                              }}
+                              className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white"
+                            >
+                              {c.name}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
 
                   {MobileNavLinks.map((link) => (
                     <NavLink
@@ -365,6 +426,37 @@ const DashHeader = () => {
               </div>
             </div>
             <div className="flex items-center sm:space-x-3">
+              {/* Chain Switcher for Desktop */}
+              {isConnected && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white mr-2"
+                      disabled={isSwitchingChain}
+                    >
+                      <span className="flex items-center gap-2">
+                          <Network className="h-4 w-4" />
+                          {isSwitchingChain ? "Switching..." : (activeChain?.name || "Network")}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-70" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-[#1A1A1E] border-[#333] text-white">
+                    {chains.map((c) => (
+                      <DropdownMenuItem
+                        key={c.id}
+                        onClick={() => handleSwitchChain(c.id)}
+                        className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white"
+                      >
+                        {c.name}
+                        {activeChain?.id === c.id && " ✓"}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
               {/* <ClaimBtn /> */}
               {/* Icons for connected wallets */}
               <SmileFace />
