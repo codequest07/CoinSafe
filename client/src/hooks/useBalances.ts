@@ -25,7 +25,8 @@ export const useBalances = (address: string) => {
   const setLoading = useSetRecoilState(loadingState);
 
   const { chain, diamondAddress } = useChainConfig();
-
+  // console.log("diamondAddress", diamondAddress);
+  // console.log("chain", chain);
   const contract = getContract({
     client,
     address: diamondAddress,
