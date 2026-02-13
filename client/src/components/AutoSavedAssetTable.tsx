@@ -172,9 +172,9 @@ export default function AutoSavedAssetTable({
             <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
               IN VAULT
             </TableHead>
-            <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+            {/* <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
               AUTOSAVED
-            </TableHead>
+            </TableHead> */}
             <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
               <span className="sr-only">Actions</span>
             </TableHead>
@@ -262,7 +262,7 @@ export default function AutoSavedAssetTable({
                     </div> */}
               </TableCell>
 
-              {/* Autosaved */}
+              {/* Autosaved 
               <TableCell className="px-6 py-4">
                 {/* {asset.claimableAmount.amount === "-" ? (
                       <div className="text-white">-</div>
@@ -277,12 +277,12 @@ export default function AutoSavedAssetTable({
                           </div>
                         )}
                       </>
-                    )} */}
+                    )}
                 <div className="flex items-center gap-1">
-                  {/* <span className="text-[#48FF91]">Yes</span>
+                  <span className="text-[#48FF91]">Yes</span>
                       <div className="w-4 h-4 rounded-full bg-[#48FF91] flex items-center justify-center">
                         <Check className="w-3 h-3 text-white" />
-                      </div> */}
+                      </div>
                   {asset.autosaved ? (
                     <>
                       <span className="text-[#48FF91]">Yes</span>
@@ -299,7 +299,7 @@ export default function AutoSavedAssetTable({
                     </>
                   )}
                 </div>
-              </TableCell>
+              </TableCell> */}
 
               {/* Actions */}
               {/* <TableCell className="px-6 py-4">
