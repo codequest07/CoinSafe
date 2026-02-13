@@ -6,7 +6,7 @@ import {
   useConnectModal,
   useWalletDetailsModal,
 } from "thirdweb/react";
-import { client, liskMainnet } from "@/lib/config";
+import { client, liskMainnet, base } from "@/lib/config";
 import { Skeleton } from "./ui/skeleton";
 import { wallets } from "@/lib/wallets";
 import { thirdwebSupportedTokens } from "@/lib/utils";
@@ -22,12 +22,12 @@ const WalletAvatar = () => {
       await connect({
         client,
         wallets: wallets,
-        chain: liskMainnet,
+        chains: [liskMainnet, base],
         theme: darkTheme({
           colors: { accentText: "hsl(144, 100%, 39%)" },
         }),
       });
-    } else {  
+    } else {
       detailsModal.open({ client, supportedTokens: thirdwebSupportedTokens });
     }
   };
