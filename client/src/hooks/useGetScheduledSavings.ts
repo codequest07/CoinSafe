@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { getContract, resolveMethod } from "thirdweb";
-import { liskMainnet } from "@/lib/config";
 import { client } from "@/lib/config";
 import { useReadContract } from "thirdweb/react";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { facetAbis } from "@/lib/contract";
 import { Abi, formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
 import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 export interface ScheduledSaving {
   token: string;
@@ -43,11 +43,12 @@ export const useGetScheduledSavings = (): ScheduledSavingsResult => {
     []
   );
   const [error, setError] = useState<Error | null>(null);
+  const { chain, diamondAddress } = useChainConfig();
 
   const contract = getContract({
     client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
+    address: diamondAddress,
+    chain: chain,
     abi: facetAbis.automatedSavingsFacet as Abi,
   });
 

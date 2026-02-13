@@ -1,11 +1,12 @@
 import { useCallback } from "react";
 import { useSmartAccountTransactionInterceptor } from "./useSmartAccountTransactionInterceptor";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { toast } from "sonner";
 import { Abi } from "viem";
 import { getSignedApr, getSignedAprForClaimAll } from "@/lib/apr-api";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 type ClaimSingle = (assetId: string) => Promise<void>;
 type ClaimAll = () => Promise<void>;
@@ -23,6 +24,7 @@ export default function useClaimAsset({
   handleClaimAll: ClaimAll;
 } {
   const { sendTransaction } = useSmartAccountTransactionInterceptor();
+  const { chain, diamondAddress } = useChainConfig();
 
   const handleClaimSingle: ClaimSingle = useCallback(
     async (token: string) => {
@@ -30,8 +32,8 @@ export default function useClaimAsset({
       try {
         const contract = getContract({
           client,
-          chain: liskMainnet,
-          address: CoinsafeDiamondContract.address,
+          chain,
+          address: diamondAddress,
           abi: facetAbis.targetSavingsFacet as Abi,
         });
 
@@ -82,8 +84,8 @@ export default function useClaimAsset({
       setClaiming,
       toast,
       facetAbis,
-      CoinsafeDiamondContract,
-      liskMainnet,
+      chain,
+      diamondAddress,
       getContract,
       prepareContractCall,
       sendTransaction,
@@ -95,8 +97,8 @@ export default function useClaimAsset({
     try {
       const contract = getContract({
         client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain,
+        address: diamondAddress,
         abi: facetAbis.targetSavingsFacet as Abi,
       });
 
@@ -145,8 +147,8 @@ export default function useClaimAsset({
     setClaiming,
     toast,
     facetAbis,
-    CoinsafeDiamondContract,
-    liskMainnet,
+    chain,
+    diamondAddress,
     getContract,
     prepareContractCall,
     sendTransaction,

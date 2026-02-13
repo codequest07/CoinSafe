@@ -1,8 +1,8 @@
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { facetAbis } from "@/lib/contract";
 import { convertTokenAmountToUsd } from "@/lib/utils";
 import { useEffect, useMemo } from "react";
-import { Contract } from "ethers";
-import { jsonRpcProvider } from "@/lib";
+import { Contract, JsonRpcProvider } from "ethers";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 type EventHandler = (amountInUsd: number) => void;
 type StreakEventHandler = (streak: number) => void;
@@ -38,6 +38,8 @@ export const useWatchEvents = ({
   onStreakUpdate,
   onSwap,
 }: UseContractEventsProps) => {
+  const { chain, diamondAddress } = useChainConfig();
+
   // Create event handler function
   const createEventHandler = (
     callback?: EventHandler | EventHandlerWithFee | StreakEventHandler
@@ -295,12 +297,15 @@ export const useWatchEvents = ({
   ];
 
   useEffect(() => {
+    // Create a new provider for the current chain
+    const provider = new JsonRpcProvider(chain.rpc);
+    
     const contracts = eventMappings.map(({ event, handler, abi }) => {
       const abiArray = (abi as any)?.abi || abi;
       const contract = new Contract(
-        CoinsafeDiamondContract.address as `0x${string}`,
+        diamondAddress,
         abiArray,
-        jsonRpcProvider
+        provider
       );
       contract.on(event, handler);
       return { contract, event, handler };
@@ -311,5 +316,5 @@ export const useWatchEvents = ({
         contract.off(event, handler)
       );
     };
-  }, [eventHandlers]);
+  }, [eventHandlers, chain, diamondAddress]);
 };

@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { Account } from "thirdweb/wallets";
 import { Abi } from "viem";
 import { getTokenDecimals } from "@/lib/utils";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 import { calculateDeadline } from "@/lib/swap-utils";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 /**
  * Parameters for executing a swap
@@ -69,6 +70,7 @@ export function useSwap({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain, diamondAddress } = useChainConfig();
 
   const swap = useCallback(
     async (params: SwapParams) => {
@@ -104,8 +106,8 @@ export function useSwap({
       try {
         const contract = getContract({
           client,
-          chain: liskMainnet,
-          address: CoinsafeDiamondContract.address,
+          chain: chain,
+          address: diamondAddress,
           abi: facetAbis.swapFacet as unknown as Abi,
         });
 
@@ -204,7 +206,7 @@ export function useSwap({
         setIsLoading(false);
       }
     },
-    [account, sendTransaction, onSuccess, onError, toast],
+    [account, sendTransaction, onSuccess, onError, toast, chain, diamondAddress],
   );
 
   return {

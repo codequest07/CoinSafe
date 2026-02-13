@@ -2,8 +2,7 @@ import { getContract, readContract } from "thirdweb";
 import { useCallback, useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { client } from "@/lib/config";
-import { liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { facetAbis } from "@/lib/contract";
 import {
   userCurrentStreakState,
   userLongestStreakState,
@@ -13,6 +12,7 @@ import {
   MultiplierTiers,
 } from "@/store/atoms/streak";
 import { userMultiplierState } from "@/store/atoms/points";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 export interface StreakInfo {
   currentStreak: bigint;
@@ -28,10 +28,11 @@ export interface StreakSystemHookReturn {
 }
 
 export function useStreakSystem(): StreakSystemHookReturn {
+  const { chain, diamondAddress } = useChainConfig();
   const contract = getContract({
     client,
-    chain: liskMainnet,
-    address: CoinsafeDiamondContract.address,
+    chain: chain,
+    address: diamondAddress,
     abi: facetAbis.balanceFacet as any,
   });
 

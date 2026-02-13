@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall, resolveMethod } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { Abi } from "viem";
 import { toBigInt } from "ethers";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
 import { getTokenDecimals } from "@/lib/utils";
 import { parseUnits } from "ethers";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 interface SaveState {
   token: string;
@@ -37,6 +38,7 @@ export const useReactivateSavingsTarget = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain, diamondAddress } = useChainConfig();
 
   const account = useActiveAccount();
 
@@ -63,8 +65,8 @@ export const useReactivateSavingsTarget = ({
 
         const contract = getContract({
           client,
-          chain: liskMainnet,
-          address: CoinsafeDiamondContract.address,
+          chain: chain,
+          address: diamondAddress,
           abi: facetAbis.targetSavingsFacet as Abi,
         });
 
@@ -113,7 +115,7 @@ export const useReactivateSavingsTarget = ({
         setIsLoading(false);
       }
     },
-    [saveState, onSuccess, onError, account, safeId]
+    [saveState, onSuccess, onError, account, safeId, chain, diamondAddress]
   );
 
   return {
