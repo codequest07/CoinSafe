@@ -5,7 +5,7 @@ export interface ChainConfig {
     chain: Chain;
     diamondAddress: string;
     tokens: {
-        usdt: string;
+        usdt?: string;
         usdc: string;
         safu?: string;
         lsk?: string;
@@ -29,10 +29,10 @@ export const chainConfigs: Record<number, ChainConfig> = {
     },
     [base.id]: {
         chain: base,
-        diamondAddress: "0x0000000000000000000000000000000000000000", // Placeholder
+        diamondAddress: "0xAE7f97004e88afcBF526f0D9c2233A8F3EF14283",
         tokens: {
-            usdc: "0x0000000000000000000000000000000000000000", // Placeholder
-            usdt: "0x0000000000000000000000000000000000000000", // Placeholder
+            usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // Placeholder
+            // usdt: "0x0000000000000000000000000000000000000000",
         },
     },
 };

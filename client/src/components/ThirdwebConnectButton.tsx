@@ -1,6 +1,6 @@
 import { ConnectButton } from "thirdweb/react";
 import { darkTheme } from "thirdweb/react";
-import { client, liskMainnet } from "@/lib/config";
+import { client, liskMainnet, base } from "@/lib/config";
 import { wallets } from "@/lib/wallets";
 import { thirdwebSupportedTokens } from "@/lib/utils";
 
@@ -9,7 +9,7 @@ export default function ThirdwebConnectButton() {
     <ConnectButton
       client={client}
       wallets={wallets}
-      chain={liskMainnet}
+      chains={[liskMainnet, base]}
       supportedTokens={thirdwebSupportedTokens}
       theme={darkTheme({
         colors: { accentText: "hsl(144, 100%, 39%)" },
@@ -30,10 +30,10 @@ export default function ThirdwebConnectButton() {
           border: "1px solid #fff",
         },
       }}
-      // accountAbstraction={{
-      //   // chain: liskMainnet,
-      //   // sponsorGas: true,
-      // }}
+    // accountAbstraction={{
+    //   // chain: liskMainnet,
+    //   // sponsorGas: true,
+    // }}
     />
   );
 }

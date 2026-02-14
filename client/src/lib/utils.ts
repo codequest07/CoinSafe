@@ -12,7 +12,7 @@ import {
 } from "@/lib";
 import { TokenInfo } from "thirdweb/react";
 import { getContract, readContract } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
+import { client, liskMainnet, base } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 
 export function cn(...inputs: ClassValue[]) {
@@ -83,7 +83,7 @@ export const convertTokenAmountToUsd = async (
       return await getLskToUsd(Number(formatUnits(amount, tokenDecimals)));
     case tokens.usdc:
       return await getUsdcToUsd(Number(formatUnits(amount, tokenDecimals)));
-    case tokens.usdt0: 
+    case tokens.usdt0:
       return await getUsdt0ToUsd(Number(formatUnits(amount, tokenDecimals)))
     default:
       console.error("Unknown token address:", token);
@@ -223,6 +223,13 @@ export const tokenData = {
     color: "bg-[#d5f]",
     image: "/assets/tokens/usdt0.png",
   },
+  // Base Tokens
+  "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913": {
+    symbol: "USDC",
+    chain: "Base",
+    color: "bg-[#2775ca]",
+    image: "/assets/tokens/usdc.png",
+  },
 } as any;
 
 export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
@@ -234,7 +241,7 @@ export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
       symbol: tokenData[tokens.usdt]?.symbol,
     },
     {
-      address: tokens.lsk,
+      address: tokens.usdc, // Fixed: was tokens.lsk mapped to usdc data
       icon: tokenData[tokens.usdc]?.image,
       name: tokenData[tokens.usdc]?.symbol,
       symbol: tokenData[tokens.usdc]?.symbol,
@@ -250,6 +257,14 @@ export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
       icon: tokenData[tokens.usdt0]?.image,
       name: tokenData[tokens.usdt0]?.symbol,
       symbol: tokenData[tokens.usdt0]?.symbol,
+    },
+  ],
+  [base.id]: [
+    {
+      address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      icon: "/assets/tokens/usdc.png",
+      name: "USDC",
+      symbol: "USDC",
     },
   ],
 };
