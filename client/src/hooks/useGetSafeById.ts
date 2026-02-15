@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
-import { tokens } from "@/lib/contract";
-import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { convertTokenAmountToUsd } from "@/lib/utils";
+import { getTokenDecimals } from "@/lib/token-metadata";
 
 export interface FormattedSafeDetails {
   id: string;
@@ -31,6 +32,8 @@ export function useGetSafeById(id: string | undefined) {
   const [tokenAmounts, setTokenAmounts] = useState<Record<string, unknown>>({});
   // const [savingsBalance] = useRecoilState(savingsBalanceState);
 
+  const { tokens } = useChainConfig();
+
   // Token address to symbol mapping
   const tokenSymbols: Record<string, string> = useMemo(() => {
     const mapping = Object.entries(tokens).reduce(
@@ -43,7 +46,7 @@ export function useGetSafeById(id: string | undefined) {
       {} as Record<string, string>,
     );
     return mapping;
-  }, []);
+  }, [tokens]);
 
   // Format date to readable string
   const formatDate = (date: Date): string => {

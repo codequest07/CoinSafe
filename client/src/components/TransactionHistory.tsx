@@ -63,10 +63,10 @@ const formatDate = (timestamp: number) => {
     day === 1 || day === 21 || day === 31
       ? "st"
       : day === 2 || day === 22
-      ? "nd"
-      : day === 3 || day === 23
-      ? "rd"
-      : "th";
+        ? "nd"
+        : day === 3 || day === 23
+          ? "rd"
+          : "th";
 
   return `${day}${suffix} ${month}, ${year}`;
 };
@@ -181,7 +181,7 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
         <Deposit
           isDepositModalOpen={isDepositModalOpen}
           setIsDepositModalOpen={setIsDepositModalOpen}
-          onBack={() => {}}
+          onBack={() => { }}
         />
         <SavingOption
           isFirstModalOpen={isFirstModalOpen}
@@ -256,10 +256,10 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                                 <span className="flex items-center gap-2 text-sm text-gray-400">
                                   <span>
                                     {formatUnits(transaction.amount, getTokenDecimals(transaction.token))}{" "}
-                                    {tokenData[transaction.token]?.symbol}
+                                    {tokenData[transaction.token.toLowerCase()]?.symbol}
                                   </span>
                                   <img
-                                    src={tokenData[transaction.token]?.image}
+                                    src={tokenData[transaction.token.toLowerCase()]?.image}
                                     width={12}
                                     height={12}
                                     className="w-[14px] h-[14px] rounded-full"

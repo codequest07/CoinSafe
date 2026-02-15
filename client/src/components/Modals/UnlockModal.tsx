@@ -3,7 +3,7 @@ import { getTokenDecimals, tokenData } from "@/lib/utils";
 import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { tokens, CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { Button } from "../ui/button";
 import { LoaderCircle, X } from "lucide-react";
 import { unlockStateAtom, UnlockState } from "@/store/atoms/unlock";
@@ -139,8 +139,7 @@ export default function UnlockModal({
       setBreakingFeeUsd(usdValue);
 
       console.log(
-        `Breaking fee: ${feeAmount} ${tokenSymbol} (${breakingFeePercentage}% of ${
-          saveState.amount
+        `Breaking fee: ${feeAmount} ${tokenSymbol} (${breakingFeePercentage}% of ${saveState.amount
         }) ≈ $${usdValue.toFixed(2)}`,
       );
     };
@@ -309,7 +308,7 @@ export default function UnlockModal({
 
       // Call unlockSafe
       await unlockSafe({
-        preventDefault: () => {}, // Mock preventDefault method
+        preventDefault: () => { }, // Mock preventDefault method
         target: document.createElement("form"), // Mock target
       } as unknown as React.FormEvent);
     } catch (error) {
@@ -362,7 +361,7 @@ export default function UnlockModal({
                 handleAmountChange={handleAmountChange}
                 handleTokenSelect={handleTokenSelect}
                 saveState={saveState}
-                tokens={tokens}
+
                 selectedTokenBalance={selectedTokenBalance}
                 validationErrors={validationErrors}
                 supportedTokens={supportedTokens}
@@ -449,7 +448,7 @@ export default function UnlockModal({
                         {Math.ceil(
                           (safeDetails.unlockTime.getTime() -
                             new Date().getTime()) /
-                            (1000 * 60 * 60 * 24),
+                          (1000 * 60 * 60 * 24),
                         )}{" "}
                         days left
                       </Badge>

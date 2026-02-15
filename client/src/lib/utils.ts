@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatEther, formatUnits } from "viem";
-import { tokens } from "@/lib/contract";
+import { chainConfigs } from "@/lib/chains";
 import {
   getAvgAPR,
   getLskToUsd,
@@ -14,6 +14,8 @@ import { TokenInfo } from "thirdweb/react";
 import { getContract, readContract } from "thirdweb";
 import { client, liskMainnet, base } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
+import { tokenData, getTokenDecimals, tokenDecimals } from "@/lib/token-metadata";
+export { tokenData, getTokenDecimals, tokenDecimals };
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -36,14 +38,7 @@ export function formatNumberToMax7Dp(num: number, maxDecimals = 7) {
   return `${intPart}.${trimmedDecimal}`;
 }
 
-export const tokenDecimals: Record<string, number> = {
-  "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24": 18,
-  DEFAULT: 6,
-};
 
-export const getTokenDecimals = (token: string): number => {
-  return tokenDecimals[token] || tokenDecimals.DEFAULT;
-};
 
 export function transformAndAccumulateTokenBalances(
   data: Array<any>
@@ -73,20 +68,30 @@ export const convertTokenAmountToUsd = async (
   amount: bigint
 ): Promise<number> => {
   const tokenDecimals = getTokenDecimals(token);
-  switch (token) {
-    case tokens.usdt:
-      // this will be changed when going mainnet
-      return await getUsdtToUsd(Number(formatUnits(amount, tokenDecimals)));
-    case tokens.safu:
-      return getSafuToUsd(Number(formatUnits(amount, tokenDecimals)));
-    case tokens.lsk:
-      return await getLskToUsd(Number(formatUnits(amount, tokenDecimals)));
-    case tokens.usdc:
-      return await getUsdcToUsd(Number(formatUnits(amount, tokenDecimals)));
-    case tokens.usdt0:
-      return await getUsdt0ToUsd(Number(formatUnits(amount, tokenDecimals)))
+  // Keys in tokenData are now normalized to lowercase
+  const info = tokenData[token.toLowerCase()];
+  const symbol = info?.symbol;
+
+  if (!symbol) {
+    console.error("Unknown token address:", token);
+    return 0;
+  }
+
+  const numericAmount = Number(formatUnits(amount, tokenDecimals));
+
+  switch (symbol.toUpperCase()) {
+    case "USDT":
+      return await getUsdtToUsd(numericAmount);
+    case "SAFU":
+      return getSafuToUsd(numericAmount);
+    case "LSK":
+      return await getLskToUsd(numericAmount);
+    case "USDC":
+      return await getUsdcToUsd(numericAmount);
+    case "USDT0":
+      return await getUsdt0ToUsd(numericAmount);
     default:
-      console.error("Unknown token address:", token);
+      console.warn(`No price conversion for symbol: ${symbol}`);
       return 0;
   }
 };
@@ -174,94 +179,38 @@ export function convertTokenToUSD(
   return usdValue.toFixed(2);
 }
 
-export const tokenData = {
-  // "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
-  //   symbol: "SAFU",
-  //   chain: "Lisk",
-  //   color: "bg-[#22c55e]",
-  //   image: "/assets/tokens/safu.png",
-  // },
-  // "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda": {
-  //   symbol: "USDT",
-  //   chain: "Lisk",
-  //   color: "bg-[#d54f]",
-  //   image: "/assets/tokens/usdt.jpg",
-  // },
-  // "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": {
-  //   symbol: "LSK",
-  //   chain: "Lisk",
-  //   color: "bg-[#55e]",
-  //   image: "/assets/tokens/lsk.jpg",
-  // },
-  // "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83": {
-  //   symbol: "USDC",
-  //   chain: "Lisk",
-  //   color: "bg-[#2775ca]",
-  //   image: "/assets/tokens/usdc.png",
-  // },
-  "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24": {
-    symbol: "LSK",
-    chain: "Lisk",
-    color: "bg-[#55e]",
-    image: "/assets/tokens/lsk.jpg",
-  },
-  "0xF242275d3a6527d877f2c927a82D9b057609cc71": {
-    symbol: "USDC",
-    chain: "Lisk",
-    color: "bg-[#2775ca]",
-    image: "/assets/tokens/usdc.png",
-  },
-  "0x05D032ac25d322df992303dCa074EE7392C117b9": {
-    symbol: "USDT",
-    chain: "Lisk",
-    color: "bg-[#d54f]",
-    image: "/assets/tokens/usdt.jpg",
-  },
-  "0x43F2376D5D03553aE72F4A8093bbe9de4336EB08": {
-    symbol: "USDT0",
-    chain: "Lisk",
-    color: "bg-[#d5f]",
-    image: "/assets/tokens/usdt0.png",
-  },
-  // Base Tokens
-  "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913": {
-    symbol: "USDC",
-    chain: "Base",
-    color: "bg-[#2775ca]",
-    image: "/assets/tokens/usdc.png",
-  },
-} as any;
+
 
 export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
   [liskMainnet.id]: [
     {
-      address: tokens.usdt,
-      icon: tokenData[tokens.usdt]?.image,
-      name: tokenData[tokens.usdt]?.symbol,
-      symbol: tokenData[tokens.usdt]?.symbol,
+      address: chainConfigs[liskMainnet.id].tokens.usdt!,
+      icon: tokenData[chainConfigs[liskMainnet.id].tokens.usdt!]?.image,
+      name: tokenData[chainConfigs[liskMainnet.id].tokens.usdt!]?.symbol,
+      symbol: tokenData[chainConfigs[liskMainnet.id].tokens.usdt!]?.symbol,
     },
     {
-      address: tokens.usdc, // Fixed: was tokens.lsk mapped to usdc data
-      icon: tokenData[tokens.usdc]?.image,
-      name: tokenData[tokens.usdc]?.symbol,
-      symbol: tokenData[tokens.usdc]?.symbol,
+      address: chainConfigs[liskMainnet.id].tokens.usdc,
+      icon: tokenData[chainConfigs[liskMainnet.id].tokens.usdc!]?.image,
+      name: tokenData[chainConfigs[liskMainnet.id].tokens.usdc!]?.symbol,
+      symbol: tokenData[chainConfigs[liskMainnet.id].tokens.usdc!]?.symbol,
     },
     {
-      address: tokens.lsk,
-      icon: tokenData[tokens.lsk]?.image,
-      name: tokenData[tokens.lsk]?.symbol,
-      symbol: tokenData[tokens.lsk]?.symbol,
+      address: chainConfigs[liskMainnet.id].tokens.lsk!,
+      icon: tokenData[chainConfigs[liskMainnet.id].tokens.lsk!]?.image,
+      name: tokenData[chainConfigs[liskMainnet.id].tokens.lsk!]?.symbol,
+      symbol: tokenData[chainConfigs[liskMainnet.id].tokens.lsk!]?.symbol,
     },
     {
-      address: tokens.usdt0,
-      icon: tokenData[tokens.usdt0]?.image,
-      name: tokenData[tokens.usdt0]?.symbol,
-      symbol: tokenData[tokens.usdt0]?.symbol,
+      address: chainConfigs[liskMainnet.id].tokens.usdt0!,
+      icon: tokenData[chainConfigs[liskMainnet.id].tokens.usdt0!]?.image,
+      name: tokenData[chainConfigs[liskMainnet.id].tokens.usdt0!]?.symbol,
+      symbol: tokenData[chainConfigs[liskMainnet.id].tokens.usdt0!]?.symbol,
     },
   ],
   [base.id]: [
     {
-      address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      address: chainConfigs[base.id].tokens.usdc,
       icon: "/assets/tokens/usdc.png",
       name: "USDC",
       symbol: "USDC",

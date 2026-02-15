@@ -142,8 +142,7 @@ export default function UnlockAutoSafeModal({
     setBreakingFeeUsd(formattedUsdValue);
 
     console.log(
-      `Breaking fee: ${feeAmount} ${tokenSymbol} (${breakingFeePercentage}% of ${
-        saveState.amount
+      `Breaking fee: ${feeAmount} ${tokenSymbol} (${breakingFeePercentage}% of ${saveState.amount
       }) ≈ $${usdValue.toFixed(2)}`
     );
   }, [saveState.amount, saveState.token, breakingFeePercentage]);
@@ -245,16 +244,16 @@ export default function UnlockAutoSafeModal({
                 isMaxClicked
                   ? Number(saveState.amount) % 1 === 0
                     ? formatUnits(
-                        BigInt(saveState.amount),
-                        getTokenDecimals(saveState.token)
-                      )
+                      BigInt(saveState.amount),
+                      getTokenDecimals(saveState.token)
+                    )
                     : saveState.amount
                   : saveState.amount || ""
               }
               handleAmountChange={handleAmountChange}
               handleTokenSelect={handleTokenSelect}
               saveState={saveState}
-              tokens={tokens}
+
               selectedTokenBalance={selectedTokenBalance}
               validationErrors={{ token: error?.message }}
               supportedTokens={supportedTokens}
@@ -355,24 +354,24 @@ export default function UnlockAutoSafeModal({
                       {/* new Date(Number(safe.unlockTime) * 1000) */}
                       {new Date(Number(details.unlockTime) * 1000) > new Date()
                         ? format(
-                            new Date(Number(details.unlockTime) * 1000),
-                            "dd MMM, yyyy • HH:mm"
-                          )
+                          new Date(Number(details.unlockTime) * 1000),
+                          "dd MMM, yyyy • HH:mm"
+                        )
                         : "Ready to unlock"}
                     </div>
                     {new Date(Number(details.unlockTime) * 1000) >
                       new Date() && (
-                      <Badge className="bg-[#2a2a2a] text-white hover:bg-[#2a2a2a] rounded-full text-xs py-1">
-                        {Math.ceil(
-                          (new Date(
-                            Number(details.unlockTime) * 1000
-                          ).getTime() -
-                            new Date().getTime()) /
+                        <Badge className="bg-[#2a2a2a] text-white hover:bg-[#2a2a2a] rounded-full text-xs py-1">
+                          {Math.ceil(
+                            (new Date(
+                              Number(details.unlockTime) * 1000
+                            ).getTime() -
+                              new Date().getTime()) /
                             (1000 * 60 * 60 * 24)
-                        )}{" "}
-                        days left
-                      </Badge>
-                    )}
+                          )}{" "}
+                          days left
+                        </Badge>
+                      )}
                   </div>
                 </div>
 

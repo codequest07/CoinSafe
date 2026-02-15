@@ -60,8 +60,10 @@ export const useBalances = (address: string) => {
 
         // Only set tokens if we actually got some from the contract
         if (tokens && tokens.length > 0) {
-          // console.log("Setting supported tokens:", tokens);
-          setSupportedTokens(tokens);
+          // Remove duplicates
+          const uniqueTokens = Array.from(new Set(tokens.map(t => t.toLowerCase())));
+          // console.log("Setting supported tokens:", uniqueTokens);
+          setSupportedTokens(uniqueTokens);
         } else {
           console.warn("No supported tokens returned from contract");
           // Don't set empty tokens - let the contract handle this case

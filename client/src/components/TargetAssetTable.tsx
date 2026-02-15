@@ -106,9 +106,8 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">
           {safeDetails
-            ? `Assets in ${
-                safeDetails.target ? safeDetails.target : "Auto safe"
-              }`
+            ? `Assets in ${safeDetails.target ? safeDetails.target : "Auto safe"
+            }`
             : "Assets"}
         </h1>
         <AssetTableContent assets={allAssetData} safeDetails={safeDetails} />
@@ -161,7 +160,7 @@ function AssetTableContent({
           saved_usd: null, // Placeholder for loading state
           autosaved: null, // Placeholder for loading state
           yield_usd: null,
-          tokenInfo: tokenData[asset.token] || {
+          tokenInfo: tokenData[asset.token.toLowerCase()] || {
             symbol: "Unknown",
             name: "Lisk",
             color: "bg-[#440]",
@@ -222,8 +221,8 @@ function AssetTableContent({
             {safeDetails
               ? `No assets found in this safe.`
               : isConnected
-              ? "Too much empty space? fill it up with deposits!"
-              : "No wallet connected, connect your wallet to get the best of coinsafe"}
+                ? "Too much empty space? fill it up with deposits!"
+                : "No wallet connected, connect your wallet to get the best of coinsafe"}
           </h3>
           {safeDetails ? (
             <Button
@@ -408,7 +407,7 @@ function AssetTableContent({
           onClose={() => {
             setShowUnlockModal(false);
           }}
-          onUnlock={() => {}}
+          onUnlock={() => { }}
           safeId={safeDetails?.id?.toString()}
         />
       )}

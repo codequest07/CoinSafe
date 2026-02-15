@@ -38,10 +38,10 @@ export default function ScheduledSavings() {
             </div>
             <div key={index} className="flex justify-between items-center mb-4">
               <div className="flex space-x-2 items-center">
-                {tokenData[saving.token]?.image ? (
+                {tokenData[saving.token.toLowerCase()]?.image ? (
                   <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
                     <img
-                      src={tokenData[saving.token]?.image}
+                      src={tokenData[saving.token.toLowerCase()]?.image}
                       width={30}
                       height={30}
                       className="w-full h-full"
@@ -49,21 +49,21 @@ export default function ScheduledSavings() {
                   </div>
                 ) : (
                   <div
-                    className={`w-7 h-7 rounded-full ${tokenData[saving.token].color} flex items-center justify-center text-white font-medium`}
+                    className={`w-7 h-7 rounded-full ${tokenData[saving.token.toLowerCase()].color} flex items-center justify-center text-white font-medium`}
                   >
-                    {tokenData[saving.token].symbol?.charAt(0)}
+                    {tokenData[saving.token.toLowerCase()].symbol?.charAt(0)}
                   </div>
                 )}
                 <div>
                   <div className="text-sm text-gray-400 sm:text-base uppercase">
-                    {tokenData[saving.token].symbol}
+                    {tokenData[saving.token.toLowerCase()].symbol}
                   </div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="font-[400] text-sm sm:text-base">
                   {Number(saving.amount)?.toFixed(2)}{" "}
-                  <span className="text-[13px] opacity-70">{tokenData[saving.token].symbol}</span>
+                  <span className="text-[13px] opacity-70">{tokenData[saving.token.toLowerCase()].symbol}</span>
                 </div>
 
                 <div className="text-sm text-gray-400 sm:text-base">

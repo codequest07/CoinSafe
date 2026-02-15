@@ -19,7 +19,7 @@ import { getBalance } from "thirdweb/extensions/erc20";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import ApproveTxModal from "../Modals/ApproveTxModal";
 import { useNavigate } from "react-router-dom";
-import { tokenData } from "@/lib/utils";
+import { tokenData } from "@/lib/token-metadata";
 import { getTokenPrice } from "@/lib";
 import { supportedTokensState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
@@ -155,9 +155,8 @@ export default function DepositCard() {
                         </div>
                       ) : token && tokenData[token] ? (
                         <div
-                          className={`w-4 h-4 rounded-full ${
-                            tokenData[token]?.color || "bg-gray-600"
-                          } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                          className={`w-4 h-4 rounded-full ${tokenData[token]?.color || "bg-gray-600"
+                            } flex items-center justify-center text-white text-xs font-medium mr-2`}>
                           {tokenData[token]?.symbol?.charAt(0) || "?"}
                         </div>
                       ) : (
@@ -191,9 +190,8 @@ export default function DepositCard() {
                               </div>
                             ) : (
                               <div
-                                className={`w-4 h-4 rounded-full ${
-                                  tokenInfo?.color || "bg-gray-600"
-                                } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                                className={`w-4 h-4 rounded-full ${tokenInfo?.color || "bg-gray-600"
+                                  } flex items-center justify-center text-white text-xs font-medium mr-2`}>
                                 {tokenInfo?.symbol?.charAt(0) || "?"}
                               </div>
                             )}
@@ -226,8 +224,8 @@ export default function DepositCard() {
                   </span>
                 </div>
                 {token &&
-                (selectedTokenBalance == 0 ||
-                  (amount && amount > selectedTokenBalance)) ? (
+                  (selectedTokenBalance == 0 ||
+                    (amount && amount > selectedTokenBalance)) ? (
                   <Button
                     variant="link"
                     className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
