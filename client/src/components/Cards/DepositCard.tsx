@@ -54,7 +54,6 @@ export default function DepositCard() {
     account: smartAccount,
     token: token as `0x${string}`,
     amount,
-    // coinSafeAddress: CoinSafeContract.address as `0x${string}`,
     coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
     coinSafeAbi: fundingFacetAbi,
     onSuccess: () => {
@@ -69,12 +68,8 @@ export default function DepositCard() {
     },
     toast,
   });
-
   const resetState = () => {
     setAmount(0);
-    // setToken("");
-    // setTokenPrice("0.00");
-    // setSelectedTokenBalance(0);
   };
 
   useEffect(() => {
@@ -91,7 +86,6 @@ export default function DepositCard() {
         const contract = getContract({
           client,
           address: token,
-          // abi: erc20Abi,
           chain: liskMainnet,
         });
 
@@ -140,7 +134,8 @@ export default function DepositCard() {
                 <Select
                   onValueChange={handleTokenSelect}
                   value={token}
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   <SelectTrigger className="w-28 h-12 bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                     <div className="flex items-center">
                       {token && tokenData[token]?.image ? (
@@ -157,7 +152,8 @@ export default function DepositCard() {
                         <div
                           className={`w-4 h-4 rounded-full ${
                             tokenData[token]?.color || "bg-gray-600"
-                          } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                          } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                        >
                           {tokenData[token]?.symbol?.charAt(0) || "?"}
                         </div>
                       ) : (
@@ -193,7 +189,8 @@ export default function DepositCard() {
                               <div
                                 className={`w-4 h-4 rounded-full ${
                                   tokenInfo?.color || "bg-gray-600"
-                                } flex items-center justify-center text-white text-xs font-medium mr-2`}>
+                                } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                              >
                                 {tokenInfo?.symbol?.charAt(0) || "?"}
                               </div>
                             )}
@@ -231,13 +228,15 @@ export default function DepositCard() {
                   <Button
                     variant="link"
                     className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                    onClick={() => navigate("/deposit")}>
+                    onClick={() => navigate("/deposit")}
+                  >
                     Deposit to save
                   </Button>
                 ) : (
                   <Button
                     className="text-sm border-none outline-none bg-transparent hover:bg-transparent text-green-400 cursor-pointer"
-                    onClick={() => setAmount(selectedTokenBalance)}>
+                    onClick={() => setAmount(selectedTokenBalance)}
+                  >
                     Max
                   </Button>
                 )}
@@ -248,7 +247,8 @@ export default function DepositCard() {
         <div className="flex items-center justify-between sm:gap-3 sm:justify-end mt-5">
           <Button
             onClick={() => navigate(-1)}
-            className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]">
+            className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1]  bg-[#3F3F3F99] hover:bg-[#3F3F3F99]"
+          >
             Cancel
           </Button>
           <Button
@@ -257,7 +257,8 @@ export default function DepositCard() {
             }}
             className="text-black px-8 rounded-[2rem]"
             variant="outline"
-            disabled={isLoading || (amount || 0) > selectedTokenBalance}>
+            disabled={isLoading || (amount || 0) > selectedTokenBalance}
+          >
             {isLoading ? (
               <LoaderCircle className="animate-spin" />
             ) : (

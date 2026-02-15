@@ -1,4 +1,4 @@
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import {
   availableBalanceState,
   savingsBalanceState,
@@ -8,43 +8,50 @@ import {
   loadingState,
 } from "../store/atoms/balance";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
-import { useEffect } from "react";
-import { getValidNumberValue } from "@/lib/utils";
-import { convertTokenAmountToUsd } from "@/lib/utils";
+import { useEffect, useMemo } from "react";
+import { getTokenDecimals } from "@/lib/utils";
 import { getContract, readContract } from "thirdweb";
 import { liskMainnet } from "@/lib/config";
+import { publicClient } from "@/lib/client";
+import { Abi, formatUnits } from "viem";
+import { useTokenPrices } from "@/lib/price-service";
 import { client } from "@/lib/config";
-import { Abi } from "viem";
 
 export const useBalances = (address: string) => {
   const setAvailableBalance = useSetRecoilState(availableBalanceState);
   const setSavingsBalance = useSetRecoilState(savingsBalanceState);
   const setTotalBalance = useSetRecoilState(totalBalanceState);
-  const setSupportedTokens = useSetRecoilState(supportedTokensState);
-  const setBalances = useSetRecoilState(balancesState);
+  const [supportedTokens, setSupportedTokens] =
+    useRecoilState(supportedTokensState);
+  const [balances, setBalances] = useRecoilState(balancesState);
   const setLoading = useSetRecoilState(loadingState);
 
-  const contract = getContract({
-    client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
-    abi: facetAbis.fundingFacet as unknown as Abi,
-  });
+  // 1. Fetch prices for supported tokens
+  const priceQueries = useTokenPrices(supportedTokens);
 
+  const tokenPriceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    supportedTokens.forEach((token, index) => {
+      const query = priceQueries[index];
+      if (query.data !== undefined) {
+        map[token] = query.data;
+      }
+    });
+    return map;
+  }, [supportedTokens, priceQueries]);
+
+  // 2. Fetch supported tokens
   useEffect(() => {
     if (!address) return;
 
     async function fetchSupportedTokens() {
       try {
-        // console.log("Fetching supported tokens for address:", address);
         const fundingFacetContract = getContract({
           client,
           address: CoinsafeDiamondContract.address,
           chain: liskMainnet,
           abi: facetAbis.fundingFacet as unknown as Abi,
         });
-
-        console.log("FundingFacet contract:", fundingFacetContract.address);
 
         const tokens = (await readContract({
           contract: fundingFacetContract,
@@ -53,15 +60,9 @@ export const useBalances = (address: string) => {
           params: [],
         })) as string[];
 
-        // console.log("Supported tokens fetched:", tokens);
-
         // Only set tokens if we actually got some from the contract
         if (tokens && tokens.length > 0) {
-          // console.log("Setting supported tokens:", tokens);
           setSupportedTokens(tokens);
-        } else {
-          console.warn("No supported tokens returned from contract");
-          // Don't set empty tokens - let the contract handle this case
         }
       } catch (err) {
         console.error("Error fetching supported tokens:", err);
@@ -71,8 +72,9 @@ export const useBalances = (address: string) => {
     fetchSupportedTokens();
   }, [address, setSupportedTokens]);
 
+  // 3. Fetch Balances (Contract Calls only)
   useEffect(() => {
-    if (!address) return;
+    if (!address || supportedTokens.length === 0) return;
 
     async function fetchBalances() {
       try {
@@ -82,46 +84,66 @@ export const useBalances = (address: string) => {
           savings: true,
         });
 
-        const supportedTokens = await readContract({
-          contract,
-          method:
-            "function getAcceptedTokenAddresses() external view returns (address[] memory)",
-          params: [],
-        });
+        const contractAddress =
+          CoinsafeDiamondContract.address as `0x${string}`;
+        const abi = [
+          {
+            inputs: [
+              { internalType: "address", name: "user", type: "address" },
+              { internalType: "address", name: "token", type: "address" },
+            ],
+            name: "getUserTotalBalance",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "user", type: "address" },
+              { internalType: "address", name: "token", type: "address" },
+            ],
+            name: "getUserAvailableBalance",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "user", type: "address" },
+              { internalType: "address", name: "token", type: "address" },
+            ],
+            name: "getUserSavedBalance",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+        ] as const;
 
-        const balanceCalls = supportedTokens.flatMap((token) => [
+        const calls = supportedTokens.flatMap((token) => [
           {
-            type: "total",
-            contractCall: {
-              contract,
-              method:
-                "function getUserTotalBalance(address user, address token) external view returns (uint256)",
-              params: [address, token],
-            },
+            address: contractAddress,
+            abi,
+            functionName: "getUserTotalBalance",
+            args: [address, token],
           },
           {
-            type: "available",
-            contractCall: {
-              contract,
-              method:
-                "function getUserAvailableBalance(address user, address token) external view returns (uint256)",
-              params: [address, token],
-            },
+            address: contractAddress,
+            abi,
+            functionName: "getUserAvailableBalance",
+            args: [address, token],
           },
           {
-            type: "savings",
-            contractCall: {
-              contract,
-              method:
-                "function getUserSavedBalance(address user, address token) external view returns (uint256)",
-              params: [address, token],
-            },
+            address: contractAddress,
+            abi,
+            functionName: "getUserSavedBalance",
+            args: [address, token],
           },
         ]);
 
-        const results = await Promise.all(
-          balanceCalls.map(({ contractCall }) => readContract(contractCall))
-        );
+        const results = await publicClient.multicall({
+          contracts: calls,
+          allowFailure: false, // Or true if we want to handle partial failures
+        });
 
         const balancesMap = {
           total: [] as bigint[],
@@ -129,11 +151,17 @@ export const useBalances = (address: string) => {
           savings: [] as bigint[],
         };
 
-        results.forEach((result, index) => {
+        // Results array order matches calls order: [total, available, savings, total, available, savings, ...]
+        results.forEach((result: any, index: any) => {
           const tokenIndex = Math.floor(index / 3);
-          const type = balanceCalls[index].type as keyof typeof balancesMap;
-          balancesMap[type][tokenIndex] =
-            typeof result === "bigint" ? result : BigInt(0);
+          const remainder = index % 3;
+          // 0 -> total, 1 -> available, 2 -> savings
+
+          const value = typeof result === "bigint" ? result : BigInt(0);
+
+          if (remainder === 0) balancesMap.total[tokenIndex] = value;
+          else if (remainder === 1) balancesMap.available[tokenIndex] = value;
+          else if (remainder === 2) balancesMap.savings[tokenIndex] = value;
         });
 
         const updatedTokenBalanceMap = supportedTokens.reduce(
@@ -147,45 +175,10 @@ export const useBalances = (address: string) => {
             available: {} as Record<string, unknown>,
             total: {} as Record<string, unknown>,
             savings: {} as Record<string, unknown>,
-          }
+          },
         );
 
         setBalances(updatedTokenBalanceMap);
-
-        const usdPromises = supportedTokens.map(async (token, i) => {
-          const totalUsdVal = convertTokenAmountToUsd(
-            token,
-            balancesMap.total[i] || 0n
-          );
-          const availableUsdVal = convertTokenAmountToUsd(
-            token,
-            BigInt(balancesMap.available[i] || 0n)
-          );
-          const savedUsdVal = convertTokenAmountToUsd(
-            token,
-            BigInt(balancesMap.savings[i] || 0n)
-          );
-
-          return Promise.all([totalUsdVal, availableUsdVal, savedUsdVal]);
-        });
-
-        const usdResults = await Promise.all(usdPromises);
-
-        console.log("USD RESULTS: ", usdResults)
-
-        let totalUsd = 0;
-        let availableUsd = 0;
-        let savedUsd = 0;
-
-        usdResults.forEach(([totalUsdVal, availableUsdVal, savedUsdVal]) => {
-          totalUsd += getValidNumberValue(totalUsdVal);
-          availableUsd += getValidNumberValue(availableUsdVal);
-          savedUsd += getValidNumberValue(savedUsdVal);
-        });
-
-        setTotalBalance(Number(totalUsd.toFixed(2)));
-        setAvailableBalance(Number(availableUsd.toFixed(2)));
-        setSavingsBalance(Number(savedUsd.toFixed(2)));
       } catch (err) {
         console.error("Error fetching balances:", err);
       } finally {
@@ -198,13 +191,47 @@ export const useBalances = (address: string) => {
     }
 
     fetchBalances();
+  }, [address, supportedTokens, setBalances, setLoading]);
+
+  // 4. Calculate USD Values using Price Map and Balances
+  useEffect(() => {
+    if (supportedTokens.length === 0) return;
+
+    let totalUsd = 0;
+    let availableUsd = 0;
+    let savedUsd = 0;
+
+    supportedTokens.forEach((token) => {
+      const price = tokenPriceMap[token] || 0;
+      const decimals = getTokenDecimals(token);
+
+      const totalBal =
+        (balances.total as Record<string, bigint>)?.[token] || 0n;
+      const availableBal =
+        (balances.available as Record<string, bigint>)?.[token] || 0n;
+      const savedBal =
+        (balances.savings as Record<string, bigint>)?.[token] || 0n;
+
+      // Helper to convert bigint balance -> number amount -> usd value
+      const getUsd = (bal: bigint) => {
+        const amount = Number(formatUnits(bal, decimals));
+        return amount * price;
+      };
+
+      totalUsd += getUsd(totalBal);
+      availableUsd += getUsd(availableBal);
+      savedUsd += getUsd(savedBal);
+    });
+
+    setTotalBalance(Number(totalUsd.toFixed(2)));
+    setAvailableBalance(Number(availableUsd.toFixed(2)));
+    setSavingsBalance(Number(savedUsd.toFixed(2)));
   }, [
-    address,
-    setBalances,
+    balances,
+    tokenPriceMap,
+    supportedTokens,
+    setTotalBalance,
     setAvailableBalance,
     setSavingsBalance,
-    setTotalBalance,
-    setLoading,
-    contract,
   ]);
 };

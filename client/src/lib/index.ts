@@ -2,128 +2,58 @@ import { JsonRpcProvider } from "ethers";
 import { tokens } from "./contract";
 import { API_BASE_URL } from "./api-config";
 // export const base_uri_test = import.meta.env.DEV ? 'http://localhost:1234' : 'https://coinsafe-0q0m.onrender.com';
-export const base_uri = `${API_BASE_URL}/coingecko`;
+export const base_uri = `${API_BASE_URL}`;
+
+import { getStoredTokenPrice } from "./price-service";
 
 export const getLskToUsd = async (lsk: number) => {
-  const options = {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
-    },
-  };
-  try {
-    // const res = await fetch(`${base_uri}/api-cg/lisk`);
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=lisk",
-      options
-    );
-    const data = await res.json();
-
-    if (data?.lisk?.usd) {
-      return data.lisk.usd * lsk;
-    } else {
-      throw new Error("LSK data or USD price not available");
-    }
-  } catch (err) {
-    console.error(err);
-    return 0;
-  }
+  const price = await getStoredTokenPrice("lsk");
+  return price * lsk;
 };
 
 export const getSafuToUsd = (safu: number) => {
-  return 0.339 * safu;
+  return 0.339 * safu; // Kept as synchronous calculation since it's hardcoded
 };
 
 export const getUsdtToUsd = async (usdt: number) => {
-  const options = {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
-    },
-  };
-
-  try {
-    // const res = await fetch(`${base_uri}/api-cg/tether`);
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=tether",
-      options
-    );
-    const data = await res.json();
-
-    console.log("=====================================");
-    console.log("USDT", data);
-    console.log("=====================================");
-
-    if (data?.tether?.usd) {
-      console.log("=====================================");
-      console.log("USDT", data);
-      console.log("=====================================");
-      return data.tether.usd * usdt;
-    } else {
-      throw new Error("USDT data or USD price not available");
-    }
-  } catch (err) {
-    console.error(err);
-    return 0;
-  }
+  const price = await getStoredTokenPrice("usdt");
+  return price * usdt;
 };
 
 export const getUsdcToUsd = async (usdc: number) => {
-  const options = {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
-    },
-  };
-  try {
-    // const res = await fetch(`${base_uri}/api-cg/usd-coin`);
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=usd-coin",
-      options
-    );
-    const data = await res.json();
-
-    if (data?.["usd-coin"]?.usd) {
-      console.log("=====================================");
-      console.log("USDT", data);
-      console.log("=====================================");
-      return data["usd-coin"].usd * usdc;
-    } else {
-      throw new Error("USDC data or USD price not available");
-    }
-  } catch (err) {
-    console.error(err);
-    return 0;
-  }
+  const price = await getStoredTokenPrice("usdc");
+  return price * usdc;
 };
 
 export async function getTokenPrice(token: string, amount: number | undefined) {
   if (!token || !amount) return "0.00";
 
   try {
+    // Basic mapping or direct usage
+    let finalPrice = 0;
+
     switch (token) {
-      case tokens.safu: {
-        const safuPrice = await getSafuToUsd(amount);
-        return safuPrice.toFixed(2);
-      }
-      case tokens.lsk: {
-        const lskPrice = await getLskToUsd(amount);
-        return lskPrice.toFixed(2);
-      }
-      case tokens.usdt: {
-        const usdtPrice = await getUsdtToUsd(amount);
-        return usdtPrice.toFixed(2);
-      }
-      case tokens.usdc: {
-        const usdcPrice = await getUsdcToUsd(amount);
-        return usdcPrice.toFixed(2);
-      }
+      case tokens.safu:
+        // SAFU might be special or just use the same logic
+        // The original code used a sync helper, but we can treat it same if we want consistency
+        // For now, let's stick to the specific helpers which now use the cache
+        finalPrice = await getSafuToUsd(amount);
+        break;
+      case tokens.lsk:
+        finalPrice = await getLskToUsd(amount);
+        break;
+      case tokens.usdt:
+        finalPrice = await getUsdtToUsd(amount);
+        break;
+      case tokens.usdc:
+        finalPrice = await getUsdcToUsd(amount);
+        break;
       default:
+        // Attempt generic fetch if it's a known token elsewhere?
+        // For now return 0 as per original
         return "0.00";
     }
+    return finalPrice.toFixed(2);
   } catch (error) {
     console.error("Error getting token price:", error);
     return "0.00";
