@@ -25,7 +25,7 @@ interface IAmountInput {
   handleAmountChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   saveState: ISaveState;
   selectedTokenBalance: any;
-  tokens: any;
+
   validationErrors: any;
   supportedTokens: string[];
 }
@@ -100,9 +100,8 @@ const AmountInput = ({
                     </div>
                   ) : saveState.token && selectedTokenInfo ? (
                     <div
-                      className={`w-4 h-4 rounded-full ${
-                        selectedTokenInfo?.color || "bg-gray-600"
-                      } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                      className={`w-4 h-4 rounded-full ${selectedTokenInfo?.color || "bg-gray-600"
+                        } flex items-center justify-center text-white text-xs font-medium mr-2`}
                     >
                       {selectedTokenInfo?.symbol?.charAt(0) || "?"}
                     </div>
@@ -134,9 +133,8 @@ const AmountInput = ({
                           </div>
                         ) : (
                           <div
-                            className={`w-4 h-4 rounded-full ${
-                              tokenInfo?.color || "bg-gray-600"
-                            } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                            className={`w-4 h-4 rounded-full ${tokenInfo?.color || "bg-gray-600"
+                              } flex items-center justify-center text-white text-xs font-medium mr-2`}
                           >
                             {tokenInfo?.symbol?.charAt(0) || "?"}
                           </div>

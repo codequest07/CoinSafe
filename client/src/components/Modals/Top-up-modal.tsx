@@ -4,7 +4,7 @@ import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { tokens, CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import AmountInput from "../AmountInput";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
@@ -154,10 +154,10 @@ export default function TopUpModal({
                   {safeDetails.isLocked
                     ? safeDetails.unlockTime > new Date()
                       ? `${Math.ceil(
-                          (safeDetails.unlockTime.getTime() -
-                            new Date().getTime()) /
-                            (1000 * 60 * 60 * 24)
-                        )} days to unlock`
+                        (safeDetails.unlockTime.getTime() -
+                          new Date().getTime()) /
+                        (1000 * 60 * 60 * 24)
+                      )} days to unlock`
                       : "Ready to unlock"
                     : "Flexible"}
                 </span>
@@ -177,7 +177,7 @@ export default function TopUpModal({
           handleAmountChange={handleAmountChange}
           handleTokenSelect={handleTokenSelect}
           saveState={saveState}
-          tokens={tokens}
+
           selectedTokenBalance={selectedTokenBalance}
           validationErrors={validationErrors}
           supportedTokens={supportedTokens}
@@ -193,8 +193,8 @@ export default function TopUpModal({
               </span>
             </div>
             {saveState.token &&
-            (selectedTokenBalance == 0 ||
-              (saveState.amount && saveState.amount > selectedTokenBalance)) ? (
+              (selectedTokenBalance == 0 ||
+                (saveState.amount && saveState.amount > selectedTokenBalance)) ? (
               <Button
                 variant="link"
                 className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"

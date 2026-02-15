@@ -11,6 +11,7 @@ export interface ChainConfig {
         lsk?: string;
         // Add other tokens as needed
         usdt0?: string; // For legacy or specific lisk token if needed
+        [key: string]: string | undefined;
     };
     serverUrl?: string; // If backend URL differs by chain
 }

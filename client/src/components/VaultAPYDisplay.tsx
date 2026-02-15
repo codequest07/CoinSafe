@@ -1,13 +1,16 @@
 import React from "react";
 import { useVaultApy } from "@/hooks/useVaultApy";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 export const VaultAPYDisplay: React.FC<{
   vaultAddress: `0x${string}`;
   morphoBlueAddress: `0x${string}`;
 }> = ({ vaultAddress, morphoBlueAddress }) => {
+  const { chain } = useChainConfig();
   const { nativeApy, totalApr, fees, loading, error } = useVaultApy(
     vaultAddress,
-    morphoBlueAddress
+    morphoBlueAddress,
+    chain.id
   );
 
   if (loading) return <div>Loading APY...</div>;

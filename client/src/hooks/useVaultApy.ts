@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { createPublicClient, http, formatUnits } from "viem";
 import { type PublicClient, type Address } from "viem/";
 import { parseAbi } from "viem/utils";
-import { lisk } from "viem/chains";
+import { lisk, base } from "viem/chains";
 import { getChainAddresses, Vault } from "@morpho-org/blue-sdk";
 import "@morpho-org/blue-sdk-viem/lib/augment";
 import axios, { AxiosError } from "axios";
@@ -384,14 +384,15 @@ interface MerklOpportunity {
 
 // NEW: Function to fetch and match Merkl APR for specific vault (efficient: single call, filter by identifier)
 async function fetchMerklAprForVault(
-  vaultAddress: Address
+  vaultAddress: Address,
+  chainId: number
 ): Promise<{ totalApr: number | null; opportunity?: MerklOpportunity }> {
   try {
     const params = new URLSearchParams({
       page: "0",
       items: "20",
-      name: "lisk",
-      chainId: "1135", // Lisk-specific
+      name: chainId === 8453 ? "base" : "lisk",
+      chainId: chainId.toString(),
       // type: 'MORPHOVAULT',
       // status: 'LIVE',
       // action: 'LEND',
@@ -435,7 +436,8 @@ async function fetchMerklAprForVault(
 
 export const useVaultApy = (
   tokenAddress: Address,
-  morphoBlueAddress: Address
+  morphoBlueAddress: Address,
+  chainId: number = 1135 // Default to lisk for backward compat
 ) => {
   // const [apy, setApy] = useState<string>('0.00');
   const [nativeApy, setNativeApy] = useState<string>("0.00"); // RENAMED: Original on-chain native APY
@@ -445,60 +447,32 @@ export const useVaultApy = (
   const [error, setError] = useState<string | null>(null);
 
   const vaultAddress = useMemo(
-    () => ({
-      "0x05D032ac25d322df992303dCa074EE7392C117b9":
-        "0x50cB55BE8cF05480a844642cB979820C847782aE", // usdt0
-      "0xF242275d3a6527d877f2c927a82D9b057609cc71":
-        "0xD92f564A29992251297980187a6B74FAa3D50699", // usdc
-      "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24":
-        "0x8258F0c79465c95AFAc325D6aB18797C9DDAcf55", // lsk
-    }),
-    []
+    () => {
+      if (chainId === 1135) {
+        return {
+          // Map USDT0 to the USDT Vault
+          "0x43f2376d5d03553ae72f4a8093bbe9de4336eb08": // USDT0
+            "0x50cB55BE8cF05480a844642cB979820C847782aE",
+          "0xf242275d3a6527d877f2c927a82d9b057609cc71": // USDC
+            "0xD92f564A29992251297980187a6B74FAa3D50699",
+          "0xac485391eb2d7d88253a7f1ef18c37f4242d1a24": // LSK
+            "0x8258F0c79465c95AFAc325D6aB18797C9DDAcf55",
+        }
+      }
+      return {};
+    },
+    [chainId]
   );
-  //   "0x05D032ac25d322df992303dCa074EE7392C117b9": "0x50cB55BE8cF05480a844642cB979820C847782aE", // usdt0
-  // "0xF242275d3a6527d877f2c927a82D9b057609cc71": "0xD92f564A29992251297980187a6B74FAa3D50699", // usdc
-  // "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24": "0x8258F0c79465c95AFAc325D6aB18797C9DDAcf55", // lsk
-  // }
-
-  // useEffect(() => {
-  //   if (!vaultAddress[tokenAddress] || vaultAddress[tokenAddress] === '0x...') {
-  //     setApy('0.00');
-  //     setLoading(false);
-  //     return;
-  //   }
-
-  //   const fetchApy = async () => {
-  //     try {
-  //       setLoading(true);
-  //       setError(null);
-
-  //       const chainId = 1135;
-  //       const config = getChainAddresses(chainId);
-  //       if (!config) throw new Error('Lisk unsupported');
-
-  //       const client = createPublicClient({
-  //         chain: lisk,
-  //         transport: http(),
-  //       });
-
-  //       // const morphoBlueAddress = config.morphoBlue as Address;
-  //       // const morphoBlueAddress = (config as any).morphoBlue as Address;
-  //       const rawApy = await calculateVaultApy(client, vaultAddress[tokenAddress], morphoBlueAddress);
-  //       const formattedApy = formatUnits(rawApy, 16);
-  //       setApy(formattedApy);
-  //     } catch (err) {
-  //       setError(err instanceof Error ? err.message : 'Failed to fetch APY');
-  //       setApy('N/A');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchApy();
-  // }, [vaultAddress[tokenAddress], morphoBlueAddress]);
 
   useEffect(() => {
-    const vault = vaultAddress[tokenAddress as keyof typeof vaultAddress];
+    // If no vault map for this chain, or invalid token
+    if (!tokenAddress) {
+      setNativeApy("0.00");
+      setTotalApr(null);
+      setLoading(false);
+      return;
+    }
+    const vault = vaultAddress[tokenAddress.toLowerCase() as keyof typeof vaultAddress];
     if (!vault || vault === "0x...") {
       setNativeApy("0.00");
       setTotalApr(null);
@@ -511,28 +485,30 @@ export const useVaultApy = (
         setLoading(true);
         setError(null);
 
-        const chainId = 1135;
         const config = getChainAddresses(chainId);
-        if (!config) throw new Error("Lisk unsupported");
+        // Fallback or cast if type missing
+        const effectiveMorphoAddr = (config as any)?.morphoBlue || morphoBlueAddress;
+
+        if (!effectiveMorphoAddr) {
+          console.warn(`Morpho Blue address not found for chain ${chainId}`);
+        }
 
         const client = createPublicClient({
-          chain: lisk,
-          transport: http(), // FIXED: Wrapped URL in options
+          chain: chainId === 8453 ? base : lisk,
+          transport: http(),
         });
-
-        // const vault = await Vault.fetch(vaultAddress[tokenAddress] as `0x${string}`, client);
-        // console.log("VAULT", vault)
 
         // NEW: Parallel fetch for Merkl APR (based on vaultAddress[tokenAddress] for token/vault-specific matching)
         const merklPromise = fetchMerklAprForVault(
           vaultAddress[
-            tokenAddress as keyof typeof vaultAddress
-          ] as `0x${string}`
+          tokenAddress.toLowerCase() as keyof typeof vaultAddress
+          ] as `0x${string}`,
+          chainId
         );
         const onChainPromise = calculateVaultApy(
           client,
           vault as `0x${string}`,
-          morphoBlueAddress
+          effectiveMorphoAddr as Address
         );
 
         // Await both in parallel for efficiency
@@ -564,10 +540,11 @@ export const useVaultApy = (
     };
 
     fetchApy();
-  }, [tokenAddress, morphoBlueAddress, vaultAddress]);
+  }, [tokenAddress, morphoBlueAddress, vaultAddress, chainId]);
 
   useEffect(() => {
-    const vault = vaultAddress[tokenAddress as keyof typeof vaultAddress];
+    if (!tokenAddress) return;
+    const vault = vaultAddress[tokenAddress.toLowerCase() as keyof typeof vaultAddress];
     if (!vault || vault === "0x...") {
       setFees(0);
       setLoading(false);
@@ -579,18 +556,14 @@ export const useVaultApy = (
         setLoading(true);
         setError(null);
 
-        const chainId = 1135;
-        const config = getChainAddresses(chainId);
-        if (!config) throw new Error("Lisk unsupported");
-
         const client = createPublicClient({
-          chain: lisk,
-          transport: http(), // FIXED: Wrapped URL in options
+          chain: chainId === 8453 ? base : lisk,
+          transport: http(),
         });
 
         const vault = await Vault.fetch(
           vaultAddress[
-            tokenAddress as keyof typeof vaultAddress
+          tokenAddress.toLowerCase() as keyof typeof vaultAddress
           ] as `0x${string}`,
           client
         );
@@ -608,10 +581,8 @@ export const useVaultApy = (
     };
 
     fetchFees();
-  }, [tokenAddress, vaultAddress, morphoBlueAddress]);
+  }, [tokenAddress, vaultAddress, morphoBlueAddress, chainId]);
 
-  // return { apy, loading, error };
-  // UPDATED: Return both native and total (use totalApr for display if available, else nativeApy)
   return {
     nativeApy,
     totalApr,

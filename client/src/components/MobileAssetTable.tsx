@@ -130,12 +130,12 @@ export default function MobileAssetTable({
           autosaved: null,
           isMature: safeDetails
             ? safeDetails.id !== "911" &&
-              safeDetails.unlockTime &&
-              safeDetails.unlockTime < new Date() &&
-              safeDetails.target &&
-              safeDetails.target !== "Emergency Safe"
+            safeDetails.unlockTime &&
+            safeDetails.unlockTime < new Date() &&
+            safeDetails.target &&
+            safeDetails.target !== "Emergency Safe"
             : false,
-          tokenInfo: tokenData[asset.token] || {
+          tokenInfo: tokenData[asset.token.toLowerCase()] || {
             symbol: "Unknown",
             name: "Token",
             color: "bg-[#440]",

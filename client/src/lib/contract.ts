@@ -6,6 +6,10 @@ import emergencySavingsFacetAbi from "../abi/EmergencySavingsFacet.json";
 import fundingFacetAbi from "../abi/FundingFacet.json";
 import swapFacetAbi from "../abi/SwapFacet.json";
 
+/**
+ * @deprecated Use useChainConfig() hook to access chain-specific tokens.
+ * This object is Lisk-only and will be removed.
+ */
 export const tokens = {
   usdt: "0x05D032ac25d322df992303dCa074EE7392C117b9",
   usdt0: "0x43F2376D5D03553aE72F4A8093bbe9de4336EB08",
