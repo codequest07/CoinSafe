@@ -1,14 +1,12 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
-import { getContract, prepareContractCall } from "thirdweb";
-import { liskMainnet } from "@/lib/config";
+import { getContract, prepareContractCall, type Chain } from "thirdweb";
 import { client } from "@/lib/config";
 import { toBigInt } from "ethers";
 import { toast } from "sonner";
 import { tokenDecimals } from "@/lib/utils";
 import { Abi } from "viem";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
-// import { liskMainnet } from 'viem/chains';
 
 interface SaveState {
   target: string;
@@ -24,7 +22,7 @@ interface UseSaveAssetParams {
   saveState: SaveState;
   coinSafeAddress: `0x${string}`;
   coinSafeAbi: any;
-  chainId: number;
+  chain: Chain;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
@@ -42,6 +40,7 @@ export const useSaveAsset = ({
   saveState,
   coinSafeAddress,
   coinSafeAbi,
+  chain,
   onSuccess,
   onError,
 }: UseSaveAssetParams): UseSaveAssetResult => {
@@ -70,7 +69,7 @@ export const useSaveAsset = ({
 
   const contract = getContract({
     client,
-    chain: liskMainnet,
+    chain: chain as any,
     address: coinSafeAddress,
     abi: coinSafeAbi as Abi,
   });
