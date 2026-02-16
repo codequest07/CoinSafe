@@ -8,13 +8,12 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
-import { CoinsafeDiamondContract } from "@/lib/contract";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useDepositAsset } from "@/hooks/useDepositAsset";
 import { useActiveAccount } from "thirdweb/react";
 import { getContract } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
+import { client } from "@/lib/config";
 import { getBalance } from "thirdweb/extensions/erc20";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
 import ApproveTxModal from "../Modals/ApproveTxModal";
@@ -23,6 +22,7 @@ import { tokenData } from "@/lib/token-metadata";
 import { getTokenPrice } from "@/lib";
 import { supportedTokensState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 export default function DepositCard() {
   const navigate = useNavigate();
@@ -36,6 +36,9 @@ export default function DepositCard() {
   const [tokenPrice, setTokenPrice] = useState("0.00");
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [supportedTokens] = useRecoilState(supportedTokensState);
+
+  // Get active chain configuration
+  const { chain, diamondAddress } = useChainConfig();
 
   const openThirdModal = () => {
     setIsThirdModalOpen(true);
@@ -54,9 +57,9 @@ export default function DepositCard() {
     account: smartAccount,
     token: token as `0x${string}`,
     amount,
-    // coinSafeAddress: CoinSafeContract.address as `0x${string}`,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     coinSafeAbi: fundingFacetAbi,
+    chain,
     onSuccess: () => {
       openThirdModal();
       setSelectedTokenBalance((prev) => prev - (amount || 0));
@@ -92,7 +95,7 @@ export default function DepositCard() {
           client,
           address: token,
           // abi: erc20Abi,
-          chain: liskMainnet,
+          chain,
         });
 
         const tokenBalance = await getBalance({ contract, address: address! });
@@ -106,7 +109,7 @@ export default function DepositCard() {
     if (address && token) {
       fetchTokenBalance();
     }
-  }, [token, address]);
+  }, [token, address, chain]);
 
   return (
     <main className="min-h-screen md:min-h-fit flex items-start md:items-center justify-center md:justify-center p-4 pt-8 md:pt-4">

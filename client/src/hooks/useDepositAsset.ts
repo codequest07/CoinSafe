@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
-import { getContract, prepareContractCall } from "thirdweb";
+import { getContract, prepareContractCall, type Chain } from "thirdweb";
 import { client } from "@/lib/config";
-import { liskMainnet } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { erc20Abi, Abi } from "viem";
 import { getTokenDecimals } from "@/lib/utils";
@@ -16,7 +15,7 @@ interface UseDepositAssetParams {
   amount?: number;
   coinSafeAddress: `0x${string}`;
   coinSafeAbi: any;
-  chainId?: number;
+  chain: Chain;
   onSuccess?: () => void;
   onApprove?: () => void;
   onError?: (error: Error) => void;
@@ -34,6 +33,7 @@ export const useDepositAsset = ({
   token,
   amount,
   coinSafeAddress,
+  chain,
   onSuccess,
   onApprove,
   onError,
@@ -53,7 +53,7 @@ export const useDepositAsset = ({
       try {
         const contract = getContract({
           client,
-          chain: liskMainnet,
+          chain,
           address: coinSafeAddress,
           abi: facetAbis.fundingFacet as Abi,
         });
@@ -73,7 +73,7 @@ export const useDepositAsset = ({
         const tokenContract = getContract({
           client,
           address: token,
-          chain: liskMainnet,
+          chain,
           abi: erc20Abi,
         });
 
@@ -110,8 +110,7 @@ export const useDepositAsset = ({
           } catch (error: any) {
             console.error("Approval failed:", error);
             throw new Error(
-              `Approve token spend transaction failed: ${
-                error?.message ?? error
+              `Approve token spend transaction failed: ${error?.message ?? error
               }`
             );
           } finally {
@@ -157,6 +156,7 @@ export const useDepositAsset = ({
       token,
       amount,
       coinSafeAddress,
+      chain,
       onSuccess,
       onError,
       // isPending,
