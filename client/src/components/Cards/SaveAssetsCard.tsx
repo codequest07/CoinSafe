@@ -187,7 +187,7 @@ export default function SaveAssetsCard() {
     // SAFU & LSK check
     setDecimals(getTokenDecimals(value));
 
-    setSaveState((prevState) => ({ ...prevState, token: value }));
+    setSaveState((prevState) => ({ ...prevState, token: value.toLowerCase() }));
 
     if (tokenData[value]?.symbol === "USDT") {
       setShowUsdtModal(true);
@@ -356,7 +356,8 @@ export default function SaveAssetsCard() {
       const tokensData = AvailableBalance;
       if (!tokensData) return;
 
-      const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
+      const normalizedToken = saveState.token.toLowerCase();
+      const tokenBalance = (AvailableBalance[normalizedToken] as bigint) || 0n;
 
       setSelectedTokenBalance(
         Number(formatUnits(tokenBalance, getTokenDecimals(saveState.token))),

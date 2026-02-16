@@ -143,9 +143,10 @@ export const useBalances = (address: string) => {
 
         const updatedTokenBalanceMap = supportedTokens.reduce(
           (acc, token, index) => {
-            acc.available[token] = balancesMap.available[index];
-            acc.total[token] = balancesMap.total[index];
-            acc.savings[token] = balancesMap.savings[index];
+            const normalizedToken = token.toLowerCase();
+            acc.available[normalizedToken] = balancesMap.available[index];
+            acc.total[normalizedToken] = balancesMap.total[index];
+            acc.savings[normalizedToken] = balancesMap.savings[index];
             return acc;
           },
           {
