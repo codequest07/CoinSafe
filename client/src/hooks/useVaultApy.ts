@@ -448,18 +448,18 @@ export const useVaultApy = (
 
   const vaultAddress = useMemo(
     () => {
-      if (chainId === 1135) {
-        return {
-          // Map USDT0 to the USDT Vault
-          "0x43f2376d5d03553ae72f4a8093bbe9de4336eb08": // USDT0
-            "0x50cB55BE8cF05480a844642cB979820C847782aE",
-          "0xf242275d3a6527d877f2c927a82d9b057609cc71": // USDC
-            "0xD92f564A29992251297980187a6B74FAa3D50699",
-          "0xac485391eb2d7d88253a7f1ef18c37f4242d1a24": // LSK
-            "0x8258F0c79465c95AFAc325D6aB18797C9DDAcf55",
+      const vaultMappings: Record<number, Record<string, string>> = {
+        1135: {  // Lisk
+          "0x43f2376d5d03553ae72f4a8093bbe9de4336eb08": "0x50cB55BE8cF05480a844642cB979820C847782aE", // USDT0
+          "0xf242275d3a6527d877f2c927a82d9b057609cc71": "0xD92f564A29992251297980187a6B74FAa3D50699", // USDC
+          "0xac485391eb2d7d88253a7f1ef18c37f4242d1a24": "0x8258F0c79465c95AFAc325D6aB18797C9DDAcf55", // LSK
+        },
+        8453: {  // Base
+          "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": "0xBEEFE94c8aD530842bfE7d8B397938fFc1cb83b2", // USDC
         }
-      }
-      return {};
+      };
+
+      return vaultMappings[chainId] || {};
     },
     [chainId]
   );
