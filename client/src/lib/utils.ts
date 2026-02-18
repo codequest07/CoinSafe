@@ -64,11 +64,9 @@ export const convertTokenAmountToUsd = async (
 ): Promise<number> => {
   const tokenDecimals = getTokenDecimals(token);
   const numericAmount = Number(formatUnits(amount, tokenDecimals));
-  console.log("numericAmount", numericAmount);
 
   // Use the central price fetching logic
   const priceString = await getTokenPrice(token, numericAmount);
-  console.log("priceString", priceString);
   return Number(priceString) || 0;
 };
 
@@ -137,10 +135,7 @@ export function formatTimeFrequency(frequency: any) {
   return match ? match.label : `Every ${frequency} seconds`;
 }
 
-// Example usage
-// console.log(formatTimeFrequency(172800n)); // Output: "Every 2 days"
-// console.log(formatTimeFrequency(86400n));  // Output: "Every day"
-// console.log(formatTimeFrequency(23n));     // Output: "Every 23 seconds"
+// Example usage removed
 
 export function convertTokenToUSD(
   tokenValue: any,
@@ -252,14 +247,9 @@ export const getUserTokenYield = async (
     params: [tokenShares, vaultAddress],
   });
 
-  // console.log("targett safe assets yield", assets)
-
   const effectiveYield =
     (100 - Number(feePercentage) / 100) * Number(assets - principal);
 
-  // console.log("targett safe assets yield variables ", (100 -(Number(feePercentage)/100)), (assets) - (principal))
-
-  // console.log("targett safe assets calculated yield", effectiveYield)
   return BigInt(effectiveYield);
 };
 
@@ -272,8 +262,6 @@ export const getSafeLSKRewards = async (safeId: string, account: any) => {
 
   const { avgAPR } = await getSignedAprForClaimAll();
 
-  console.log("SafeId, AvgApr", safeId, avgAPR.toString());
-
   const rewards = await readContract({
     contract: contract,
     method:
@@ -281,8 +269,6 @@ export const getSafeLSKRewards = async (safeId: string, account: any) => {
     params: [BigInt(safeId), avgAPR],
     from: account?.address,
   });
-
-  console.log("Rewards hereeee", rewards);
 
   return formatEther(rewards[0]);
 };

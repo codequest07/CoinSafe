@@ -97,7 +97,7 @@ export const useWatchEvents = ({
   onStreakUpdate,
   onSwap,
 }: UseContractEventsProps) => {
-  const { diamondAddress } = useChainConfig();
+  const { chain, diamondAddress } = useChainConfig();
 
   // Use refs so the polling loop always has the latest callbacks
   // without needing to re-subscribe
@@ -137,20 +137,19 @@ export const useWatchEvents = ({
   }, [address]);
 
   useEffect(() => {
-    if (!diamondAddress) return;
-
-    // HARDCODED RPC debug - verify connectivity
-    const rpcUrl = "https://rpc.api.lisk.com";
-    console.log(
-      `Initializing event watcher for ${diamondAddress} on ${rpcUrl}`,
-    );
+    const rpcVal = chain?.rpc;
+    const rpcUrl = Array.isArray(rpcVal)
+      ? rpcVal[0]
+      : rpcVal || "https://rpc.api.lisk.com";
+    if (!diamondAddress || !rpcUrl) return;
 
     let cleanedUp = false;
     let lastBlockChecked = 0;
 
     let provider: JsonRpcProvider;
     try {
-      provider = new JsonRpcProvider(rpcUrl);
+      const chainId = chain?.id || 1135;
+      provider = new JsonRpcProvider(rpcUrl, chainId, { staticNetwork: true });
     } catch (e) {
       console.error("Failed to initialize provider:", e);
       return;
@@ -191,13 +190,8 @@ export const useWatchEvents = ({
                 token,
                 amountVal,
               );
-              console.log(
-                `Event ${eventName}: token=${token}, amount=${amountVal}, USD=${amountInUsd}`,
-              );
               if (amountInUsd === 0 && amountVal > 0n) return; // Only return if conversion failed for non-zero amount
-              console.log("amountInUsd", amountInUsd);
               cb(amountInUsd);
-              console.log("Callback executed", cb);
             } else if (amountIdx === -1 && tokenIdx === -1) {
               // Special case like AutomatedPlanTerminated - just trigger callback with 0 to invalidate
               cb(0);
@@ -296,32 +290,21 @@ export const useWatchEvents = ({
           return;
         }
 
-        if (logs.length > 0) {
-          console.log(`Found ${logs.length} RAW logs!`);
-        }
-
-        console.log("All Logs:", logs);
-        if (cleanedUp || logs.length === 0) return;
-        console.log("Proceeding to handle all Logs:", logs);
-
-        // Parse all logs against the combined interface
-        for (const log of logs) {
-          console.log("To Log:", log);
-          if (cleanedUp) return;
-          console.log("Log:", log);
-          try {
-            const parsed = combinedInterface.parseLog({
-              topics: log.topics as string[],
-              data: log.data,
-            });
-            console.log("Parsed event:", parsed);
-            if (parsed && EVENT_CONFIGS[parsed.name]) {
-              console.log("Parsed event:", parsed);
-              await processLog(parsed);
+        if (logs && logs.length > 0) {
+          // Parse all logs against the combined interface
+          for (const log of logs) {
+            if (cleanedUp) return;
+            try {
+              const parsed = combinedInterface.parseLog({
+                topics: log.topics as string[],
+                data: log.data,
+              });
+              if (parsed && EVENT_CONFIGS[parsed.name]) {
+                await processLog(parsed);
+              }
+            } catch {
+              // Log doesn't match any known event - skip
             }
-          } catch {
-            // Log doesn't match any known event - skip
-            console.warn("Log doesn't match any known event - skip");
           }
         }
       } catch (err) {
@@ -340,5 +323,5 @@ export const useWatchEvents = ({
       clearInterval(pollingInterval);
       clearTimeout(initialTimeout);
     };
-  }, [diamondAddress]); // Removed chain dependency since RPC is hardcoded
+  }, [chain, diamondAddress]); // Restore chain dependency
 };

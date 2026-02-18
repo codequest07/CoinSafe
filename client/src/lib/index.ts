@@ -1,9 +1,10 @@
-import { JsonRpcProvider } from "ethers";
 import { tokens } from "./contract";
 import { API_BASE_URL } from "./api-config";
 // export const base_uri_test = import.meta.env.DEV ? 'http://localhost:1234' : 'https://coinsafe-0q0m.onrender.com';
 export const base_uri = `${API_BASE_URL}`;
 
+import { chainConfigs } from "./chains";
+import { base } from "./config";
 import { getStoredTokenPrice } from "./price-service";
 
 export const getLskToUsd = async (lsk: number) => {
@@ -45,6 +46,7 @@ export async function getTokenPrice(token: string, amount: number | undefined) {
         finalPrice = await getUsdtToUsd(amount);
         break;
       case tokens.usdc.toLowerCase():
+      case chainConfigs[base.id].tokens.usdc.toLowerCase():
         finalPrice = await getUsdcToUsd(amount);
         break;
       case tokens.usdt0.toLowerCase():
@@ -55,14 +57,12 @@ export async function getTokenPrice(token: string, amount: number | undefined) {
         // Check if there are other tokens
         return "0.00";
     }
-    
+
     return finalPrice.toFixed(5);
   } catch (error) {
     console.error("Error getting token price:", error);
     return "0.00";
   }
 }
-
-export const jsonRpcProvider = new JsonRpcProvider("https://rpc.api.lisk.com");
 
 export * from "./apr-api";
