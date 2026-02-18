@@ -47,6 +47,8 @@ export default function SavingsDetail() {
       // Otherwise, we're still loading
       setIsLoading(true);
     }
+
+    // console.log("Safedetails from contract in savings details page", safeDetails);
   }, [safeDetails, isError]);
 
   // Debug log for render
