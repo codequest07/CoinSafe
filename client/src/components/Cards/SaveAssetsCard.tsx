@@ -387,7 +387,7 @@ export default function SaveAssetsCard() {
   const { nativeApy, totalApr, fees, loading, error } = useVaultApy(
     saveState.token as `0x${string}`,
     "0x00cD58DEEbd7A2F1C55dAec715faF8aed5b27BF8",
-    chain.id
+    chain.id,
   );
 
   useEffect(() => {
@@ -396,7 +396,7 @@ export default function SaveAssetsCard() {
     }
 
     // Calculate total APY if data is available
-    if (saveState.token && nativeApy && totalApr && fees && !loading) {
+    if (saveState.token && nativeApy && totalApr && fees !== null && !loading) {
       const computation = (
         Number(totalApr) +
         Number(nativeApy) -
@@ -408,8 +408,6 @@ export default function SaveAssetsCard() {
       setTotalApy(null);
     }
   }, [saveState.token, nativeApy, totalApr, fees, loading, error]);
-
-
 
   return (
     <div className="min-h-screen md:min-h-fit flex items-center justify-center md:justify-center bg-[#010104] p-4">
@@ -431,7 +429,6 @@ export default function SaveAssetsCard() {
               handleAmountChange={handleAmountChange}
               handleTokenSelect={handleTokenSelect}
               saveState={saveState}
-
               selectedTokenBalance={selectedTokenBalance}
               validationErrors={validationErrors}
               supportedTokens={supportedTokens}
@@ -446,9 +443,9 @@ export default function SaveAssetsCard() {
                 </span>
               </div>
               {saveState.token &&
-                (selectedTokenBalance == 0 ||
-                  (saveState.amount &&
-                    saveState.amount > selectedTokenBalance)) ? (
+              (selectedTokenBalance == 0 ||
+                (saveState.amount &&
+                  saveState.amount > selectedTokenBalance)) ? (
                 <Button
                   variant="link"
                   className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
@@ -542,10 +539,11 @@ export default function SaveAssetsCard() {
                 <div className="flex flex-row gap-2">
                   <Label
                     htmlFor="by-frequency"
-                    className={`w-full flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${selectedOption === "by-frequency"
-                      ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
-                      : ""
-                      }`}
+                    className={`w-full flex items-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${
+                      selectedOption === "by-frequency"
+                        ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
+                        : ""
+                    }`}
                   >
                     <div>
                       <div className="flex gap-2">
@@ -572,10 +570,11 @@ export default function SaveAssetsCard() {
                   </Label>
                   <Label
                     htmlFor="per-transaction"
-                    className={`w-full flex flex-col items-start justify-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${selectedOption === "per-transaction"
-                      ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
-                      : ""
-                      }`}
+                    className={`w-full flex flex-col items-start justify-center gap-2 rounded-md border-0 px-4 py-3 h-24 bg-[#131313B2] text-gray-400 ${
+                      selectedOption === "per-transaction"
+                        ? "bg-[#3F3F3F99] border-[1px] border-[#FFFFFF29]"
+                        : ""
+                    }`}
                   >
                     <div>
                       <div className="flex gap-2">
@@ -623,8 +622,8 @@ export default function SaveAssetsCard() {
                     <Loader2 className="w-12 h-12 animate-spin " />
                   </div>
                 ) : supportedTokens.filter(
-                  (token) => !autoSafeTokenOptions.includes(token),
-                ).length < 1 ? (
+                    (token) => !autoSafeTokenOptions.includes(token),
+                  ).length < 1 ? (
                   <div className="p-4 flex flex-col items-center justify-center text-center gap-5">
                     <h4 className="text-xl sm:text-2xl">You're all set up</h4>
                     <p className="text-sm sm:text-base px-4">
@@ -654,8 +653,8 @@ export default function SaveAssetsCard() {
                       supportedTokens={
                         hasAutoSafe
                           ? supportedTokens.filter(
-                            (token) => !autoSafeTokenOptions.includes(token),
-                          )
+                              (token) => !autoSafeTokenOptions.includes(token),
+                            )
                           : supportedTokens
                       }
                     />
@@ -669,9 +668,9 @@ export default function SaveAssetsCard() {
                           </span>
                         </div>
                         {saveState.token &&
-                          (selectedTokenBalance == 0 ||
-                            (saveState.amount &&
-                              saveState.amount > selectedTokenBalance)) ? (
+                        (selectedTokenBalance == 0 ||
+                          (saveState.amount &&
+                            saveState.amount > selectedTokenBalance)) ? (
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0 self-start sm:self-auto"

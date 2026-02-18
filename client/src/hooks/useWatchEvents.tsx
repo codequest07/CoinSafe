@@ -273,10 +273,10 @@ export const useWatchEvents = ({
         const toBlock = currentBlock;
         lastBlockChecked = currentBlock;
 
-        // SINGLE RPC call to get ALL logs from the diamond contract
-        console.log(
-          `Polling events for ${diamondAddress} from block ${fromBlock} to ${toBlock}...`,
-        );
+        // // SINGLE RPC call to get ALL logs from the diamond contract
+        // console.log(
+        //   `Polling events for ${diamondAddress} from block ${fromBlock} to ${toBlock}...`,
+        // );
 
         let logs;
         try {

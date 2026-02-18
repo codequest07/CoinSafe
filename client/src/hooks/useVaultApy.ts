@@ -7,7 +7,6 @@ import { getChainAddresses, Vault } from "@morpho-org/blue-sdk";
 import "@morpho-org/blue-sdk-viem/lib/augment";
 import axios, { AxiosError } from "axios";
 
-
 // ABIs (unchanged from prior)
 const METAMORPHO_ABI = parseAbi([
   "function withdrawQueue(uint256) external view returns (bytes32)",
@@ -59,7 +58,7 @@ const wTaylorCompounded = (x: bigint, n: bigint): bigint => {
 const toAssetsDown = (
   shares: bigint,
   totalAssets: bigint,
-  totalShares: bigint
+  totalShares: bigint,
 ): bigint => {
   if (totalShares === 0n) return shares;
   return (
@@ -70,14 +69,14 @@ const toAssetsDown = (
 function accrueInterests(
   marketState: MarketState,
   borrowRate: bigint,
-  blockTimestamp: bigint
+  blockTimestamp: bigint,
 ): MarketState {
   const elapsed = blockTimestamp - marketState.lastUpdate;
   if (elapsed === 0n || marketState.totalBorrowAssets === 0n)
     return marketState;
   const interest = wMulDown(
     marketState.totalBorrowAssets,
-    wTaylorCompounded(borrowRate, elapsed)
+    wTaylorCompounded(borrowRate, elapsed),
   );
   return {
     ...marketState,
@@ -203,7 +202,7 @@ function accrueInterests(
 async function calculateVaultApy(
   client: PublicClient,
   vaultAddress: Address,
-  morphoBlueAddress: Address
+  morphoBlueAddress: Address,
 ): Promise<bigint> {
   const queueLength = (await client.readContract({
     address: vaultAddress,
@@ -250,7 +249,7 @@ async function calculateVaultApy(
         abi: MORPHO_BLUE_ABI,
         functionName: "position",
         args: [marketId, vaultAddress],
-      }
+      },
     );
   });
 
@@ -273,14 +272,14 @@ async function calculateVaultApy(
       bigint,
       bigint,
       bigint,
-      bigint
+      bigint,
     ]; // Tuple from ABI
     const paramsResult = marketResults[idx + 1] as [
       Address,
       Address,
       Address,
       Address,
-      bigint
+      bigint,
     ];
     const positionResult = marketResults[idx + 2] as [bigint, bigint, bigint]; // supplyShares, borrowShares, collateral
 
@@ -349,10 +348,10 @@ async function calculateVaultApy(
       const allocation = toAssetsDown(
         supplyShares,
         state.totalSupplyAssets,
-        state.totalSupplyShares
+        state.totalSupplyShares,
       );
       return { supplyApy: apy, allocation };
-    }
+    },
   );
 
   let totalWeightedApy = 0n;
@@ -385,7 +384,7 @@ interface MerklOpportunity {
 // NEW: Function to fetch and match Merkl APR for specific vault (efficient: single call, filter by identifier)
 async function fetchMerklAprForVault(
   vaultAddress: Address,
-  chainId: number
+  chainId: number,
 ): Promise<{ totalApr: number | null; opportunity?: MerklOpportunity }> {
   try {
     const params = new URLSearchParams({
@@ -415,13 +414,13 @@ async function fetchMerklAprForVault(
       {
         timeout: 5000, // Efficient: short timeout
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
 
     // Filter for matching vault by identifier (address)
     const matchingOpportunity = response.data.find(
       (item: any) =>
-        item.identifier.toLowerCase() === vaultAddress.toLowerCase()
+        item.identifier.toLowerCase() === vaultAddress.toLowerCase(),
     ) as MerklOpportunity | undefined;
 
     return {
@@ -437,7 +436,7 @@ async function fetchMerklAprForVault(
 export const useVaultApy = (
   tokenAddress: Address,
   morphoBlueAddress: Address,
-  chainId: number = 1135 // Default to lisk for backward compat
+  chainId: number = 1135, // Default to lisk for backward compat
 ) => {
   // const [apy, setApy] = useState<string>('0.00');
   const [nativeApy, setNativeApy] = useState<string>("0.00"); // RENAMED: Original on-chain native APY
@@ -446,23 +445,26 @@ export const useVaultApy = (
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const vaultAddress = useMemo(
-    () => {
-      const vaultMappings: Record<number, Record<string, string>> = {
-        1135: {  // Lisk
-          "0x43f2376d5d03553ae72f4a8093bbe9de4336eb08": "0x50cB55BE8cF05480a844642cB979820C847782aE", // USDT0
-          "0xf242275d3a6527d877f2c927a82d9b057609cc71": "0xD92f564A29992251297980187a6B74FAa3D50699", // USDC
-          "0xac485391eb2d7d88253a7f1ef18c37f4242d1a24": "0x8258F0c79465c95AFAc325D6aB18797C9DDAcf55", // LSK
-        },
-        8453: {  // Base
-          "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": "0xBEEFE94c8aD530842bfE7d8B397938fFc1cb83b2", // USDC
-        }
-      };
+  const vaultAddress = useMemo(() => {
+    const vaultMappings: Record<number, Record<string, string>> = {
+      1135: {
+        // Lisk
+        "0x43f2376d5d03553ae72f4a8093bbe9de4336eb08":
+          "0x50cB55BE8cF05480a844642cB979820C847782aE", // USDT0
+        "0xf242275d3a6527d877f2c927a82d9b057609cc71":
+          "0xD92f564A29992251297980187a6B74FAa3D50699", // USDC
+        "0xac485391eb2d7d88253a7f1ef18c37f4242d1a24":
+          "0x8258F0c79465c95AFAc325D6aB18797C9DDAcf55", // LSK
+      },
+      8453: {
+        // Base
+        "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913":
+          "0xBEEFE94c8aD530842bfE7d8B397938fFc1cb83b2", // USDC
+      },
+    };
 
-      return vaultMappings[chainId] || {};
-    },
-    [chainId]
-  );
+    return vaultMappings[chainId] || {};
+  }, [chainId]);
 
   useEffect(() => {
     // If no vault map for this chain, or invalid token
@@ -472,7 +474,8 @@ export const useVaultApy = (
       setLoading(false);
       return;
     }
-    const vault = vaultAddress[tokenAddress.toLowerCase() as keyof typeof vaultAddress];
+    const vault =
+      vaultAddress[tokenAddress.toLowerCase() as keyof typeof vaultAddress];
     if (!vault || vault === "0x...") {
       setNativeApy("0.00");
       setTotalApr(null);
@@ -487,7 +490,10 @@ export const useVaultApy = (
 
         const config = getChainAddresses(chainId);
         // Fallback or cast if type missing
-        const effectiveMorphoAddr = (config as any)?.morphoBlue || morphoBlueAddress;
+        const effectiveMorphoAddr =
+          (config as any)?.morpho ||
+          (config as any)?.morphoBlue ||
+          morphoBlueAddress;
 
         if (!effectiveMorphoAddr) {
           console.warn(`Morpho Blue address not found for chain ${chainId}`);
@@ -495,20 +501,24 @@ export const useVaultApy = (
 
         const client = createPublicClient({
           chain: chainId === 8453 ? base : lisk,
-          transport: http(),
+          transport: http(
+            chainId === 8453
+              ? "https://base.publicnode.com"
+              : "https://rpc.api.lisk.com",
+          ),
         });
 
         // NEW: Parallel fetch for Merkl APR (based on vaultAddress[tokenAddress] for token/vault-specific matching)
         const merklPromise = fetchMerklAprForVault(
           vaultAddress[
-          tokenAddress.toLowerCase() as keyof typeof vaultAddress
+            tokenAddress.toLowerCase() as keyof typeof vaultAddress
           ] as `0x${string}`,
-          chainId
+          chainId,
         );
         const onChainPromise = calculateVaultApy(
           client,
           vault as `0x${string}`,
-          effectiveMorphoAddr as Address
+          effectiveMorphoAddr as Address,
         );
 
         // Await both in parallel for efficiency
@@ -522,7 +532,7 @@ export const useVaultApy = (
 
         // Set native APY (original logic)
         const formattedNativeApy = formatUnits(rawNativeApy, 16);
-        setNativeApy(formattedNativeApy);
+        setNativeApy(Number(formattedNativeApy).toFixed(2));
 
         // NEW: Set total APR from Merkl if matched (e.g., 12.33% for USDC vault)
         if (merklData.totalApr !== null) {
@@ -544,7 +554,8 @@ export const useVaultApy = (
 
   useEffect(() => {
     if (!tokenAddress) return;
-    const vault = vaultAddress[tokenAddress.toLowerCase() as keyof typeof vaultAddress];
+    const vault =
+      vaultAddress[tokenAddress.toLowerCase() as keyof typeof vaultAddress];
     if (!vault || vault === "0x...") {
       setFees(0);
       setLoading(false);
@@ -558,14 +569,18 @@ export const useVaultApy = (
 
         const client = createPublicClient({
           chain: chainId === 8453 ? base : lisk,
-          transport: http(),
+          transport: http(
+            chainId === 8453
+              ? "https://base.publicnode.com"
+              : "https://rpc.api.lisk.com",
+          ),
         });
 
         const vault = await Vault.fetch(
           vaultAddress[
-          tokenAddress.toLowerCase() as keyof typeof vaultAddress
+            tokenAddress.toLowerCase() as keyof typeof vaultAddress
           ] as `0x${string}`,
-          client
+          client,
         );
         // console.log("VAULT", vault)
 
@@ -588,6 +603,6 @@ export const useVaultApy = (
     totalApr,
     fees,
     loading,
-    error
+    error,
   };
 };
