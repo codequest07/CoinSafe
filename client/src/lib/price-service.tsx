@@ -23,6 +23,11 @@ const fetchTokenUnitPrice = async (tokenId: string): Promise<number> => {
   if (normalizedId === "usdt" || normalizedId === normalize(tokens.usdt)) {
     coingeckoId = "tether";
   } else if (
+    normalizedId === "usdt0" ||
+    normalizedId === normalize(tokens.usdt0)
+  ) {
+    coingeckoId = "usdt0";
+  } else if (
     normalizedId === "usdc" ||
     normalizedId === normalize(tokens.usdc) ||
     normalizedId === "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" // Base USDC

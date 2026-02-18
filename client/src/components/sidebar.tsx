@@ -59,14 +59,10 @@ const Sidebar = () => {
    * It finds the exchange rate for the selected currency and multiplies by the amount
    */
   useEffect(() => {
-    console.log("[v0] calculateUsdValue: Calculating USD equivalent");
     const numericAmount = Number.parseFloat(amount) || 0;
     const currency = currencies.find((c) => c.code === selectedCurrency);
     const calculatedUsd = numericAmount * (currency?.rate || 0);
     setUsdValue(calculatedUsd);
-    console.log(
-      `[v0] calculateUsdValue: ${numericAmount} ${selectedCurrency} = ${calculatedUsd} USD`
-    );
   }, [amount, selectedCurrency]);
 
   /**
@@ -75,14 +71,10 @@ const Sidebar = () => {
    * Updates the amount state which triggers USD recalculation
    */
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("[v0] handleAmountChange: Processing amount input change");
     const value = e.target.value;
     // Allow only numbers and decimal point
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setAmount(value);
-      console.log(`[v0] handleAmountChange: Amount updated to ${value}`);
-    } else {
-      console.log("[v0] handleAmountChange: Invalid input rejected");
     }
   };
 
@@ -91,16 +83,11 @@ const Sidebar = () => {
    * Updates the selected currency which triggers USD recalculation
    */
   const handleCurrencySelect = (currencyCode: string) => {
-    console.log(
-      `[v0] handleCurrencySelect: Changing currency to ${currencyCode}`
-    );
     setSelectedCurrency(currencyCode);
     const selectedCurrencyData = currencies.find(
       (c) => c.code === currencyCode
-    );
-    console.log(
-      `[v0] handleCurrencySelect: New rate is ${selectedCurrencyData?.rate} USD per ${currencyCode}`
-    );
+    )
+    console.log(selectedCurrencyData)
   };
 
   /**
@@ -108,9 +95,7 @@ const Sidebar = () => {
    * This also triggers USD recalculation to show $0.00
    */
   const handleClear = () => {
-    console.log("[v0] handleClear: Clearing input field");
     setAmount("0.00");
-    console.log("[v0] handleClear: Amount reset to 0.00");
   };
 
   /**

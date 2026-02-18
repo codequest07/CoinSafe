@@ -100,40 +100,57 @@ export function useGetSafeById(id: string | undefined) {
 
     let totalAmountUSD = 0;
 
-    const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
-      if (!token || !token.token) {
-        return {
-          token: "unknown",
-          tokenSymbol: "Unknown",
-          amount: 0,
-          formattedAmount: "0.00",
-          tokenShares: 0n,
-        };
+    const aggregatedTokens = new Map<
+      string,
+      {
+        token: string;
+        symbol: string;
+        amount: bigint;
       }
+    >();
 
-      const tokenAddress = token.token.toLowerCase();
-      const symbol = tokenSymbols[tokenAddress] || "Unknown";
-      const tokenDecimals = getTokenDecimals(token.token);
-      const amount = Number(token.amount);
-      const formattedValue = Number(formatUnits(token.amount, tokenDecimals));
+    // Aggregate by address to remove duplicates
+    safe.tokenAmounts.forEach((token) => {
+      if (!token || !token.token) return;
 
-      const price = priceMap[token.token] || 0;
-      totalAmountUSD += formattedValue * price;
+      const tokenAddrLower = token.token.toLowerCase();
+      const existing = aggregatedTokens.get(tokenAddrLower);
 
-      return {
+      const symbol = tokenSymbols[tokenAddrLower] || "Unknown";
+      const currentAmount = existing ? existing.amount : 0n;
+
+      aggregatedTokens.set(tokenAddrLower, {
         token: token.token,
-        tokenSymbol: symbol,
-        amount: amount,
-        formattedAmount: formattedValue.toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 6,
-        }),
-        tokenShares:
-          safe.initialShares.find(
-            (share) => share.token.toLowerCase() === token.token.toLowerCase(),
-          )?.amount || 0n,
-      };
+        symbol,
+        amount: currentAmount + BigInt(token.amount),
+      });
     });
+
+    const formattedTokenAmounts = Array.from(aggregatedTokens.values()).map(
+      (data) => {
+        const tokenDecimals = getTokenDecimals(data.token);
+        const formattedValue = Number(formatUnits(data.amount, tokenDecimals));
+
+        const price = priceMap[data.token] || 0;
+        totalAmountUSD += formattedValue * price;
+
+        const tokenShares =
+          safe.initialShares.find(
+            (share) => share.token.toLowerCase() === data.token.toLowerCase(),
+          )?.amount || 0n;
+
+        return {
+          token: data.token,
+          tokenSymbol: data.symbol,
+          amount: Number(data.amount),
+          formattedAmount: formattedValue.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 6,
+          }),
+          tokenShares: tokenShares,
+        };
+      },
+    );
 
     return {
       id: safe.id.toString(),

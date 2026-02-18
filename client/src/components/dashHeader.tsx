@@ -80,14 +80,10 @@ const DashHeader = () => {
    * It finds the exchange rate for the selected currency and multiplies by the amount
    */
   useEffect(() => {
-    console.log("[v0] calculateUsdValue: Calculating USD equivalent");
     const numericAmount = Number.parseFloat(amount) || 0;
     const currency = currencies.find((c) => c.code === selectedCurrency);
     const calculatedUsd = numericAmount * (currency?.rate || 0);
     setUsdValue(calculatedUsd);
-    console.log(
-      `[v0] calculateUsdValue: ${numericAmount} ${selectedCurrency} = ${calculatedUsd} USD`,
-    );
   }, [amount, selectedCurrency]);
 
   /**
@@ -96,14 +92,10 @@ const DashHeader = () => {
    * Updates the amount state which triggers USD recalculation
    */
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("[v0] handleAmountChange: Processing amount input change");
     const value = e.target.value;
     // Allow only numbers and decimal point
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setAmount(value);
-      console.log(`[v0] handleAmountChange: Amount updated to ${value}`);
-    } else {
-      console.log("[v0] handleAmountChange: Invalid input rejected");
     }
   };
 
@@ -112,16 +104,12 @@ const DashHeader = () => {
    * Updates the selected currency which triggers USD recalculation
    */
   const handleCurrencySelect = (currencyCode: string) => {
-    console.log(
-      `[v0] handleCurrencySelect: Changing currency to ${currencyCode}`,
-    );
     setSelectedCurrency(currencyCode);
     const selectedCurrencyData = currencies.find(
       (c) => c.code === currencyCode,
     );
-    console.log(
-      `[v0] handleCurrencySelect: New rate is ${selectedCurrencyData?.rate} USD per ${currencyCode}`,
-    );
+
+    console.log(selectedCurrencyData);
   };
 
   /**
@@ -129,9 +117,7 @@ const DashHeader = () => {
    * This also triggers USD recalculation to show $0.00
    */
   const handleClear = () => {
-    console.log("[v0] handleClear: Clearing input field");
     setAmount("0.00");
-    console.log("[v0] handleClear: Amount reset to 0.00");
   };
 
   /**
@@ -288,12 +274,14 @@ const DashHeader = () => {
 
               <SheetContent
                 side="right"
-                className="flex flex-col bg-[#010104] border-[#010104] w-full max-w-none">
+                className="flex flex-col bg-[#010104] border-[#010104] w-full max-w-none"
+              >
                 <nav className="grid gap-2 text-lg font-medium">
                   <Link
                     to="/"
                     onClick={() => setIsSheetOpen(false)}
-                    className="flex items-center gap-2 font-semibold">
+                    className="flex items-center gap-2 font-semibold"
+                  >
                     <MemoLogo className="w-32 h-10" />
                   </Link>
 
@@ -305,7 +293,8 @@ const DashHeader = () => {
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="outline"
-                            className="w-full justify-between bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white">
+                            className="w-full justify-between bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white"
+                          >
                             <span className="flex items-center gap-2">
                               <Network className="h-4 w-4" />
                               {activeChain?.name || "Select Network"}
@@ -321,7 +310,8 @@ const DashHeader = () => {
                                 handleSwitchChain(c.id);
                                 setIsSheetOpen(false);
                               }}
-                              className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white">
+                              className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white"
+                            >
                               {c.name}
                             </DropdownMenuItem>
                           ))}
@@ -339,7 +329,8 @@ const DashHeader = () => {
                         isActive
                           ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
                           : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
-                      }>
+                      }
+                    >
                       <link.icon className="w-5 h-5" />
                       {link.label}
                     </NavLink>
@@ -353,7 +344,8 @@ const DashHeader = () => {
                     onClick={() => setOpenOnRampModal(true)}
                     className={
                       "flex items-center cursor-pointer gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
-                    }>
+                    }
+                  >
                     <>
                       <Coins className="w-5 h-5" />
                       {"On-ramp"}
@@ -382,7 +374,8 @@ const DashHeader = () => {
                     <Button
                       onClick={handleConnect}
                       disabled={isConnecting || localIsConnecting}
-                      className="w-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5]/80 text-[#010104] font-medium py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                      className="w-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5]/80 text-[#010104] font-medium py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       {isConnecting || localIsConnecting
                         ? "Connecting..."
                         : "Connect Wallet"}
@@ -438,7 +431,8 @@ const DashHeader = () => {
             <div className="w-full max-w-sm">
               <label
                 htmlFor=""
-                className="text-[#CACACA] font-light text-[14px]">
+                className="text-[#CACACA] font-light text-[14px]"
+              >
                 Amount to On-ramp
               </label>
               <div className="flex items-center justify-between bg-transaprarent rounded-lg p-4 border-[1px] border-[#FFFFFF3D]">
@@ -460,7 +454,8 @@ const DashHeader = () => {
                     variant="ghost"
                     size="sm"
                     onClick={handleClear}
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600">
+                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600"
+                  >
                     <X className="h-4 w-4" />
                   </Button>
 
@@ -468,19 +463,22 @@ const DashHeader = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="secondary"
-                        className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md">
+                        className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md"
+                      >
                         {selectedCurrency}
                         <ChevronDown className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="w-32 bg-gray-600 text-white">
+                      className="w-32 bg-gray-600 text-white"
+                    >
                       {currencies.map((currency) => (
                         <DropdownMenuItem
                           key={currency.code}
                           onClick={() => handleCurrencySelect(currency.code)}
-                          className="cursor-pointer">
+                          className="cursor-pointer"
+                        >
                           <div className="flex flex-col">
                             <span className="font-medium">{currency.code}</span>
                             {/* <span className="text-xs text-gray-500">{currency.name}</span> */}
@@ -498,7 +496,8 @@ const DashHeader = () => {
                       ? "#"
                       : `https://pay.fonbnk.com/auth?source=o9VjcneL&network=LISK&asset=${selectedCurrency}&amount=${amount}&currency=crypto&paymentChannel=bank&countryIsoCode=NG&address=${account?.address}&signature=${token}`
                   }
-                  target="_blank">
+                  target="_blank"
+                >
                   <Button className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] rounded-[100px] border-[1px] border-[#FFFFFF05] text-[#010104] text-[14px]">
                     Proceed to On-ramp
                   </Button>
