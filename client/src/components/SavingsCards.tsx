@@ -1,107 +1,23 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useGetSafes } from "@/hooks/useGetSafes";
-import { formatUnits } from "viem";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getTokenPrice } from "@/lib";
-import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
-import { useActiveAccount } from "thirdweb/react";
-import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
-// import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDuePlans";
-// import { tokenData } from "@/lib/utils";
-
-interface DisplaySafe {
-  id: string;
-  name: string;
-  amount: number;
-  // token: string;
-  status: "Flexible" | "Locked" | "Matured";
-  unlockDate: string;
-  isLocked?: boolean;
-}
+import { useSavingsCardsData } from "@/hooks/useSavingsCardsData";
 
 export default function SavingsCards() {
   const navigate = useNavigate();
-  const account = useActiveAccount();
-  const userAddress = account?.address;
-
-  // const { duePlanDetails } = useGetAutomatedSavingsDuePlans();
-
-  // const hasActiveAutoSavings =
-  //   duePlanDetails?.includes(userAddress as `0x${string}`) || false;
-
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { safes, isLoading, isError, fetchSafes } = useGetSafes();
+
   const {
-    details,
-    isLoading: automatedSafeLoading,
-    error: automatedSafeError,
-  } = useAutomatedSafeForUser(userAddress as `0x${string}`);
-  console.log("SAFE::::::::::", safes);
-
-  const hasActiveAutoSavings =
-    details?.tokenDetails?.some(
-      (token: { amountToSave: number }) => token.amountToSave > 0n
-    ) ?? false;
-
-  console.log(
-    "AUTOMED SAVIMGS>>> ",
-    details,
-    automatedSafeLoading,
-    automatedSafeError
-  );
-  const [displaySafes, setDisplaySafes] = useState<DisplaySafe[]>([]);
-
-  const [totalUsdValue, setTotalUsdValue] = useState<string>("0.00");
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchTotalUsdValue = async () => {
-      if (!details?.tokenDetails || details.tokenDetails.length === 0) {
-        setTotalUsdValue("0.00");
-        setError(null);
-        return;
-      }
-
-      try {
-        // Convert each token's amountSaved to USD and sum
-        const usdValues = await Promise.all(
-          details.tokenDetails.map(async (item: any) => {
-            try {
-              const usdValue = await convertTokenAmountToUsd(
-                item.token,
-                item.amountSaved
-              );
-              return usdValue;
-            } catch (err) {
-              console.error(`Error for token ${item.token}:`, err);
-              return 0; // Return 0 for failed conversions
-            }
-          })
-        );
-
-        // Sum all USD values
-        const totalUsd = usdValues.reduce((sum, value) => sum + value, 0);
-        setTotalUsdValue(totalUsd.toFixed(2));
-        setError(null);
-      } catch (err) {
-        console.error("Error converting tokens to USD:", err);
-        setTotalUsdValue("0.00");
-        setError("Failed to load USD value");
-      }
-    };
-
-    fetchTotalUsdValue();
-  }, [details]);
-
-  // Force refresh safes when component mounts
-  useEffect(() => {
-    fetchSafes();
-  }, [fetchSafes]);
-  console.log("SAFES", displaySafes);
+    safes,
+    displaySafes,
+    totalUsdValue,
+    isLoading,
+    isError,
+    hasActiveAutoSavings,
+  } = useSavingsCardsData();
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -124,97 +40,6 @@ export default function SavingsCards() {
       });
     }
   };
-
-  useEffect(() => {
-    const getSafes = async () => {
-      const safeList = await Promise.all(
-        safes?.map(async (safe) => {
-          const totalAmount = await Promise.all(
-            safe.tokenAmounts.map(async (token) => {
-              const tokenAmount = Number(
-                formatUnits(token.amount, getTokenDecimals(token.token))
-              );
-              const usdVal = await getTokenPrice(token.token, tokenAmount);
-              return Number(usdVal);
-            })
-          ).then((amounts) => amounts.reduce((sum, val) => sum + val, 0));
-
-          let formattedDate = "N/A";
-
-          console.log("THE SAFE::::::", safe);
-          if (safe.unlockTime) {
-            console.log(
-              "Type of unlock time::::::::::",
-              typeof safe.unlockTime
-            );
-
-            // 1763029433n
-            // 1763029433
-            // Today 1769621412902
-            console.log("UNLOCK TIME", Number(safe.unlockTime));
-            console.log("TODAYYYYY:::::", Date.now());
-
-            // {safeDetails.isLocked
-            //   ?
-            //     safeDetails.unlockTime > new Date()
-            //     ? `${Math.ceil(
-            //         (safeDetails.unlockTime.getTime() -
-            //           new Date().getTime()) /
-            //           (1000 * 60 * 60 * 24)
-            //       )} days till unlock`
-            //     : "Matured"
-            //   : "Flexible"}
-
-            const unlockDate = new Date(Number(safe.unlockTime) * 1000);
-            console.log("UNLOCK DATE::::::::::", unlockDate);
-            formattedDate = unlockDate.toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            });
-          }
-
-          // const status = Number(safe.duration) > 0 ? "Locked" : "Flexible";
-
-          const status =
-            Number(safe.duration) > 0
-              ? Number(safe.unlockTime) > Date.now()
-                ? "Locked"
-                : "Matured"
-              : "Flexible";
-
-          console.log("Unlock time::::::::::", Number(safe.unlockTime));
-          console.log("New Date::::::::::", new Date().getTime());
-
-          console.log(
-            "Is locked::::::::::",
-            Number(safe.unlockTime) * 1000 > new Date().getTime() ? true : false
-          );
-          console.log("DATE GET TIME", new Date().getTime());
-          console.log(
-            "IS IT LOCKED????????",
-            Number(safe.unlockTime) * 1000 > Date.now() ? true : false
-          );
-          return {
-            id: safe.id.toString(),
-            name: safe.target,
-            amount: totalAmount,
-            status: status as "Locked" | "Flexible" | "Matured",
-            isLocked: Number(safe.unlockTime) > new Date().getTime(),
-            unlockDate: safe.unlockTime
-              ? `Unlocks on ${formattedDate}`
-              : "Unlocks Anytime",
-          };
-        }) || []
-      );
-      console.log("SAFE LIST::::::::::", safeList);
-      setDisplaySafes(safeList);
-    };
-
-    if (safes) {
-      getSafes();
-    }
-  }, [safes]);
 
   return (
     <div className="bg-black text-white p-4 w-full">
@@ -306,7 +131,6 @@ export default function SavingsCards() {
                           minimumFractionDigits: 2,
                         }) || 0.0} */}
                         {totalUsdValue}
-                        {error ? ` (${error})` : ""}
                       </span>
                       <span className="text-sm text-gray-400 ml-2">USD</span>
                     </div>
@@ -320,7 +144,7 @@ export default function SavingsCards() {
                       navigate(
                         safe.id === "911" && safe.name === "Emergency Safe"
                           ? "/vault/emergency-safe"
-                          : `/vault/${safe.id}`
+                          : `/vault/${safe.id}`,
                       )
                     }
                     className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors"

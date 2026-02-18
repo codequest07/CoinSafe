@@ -11,12 +11,15 @@ import { useActiveAccount } from "thirdweb/react";
 import { useClaimAsset } from "@/hooks/useClaimAsset";
 import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
 import { toast } from "sonner";
-import { convertTokenAmountToUsd, tokenData } from "@/lib/utils";
+import { tokenData, getTokenDecimals } from "@/lib/utils";
 import MemoBackIcon from "@/icons/BackIcon";
 import ApproveTxModal from "./ApproveTxModal";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { Skeleton } from "../ui/skeleton";
+import { useTokenPrices } from "@/lib/price-service";
+import { useMemo } from "react";
+import { formatUnits } from "viem";
 
 interface ClaimModalProps {
   isOpen: boolean;
@@ -34,10 +37,8 @@ export default function ClaimModal({
   // State
   const [showApproveTxModal, setShowApproveTxModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [totalUsdValue, setTotalUsdValue] = useState(0);
-  const [totalUsdValues, setTotalUsdValues] = useState<number[]>([]);
   const [selectedToken, setSelectedToken] = useState<string | undefined>(
-    tokenAddress
+    tokenAddress,
   );
   const [claimableTokens, setClaimableTokens] = useState<
     Array<{ token: string; amount: number; symbol: string }>
@@ -162,44 +163,43 @@ export default function ClaimModal({
     } catch (error) {
       console.error("Claim process failed:", error);
       toast.error(
-        "An error occurred during the claim process. Please try again."
+        "An error occurred during the claim process. Please try again.",
       );
     }
   };
 
-  // Calculate total claimable amount in USD
-  const calculateTotalUsdValue = async () => {
-    let total = 0;
-    for (const token of claimableTokens) {
-      if (!token.amount || token.amount === 0) continue;
-      const price = await convertTokenAmountToUsd(
-        token.token,
-        BigInt(token.amount)
-      );
-      if (!price) continue;
-      setTotalUsdValues((prev) => {
-        const newValues = [...prev];
-        newValues[claimableTokens.indexOf(token)] = price;
-        return newValues;
-      });
-      total += price;
-    }
-    return total;
-  };
-
-  useEffect(() => {
-    const fetchTotalValue = async () => {
-      const totalValue = await calculateTotalUsdValue();
-      setTotalUsdValue(totalValue);
-    };
-
-    // Fetch total value when claimable tokens change
-    fetchTotalValue();
+  // --- Price Fetching Integration ---
+  const uniqueTokens = useMemo(() => {
+    return Array.from(new Set(claimableTokens.map((t) => t.token)));
   }, [claimableTokens]);
+
+  const priceQueries = useTokenPrices(uniqueTokens);
+
+  const priceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    uniqueTokens.forEach((addr, idx) => {
+      map[addr] = priceQueries[idx].data || 0;
+    });
+    return map;
+  }, [uniqueTokens, priceQueries]);
+
+  const { totalUsdValue, totalUsdValues } = useMemo(() => {
+    let total = 0;
+    const values = claimableTokens.map((token) => {
+      const price = priceMap[token.token] || 0;
+      const decimals = getTokenDecimals(token.token);
+      // token.amount is Number(wei). Convert back to BigInt safely or use string
+      const val =
+        Number(formatUnits(BigInt(Math.floor(token.amount)), decimals)) * price;
+      total += val;
+      return val;
+    });
+    return { totalUsdValue: total, totalUsdValues: values };
+  }, [claimableTokens, priceMap]);
 
   // Get the selected token details
   const selectedTokenDetails = claimableTokens.find(
-    (t) => t.token === selectedToken
+    (t) => t.token === selectedToken,
   );
 
   return (
@@ -267,7 +267,7 @@ export default function ClaimModal({
                                   {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 6,
-                                  }
+                                  },
                                 )}
                               </div>
                             </div>

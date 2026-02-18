@@ -1,173 +1,62 @@
 import { JsonRpcProvider } from "ethers";
-import { tokenData } from "./token-metadata";
+import { tokens } from "./contract";
 import { API_BASE_URL } from "./api-config";
 // export const base_uri_test = import.meta.env.DEV ? 'http://localhost:1234' : 'https://coinsafe-0q0m.onrender.com';
-export const base_uri = `${API_BASE_URL}/coingecko`;
+export const base_uri = `${API_BASE_URL}`;
+
+import { getStoredTokenPrice } from "./price-service";
 
 export const getLskToUsd = async (lsk: number) => {
-  const options = {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
-    },
-  };
-  try {
-    // const res = await fetch(`${base_uri}/api-cg/lisk`);
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=lisk",
-      options
-    );
-    const data = await res.json();
-
-    if (data?.lisk?.usd) {
-      return data.lisk.usd * lsk;
-    } else {
-      throw new Error("LSK data or USD price not available");
-    }
-  } catch (err) {
-    console.error(err);
-    return 0;
-  }
+  const price = await getStoredTokenPrice("lsk");
+  return price * lsk;
 };
 
 export const getSafuToUsd = (safu: number) => {
-  return 0.339 * safu;
+  return 0.339 * safu; // Kept as synchronous calculation since it's hardcoded
 };
 
 export const getUsdtToUsd = async (usdt: number) => {
-  const options = {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
-    },
-  };
-
-  try {
-    // const res = await fetch(`${base_uri}/api-cg/tether`);
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=tether",
-      options
-    );
-    const data = await res.json();
-
-    console.log("=====================================");
-    console.log("USDT", data);
-    console.log("=====================================");
-
-    if (data?.tether?.usd) {
-      console.log("=====================================");
-      console.log("USDT", data);
-      console.log("=====================================");
-      return data.tether.usd * usdt;
-    } else {
-      throw new Error("USDT data or USD price not available");
-    }
-  } catch (err) {
-    console.error(err);
-    return 0;
-  }
+  const price = await getStoredTokenPrice("usdt");
+  return price * usdt;
 };
-
-export const getUsdt0ToUsd = async (usdt: number) => {
-  const options = {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
-    },
-  };
-
-  try {
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=usdt0",
-      options
-    );
-    const data = await res.json();
-
-    console.log("=====================================");
-    console.log("USDT0", data);
-    console.log("=====================================");
-
-    if (data?.usdt0?.usd) {
-      console.log("=====================================");
-      console.log("USDT0", data);
-      console.log("=====================================");
-      return data.usdt0.usd * usdt;
-    } else {
-      throw new Error("USDT0 data or USD price not available");
-    }
-  } catch (err) {
-    console.error(err);
-    return 0;
-  }
-};
-
 
 export const getUsdcToUsd = async (usdc: number) => {
-  const options = {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      "x-cg-demo-api-key": "CG-xEDfyZh1gVhZ5LFCEuzwUW6M",
-    },
-  };
-  try {
-    // const res = await fetch(`${base_uri}/api-cg/usd-coin`);
-    const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=usd-coin",
-      options
-    );
-    const data = await res.json();
-
-    if (data?.["usd-coin"]?.usd) {
-      console.log("=====================================");
-      console.log("USDT", data);
-      console.log("=====================================");
-      return data["usd-coin"].usd * usdc;
-    } else {
-      throw new Error("USDC data or USD price not available");
-    }
-  } catch (err) {
-    console.error(err);
-    return 0;
-  }
+  const price = await getStoredTokenPrice("usdc");
+  return price * usdc;
 };
 
 export async function getTokenPrice(token: string, amount: number | undefined) {
   if (!token || !amount) return "0.00";
 
   try {
-    const info = tokenData[token.toLowerCase()];
-    const symbol = info?.symbol;
+    // Basic mapping or direct usage
+    let finalPrice = 0;
 
-    if (!symbol) return "0.00";
+    const lowerToken = token.toLowerCase();
 
-    switch (symbol.toUpperCase()) {
-      case "SAFU": {
-        const safuPrice = await getSafuToUsd(amount);
-        return safuPrice.toFixed(2);
-      }
-      case "LSK": {
-        const lskPrice = await getLskToUsd(amount);
-        return lskPrice.toFixed(2);
-      }
-      case "USDT": {
-        const usdtPrice = await getUsdtToUsd(amount);
-        return usdtPrice.toFixed(2);
-      }
-      case "USDC": {
-        const usdcPrice = await getUsdcToUsd(amount);
-        return usdcPrice.toFixed(2);
-      }
-      case "USDT0": {
-        const usdt0Price = await getUsdt0ToUsd(amount);
-        return usdt0Price.toFixed(2);
-      }
+    switch (lowerToken) {
+      case tokens.safu.toLowerCase():
+        finalPrice = await getSafuToUsd(amount);
+        break;
+      case tokens.lsk.toLowerCase():
+        finalPrice = await getLskToUsd(amount);
+        break;
+      case tokens.usdt.toLowerCase():
+        finalPrice = await getUsdtToUsd(amount);
+        break;
+      case tokens.usdc.toLowerCase():
+        finalPrice = await getUsdcToUsd(amount);
+        break;
+      case tokens.usdt0.toLowerCase():
+        // Handle usdt0 same as usdt? Or create new helper. assuming same price as usdt for now
+        finalPrice = await getUsdtToUsd(amount);
+        break;
       default:
+        // Check if there are other tokens
         return "0.00";
     }
+    
+    return finalPrice.toFixed(5);
   } catch (error) {
     console.error("Error getting token price:", error);
     return "0.00";
@@ -176,39 +65,4 @@ export async function getTokenPrice(token: string, amount: number | undefined) {
 
 export const jsonRpcProvider = new JsonRpcProvider("https://rpc.api.lisk.com");
 
-export async function getAvgAPR(
-  token?: "usdc" | "usdt" | "lsk"
-): Promise<{ avgApr: number | undefined; signature: string | undefined }> {
-  const tokenToSymbol = {
-    usdc: "USDC.e",
-    usdt: "USD₮0",
-    lsk: "LSK",
-  };
-
-  let url = "https://api.coinsafe.network/api/merkl/apr";
-
-  if (token) {
-    const tokenSymbol = tokenToSymbol[token];
-    url = `https://api.coinsafe.network/api/merkl/apr?tokenSymbol=${tokenSymbol}`;
-  }
-
-  const options = {
-    method: "GET",
-  };
-
-  try {
-    const res = await fetch(url, options);
-
-    const data = await res.json();
-
-    if (!data.success) throw Error(`Fetching token apr failed: ${data.error}`);
-
-    return {
-      avgApr: data.summary.averageAPR,
-      signature: data.data[0].signature,
-    };
-  } catch (error) {
-    console.error("Error fetching avgApr:", error);
-    return { avgApr: undefined, signature: undefined };
-  }
-}
+export * from "./apr-api";

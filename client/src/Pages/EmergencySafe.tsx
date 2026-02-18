@@ -6,14 +6,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { publicClient } from "@/lib/client";
 import { liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract, facetAbis, tokens } from "@/lib/contract";
-import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
+import { getTokenDecimals } from "@/lib/utils";
+import { useTokenPrices } from "@/lib/price-service";
 import {
   savingsBalanceState,
   supportedTokensState,
 } from "@/store/atoms/balance";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { useActiveAccount } from "thirdweb/react";
@@ -26,7 +27,7 @@ interface Token {
 
 const EmergencySafe = () => {
   const navigate = useNavigate();
-  const [safeDetails, setSafeDetails] = useState<any | null>(null);
+  const [safeData, setSafeData] = useState<any | null>(null);
   const [savingsBalance] = useRecoilState(savingsBalanceState);
   const [tokenAmounts, setTokenAmounts] = useState<Record<string, unknown>>({});
   const [supportedTokens] = useRecoilState(supportedTokensState);
@@ -37,7 +38,7 @@ const EmergencySafe = () => {
   const address = account?.address;
   const isConnected = !!account?.address;
 
-  const fetchEmergencySafe = async () => {
+  const fetchEmergencySafe = useCallback(async () => {
     // Prepare multicall requests
     const rawTxs = supportedTokens.map((token: string) => ({
       address: CoinsafeDiamondContract.address,
@@ -85,18 +86,35 @@ const EmergencySafe = () => {
         tokenAmounts: [],
       };
     }
-  };
+  }, [supportedTokens, address]);
 
   // Token address to symbol mapping
   const tokenSymbols: Record<string, string> = useMemo(() => {
-    const mapping = Object.entries(tokens).reduce((acc, [symbol, address]) => {
-      if (typeof address === "string") {
-        acc[address.toLowerCase()] = symbol;
-      }
-      return acc;
-    }, {} as Record<string, string>);
+    const mapping = Object.entries(tokens).reduce(
+      (acc, [symbol, address]) => {
+        if (typeof address === "string") {
+          acc[address.toLowerCase()] = symbol;
+        }
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
     return mapping;
   }, []);
+
+  // 1. Fetch prices
+  const priceQueries = useTokenPrices(supportedTokens);
+
+  const tokenPriceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    supportedTokens.forEach((token, index) => {
+      const query = priceQueries[index];
+      if (query.data !== undefined) {
+        map[token] = query.data;
+      }
+    });
+    return map;
+  }, [supportedTokens, priceQueries]);
 
   useEffect(() => {
     async function run() {
@@ -104,85 +122,95 @@ const EmergencySafe = () => {
       setIsError(false);
       try {
         const safe = await fetchEmergencySafe();
+        setSafeData(safe);
 
-        // Format token amounts
+        // Format token amounts for immediate display if needed, but derived is better
         setTokenAmounts(
-          safe.tokenAmounts.reduce((acc, token) => {
-            if (token && token.token) acc[token.token] = token.amount;
-            return acc;
-          }, {} as Record<string, unknown>)
+          safe.tokenAmounts.reduce(
+            (acc: any, token: any) => {
+              if (token && token.token) acc[token.token] = token.amount;
+              return acc;
+            },
+            {} as Record<string, unknown>,
+          ),
         );
-
-        const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
-          if (!token || !token.token) {
-            return {
-              token: "unknown",
-              tokenSymbol: "Unknown",
-              amount: 0,
-              formattedAmount: "0.00",
-            };
-          }
-          const tokenAddress = token.token.toLowerCase();
-          const symbol = tokenSymbols[tokenAddress] || "Unknown";
-
-          return {
-            token: token.token,
-            tokenSymbol: symbol,
-            amount: Number(token.amount),
-            formattedAmount: Number(
-              formatUnits(token.amount, getTokenDecimals(token.token))
-            ).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 6,
-            }),
-          };
-        });
-
-        // Calculate total amount in USD using asynchronous getTokenPrice function
-        let totalAmountUSD = 0;
-
-        try {
-          const tokenPrices = await Promise.all(
-            formattedTokenAmounts.map(async (token) => {
-              if (!token || !token.tokenSymbol) {
-                return 0;
-              }
-              const price = await convertTokenAmountToUsd(
-                token.token,
-                BigInt(token.amount)
-              );
-              return price;
-            })
-          );
-          totalAmountUSD = tokenPrices.reduce((sum, value) => sum + value, 0);
-        } catch (error) {
-          console.error("Error fetching token prices:", error);
-        }
-
-        setSafeDetails({
-          id: safe.id.toString(),
-          target: safe.target,
-          tokenAmounts: formattedTokenAmounts,
-          totalAmountUSD,
-        });
       } catch (error) {
         setIsError(true);
-        setSafeDetails(null);
+        setSafeData(null);
         console.error("Error loading safe details:", error);
       } finally {
         setIsLoading(false);
       }
     }
-    run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savingsBalance]);
+
+    if (supportedTokens.length > 0 && isConnected) {
+      run();
+    }
+  }, [savingsBalance, isConnected, supportedTokens, fetchEmergencySafe]); // Removed tokenPriceMap dependency
+
+  // Derive final safeDetails with USD values
+  const safeDetails = useMemo(() => {
+    if (!safeData) return null;
+
+    const formattedTokenAmounts = safeData.tokenAmounts.map((token: any) => {
+      if (!token || !token.token) {
+        return {
+          token: "unknown",
+          tokenSymbol: "Unknown",
+          amount: 0,
+          formattedAmount: "0.00",
+        };
+      }
+      const tokenAddress = token.token.toLowerCase();
+      const symbol = tokenSymbols[tokenAddress] || "Unknown";
+
+      return {
+        token: token.token,
+        tokenSymbol: symbol,
+        amount: Number(token.amount),
+        formattedAmount: Number(
+          formatUnits(token.amount, getTokenDecimals(token.token)),
+        ).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 6,
+        }),
+      };
+    });
+
+    // Calculate total USD synchronously
+    const totalAmountUSD = formattedTokenAmounts.reduce(
+      (sum: number, token: any) => {
+        const price = tokenPriceMap[token.token] || 0;
+
+        // Re-calculate the numeric value from the raw amount to maintain precision if needed
+        // But formattedTokenAmounts has just strings for display.
+        // Let's use the raw safeData amount again
+        const originalToken = safeData.tokenAmounts.find(
+          (t: any) => t.token === token.token,
+        );
+        if (!originalToken) return sum;
+
+        const decimals = getTokenDecimals(token.token);
+        const amountVal = Number(formatUnits(originalToken.amount, decimals));
+
+        return sum + amountVal * price;
+      },
+      0,
+    );
+
+    return {
+      ...safeData,
+      tokenAmounts: formattedTokenAmounts,
+      totalAmountUSD,
+    };
+  }, [safeData, tokenPriceMap, tokenSymbols]);
 
   // const [isLoading, setIsLoading] = useState(true);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-black text-white p-0 md:p-6">
+    <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-5xl mx-auto">
         {isLoading ? (
           <div className="mb-8">
@@ -193,19 +221,19 @@ const EmergencySafe = () => {
                 <Skeleton className="h-6 w-32 rounded-full" />
               </div>
             </div>
-            <Skeleton className="h-4 w-64 ml-[3.3rem] mt-1" />
+            <Skeleton className="h-4 w-64 ml-[3.3rem] mt-1 mb-4" />
 
-            <div className="flex gap-4 pr-4 pb-2 mt-6">
+            <div className="flex-col lg:flex-row flex gap-4 sm:pr-4 pb-2">
               <div className="flex-1 border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
                 <div className="flex justify-between items-center pb-4">
                   <Skeleton className="h-4 w-32" />
                 </div>
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col gap-2 sm:flex-row justify-between sm:items-end">
                   <div>
                     <Skeleton className="h-8 w-40 mb-2" />
                     <Skeleton className="h-3 w-48" />
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex sm:justify-end gap-2">
                     <Skeleton className="h-10 w-24 rounded-full" />
                   </div>
                 </div>
@@ -214,12 +242,12 @@ const EmergencySafe = () => {
                 <div className="flex justify-between items-center pb-4">
                   <Skeleton className="h-4 w-32" />
                 </div>
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col gap-2 sm:flex-row justify-between sm:items-end">
                   <div>
                     <Skeleton className="h-8 w-40 mb-2" />
                     <Skeleton className="h-3 w-48" />
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex sm:justify-end gap-2">
                     <Skeleton className="h-10 w-24 rounded-full" />
                   </div>
                 </div>
@@ -231,7 +259,7 @@ const EmergencySafe = () => {
             Error loading safe details. Please try again.
           </div>
         ) : !safeDetails && !isLoading ? (
-          <div className="flex flex-col items-center justify-center p-2 md:p-0 py-12">
+          <div className="flex flex-col items-center justify-center py-12">
             <img
               src="/assets/not-found.gif"
               alt="Safe not found"
@@ -257,7 +285,7 @@ const EmergencySafe = () => {
                   <ArrowLeft className="h-6 w-6" />
                 </Button>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl md:text-2xl">{safeDetails.target}</h1>
+                  <h1 className="text-2xl">{safeDetails.target}</h1>
                   <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
                     Flexible
                   </Badge>
@@ -270,21 +298,8 @@ const EmergencySafe = () => {
           )
         )}
 
-        <div className="flex w-full md:hidden p-2 pb-4">
-          {isConnected && (
-            <div className="flex w-full md:hidden gap-2">
-              <button
-                onClick={() => setShowTopUpModal(true)}
-                className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104] w-full"
-              >
-                Top up
-              </button>
-            </div>
-          )}
-        </div>
-
         {safeDetails && !isLoading && (
-          <div className="flex flex-col w-full md:flex-row gap-4 pr-0 md:pr-4 pb-2">
+          <div className="flex-col lg:flex-row flex gap-4 sm:pr-4 pb-2">
             <div className="flex-1 flex gap-2">
               <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">
                 <div className="flex justify-between items-center pb-4">
@@ -292,7 +307,7 @@ const EmergencySafe = () => {
                     Savings Balance
                   </div>
                 </div>
-                <div className="flex justify-between items-end">
+                <div className="flex flex-col gap-2 sm:flex-row justify-between sm:items-end">
                   <div>
                     <div>
                       <span className="text-[#F1F1F1] pr-2 text-3xl">
@@ -311,7 +326,7 @@ const EmergencySafe = () => {
                     </div>
                   </div>
                   {isConnected && (
-                    <div className="hidden md:flex justify-end gap-2">
+                    <div className="flex justify-start  sm:justify-end gap-2">
                       <button
                         onClick={() => setShowTopUpModal(true)}
                         className="rounded-[100px] px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
@@ -331,7 +346,7 @@ const EmergencySafe = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-end">
+              <div className="flex flex-col gap-2 sm:flex-row justify-between sm:items-end">
                 <div>
                   <div>
                     <span className="text-[#F1F1F1] pr-2 text-3xl">
@@ -349,7 +364,7 @@ const EmergencySafe = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-start py-2 md:py-0 md:justify-end gap-2">
+                <div className="flex sm:justify-end gap-2">
                   <button
                     onClick={() => setShowWithdrawModal(true)}
                     className="rounded-[100px] px-8 py-[8px] bg-[#3F3F3F99] h-[40px] text-sm text-[#F1F1F1]"

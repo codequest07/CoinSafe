@@ -9,24 +9,20 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import {
-  convertFrequency,
-  convertTokenAmountToUsd,
-  getTokenDecimals,
-  tokenData,
-} from "@/lib/utils";
+import { convertFrequency, getTokenDecimals, tokenData } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { formatUnits } from "viem";
-import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
 import { client, liskMainnet } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
+import { useTokenPrices } from "@/lib/price-service";
+import { useMemo } from "react";
 // import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
-  tokenAddress: string
+  tokenAddress: string,
 ) {
   const contract = getContract({
     client,
@@ -67,13 +63,6 @@ interface AssetData {
 //   assets: AssetData[];
 // }
 
-interface Token {
-  token: string; // Token address
-  amountToSave: bigint; // Amount as BigInt
-  frequency?: any; // Optional period (e.g., "per month")
-  selected?: boolean; // Added for selection state
-}
-
 export interface ITokenDetails {
   amountSaved: bigint;
   amountToSave: bigint;
@@ -95,68 +84,42 @@ export default function AutoSavedAssetTable({
 
   const [tokenDetails, setTokenDetails] = useState<ITokenDetails[]>([]);
 
-  useEffect(() => {
-    const fetchPrices = async () => {
-      const _tokenDetails = [];
-      for (const asset of assets.tokenDetails) {
-        const amountSaved = formatUnits(BigInt(asset.amountSaved), 18);
-        const price = await getTokenPrice(asset.token, Number(amountSaved));
+  // --- Price Fetching Integration ---
+  const uniqueTokenAddresses = useMemo(() => {
+    if (!assets?.tokenDetails) return [];
+    const tokens = new Set<string>();
+    assets.tokenDetails.forEach((asset: any) => tokens.add(asset.token));
+    return Array.from(tokens);
+  }, [assets]);
 
-        const autosaved = await checkIsTokenAutoSaved(
-          address! as `0x${string}`,
-          asset.token
-        );
-        // prices[asset.token] = price;
-        // console.log("TOKEN PRICE AUTOSAFE", price);
-        _tokenDetails.push({ ...asset, amountSavedInUSD: price, autosaved });
+  const priceQueries = useTokenPrices(uniqueTokenAddresses);
+
+  const priceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    uniqueTokenAddresses.forEach((addr, idx) => {
+      map[addr] = priceQueries[idx].data || 0;
+    });
+    return map;
+  }, [uniqueTokenAddresses, priceQueries]);
+
+  useEffect(() => {
+    const fetchAutosaveStatus = async () => {
+      const _tokenDetails = [];
+      if (assets?.tokenDetails) {
+        for (const asset of assets.tokenDetails) {
+          const autosaved = await checkIsTokenAutoSaved(
+            address! as `0x${string}`,
+            asset.token,
+          );
+          _tokenDetails.push({ ...asset, autosaved });
+        }
       }
       setTokenDetails(_tokenDetails);
-
-      // console.log("TOKEN DETAILS", _tokenDetails);
     };
-    fetchPrices();
-  }, [assets]); // Re-run if assets change
-
-  //   const {
-  //     balances,
-  //     // isLoading: isBalanceLoading,
-  //     // error,
-  //     // refetch,
-  //   } = useClaimableBalanceAutomatedSafe();
-
-  // console.log("Error", errors, usdValues);
-
-  // Fetch USD values for each token
-  useEffect(() => {
-    const fetchUsdValues = async () => {
-      if (!assets?.tokenDetails) return;
-
-      const newUsdValues: { [key: string]: string } = {};
-      const newErrors: { [key: string]: string } = {};
-
-      await Promise.all(
-        assets.tokenDetails.map(async (item: Token) => {
-          // tokenDetails.map(async (item: Token) => {
-          try {
-            const usdValue = await convertTokenAmountToUsd(
-              item.token,
-              item.amountToSave
-            );
-            newUsdValues[item.token] = usdValue.toFixed(2); // Format to 2 decimals
-          } catch (err) {
-            console.error(`Error for token ${item.token}:`, err);
-            newErrors[item.token] = "Failed to load USD value";
-            newUsdValues[item.token] = "0.00"; // Fallback value
-          }
-        })
-      );
-
-      // setUsdValues(newUsdValues);
-      // setErrors(newErrors);
-    };
-
-    fetchUsdValues();
-  }, [assets, tokenDetails]); // Depend on tokenDetails, not tokenData
+    if (address) {
+      fetchAutosaveStatus();
+    }
+  }, [assets, address]); // Re-run if assets change
 
   return (
     <div className="w-full overflow-x-auto">
@@ -186,7 +149,8 @@ export default function AutoSavedAssetTable({
               key={asset.token}
               className={`border-gray-600 hover:bg-[#1D1D1D73]/20 ${
                 index === assets.length - 1 ? "border-b-0" : ""
-              }`}>
+              }`}
+            >
               {/* Ticker */}
               <TableCell className="px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -218,7 +182,7 @@ export default function AutoSavedAssetTable({
                     `${
                       formatUnits(
                         asset.amountToSave,
-                        getTokenDecimals(asset.token)
+                        getTokenDecimals(asset.token),
                       ) +
                       " " +
                       tokenData[asset.token].symbol
@@ -236,15 +200,23 @@ export default function AutoSavedAssetTable({
                   <p className="text-white">
                     {formatUnits(
                       asset.amountSaved,
-                      getTokenDecimals(asset.token)
+                      getTokenDecimals(asset.token),
                     )}{" "}
                     {tokenData[asset.token].symbol}
                   </p>
                   <p className="text-xs text-gray-400">
                     ≈ $
-                    {asset.amountSavedInUSD !== null
-                      ? asset.amountSavedInUSD
-                      : "Loading..."}
+                    {(() => {
+                      const price = priceMap[asset.token] || 0;
+                      const decimals = getTokenDecimals(asset.token);
+                      const val =
+                        Number(formatUnits(asset.amountSaved, decimals)) *
+                        price;
+                      return val.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      });
+                    })()}
                   </p>
                 </div>
                 <div className="text-white">

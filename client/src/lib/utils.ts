@@ -2,19 +2,16 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatEther, formatUnits } from "viem";
 import { chainConfigs } from "@/lib/chains";
-import {
-  getAvgAPR,
-  getLskToUsd,
-  getSafuToUsd,
-  getUsdcToUsd,
-  getUsdt0ToUsd,
-  getUsdtToUsd,
-} from "@/lib";
+import { getTokenPrice, getSignedAprForClaimAll } from "@/lib";
 import { TokenInfo } from "thirdweb/react";
 import { getContract, readContract } from "thirdweb";
 import { client, liskMainnet, base } from "@/lib/config";
 import { CoinsafeDiamondContract } from "@/lib/contract";
-import { tokenData, getTokenDecimals, tokenDecimals } from "@/lib/token-metadata";
+import {
+  tokenData,
+  getTokenDecimals,
+  tokenDecimals,
+} from "@/lib/token-metadata";
 export { tokenData, getTokenDecimals, tokenDecimals };
 
 export function cn(...inputs: ClassValue[]) {
@@ -38,10 +35,8 @@ export function formatNumberToMax7Dp(num: number, maxDecimals = 7) {
   return `${intPart}.${trimmedDecimal}`;
 }
 
-
-
 export function transformAndAccumulateTokenBalances(
-  data: Array<any>
+  data: Array<any>,
 ): { token: string; balance: string }[] {
   const tokenMap: { [key: string]: bigint } = {};
 
@@ -65,40 +60,21 @@ export function transformAndAccumulateTokenBalances(
 
 export const convertTokenAmountToUsd = async (
   token: string,
-  amount: bigint
+  amount: bigint,
 ): Promise<number> => {
   const tokenDecimals = getTokenDecimals(token);
-  // Keys in tokenData are now normalized to lowercase
-  const info = tokenData[token.toLowerCase()];
-  const symbol = info?.symbol;
-
-  if (!symbol) {
-    console.error("Unknown token address:", token);
-    return 0;
-  }
-
   const numericAmount = Number(formatUnits(amount, tokenDecimals));
+  console.log("numericAmount", numericAmount);
 
-  switch (symbol.toUpperCase()) {
-    case "USDT":
-      return await getUsdtToUsd(numericAmount);
-    case "SAFU":
-      return getSafuToUsd(numericAmount);
-    case "LSK":
-      return await getLskToUsd(numericAmount);
-    case "USDC":
-      return await getUsdcToUsd(numericAmount);
-    case "USDT0":
-      return await getUsdt0ToUsd(numericAmount);
-    default:
-      console.warn(`No price conversion for symbol: ${symbol}`);
-      return 0;
-  }
+  // Use the central price fetching logic
+  const priceString = await getTokenPrice(token, numericAmount);
+  console.log("priceString", priceString);
+  return Number(priceString) || 0;
 };
 
 export const convertFrequency = (
   frequency: number,
-  inputUnit: "milliseconds" | "seconds" | "minutes" | "hours" = "seconds"
+  inputUnit: "milliseconds" | "seconds" | "minutes" | "hours" = "seconds",
 ) => {
   // Validate input
   if (typeof frequency !== "number" || frequency <= 0) {
@@ -115,7 +91,7 @@ export const convertFrequency = (
 
   if (!unitConversions[inputUnit]) {
     throw new Error(
-      `Unsupported unit: ${inputUnit}. Use milliseconds, seconds, minutes, or hours.`
+      `Unsupported unit: ${inputUnit}. Use milliseconds, seconds, minutes, or hours.`,
     );
   }
 
@@ -169,7 +145,7 @@ export function formatTimeFrequency(frequency: any) {
 export function convertTokenToUSD(
   tokenValue: any,
   decimals: number,
-  usdPrice: number
+  usdPrice: number,
 ) {
   // Convert BigInt to a regular number by dividing by 10^decimals
   const tokenAmount = Number(tokenValue) / Math.pow(10, decimals);
@@ -178,8 +154,6 @@ export function convertTokenToUSD(
   // Format to 2 decimal places for USD
   return usdValue.toFixed(2);
 }
-
-
 
 export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
   [liskMainnet.id]: [
@@ -220,7 +194,7 @@ export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
 
 export const getContractFeePercentage = async (
   duration: number,
-  user: string
+  user: string,
 ) => {
   const contract = getContract({
     client: client,
@@ -259,7 +233,7 @@ export const getUserTokenYield = async (
   tokenAddress: string,
   feePercentage: number,
   tokenShares: bigint,
-  principal: bigint
+  principal: bigint,
 ) => {
   const contract = getContract({
     client: client,
@@ -296,15 +270,15 @@ export const getSafeLSKRewards = async (safeId: string, account: any) => {
     chain: liskMainnet,
   });
 
-  const { avgApr } = await getAvgAPR();
+  const { avgAPR } = await getSignedAprForClaimAll();
 
-  console.log("SafeId, AvgApr", safeId, BigInt(avgApr?.toFixed() || "1"));
+  console.log("SafeId, AvgApr", safeId, avgAPR.toString());
 
   const rewards = await readContract({
     contract: contract,
     method:
       "function previewWithdrawalLSKRewards(uint256 _safeId, uint256 _avgAPR ) external view returns (uint256 projectedLSK,uint256 availableLSK,uint256 claimableLSK,uint256 claimableWithFeeApplied)",
-    params: [BigInt(safeId), BigInt(avgApr?.toFixed() || "1")],
+    params: [BigInt(safeId), avgAPR],
     from: account?.address,
   });
 

@@ -1,167 +1,23 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 // import { ChevronRight, ChevronLeft } from "lucide-react";
 // import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useGetSafes } from "@/hooks/useGetSafes";
-import { formatUnits } from "viem";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getTokenPrice } from "@/lib";
-import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
-import { useActiveAccount } from "thirdweb/react";
-import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
-
-interface DisplaySafe {
-  id: string;
-  name: string;
-  amount: number;
-  status: "Flexible" | "Locked";
-  unlockDate: string;
-}
+import { useSavingsCardsData } from "@/hooks/useSavingsCardsData";
 
 export default function MobileSavingsCards() {
   const navigate = useNavigate();
-  const account = useActiveAccount();
-  const userAddress = account?.address;
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { safes, isLoading, isError, fetchSafes } = useGetSafes();
   const {
-    details,
-    isLoading: automatedSafeLoading,
-    error: automatedSafeError,
-  } = useAutomatedSafeForUser(userAddress as `0x${string}`);
-
-  const hasActiveAutoSavings =
-    details?.tokenDetails?.some(
-      (token: { amountToSave: number }) => token.amountToSave > 0n
-    ) ?? false;
-
-  console.log(
-    "AUTOMED SAVIMGS>>> ",
-    details,
-    automatedSafeLoading,
-    automatedSafeError
-  );
-  const [displaySafes, setDisplaySafes] = useState<DisplaySafe[]>([]);
-
-  const [totalUsdValue, setTotalUsdValue] = useState<string>("0.00");
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchTotalUsdValue = async () => {
-      if (!details?.tokenDetails || details.tokenDetails.length === 0) {
-        setTotalUsdValue("0.00");
-        setError(null);
-        return;
-      }
-
-      try {
-        // Convert each token's amountSaved to USD and sum
-        const usdValues = await Promise.all(
-          details.tokenDetails.map(async (item: any) => {
-            try {
-              const usdValue = await convertTokenAmountToUsd(
-                item.token,
-                item.amountSaved
-              );
-              return usdValue;
-            } catch (err) {
-              console.error(`Error for token ${item.token}:`, err);
-              return 0; // Return 0 for failed conversions
-            }
-          })
-        );
-
-        // Sum all USD values
-        const totalUsd = usdValues.reduce((sum, value) => sum + value, 0);
-        setTotalUsdValue(totalUsd.toFixed(2));
-        setError(null);
-      } catch (err) {
-        console.error("Error converting tokens to USD:", err);
-        setTotalUsdValue("0.00");
-        setError("Failed to load USD value");
-      }
-    };
-
-    fetchTotalUsdValue();
-  }, [details]);
-
-  // Force refresh safes when component mounts
-  useEffect(() => {
-    fetchSafes();
-  }, [fetchSafes]);
-  console.log("SAFES", displaySafes);
-
-  //   const handleScroll = () => {
-  //     if (scrollContainerRef.current) {
-  //       const container = scrollContainerRef.current;
-  //       const scrollAmount = 280 + 16;
-  //       container.scrollTo({
-  //         left: container.scrollLeft + scrollAmount,
-  //         behavior: "smooth",
-  //       });
-  //     }
-  //   };
-
-  //   const handleScrollBack = () => {
-  //     if (scrollContainerRef.current) {
-  //       const container = scrollContainerRef.current;
-  //       const scrollAmount = 280 + 16;
-  //       container.scrollTo({
-  //         left: container.scrollLeft - scrollAmount,
-  //         behavior: "smooth",
-  //       });
-  //     }
-  //   };
-
-  useEffect(() => {
-    const getSafes = async () => {
-      const safeList = await Promise.all(
-        safes?.map(async (safe) => {
-          const totalAmount = await Promise.all(
-            safe.tokenAmounts.map(async (token) => {
-              const tokenAmount = Number(
-                formatUnits(token.amount, getTokenDecimals(token.token))
-              );
-              const usdVal = await getTokenPrice(token.token, tokenAmount);
-              return Number(usdVal);
-            })
-          ).then((amounts) => amounts.reduce((sum, val) => sum + val, 0));
-
-          let formattedDate = "N/A";
-
-          if (safe.unlockTime) {
-            const unlockDate = new Date(Number(safe.unlockTime) * 1000);
-
-            formattedDate = unlockDate.toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            });
-          }
-
-          const status = Number(safe.duration) > 0 ? "Locked" : "Flexible";
-
-          return {
-            id: safe.id.toString(),
-            name: safe.target,
-            amount: totalAmount,
-            status: status as "Locked" | "Flexible",
-            unlockDate: safe.unlockTime
-              ? `Unlocks on ${formattedDate}`
-              : "Unlocks Anytime",
-          };
-        }) || []
-      );
-
-      setDisplaySafes(safeList);
-    };
-
-    if (safes) {
-      getSafes();
-    }
-  }, [safes]);
+    safes,
+    displaySafes,
+    totalUsdValue,
+    isLoading,
+    isError,
+    hasActiveAutoSavings,
+  } = useSavingsCardsData();
 
   return (
     <div className="bg-black text-white p-4 w-full">
@@ -253,7 +109,6 @@ export default function MobileSavingsCards() {
                           minimumFractionDigits: 2,
                         }) || 0.0} */}
                         {totalUsdValue}
-                        {error ? ` (${error})` : ""}
                       </span>
                       <span className="text-sm text-gray-400 ml-2">USD</span>
                     </div>
@@ -267,7 +122,7 @@ export default function MobileSavingsCards() {
                       navigate(
                         safe.id === "911" && safe.name === "Emergency Safe"
                           ? "/vault/emergency-safe"
-                          : `/vault/${safe.id}`
+                          : `/vault/${safe.id}`,
                       )
                     }
                     className="text-left shrink-0 w-[280px] p-6 rounded-lg border border-[#FFFFFF21] transition-colors"

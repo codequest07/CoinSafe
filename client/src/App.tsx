@@ -18,19 +18,8 @@ import { useActiveAccount } from "thirdweb/react";
 import EmergencySafe from "./Pages/EmergencySafe";
 import AutoSave from "./Pages/AutoSave";
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
-import {
-  availableBalanceState,
-  savingsBalanceState,
-  totalBalanceState,
-} from "./store/atoms/balance";
-import { useWatchEvents } from "./hooks/useWatchEvents";
 import Profile from "./Pages/Profile";
 import { SmartAccountTransactionProvider } from "./hooks/useSmartAccountTransactionInterceptor";
-import {
-  userCurrentStreakState,
-  userLongestStreakState,
-} from "./store/atoms/streak";
 import { OnlineStatusIndicator } from "./components/pwa/online-status-indicator";
 import { PWAInstallPrompt } from "./components/pwa/install-prompt";
 import { PushNotificationPopup } from "./components/pwa/push-notification-popup";
@@ -40,12 +29,9 @@ import ConnectModal from "./components/Modals/ConnectModal";
 // import { useFCMNotifications } from "./hooks/useFCMNotifications";
 // import { Button } from "./components/ui/button";
 
+import { useGlobalReactivity } from "./hooks/useGlobalReactivity";
+
 const App = () => {
-  const [, setAvailableBalance] = useRecoilState(availableBalanceState);
-  const [, setSavingsBalance] = useRecoilState(savingsBalanceState);
-  const [, setTotalBalance] = useRecoilState(totalBalanceState);
-  const [, setUserCurrentStreak] = useRecoilState(userCurrentStreakState);
-  const [, setUserLongestStreak] = useRecoilState(userLongestStreakState);
   const [openConnectModal, setOpenConnectModal] = useState(false);
 
   // const { sendTestNotification } = useFCMNotifications({
@@ -55,33 +41,8 @@ const App = () => {
 
   const account = useActiveAccount();
 
-  useWatchEvents({
-    address: account?.address as string,
-    onDeposit: (amountInUsd) => {
-      setAvailableBalance((prev) => prev + amountInUsd);
-      setTotalBalance((prev) => prev + amountInUsd);
-    },
-    onWithdraw: (amountInUsd) => {
-      setAvailableBalance((prev) => prev - amountInUsd);
-      setTotalBalance((prev) => prev - amountInUsd);
-    },
-    onSave: (amountInUsd) => {
-      setAvailableBalance((prev) => prev - amountInUsd);
-      setSavingsBalance((prev) => prev + amountInUsd);
-    },
-    onClaim: (amountInUsd) => {
-      setSavingsBalance((prev) => prev - amountInUsd);
-      setAvailableBalance((prev) => prev + amountInUsd);
-    },
-    onSavingsWithdrawn: (amountInUsdToDeduct, amountInUsdToAdd) => {
-      setSavingsBalance((prev) => prev - amountInUsdToDeduct);
-      setAvailableBalance((prev) => prev + amountInUsdToAdd);
-    },
-    onStreakUpdate: (streak) => {
-      setUserCurrentStreak((prev) => prev + BigInt(streak));
-      setUserLongestStreak((prev) => prev + BigInt(streak));
-    },
-  });
+  // Initialize global event listeners and query invalidation
+  useGlobalReactivity();
 
   const balances = useBalances(account?.address as string);
 
