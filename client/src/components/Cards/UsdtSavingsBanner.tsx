@@ -1,21 +1,31 @@
 import MemoAlertIcon from "@/icons/AlertIcon";
+import { useActiveWalletChain } from "thirdweb/react";
+import { base } from "@/lib/config";
 
 type Props = {
   className?: string;
 };
 
-const UsdtSavingsBanner = ({ className = "" }: Props) => (
-  <div
-    className={`mb-6 rounded-[6px] bg-[#FFA3481A] text-[#FFA448] px-4 py-3 text-sm flex flex-col items-center justify-center gap-3 ${className}`}>
-    <MemoAlertIcon className="w-4 h-4 text-[#FFA448]" />
+const UsdtSavingsBanner = ({ className = "" }: Props) => {
+  const activeChain = useActiveWalletChain();
 
-    <p className="leading-relaxed text-[12px] text-center">
-      We recommend swapping your USDT to USDT0 to enjoy our savings rewards.
-      While you can still save in USDT, saving in USDT0 allows you to earn the
-      rewards. We are working hard to ensure you can save and earn in USDT in
-      the nearest future!
-    </p>
-  </div>
-);
+  if (activeChain?.id === base.id) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`mb-6 rounded-[6px] bg-[#FFA3481A] text-[#FFA448] px-4 py-3 text-sm flex flex-col items-center justify-center gap-3 ${className}`}>
+      <MemoAlertIcon className="w-4 h-4 text-[#FFA448]" />
+
+      <p className="leading-relaxed text-[12px] text-center">
+        We recommend swapping your USDT to USDT0 to enjoy our savings rewards.
+        While you can still save in USDT, saving in USDT0 allows you to earn the
+        rewards. We are working hard to ensure you can save and earn in USDT in
+        the nearest future!
+      </p>
+    </div>
+  );
+};
 
 export default UsdtSavingsBanner;

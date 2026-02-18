@@ -4,7 +4,7 @@ import Home from "./Pages/Home";
 import Portfolio from "./Pages/Portfolio";
 import Vault from "./Pages/Vault";
 import Staking from "./Pages/Staking";
-import Rewards from "./Pages/Rewards";
+// import Rewards from "./Pages/Rewards";
 import SaveSense from "./Pages/SaveSense";
 import { Toaster } from "sonner";
 // import Faucet from "./Pages/Faucet";
@@ -124,7 +124,7 @@ const App = () => {
             <Route path="/vault/emergency-safe" element={<EmergencySafe />} />
             <Route path="/vault/auto-safe" element={<AutoSave />} />
             <Route path="/staking" element={<Staking />} />
-            <Route path="/rewards" element={<Rewards />} />
+            {/* <Route path="/rewards" element={<Rewards />} /> */}
             <Route path="/swap" element={<Swap />} />
             <Route path="/SaveSense" element={<SaveSense />} />
             {/* Test */}

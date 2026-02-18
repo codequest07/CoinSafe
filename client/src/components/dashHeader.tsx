@@ -35,7 +35,6 @@ import { darkTheme } from "thirdweb/react";
 import { wallets } from "@/lib/wallets";
 import { API_BASE_URL } from "@/lib/api-config";
 
-
 const getRandomMessage = () => {
   const messages = [
     "Why haven't you saved today? Don't miss out!",
@@ -65,17 +64,15 @@ const DashHeader = () => {
   const account = useActiveAccount();
   const address = account?.address;
   const isConnected = !!account?.address;
-  
+
   const switchChain = useSwitchActiveWalletChain();
   const activeChain = useActiveWalletChain();
-
 
   const [amount, setAmount] = useState<string>("0.00");
   const [selectedCurrency, setSelectedCurrency] = useState("LSK");
   const [, setUsdValue] = useState<number>(0);
   const [openOnRampModal, setOpenOnRampModal] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [isSwitchingChain, setIsSwitchingChain] = useState(false);
 
   /**
    * Calculates USD equivalent when amount or currency changes
@@ -89,7 +86,7 @@ const DashHeader = () => {
     const calculatedUsd = numericAmount * (currency?.rate || 0);
     setUsdValue(calculatedUsd);
     console.log(
-      `[v0] calculateUsdValue: ${numericAmount} ${selectedCurrency} = ${calculatedUsd} USD`
+      `[v0] calculateUsdValue: ${numericAmount} ${selectedCurrency} = ${calculatedUsd} USD`,
     );
   }, [amount, selectedCurrency]);
 
@@ -116,14 +113,14 @@ const DashHeader = () => {
    */
   const handleCurrencySelect = (currencyCode: string) => {
     console.log(
-      `[v0] handleCurrencySelect: Changing currency to ${currencyCode}`
+      `[v0] handleCurrencySelect: Changing currency to ${currencyCode}`,
     );
     setSelectedCurrency(currencyCode);
     const selectedCurrencyData = currencies.find(
-      (c) => c.code === currencyCode
+      (c) => c.code === currencyCode,
     );
     console.log(
-      `[v0] handleCurrencySelect: New rate is ${selectedCurrencyData?.rate} USD per ${currencyCode}`
+      `[v0] handleCurrencySelect: New rate is ${selectedCurrencyData?.rate} USD per ${currencyCode}`,
     );
   };
 
@@ -174,7 +171,7 @@ const DashHeader = () => {
 
   // Get safe details if we're on a vault detail page
   const { safeDetails, isLoading } = useGetSafeById(
-    isVaultDetailPage ? params.id : undefined
+    isVaultDetailPage ? params.id : undefined,
   );
 
   // Get current route name - only the last segment
@@ -225,13 +222,16 @@ const DashHeader = () => {
   const { connect, isConnecting } = useConnectModal();
   const [localIsConnecting, setLocalIsConnecting] = useState(false);
 
+  // Use active chain if connected, otherwise default to Lisk
+  const chainToUse = activeChain || liskMainnet;
+
   const handleConnect = async () => {
     try {
       setLocalIsConnecting(true);
       await connect({
         client,
         wallets,
-        chain: liskMainnet,
+        chain: chainToUse,
         theme: darkTheme({
           colors: { accentText: "hsl(144, 100%, 39%)" },
         }),
@@ -244,7 +244,6 @@ const DashHeader = () => {
   };
 
   const handleSwitchChain = async (chainId: number) => {
-    setIsSwitchingChain(true);
     try {
       const chainToSwitch = chains.find((c) => c.id === chainId);
       if (chainToSwitch) {
@@ -252,8 +251,6 @@ const DashHeader = () => {
       }
     } catch (error) {
       console.error("Failed to switch chain:", error);
-    } finally {
-      setIsSwitchingChain(false);
     }
   };
 
@@ -306,13 +303,12 @@ const DashHeader = () => {
                       <p className="text-sm text-gray-500 mb-2">Network</p>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            className="w-full justify-between bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white"
-                          >
+                          <Button
+                            variant="outline"
+                            className="w-full justify-between bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white">
                             <span className="flex items-center gap-2">
-                               <Network className="h-4 w-4" />
-                               {activeChain?.name || "Select Network"}
+                              <Network className="h-4 w-4" />
+                              {activeChain?.name || "Select Network"}
                             </span>
                             <ChevronDown className="h-4 w-4 opacity-50" />
                           </Button>
@@ -325,8 +321,7 @@ const DashHeader = () => {
                                 handleSwitchChain(c.id);
                                 setIsSheetOpen(false);
                               }}
-                              className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white"
-                            >
+                              className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white">
                               {c.name}
                             </DropdownMenuItem>
                           ))}
@@ -426,39 +421,8 @@ const DashHeader = () => {
               </div>
             </div>
             <div className="flex items-center sm:space-x-3">
-              {/* Chain Switcher for Desktop */}
-              {isConnected && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white mr-2"
-                      disabled={isSwitchingChain}
-                    >
-                      <span className="flex items-center gap-2">
-                          <Network className="h-4 w-4" />
-                          {isSwitchingChain ? "Switching..." : (activeChain?.name || "Network")}
-                      </span>
-                      <ChevronDown className="h-4 w-4 opacity-70" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-[#1A1A1E] border-[#333] text-white">
-                    {chains.map((c) => (
-                      <DropdownMenuItem
-                        key={c.id}
-                        onClick={() => handleSwitchChain(c.id)}
-                        className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white"
-                      >
-                        {c.name}
-                        {activeChain?.id === c.id && " ✓"}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-
               {/* <ClaimBtn /> */}
-              {/* Icons for connected wallets */}
+              {/* Icons for connected wallets (includes chain switcher when connected) */}
               <SmileFace />
             </div>
           </div>
