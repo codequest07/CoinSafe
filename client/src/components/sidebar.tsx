@@ -19,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { ArrowDownToLine, ChevronDown, Coins, X } from "lucide-react";
+import {  ChevronDown, Coins, X } from "lucide-react";
 // import { useNavigate } from "react-router-dom";
 // import { Coins, ExternalLinkIcon } from "lucide-react";
 
@@ -269,7 +269,7 @@ const Sidebar = () => {
                     {/* <span><ExternalLinkIcon className="w-5 h-5" /></span> */}
                   </>
                 </div>
-
+{/* 
                 <div
                   onClick={() => setOpenOffRampModal(true)}
                   className={
@@ -278,7 +278,7 @@ const Sidebar = () => {
                 >
                   <ArrowDownToLine className="w-5 h-5" />
                   {"Off-ramp"}
-                </div>
+                </div> */}
               </nav>
             </div>
           </div>
