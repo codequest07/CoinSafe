@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
-import { tokens } from "@/lib/contract";
-import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { convertTokenAmountToUsd } from "@/lib/utils";
+import { getTokenDecimals } from "@/lib/token-metadata";
 
 export interface FormattedSafeDetails {
   id: string;
@@ -26,21 +27,26 @@ export interface FormattedSafeDetails {
 export function useGetSafeById(id: string | undefined) {
   const { safes, isLoading, isError, error } = useGetSafes();
   const [safeDetails, setSafeDetails] = useState<FormattedSafeDetails | null>(
-    null
+    null,
   );
   const [tokenAmounts, setTokenAmounts] = useState<Record<string, unknown>>({});
   // const [savingsBalance] = useRecoilState(savingsBalanceState);
 
+  const { tokens } = useChainConfig();
+
   // Token address to symbol mapping
   const tokenSymbols: Record<string, string> = useMemo(() => {
-    const mapping = Object.entries(tokens).reduce((acc, [symbol, address]) => {
-      if (typeof address === "string") {
-        acc[address.toLowerCase()] = symbol;
-      }
-      return acc;
-    }, {} as Record<string, string>);
+    const mapping = Object.entries(tokens).reduce(
+      (acc, [symbol, address]) => {
+        if (typeof address === "string") {
+          acc[address.toLowerCase()] = symbol;
+        }
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
     return mapping;
-  }, []);
+  }, [tokens]);
 
   // Format date to readable string
   const formatDate = (date: Date): string => {
@@ -58,11 +64,9 @@ export function useGetSafeById(id: string | undefined) {
       // Find the safe with the matching ID
       const safe = safes.find((safe) => safe.id.toString() === id);
 
-
-
       if (!safe) return;
-      console.log("Safeeeeeeeee============:", safe); 
-      
+      console.log("Safeeeeeeeee============:", safe);
+
       // Format the safe data
       const startTime = new Date(Number(safe.startTime) * 1000);
       const unlockTime = new Date(Number(safe.unlockTime) * 1000);
@@ -78,16 +82,19 @@ export function useGetSafeById(id: string | undefined) {
         const cyclesPassed =
           Math.floor(timeSinceUnlock / Number(safe.duration) / 1000) + 1;
         nextUnlockDate.setTime(
-          unlockTime.getTime() + cyclesPassed * Number(safe.duration) * 1000
+          unlockTime.getTime() + cyclesPassed * Number(safe.duration) * 1000,
         );
       }
 
       // Format token amounts
       setTokenAmounts(
-        safe.tokenAmounts.reduce((acc, token) => {
-          if (token && token.token) acc[token.token] = token.amount;
-          return acc;
-        }, {} as Record<string, unknown>)
+        safe.tokenAmounts.reduce(
+          (acc, token) => {
+            if (token && token.token) acc[token.token] = token.amount;
+            return acc;
+          },
+          {} as Record<string, unknown>,
+        ),
       );
 
       const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
@@ -107,14 +114,15 @@ export function useGetSafeById(id: string | undefined) {
           token: token.token,
           tokenSymbol: symbol,
           amount: Number(token.amount),
-          formattedAmount: Number(formatUnits(token.amount, getTokenDecimals(token.token))).toLocaleString(
-            "en-US",
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 6,
-            }
-          ),
-          tokenShares: safe.initialShares.find(token => token.token == token.token)?.amount
+          formattedAmount: Number(
+            formatUnits(token.amount, getTokenDecimals(token.token)),
+          ).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 6,
+          }),
+          tokenShares: safe.initialShares.find(
+            (share) => share.token.toLowerCase() === token.token.toLowerCase(),
+          )?.amount || 0n,
         };
       });
 
@@ -136,12 +144,12 @@ export function useGetSafeById(id: string | undefined) {
               // Fetch the token price using the asynchronous function
               const price = await convertTokenAmountToUsd(
                 token.token,
-                BigInt(token.amount)
+                BigInt(token.amount),
               );
 
               console.log(price);
               return price;
-            })
+            }),
           );
 
           console.log("TOken Prices", tokenPrices);

@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { tokenData, getTokenDecimals } from "@/lib/utils";
+import { tokenData, getTokenDecimals } from "@/lib/token-metadata";
 import { useRecoilValue } from "recoil";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 import { ArrowLeft, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
@@ -19,7 +19,7 @@ import { useSwap } from "@/hooks/useSwap";
 import { useSwapQuote, SingleHopQuoteParams } from "@/hooks/useSwapQuote";
 import { formatSwapQuote, calculateSlippageBps } from "@/lib/swap-utils";
 import { toast } from "sonner";
-import { tokens } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 type TokenOption = {
   address: string;
@@ -38,6 +38,7 @@ const Swap = () => {
   const account = useActiveAccount();
   const supportedTokens = useRecoilValue(supportedTokensState);
   const balances = useRecoilValue(balancesState);
+  const { tokens } = useChainConfig();
   const validationErrors = {} as Record<string, string>;
 
   const tokenOptions = useMemo(
@@ -46,8 +47,8 @@ const Swap = () => {
         (supportedTokens?.length
           ? supportedTokens
           : Object.keys(tokenData || {})) as string[]
-      ).filter((t) => t.toLowerCase() !== tokens.lsk.toLowerCase()),
-    [supportedTokens],
+      ).filter((t) => !tokens.lsk || t.toLowerCase() !== tokens.lsk.toLowerCase()),
+    [supportedTokens, tokens],
   );
 
   const [fromToken, setFromToken] = useState<string>("");
@@ -294,9 +295,8 @@ const Swap = () => {
 
         <div className="space-y-2 relative">
           <div
-            className={`rounded-[8px] border ${
-              insufficientBalance ? "border-[#FF6B6B]" : "border-[#1E1E1E]"
-            } bg-[#111114] p-4 sm:p-5`}
+            className={`rounded-[8px] border ${insufficientBalance ? "border-[#FF6B6B]" : "border-[#1E1E1E]"
+              } bg-[#111114] p-4 sm:p-5`}
           >
             <div className="flex items-center justify-between text-sm text-[#B5B5B5]">
               <span>Swap from</span>
@@ -334,7 +334,7 @@ const Swap = () => {
                   amount: saveState.amount,
                 }}
                 selectedTokenBalance={selectedTokenBalance}
-                tokens={tokenOptions}
+
                 validationErrors={validationErrors}
                 supportedTokens={tokenOptions}
               />

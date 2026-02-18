@@ -25,7 +25,8 @@ export const useBalances = (address: string) => {
   const setLoading = useSetRecoilState(loadingState);
 
   const { chain, diamondAddress } = useChainConfig();
-
+  // console.log("diamondAddress", diamondAddress);
+  // console.log("chain", chain);
   const contract = getContract({
     client,
     address: diamondAddress,
@@ -59,8 +60,10 @@ export const useBalances = (address: string) => {
 
         // Only set tokens if we actually got some from the contract
         if (tokens && tokens.length > 0) {
-          // console.log("Setting supported tokens:", tokens);
-          setSupportedTokens(tokens);
+          // Remove duplicates
+          const uniqueTokens = Array.from(new Set(tokens.map(t => t.toLowerCase())));
+          // console.log("Setting supported tokens:", uniqueTokens);
+          setSupportedTokens(uniqueTokens);
         } else {
           console.warn("No supported tokens returned from contract");
           // Don't set empty tokens - let the contract handle this case
@@ -140,9 +143,10 @@ export const useBalances = (address: string) => {
 
         const updatedTokenBalanceMap = supportedTokens.reduce(
           (acc, token, index) => {
-            acc.available[token] = balancesMap.available[index];
-            acc.total[token] = balancesMap.total[index];
-            acc.savings[token] = balancesMap.savings[index];
+            const normalizedToken = token.toLowerCase();
+            acc.available[normalizedToken] = balancesMap.available[index];
+            acc.total[normalizedToken] = balancesMap.total[index];
+            acc.savings[normalizedToken] = balancesMap.savings[index];
             return acc;
           },
           {

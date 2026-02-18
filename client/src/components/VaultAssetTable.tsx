@@ -134,9 +134,8 @@ export default function VaultAssetTable({
       <div className="hidden md:block sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">
           {safeDetails
-            ? `Assets in ${
-                safeDetails.target ? safeDetails.target : "Auto safe"
-              }`
+            ? `Assets in ${safeDetails.target ? safeDetails.target : "Auto safe"
+            }`
             : "Assets"}
         </h1>
         <VaultAssetTableContent
@@ -150,9 +149,8 @@ export default function VaultAssetTable({
       <div className="flex flex-col md:hidden sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">
           {safeDetails
-            ? `Assets in ${
-                safeDetails.target ? safeDetails.target : "Auto safe"
-              }`
+            ? `Assets in ${safeDetails.target ? safeDetails.target : "Auto safe"
+            }`
             : "Assets"}
         </h1>
         <MobileAssetTable
@@ -201,12 +199,12 @@ function VaultAssetTableContent({
           autosaved: null,
           isMature: safeDetails
             ? safeDetails.id !== "911" &&
-              safeDetails.unlockTime &&
-              safeDetails.unlockTime < new Date() &&
-              safeDetails.target &&
-              safeDetails.target !== "Emergency Safe"
+            safeDetails.unlockTime &&
+            safeDetails.unlockTime < new Date() &&
+            safeDetails.target &&
+            safeDetails.target !== "Emergency Safe"
             : false,
-          tokenInfo: tokenData[asset.token] || {
+          tokenInfo: tokenData[asset.token.toLowerCase()] || {
             symbol: "Unknown",
             name: "Token",
             color: "bg-[#440]",
@@ -271,8 +269,8 @@ function VaultAssetTableContent({
             {safeDetails
               ? `No assets found in this safe.`
               : isConnected
-              ? "Too much empty space? fill it up with deposits!"
-              : "No wallet connected, connect your wallet to get the best of coinsafe"}
+                ? "Too much empty space? fill it up with deposits!"
+                : "No wallet connected, connect your wallet to get the best of coinsafe"}
           </h3>
           {safeDetails ? (
             <Button
@@ -369,8 +367,8 @@ function VaultAssetTableContent({
                           ? asset.saved_usd
                           : "Loading..."
                         : asset.balance_usd !== null
-                        ? asset.balance_usd
-                        : "Loading..."}
+                          ? asset.balance_usd
+                          : "Loading..."}
                     </p>
                   </div>
                 </TableCell>
@@ -396,7 +394,7 @@ function VaultAssetTableContent({
                 <TableCell className="py-4 px-4">
                   <div className="flex items-center gap-2 justify-start">
                     {safeDetails?.unlockTime &&
-                    safeDetails?.unlockTime < new Date()
+                      safeDetails?.unlockTime < new Date()
                       ? safeDetails?.totalAmountUSD ?? 0.0
                       : "—"}
                   </div>

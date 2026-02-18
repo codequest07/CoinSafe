@@ -7,7 +7,7 @@ import {
   useWalletDetailsModal,
   useActiveWalletChain,
 } from "thirdweb/react";
-import { client, liskMainnet } from "@/lib/config";
+import { client, liskMainnet, base } from "@/lib/config";
 import { Skeleton } from "./ui/skeleton";
 import { wallets } from "@/lib/wallets";
 import { thirdwebSupportedTokens } from "@/lib/utils";
@@ -32,7 +32,7 @@ const WalletAvatar = () => {
           colors: { accentText: "hsl(144, 100%, 39%)" },
         }),
       });
-    } else {  
+    } else {
       detailsModal.open({ client, supportedTokens: thirdwebSupportedTokens });
     }
   };

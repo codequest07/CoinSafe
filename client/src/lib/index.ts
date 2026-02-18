@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from "ethers";
-import { tokens } from "./contract";
+import { tokenData } from "./token-metadata";
 import { API_BASE_URL } from "./api-config";
 // export const base_uri_test = import.meta.env.DEV ? 'http://localhost:1234' : 'https://coinsafe-0q0m.onrender.com';
 export const base_uri = `${API_BASE_URL}/coingecko`;
@@ -139,24 +139,29 @@ export async function getTokenPrice(token: string, amount: number | undefined) {
   if (!token || !amount) return "0.00";
 
   try {
-    switch (token) {
-      case tokens.safu: {
+    const info = tokenData[token.toLowerCase()];
+    const symbol = info?.symbol;
+
+    if (!symbol) return "0.00";
+
+    switch (symbol.toUpperCase()) {
+      case "SAFU": {
         const safuPrice = await getSafuToUsd(amount);
         return safuPrice.toFixed(2);
       }
-      case tokens.lsk: {
+      case "LSK": {
         const lskPrice = await getLskToUsd(amount);
         return lskPrice.toFixed(2);
       }
-      case tokens.usdt: {
+      case "USDT": {
         const usdtPrice = await getUsdtToUsd(amount);
         return usdtPrice.toFixed(2);
       }
-      case tokens.usdc: {
+      case "USDC": {
         const usdcPrice = await getUsdcToUsd(amount);
         return usdcPrice.toFixed(2);
       }
-      case tokens.usdt0: {
+      case "USDT0": {
         const usdt0Price = await getUsdt0ToUsd(amount);
         return usdt0Price.toFixed(2);
       }
