@@ -53,7 +53,6 @@ export const useBalances = (address: string) => {
           const uniqueTokens = Array.from(
             new Set(tokens.map((t) => t.toLowerCase())),
           );
-          console.log("Supported tokens:", uniqueTokens);
           return uniqueTokens;
         }
         return [];
@@ -164,15 +163,7 @@ export const useBalances = (address: string) => {
       let availableUsd = 0;
       let savedUsd = 0;
 
-      usdResults.forEach(([totalUsdVal, availableUsdVal, savedUsdVal], i) => {
-        console.log(`Balance Debug - Token: ${supportedTokens[i]}`);
-        console.log(
-          `  Raw: Total=${balancesMap.total[i]}, Avail=${balancesMap.available[i]}, Saved=${balancesMap.savings[i]}`,
-        );
-        console.log(
-          `  USD: Total=${totalUsdVal}, Avail=${availableUsdVal}, Saved=${savedUsdVal}`,
-        );
-
+      usdResults.forEach(([totalUsdVal, availableUsdVal, savedUsdVal]) => {
         totalUsd += getValidNumberValue(totalUsdVal);
         availableUsd += getValidNumberValue(availableUsdVal);
         savedUsd += getValidNumberValue(savedUsdVal);
