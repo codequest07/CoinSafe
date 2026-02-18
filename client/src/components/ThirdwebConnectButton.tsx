@@ -1,6 +1,6 @@
 import { ConnectButton, useActiveWalletChain } from "thirdweb/react";
 import { darkTheme } from "thirdweb/react";
-import { client, liskMainnet, base } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { wallets } from "@/lib/wallets";
 import { thirdwebSupportedTokens } from "@/lib/utils";
 
