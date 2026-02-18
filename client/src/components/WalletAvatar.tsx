@@ -5,8 +5,9 @@ import {
   useActiveAccount,
   useConnectModal,
   useWalletDetailsModal,
+  useActiveWalletChain,
 } from "thirdweb/react";
-import { client, liskMainnet, base } from "@/lib/config";
+import { client, liskMainnet } from "@/lib/config";
 import { Skeleton } from "./ui/skeleton";
 import { wallets } from "@/lib/wallets";
 import { thirdwebSupportedTokens } from "@/lib/utils";
@@ -16,13 +17,17 @@ const WalletAvatar = () => {
   const address = account?.address;
   const { connect } = useConnectModal();
   const detailsModal = useWalletDetailsModal();
+  const activeChain = useActiveWalletChain();
+
+  // Use active chain if connected, otherwise default to Lisk
+  const chainToUse = activeChain || liskMainnet;
 
   const handleClick = async () => {
     if (!address) {
       await connect({
         client,
         wallets: wallets,
-        chains: [liskMainnet, base],
+        chain: chainToUse,
         theme: darkTheme({
           colors: { accentText: "hsl(144, 100%, 39%)" },
         }),

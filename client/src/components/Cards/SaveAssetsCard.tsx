@@ -8,7 +8,6 @@ import SavingsTargetInput from "../SavingsTargetInput";
 import AmountInput from "../AmountInput";
 import { useRecoilState, useResetRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { CoinsafeDiamondContract } from "@/lib/contract";
 import { DurationSelector } from "../DurationSelector";
 import { format, addDays, differenceInDays, startOfDay } from "date-fns";
 import { Label } from "../ui/label";
@@ -23,7 +22,6 @@ import {
 import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useActiveAccount } from "thirdweb/react";
 import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
-import { liskMainnet } from "@/lib/config";
 import { toast } from "sonner";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
@@ -47,7 +45,8 @@ export default function SaveAssetsCard() {
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const resetSaveState = useResetRecoilState(saveAtom);
 
-  const { chain } = useChainConfig();
+  const chainConfig = useChainConfig();
+  const { chain, diamondAddress } = chainConfig;
 
   const initialSaveType = "one-time";
   const [saveType] = useState<"one-time" | "auto">(initialSaveType);
@@ -242,9 +241,9 @@ export default function SaveAssetsCard() {
   } = useSaveAsset({
     address: address as `0x${string}`,
     saveState,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     coinSafeAbi: targetSavingsFacetAbi,
-    chainId: liskMainnet.id,
+    chain: chain as any,
     onSuccess: () => {
       openThirdModal();
 

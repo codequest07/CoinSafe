@@ -327,8 +327,7 @@ export default function UnlockModal({
             className="absolute inset-0 bg-black/80"
             onClick={(e) => {
               e.stopPropagation();
-            }}
-          ></div>
+            }}></div>
           <div className="relative w-full max-w-lg rounded-xl bg-[#17171C] text-white shadow-lg p-5 border border-white/15">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-[500]">Unlock savings</h2>
@@ -339,8 +338,7 @@ export default function UnlockModal({
                   if (onClose) onClose();
                 }}
                 className="rounded-full p-1 bg-white "
-                aria-label="Close"
-              >
+                aria-label="Close">
                 <X className="h-4 w-4 text-black" />
               </button>
             </div>
@@ -404,8 +402,7 @@ export default function UnlockModal({
                         "You don't have any tokens to unlock in this safe",
                     });
                   }
-                }}
-              >
+                }}>
                 Max
               </button>
             </div>
@@ -493,16 +490,14 @@ export default function UnlockModal({
               <Button
                 onClick={() => onClose && onClose()}
                 className="bg-[#1E1E1E99] px-8 py-3 sm:py-2 rounded-[2rem] hover:bg-[#1E1E1E99] w-full sm:w-auto text-sm sm:text-base"
-                type="submit"
-              >
+                type="submit">
                 Cancel
               </Button>
               <Button
                 onClick={handleUnlockClick}
                 className="text-black px-8 py-3 sm:py-2 rounded-[2rem] w-full sm:w-auto text-sm sm:text-base bg-white hover:bg-gray-100"
                 variant="outline"
-                disabled={isPending || !saveState.amount || !saveState.token}
-              >
+                disabled={isPending || !saveState.amount || !saveState.token}>
                 {isPending ? (
                   <>
                     <LoaderCircle className="animate-spin mr-2 w-4 h-4 sm:w-5 sm:h-5" />

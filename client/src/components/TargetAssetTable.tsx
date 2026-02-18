@@ -21,6 +21,8 @@ import { getTokenPrice } from "@/lib";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { getTokenDecimals, getUserTokenYield, tokenData } from "@/lib/utils";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { liskMainnet } from "@/lib/config";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
@@ -40,6 +42,7 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
   >([]);
 
   const [balances] = useRecoilState(balancesState);
+  const { chain } = useChainConfig();
 
   const availableTokenBalances = useMemo(
     () => balances.available,
@@ -62,19 +65,28 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
 
         const safeAssetsRes = await Promise.all(
           safeDetails.tokenAmounts.map(async (tokenInfo) => {
-            let effectiveYield;
+            let effectiveYield: bigint | null = null;
 
+            // Yield calculations are currently only supported on Lisk.
+            // On other chains (e.g. Base), we skip this call to avoid
+            // cross-chain contract issues but still show the asset rows.
             if (
+              chain.id === liskMainnet.id &&
               safeDetails.id !== "911" &&
               typeof safeDetails.target === "string" &&
               safeDetails.target !== "Emergency Safe"
             ) {
-              effectiveYield = await getUserTokenYield(
-                tokenInfo.token,
-                safeDetails.feePercentage!,
-                tokenInfo.tokenShares!,
-                BigInt(tokenInfo.amount)!
-              );
+              try {
+                effectiveYield = await getUserTokenYield(
+                  tokenInfo.token,
+                  safeDetails.feePercentage!,
+                  tokenInfo.tokenShares!,
+                  BigInt(tokenInfo.amount)!
+                );
+              } catch (error) {
+                console.error("Error fetching token yield:", error);
+                effectiveYield = null;
+              }
             }
 
             return {
@@ -82,9 +94,13 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
               // For a specific safe, the balance is the amount in the safe
               balance: tokenInfo.formattedAmount,
               saved: tokenInfo.formattedAmount,
-              yield: effectiveYield
-                ? formatUnits(effectiveYield, getTokenDecimals(tokenInfo.token))
-                : "0",
+              yield:
+                effectiveYield && effectiveYield > 0n
+                  ? formatUnits(
+                      effectiveYield,
+                      getTokenDecimals(tokenInfo.token)
+                    )
+                  : "0",
             };
           })
         );
@@ -99,6 +115,7 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
     totalTokenBalances,
     savedTokenBalances,
     safeDetails,
+    chain.id,
   ]);
 
   return (
