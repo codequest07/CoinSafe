@@ -44,7 +44,6 @@ export const useSavingsCardsData = () => {
   const priceQueries = useTokenPrices(allTokenAddresses);
 
   const priceMap = useMemo(() => {
-    console.log("PriceQueries", priceQueries);
     const map: Record<string, number> = {};
     allTokenAddresses.forEach((addr, idx) => {
       map[addr] = priceQueries[idx].data || 0;
@@ -84,26 +83,12 @@ export const useSavingsCardsData = () => {
     if (!safes) return [];
 
     return safes.map((safe) => {
-      console.log("Safee", safe);
       const totalAmount = safe.tokenAmounts.reduce((sum, token) => {
         const decimals = getTokenDecimals(token.token);
         const amount = Number(formatUnits(token.amount, decimals));
-        console.log("PriceMap", priceMap);
         const price = priceMap[token.token] || 0;
-        console.log(
-          "DECIMALS,",
-          decimals,
-          "TOKEN",
-          token.token,
-          "AMOUNT",
-          amount,
-          "PRICE",
-          price,
-        );
         return sum + amount * price;
       }, 0);
-
-      console.log(totalAmount);
 
       let formattedDate = "N/A";
       if (safe.unlockTime) {
