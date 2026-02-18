@@ -26,6 +26,8 @@ export interface FormattedSafeDetails {
 
 export function useGetSafeById(id: string | undefined) {
   const { safes, isLoading, isError, error } = useGetSafes();
+
+  // console.log("All safes from getsafe by id ", safes)
   const { tokens } = useChainConfig();
 
   // Find the safe with the matching ID
