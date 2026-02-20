@@ -97,9 +97,9 @@ export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
               yield:
                 effectiveYield && effectiveYield > 0n
                   ? formatUnits(
-                      effectiveYield,
-                      getTokenDecimals(tokenInfo.token)
-                    )
+                    effectiveYield,
+                    getTokenDecimals(tokenInfo.token)
+                  )
                   : "0",
             };
           })
@@ -166,6 +166,8 @@ function AssetTableContent({
   useEffect(() => {
     if (!assets || !address) return;
 
+    let isMounted = true;
+
     async function updateAssets(assets: any[]) {
       try {
         const transformedAssets: any[] = assets.map((asset: any) => ({
@@ -184,7 +186,9 @@ function AssetTableContent({
           },
         }));
 
-        setUpdatedAssets(transformedAssets);
+        if (isMounted) {
+          setUpdatedAssets(transformedAssets);
+        }
 
         // Fetch additional data asynchronously
         assets.forEach(async (asset: any, index: number) => {
@@ -205,16 +209,26 @@ function AssetTableContent({
               Number(asset.yield)
             );
 
-            setUpdatedAssets((prev: any) => {
-              const updated = [...prev];
-              updated[index] = {
-                ...updated[index],
-                balance_usd: balanceUsd,
-                saved_usd: savedUsd,
-                yield_usd: yieldUsd,
-              };
-              return updated;
-            });
+            if (isMounted) {
+              setUpdatedAssets((prev: any) => {
+                // Determine if we should update based on current state length
+                // This prevents out-of-bounds updates if the asset list has changed
+                if (index >= prev.length) return prev;
+
+                // Compare token to ensure we are updating the correct asset
+                // This handles cases where list order might have changed (unlikely with index but good safety)
+                if (prev[index].token !== asset.token) return prev;
+
+                const updated = [...prev];
+                updated[index] = {
+                  ...updated[index],
+                  balance_usd: balanceUsd,
+                  saved_usd: savedUsd,
+                  yield_usd: yieldUsd,
+                };
+                return updated;
+              });
+            }
           } catch {
             // Silent error handling
           }
@@ -225,6 +239,10 @@ function AssetTableContent({
     }
 
     if (address && assets.length > 0) updateAssets(assets);
+
+    return () => {
+      isMounted = false;
+    };
   }, [assets, address, safeDetails]);
 
   if (!assets || assets.length === 0 || !hasNonZeroAssets) {

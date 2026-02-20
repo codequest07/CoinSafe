@@ -56,7 +56,8 @@ export function useGetSafes() {
 
   const fetchEmergencySafe = useCallback(async () => {
     // Prepare multicall requests
-    const rawTxs = supportedTokens.map((token: string) => ({
+    const uniqueSupportedTokens = Array.from(new Set(supportedTokens));
+    const rawTxs = uniqueSupportedTokens.map((token: string) => ({
       address: diamondAddress as `0x${string}`,
       abi: facetAbis.emergencySavingsFacet as Abi,
       args: [address, token],
@@ -72,7 +73,7 @@ export function useGetSafes() {
       const tokenAmounts: Token[] = results
         .filter(({ status }: { status: string }) => status === "success")
         .map(({ result }: { result: any }, idx: number) => ({
-          token: supportedTokens[idx],
+          token: uniqueSupportedTokens[idx],
           amount: result,
         }));
 
@@ -117,7 +118,21 @@ export function useGetSafes() {
       });
 
       // Update targeted safes state directly here if needed, or in useEffect
-      const targetedSafesData = result as SafeDetails[];
+      // Deduplicate tokenAmounts for each safe to prevent "tripling" issue
+      const targetedSafesData = (result as SafeDetails[]).map((safe) => {
+        const uniqueTokens = new Set<string>();
+        const uniqueTokenAmounts = safe.tokenAmounts.filter((t) => {
+          if (uniqueTokens.has(t.token.toLowerCase())) {
+            return false;
+          }
+          uniqueTokens.add(t.token.toLowerCase());
+          return true;
+        });
+        return {
+          ...safe,
+          tokenAmounts: uniqueTokenAmounts,
+        };
+      });
 
       // Fetch emergency safe
       const emergencySafe = await fetchEmergencySafe();
