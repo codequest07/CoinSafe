@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/table";
 import DeleteSafeModal from "./Modals/DeleteSafeModal";
 import RewardsCard from "./Cards/RewardsCard";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { base } from "@/lib/config";
 
 export default function SavingsDetail() {
   const navigate = useNavigate();
@@ -26,6 +28,8 @@ export default function SavingsDetail() {
 
   const { safeDetails, isLoading: apiLoading, isError } = useGetSafeById(id);
   const [isLoading, setIsLoading] = useState(true);
+  const chainConfig = useChainConfig();
+  const isBase = chainConfig.chain.id === base.id;
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -188,12 +192,12 @@ export default function SavingsDetail() {
                   <Badge className="bg-[#79E7BA33] inline-block px-2 py-2 rounded-[2rem] text-xs">
                     {safeDetails.isLocked
                       ? // remove this after work amd
-                        safeDetails.unlockTime > new Date()
+                      safeDetails.unlockTime > new Date()
                         ? `${Math.ceil(
-                            (safeDetails.unlockTime.getTime() -
-                              new Date().getTime()) /
-                              (1000 * 60 * 60 * 24)
-                          )} days till unlock`
+                          (safeDetails.unlockTime.getTime() -
+                            new Date().getTime()) /
+                          (1000 * 60 * 60 * 24)
+                        )} days till unlock`
                         : "Matured"
                       : "Flexible"}
                   </Badge>
@@ -215,8 +219,8 @@ export default function SavingsDetail() {
               {safeDetails.unlockTime < new Date()
                 ? "Withdraw anytime"
                 : safeDetails.isLocked
-                ? `Next unlock date: ${safeDetails.nextUnlockDate}`
-                : "Withdraw anytime"}
+                  ? `Next unlock date: ${safeDetails.nextUnlockDate}`
+                  : "Withdraw anytime"}
             </p>
           </div>
         ) : (
@@ -260,19 +264,21 @@ export default function SavingsDetail() {
                       safeDetails.unlockTime < new Date()
                         ? "Available to withdraw now"
                         : `Available in ${formatDistanceToNow(
-                            safeDetails.unlockTime
-                          )}`
+                          safeDetails.unlockTime
+                        )}`
                     }
                     safeDetails={safeDetails}
                     isLoading={apiLoading}
                   />
                 )}
-                <RewardsCard
-                  title="Yield rewards"
-                  campaign="Lisk"
-                  text={<>rewards on your yields (seperate from your yields)</>}
-                  safeId={Number(safeDetails.id)}
-                />
+                {!isBase && (
+                  <RewardsCard
+                    title="Yield rewards"
+                    campaign="Lisk"
+                    text={<>rewards on your yields (seperate from your yields)</>}
+                    safeId={Number(safeDetails.id)}
+                  />
+                )}
               </div>
             </div>
 

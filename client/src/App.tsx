@@ -11,6 +11,7 @@ import { Toaster } from "sonner";
 import SavingsDetail from "./components/SavingsDetail";
 import SaveAssets from "./Pages/SaveAssets";
 import Deposit from "./Pages/Deposit";
+import Onramp from "./Pages/Onramp";
 import Withdraw from "./Pages/Withdraw";
 import NotFound from "./components/not-found";
 import { useBalances } from "./hooks/useBalances";
@@ -91,6 +92,7 @@ const App = () => {
             {/* Test */}
             <Route path="/save-assets" element={<SaveAssets />} />
             <Route path="/deposit" element={<Deposit />} />
+            <Route path="/onramp" element={<Onramp />} />
             <Route path="/withdraw-assets" element={<Withdraw />} />
           </Route>
           <Route path="*" element={<NotFound />} />
