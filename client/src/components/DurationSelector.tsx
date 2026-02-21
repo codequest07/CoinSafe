@@ -29,6 +29,7 @@ interface PillSelectorProps {
   unlockDate?: string;
   apy?: number;
   isLoading?: boolean;
+  baseUnlockDate?: Date;
 }
 
 export function DurationSelector({
@@ -45,6 +46,7 @@ export function DurationSelector({
   unlockDate,
   apy,
   isLoading,
+  baseUnlockDate,
 }: PillSelectorProps) {
   // // if a date should be disabled
   // const isDateDisabled = (date: Date) => {
@@ -64,18 +66,20 @@ export function DurationSelector({
     >,
   );
 
-  // if a date should be disabled
   const isDateDisabled = (date: Date) => {
     // Get today's date with time set to midnight
     const today = new Date(new Date().setHours(0, 0, 0, 0));
+    const baseDate = baseUnlockDate
+      ? new Date(new Date(baseUnlockDate).setHours(0, 0, 0, 0))
+      : today;
 
-    // Calculate the date 30 days from today
-    const thirtyDaysFromNow = new Date(today);
-    thirtyDaysFromNow.setDate(today.getDate() + 30);
+    // Calculate the date 30 days from baseDate
+    const thirtyDaysFromNow = new Date(baseDate);
+    thirtyDaysFromNow.setDate(baseDate.getDate() + 30);
 
-    // Disable if date is before today (if disablePastDates is true)
-    // OR if date is less than 30 days from today
-    return (disablePastDates && date < today) || date < thirtyDaysFromNow;
+    // Disable if date is before baseDate (if disablePastDates is true)
+    // OR if date is less than 30 days from baseDate
+    return (disablePastDates && date <= baseDate) || date < thirtyDaysFromNow;
   };
 
   useEffect(() => {
@@ -116,7 +120,8 @@ export function DurationSelector({
 
         {unlockDate && (
           <p className="text-xs text-[#CACACA]">
-            Unlocks on <span className="text-[#79E7BA]">{unlockDate}</span>
+            {baseUnlockDate ? "New Unlock on " : "Unlocks on "}
+            <span className="text-[#79E7BA]">{unlockDate}</span>
           </p>
         )}
       </div>
