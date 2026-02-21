@@ -3,9 +3,7 @@ import TopUpEmergencySafe from "@/components/Modals/TopUpEmegencySafe";
 import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { publicClient } from "@/lib/client";
-import { liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis, tokens } from "@/lib/contract";
+import { tokens } from "@/lib/contract";
 import { getTokenDecimals } from "@/lib/utils";
 import { useTokenPrices } from "@/lib/price-service";
 import {
@@ -14,16 +12,11 @@ import {
 } from "@/store/atoms/balance";
 import { formatUnits } from "ethers";
 import { ArrowLeft, Badge } from "lucide-react";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { useActiveAccount } from "thirdweb/react";
-import { Abi } from "viem";
-
-interface Token {
-  token: string;
-  amount: bigint;
-}
+import { useGetSafes } from "@/hooks/useGetSafes";
 
 const EmergencySafe = () => {
   const navigate = useNavigate();
@@ -31,62 +24,12 @@ const EmergencySafe = () => {
   const [savingsBalance] = useRecoilState(savingsBalanceState);
   const [tokenAmounts, setTokenAmounts] = useState<Record<string, unknown>>({});
   const [supportedTokens] = useRecoilState(supportedTokensState);
+  const { fetchEmergencySafe } = useGetSafes();
 
   const account = useActiveAccount();
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const address = account?.address;
   const isConnected = !!account?.address;
-
-  const fetchEmergencySafe = useCallback(async () => {
-    // Prepare multicall requests
-    const rawTxs = supportedTokens.map((token: string) => ({
-      address: CoinsafeDiamondContract.address,
-      abi: facetAbis.emergencySavingsFacet as Abi,
-      args: [address, token],
-      functionName: "getEmergencySafeBalance",
-    }));
-
-    // console.log("Preparing multicall with contracts:", rawTxs);
-
-    try {
-      const results = await publicClient.multicall({
-        contracts: rawTxs,
-        chain: liskMainnet,
-      });
-
-      // console.log("Multicall results:", results);
-
-      const tokenAmounts: Token[] = results
-        .filter(({ status }: { status: string }) => status === "success")
-        .map(({ result }: { result: any }, idx: number) => ({
-          token: supportedTokens[idx],
-          amount: result,
-        }));
-
-      // console.log("Processed token amounts:", tokenAmounts);
-
-      return {
-        id: 911n,
-        target: "Emergency Safe",
-        duration: 0n,
-        startTime: 0n,
-        unlockTime: 0n,
-        tokenAmounts,
-      };
-    } catch (err) {
-      console.error("Error in multicall for emergency safe:", err);
-      // Return empty emergency safe on error
-      return {
-        id: 911n,
-        target: "Emergency Safe",
-        duration: 0n,
-        startTime: 0n,
-        unlockTime: 0n,
-        tokenAmounts: [],
-      };
-    }
-  }, [supportedTokens, address]);
 
   // Token address to symbol mapping
   const tokenSymbols: Record<string, string> = useMemo(() => {
@@ -122,6 +65,8 @@ const EmergencySafe = () => {
       setIsError(false);
       try {
         const safe = await fetchEmergencySafe();
+        console.log("Emergency safeeee", safe);
+
         setSafeData(safe);
 
         // Format token amounts for immediate display if needed, but derived is better

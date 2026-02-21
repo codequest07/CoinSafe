@@ -56,14 +56,26 @@ export const useSavingsCardsData = () => {
     if (!details?.tokenDetails || details.tokenDetails.length === 0) {
       return "0.00";
     }
-    let total = 0;
+    // Aggregate amounts by token address to handle potential duplicates
+    const aggregatedAmounts = new Map<string, bigint>();
     details.tokenDetails.forEach((item: any) => {
-      const price = priceMap[item.token] || 0;
-      const decimals = getTokenDecimals(item.token);
-      // item.amountSaved is BigInt
-      const amount = Number(formatUnits(item.amountSaved, decimals));
-      total += amount * price;
+      const tokenLower = item.token.toLowerCase();
+      const currentAmount = aggregatedAmounts.get(tokenLower) || 0n;
+      aggregatedAmounts.set(
+        tokenLower,
+        currentAmount + BigInt(item.amountSaved),
+      );
     });
+
+    let total = 0;
+    aggregatedAmounts.forEach((amount, token) => {
+      // Find price using lowercase key or original casing if needed (map keys are lowercase)
+      const price = priceMap[token] || priceMap[token.toLowerCase()] || 0;
+      const decimals = getTokenDecimals(token);
+      const amountFormatted = Number(formatUnits(amount, decimals));
+      total += amountFormatted * price;
+    });
+
     return total.toFixed(2);
   }, [details, priceMap]);
 

@@ -56,14 +56,14 @@ export default function SavingsDetail() {
   }, [safeDetails, isError]);
 
   // Debug log for render
-  console.log("Rendering with state:", {
-    isLoading,
-    apiLoading,
-    hasSafeDetails: !!safeDetails,
-    isError,
-  });
+  // console.log("Rendering with state:", {
+  //   isLoading,
+  //   apiLoading,
+  //   hasSafeDetails: !!safeDetails,
+  //   isError,
+  // });
 
-  console.log("Safe details", safeDetails);
+  // console.log("Safe details", safeDetails);
 
   return (
     <div className="min-h-screen bg-black text-white p-2 lg:p-6">

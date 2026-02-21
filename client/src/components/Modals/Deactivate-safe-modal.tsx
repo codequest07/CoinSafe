@@ -4,12 +4,11 @@ import { X } from "lucide-react";
 import { useState } from "react";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
-import { liskMainnet } from "@/lib/config";
-import { Abi } from "viem";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "sonner";
 import { useSmartAccountTransactionInterceptorContext } from "@/hooks/useSmartAccountTransactionInterceptor";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 interface DeactivateSafeModalProps {
   details?: any;
@@ -26,6 +25,7 @@ export default function DeactivateSafeModal({
   const [deactivating, setDeactivating] = useState(false);
   const account = useActiveAccount();
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain, diamondAddress } = useChainConfig();
 
   // useEffect(() => {
   //   const checkSafeStatus = async () => {
@@ -47,9 +47,9 @@ export default function DeactivateSafeModal({
     if (!account) return;
     const contract = getContract({
       client,
-      chain: liskMainnet,
-      address: CoinsafeDiamondContract.address,
-      abi: facetAbis.automatedSavingsFacet as Abi,
+      chain: chain,
+      address: diamondAddress,
+      abi: facetAbis.automatedSavingsFacet as any,
     });
 
     setDeactivating(true);

@@ -15,9 +15,6 @@ import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 // import { Check, X } from "lucide-react";
 import { getTokenPrice } from "@/lib";
-import { getContract, readContract } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
@@ -25,25 +22,6 @@ import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
 import MobileAssetTable from "./MobileAssetTable";
-
-async function checkIsTokenAutoSaved(
-  userAddress: `0x${string}`,
-  tokenAddress: string
-) {
-  const contract = getContract({
-    client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
-  });
-
-  const enabled = await readContract({
-    contract: contract,
-    method:
-      "function isAutosaveEnabledForToken(address _user, address _token) external view returns (bool)",
-    params: [userAddress, tokenAddress],
-  });
-  return enabled;
-}
 
 interface VaultAssetTableProps {
   safeDetails?: FormattedSafeDetails;
@@ -224,11 +202,6 @@ function VaultAssetTableContent({
               Number(asset.saved)
             );
 
-            const autosaved = await checkIsTokenAutoSaved(
-              address! as `0x${string}`,
-              asset.token
-            );
-
             let isMature = transformedAssets[index].isMature;
 
             if (!safeDetails && Number(asset.available) > 0) {
@@ -241,7 +214,7 @@ function VaultAssetTableContent({
                 ...updated[index],
                 balance_usd: balanceUsd,
                 saved_usd: savedUsd,
-                autosaved,
+                autosaved: false,
                 isMature,
               };
               return updated;

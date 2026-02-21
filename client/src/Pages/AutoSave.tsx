@@ -20,12 +20,12 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "sonner";
-import { CoinsafeDiamondContract } from "@/lib/contract";
 import ExtendSafeModal from "@/components/Modals/extend-safe-modal";
 import { getTokenDecimals } from "@/lib/utils";
 import { useTokenPrices } from "@/lib/price-service";
 import { savingsBalanceState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 const AutoSave = () => {
   const navigate = useNavigate();
@@ -46,6 +46,7 @@ const AutoSave = () => {
   const [showExtendSafeModal, setShowExtendSafeModal] = useState(false);
 
   const userAddress = account?.address;
+  const { diamondAddress } = useChainConfig();
 
   const {
     balances,
@@ -129,7 +130,7 @@ const AutoSave = () => {
     error: claimAllError,
   } = useClaimAllAutoSafe({
     account,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     toast,
     onSuccess: () => {
       console.log("Successfully claimed autosafe");

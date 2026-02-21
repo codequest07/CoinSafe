@@ -14,7 +14,7 @@ import {
 } from "@/lib/utils";
 import { formatUnits } from "ethers"; // Added for amount formatting
 import { useRemoveTokenFromAutomatedPlan } from "@/hooks/useRemoveTokenFromAutomatedPlan";
-import { CoinsafeDiamondContract } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import SuccessfulTxModal from "./SuccessfulTxModal";
@@ -39,10 +39,9 @@ export default function RemoveTokenModal({
   onClose,
   closeAllModals,
 }: RemoveTokenModalProps) {
-  if (!open) return null; // If the modal is not open, return null
-
   const account = useActiveAccount();
   const userAddress = account?.address;
+  const { diamondAddress } = useChainConfig();
   const [tokens, setTokens] = useState<Token[]>([]); // Initialize empty, populated from details
   const [showSuccessModal, setShowSucessModal] = useState(false);
   // const [selectedTokenAddress, setSelectedTokenAddress] = useState<
@@ -68,7 +67,7 @@ export default function RemoveTokenModal({
         details.tokenDetails.map((item: Token, index: number) => ({
           ...item,
           selected: index === 0, // Select first token by default
-        }))
+        })),
       );
     }
   }, [details?.tokenDetails]);
@@ -86,7 +85,7 @@ export default function RemoveTokenModal({
           try {
             const usdValue = await convertTokenAmountToUsd(
               item.token,
-              item.amountToSave
+              item.amountToSave,
             );
             newUsdValues[item.token] = usdValue.toFixed(2); // Format to 2 decimals
           } catch (err) {
@@ -94,7 +93,7 @@ export default function RemoveTokenModal({
             newErrors[item.token] = "Failed to load USD value";
             newUsdValues[item.token] = "0.00"; // Fallback value
           }
-        })
+        }),
       );
 
       setUsdValues(newUsdValues);
@@ -136,7 +135,7 @@ export default function RemoveTokenModal({
     // token: (tokens.find((token) => token.selected)?.token ||
     //   "") as `0x${string}`,
     token: selectedToken as `0x${string}`,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     toast: toast,
     onSuccess: () => {
       console.log("Token removed successfully");
@@ -152,6 +151,8 @@ export default function RemoveTokenModal({
 
   // console.log("TOKEN DETAILS:", details.tokens);
   console.log("RemoveTokenModal component rendered");
+
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/90 z-50">
@@ -271,7 +272,7 @@ export default function RemoveTokenModal({
                             ? formatUnits(
                                 _details.amountSaved!, // Pass bigint directly
                                 tokenData[token]?.decimals ||
-                                  getTokenDecimals(token)
+                                  getTokenDecimals(token),
                               )
                             : "0.00"}{" "}
                           {tokenData[token]?.symbol || "Unknown"}
@@ -292,7 +293,7 @@ export default function RemoveTokenModal({
                             Number(_details!.frequency)!
                           )}`}</div> */}
                           <div className="text-sm text-gray-400">{`${formatTimeFrequency(
-                            _details!.frequency
+                            _details!.frequency,
                           )}`}</div>
                         </div>
                       </div>
@@ -437,11 +438,11 @@ export default function RemoveTokenModal({
               subText: `Effective immediately, we will stop autosaving ${formatUnits(
                 details.tokenDetails.find(
                   ({ token }: { token: string }) =>
-                    token == tokens.find((token) => token.selected)?.token
+                    token == tokens.find((token) => token.selected)?.token,
                 )?.amountToSave ?? 0n,
                 getTokenDecimals(
-                  tokens.find((token) => token.selected)?.token || ""
-                )
+                  tokens.find((token) => token.selected)?.token || "",
+                ),
               )} ${
                 tokenData[tokens.find((token) => token.selected)?.token || ""]
                   ?.symbol || "Unknown"

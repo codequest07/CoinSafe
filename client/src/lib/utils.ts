@@ -5,8 +5,7 @@ import { chainConfigs } from "@/lib/chains";
 import { getTokenPrice, getSignedAprForClaimAll } from "@/lib";
 import { TokenInfo } from "thirdweb/react";
 import { getContract, readContract } from "thirdweb";
-import { client, liskMainnet, base } from "@/lib/config";
-import { CoinsafeDiamondContract } from "@/lib/contract";
+import { client, base, liskMainnet } from "@/lib/config";
 import {
   tokenData,
   getTokenDecimals,
@@ -190,11 +189,13 @@ export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
 export const getContractFeePercentage = async (
   duration: number,
   user: string,
+  chain: any,
+  diamondAddress: string,
 ) => {
   const contract = getContract({
     client: client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
+    address: diamondAddress,
+    chain: chain,
   });
 
   const feePercentage = await readContract({
@@ -207,11 +208,15 @@ export const getContractFeePercentage = async (
   return feePercentage;
 };
 
-export const getMorphoVaultAddressForToken = async (tokenAddress: string) => {
+export const getMorphoVaultAddressForToken = async (
+  tokenAddress: string,
+  chain: any,
+  diamondAddress: string,
+) => {
   const contract = getContract({
     client: client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
+    address: diamondAddress,
+    chain: chain,
   });
 
   const vault = await readContract({
@@ -221,6 +226,8 @@ export const getMorphoVaultAddressForToken = async (tokenAddress: string) => {
     params: [tokenAddress],
   });
 
+  // console.log("Vault address for token", tokenAddress, vault);
+
   return vault;
 };
 
@@ -229,14 +236,20 @@ export const getUserTokenYield = async (
   feePercentage: number,
   tokenShares: bigint,
   principal: bigint,
+  chain: any,
+  diamondAddress: string,
 ) => {
   const contract = getContract({
     client: client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
+    address: diamondAddress,
+    chain: chain,
   });
 
-  const vaultAddress = await getMorphoVaultAddressForToken(tokenAddress);
+  const vaultAddress = await getMorphoVaultAddressForToken(
+    tokenAddress,
+    chain,
+    diamondAddress,
+  );
 
   if (!vaultAddress) throw new Error("Vault address not found!");
 
@@ -250,14 +263,21 @@ export const getUserTokenYield = async (
   const effectiveYield =
     (100 - Number(feePercentage) / 100) * Number(assets - principal);
 
+  // console.log("Effective yiield", effectiveYield);
+
   return BigInt(effectiveYield);
 };
 
-export const getSafeLSKRewards = async (safeId: string, account: any) => {
+export const getSafeLSKRewards = async (
+  safeId: string,
+  account: any,
+  chain: any,
+  diamondAddress: string,
+) => {
   const contract = getContract({
     client: client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
+    address: diamondAddress,
+    chain: chain,
   });
 
   const { avgAPR } = await getSignedAprForClaimAll();

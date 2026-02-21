@@ -46,7 +46,6 @@ const getRandomMessage = () => {
   return messages[Math.floor(Math.random() * messages.length)];
 };
 
-
 const chains = [liskMainnet, base];
 
 const DashHeader = () => {
@@ -62,14 +61,14 @@ const DashHeader = () => {
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-
   // Get streak information
   const { getStreakInfo } = useStreakSystem();
   const currentStreak = useRecoilValue(userCurrentStreakState);
 
   // Format streak with fire emoji
-  const formattedStreak = `${currentStreak > 0 ? currentStreak.toString() : "0"
-    } days 🔥`;
+  const formattedStreak = `${
+    currentStreak > 0 ? currentStreak.toString() : "0"
+  } days 🔥`;
 
   // Check if we're on a vault detail page
   const isVaultDetailPage = location.pathname.includes("/vault/") && params.id;
@@ -193,12 +192,14 @@ const DashHeader = () => {
 
               <SheetContent
                 side="right"
-                className="flex flex-col bg-[#010104] border-[#010104] w-full max-w-none">
+                className="flex flex-col bg-[#010104] border-[#010104] w-full max-w-none"
+              >
                 <nav className="grid gap-2 text-lg font-medium">
                   <Link
                     to="/"
                     onClick={() => setIsSheetOpen(false)}
-                    className="flex items-center gap-2 font-semibold">
+                    className="flex items-center gap-2 font-semibold"
+                  >
                     <MemoLogo className="w-32 h-10" />
                   </Link>
 
@@ -210,7 +211,8 @@ const DashHeader = () => {
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="outline"
-                            className="w-full justify-between bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white">
+                            className="w-full justify-between bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white"
+                          >
                             <span className="flex items-center gap-2">
                               <Network className="h-4 w-4" />
                               {activeChain?.name || "Select Network"}
@@ -226,7 +228,8 @@ const DashHeader = () => {
                                 handleSwitchChain(c.id);
                                 setIsSheetOpen(false);
                               }}
-                              className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white">
+                              className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white"
+                            >
                               {c.name}
                             </DropdownMenuItem>
                           ))}
@@ -235,20 +238,25 @@ const DashHeader = () => {
                     </div>
                   )}
 
-                  {MobileNavLinks.map((link) => (
-                    <NavLink
-                      key={link.label}
-                      to={link.to}
-                      onClick={() => setIsSheetOpen(false)}
-                      className={({ isActive }) =>
-                        isActive
-                          ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
-                          : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
-                      }>
-                      <link.icon className="w-5 h-5" />
-                      {link.label}
-                    </NavLink>
-                  ))}
+                  {MobileNavLinks.map((link) => {
+                    if (chainToUse.id === base.id && link.label === "Swap")
+                      return null;
+                    return (
+                      <NavLink
+                        key={link.label}
+                        to={link.to}
+                        onClick={() => setIsSheetOpen(false)}
+                        className={({ isActive }) =>
+                          isActive
+                            ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
+                            : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
+                        }
+                      >
+                        <link.icon className="w-5 h-5" />
+                        {link.label}
+                      </NavLink>
+                    );
+                  })}
                 </nav>
 
                 <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -286,7 +294,8 @@ const DashHeader = () => {
                     <Button
                       onClick={handleConnect}
                       disabled={isConnecting || localIsConnecting}
-                      className="w-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5]/80 text-[#010104] font-medium py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                      className="w-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5]/80 text-[#010104] font-medium py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       {isConnecting || localIsConnecting
                         ? "Connecting..."
                         : "Connect Wallet"}

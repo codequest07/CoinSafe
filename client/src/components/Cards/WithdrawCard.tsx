@@ -7,7 +7,6 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useEffect, useMemo, useState } from "react";
-import { CoinsafeDiamondContract } from "@/lib/contract";
 // import savingsFacetAbi from "../../abi/SavingsFacet.json";
 import fundingFacetAbi from "../../abi/FundingFacet.json";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
@@ -21,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 export default function WithdrawCard() {
   const navigate = useNavigate();
@@ -36,6 +36,8 @@ export default function WithdrawCard() {
   const [balances] = useRecoilState(balancesState);
   const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
 
+  const { chain, diamondAddress } = useChainConfig();
+
   const openThirdModal = () => {
     console.log("details", token, amount);
 
@@ -47,7 +49,8 @@ export default function WithdrawCard() {
     account,
     token: token as `0x${string}`,
     amount,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    chain,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     coinSafeAbi: fundingFacetAbi,
     onSuccess: () => {
       openThirdModal();

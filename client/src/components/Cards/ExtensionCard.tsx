@@ -6,7 +6,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import MemoChrome from "@/icons/Chrome";
+// import MemoChrome from "@/icons/Chrome";
 import MemoChromeMagic from "@/icons/ChromeMagic";
 import { PermissionModal } from "../Modals/Permission-modal";
 import Loading from "../Modals/loading-screen";
@@ -67,12 +67,12 @@ const ExtensionCard: React.FC<ExtensionCardProps> = ({
 };
 
 export const extensionCardData = [
-  {
-    title: "Even more seamless",
-    desc: "Get our extension for more seamless saving while you spend",
-    btnTitle: "Download",
-    icon: () => <MemoChrome className="w-16 h-16 " />,
-  },
+  // {
+  //   title: "Even more seamless",
+  //   desc: "Get our extension for more seamless saving while you spend",
+  //   btnTitle: "Download",
+  //   icon: () => <MemoChrome className="w-16 h-16 " />,
+  // },
   {
     title: "Saving just got smarter",
     desc: "Our AI analyzes your past transactions to tailor the perfect savings plan just for you",

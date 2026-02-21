@@ -18,34 +18,12 @@ import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 // import { Check, X } from "lucide-react";
 import { getTokenPrice } from "@/lib";
-import { getContract, readContract } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
 import { useLocation, useNavigate } from "react-router-dom";
-
-async function checkIsTokenAutoSaved(
-  userAddress: `0x${string}`,
-  tokenAddress: string
-) {
-  const contract = getContract({
-    client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
-  });
-
-  const balance = await readContract({
-    contract: contract,
-    method:
-      "function isAutosaveEnabledForToken(address _user, address _token) external view returns (bool)",
-    params: [userAddress, tokenAddress],
-  });
-  return balance;
-}
 
 interface AssetTableProps {
   safeDetails?: FormattedSafeDetails;
@@ -194,12 +172,7 @@ function AssetTableContent({
             const savedUsd = await getTokenPrice(
               asset.token,
               Number(asset.saved)
-            );
-
-            const autosaved = await checkIsTokenAutoSaved(
-              address! as `0x${string}`,
-              asset.token
-            );
+            )
 
             setUpdatedAssets((prev: any) => {
               const updated = [...prev];
@@ -207,7 +180,7 @@ function AssetTableContent({
                 ...updated[index],
                 balance_usd: balanceUsd,
                 saved_usd: savedUsd,
-                autosaved,
+                autosaved: false
               };
               return updated;
             });

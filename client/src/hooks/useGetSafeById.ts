@@ -100,24 +100,18 @@ export function useGetSafeById(id: string | undefined) {
 
     let totalAmountUSD = 0;
 
-    const formattedTokenAmounts = safe.tokenAmounts.reduce<
-      {
-        token: string;
-        tokenSymbol: string;
-        amount: number;
-        formattedAmount: string;
-        tokenShares?: bigint;
-      }[]
-    >((acc, token) => {
-      if (!token || !token.token) return acc;
-
-      const tokenAddress = token.token.toLowerCase();
-
-      // Check if this token has already been added
-      if (acc.some((t) => t.token.toLowerCase() === tokenAddress)) {
-        return acc;
+    const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
+      if (!token || !token.token) {
+        return {
+          token: "unknown",
+          tokenSymbol: "Unknown",
+          amount: 0,
+          formattedAmount: "0.00",
+          tokenShares: 0n,
+        };
       }
 
+      const tokenAddress = token.token.toLowerCase();
       const symbol = tokenSymbols[tokenAddress] || "Unknown";
       const tokenDecimals = getTokenDecimals(token.token);
       const amount = Number(token.amount);
@@ -126,7 +120,7 @@ export function useGetSafeById(id: string | undefined) {
       const price = priceMap[token.token] || 0;
       totalAmountUSD += formattedValue * price;
 
-      acc.push({
+      return {
         token: token.token,
         tokenSymbol: symbol,
         amount: amount,
@@ -135,13 +129,11 @@ export function useGetSafeById(id: string | undefined) {
           maximumFractionDigits: 6,
         }),
         tokenShares:
-          safe.initialShares.find(
-            (share) => share.token.toLowerCase() === token.token.toLowerCase()
+          safe?.initialShares?.find(
+            (share) => share.token.toLowerCase() === token.token.toLowerCase(),
           )?.amount || 0n,
-      });
-
-      return acc;
-    }, []);
+      };
+    });
 
     return {
       id: safe.id.toString(),

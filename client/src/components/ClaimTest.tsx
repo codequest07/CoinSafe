@@ -1,51 +1,53 @@
-import { useState } from 'react';
-import { useActiveAccount } from 'thirdweb/react';
-import { useClaimAsset } from '@/hooks/useClaimAsset';
-import { CoinsafeDiamondContract, facetAbis } from '@/lib/contract';
-import { toast } from 'sonner';
-import { Button } from './ui/button';
-import SuccessfulTxModal from './Modals/SuccessfulTxModal';
+import { useState } from "react";
+import { useActiveAccount } from "thirdweb/react";
+import { useClaimAsset } from "@/hooks/useClaimAsset";
+import { facetAbis } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { toast } from "sonner";
+import { Button } from "./ui/button";
+import SuccessfulTxModal from "./Modals/SuccessfulTxModal";
 
 // This is a test component to demonstrate the useClaimAsset hook
 export default function ClaimTest() {
   const [safeId, setSafeId] = useState<number>(1);
-  const [tokenAddress, setTokenAddress] = useState<string>('');
+  const [tokenAddress, setTokenAddress] = useState<string>("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  
+
   const account = useActiveAccount();
-  
+  const { diamondAddress } = useChainConfig();
+
   const { claimAsset, claimAllAssets, isLoading, error } = useClaimAsset({
     account,
     safeId,
     token: tokenAddress as `0x${string}`,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     coinSafeAbi: facetAbis.targetSavingsFacet,
     onSuccess: () => {
       setShowSuccessModal(true);
     },
     onError: (error) => {
-      console.error('Claim error:', error);
+      console.error("Claim error:", error);
     },
     toast,
   });
-  
+
   const handleClaimSingle = async (e: React.FormEvent) => {
     if (!tokenAddress) {
-      toast.error('Please enter a token address');
+      toast.error("Please enter a token address");
       return;
     }
-    
+
     await claimAsset(e);
   };
-  
+
   const handleClaimAll = async (e: React.FormEvent) => {
     await claimAllAssets(e);
   };
-  
+
   return (
     <div className="p-6 space-y-6 bg-gray-900 text-white rounded-lg">
       <h2 className="text-xl font-bold">Claim Test Component</h2>
-      
+
       <div className="space-y-4">
         <div>
           <label className="block mb-2">Safe ID:</label>
@@ -56,9 +58,11 @@ export default function ClaimTest() {
             className="w-full p-2 bg-gray-800 rounded"
           />
         </div>
-        
+
         <div>
-          <label className="block mb-2">Token Address (for single token claim):</label>
+          <label className="block mb-2">
+            Token Address (for single token claim):
+          </label>
           <input
             type="text"
             value={tokenAddress}
@@ -67,25 +71,25 @@ export default function ClaimTest() {
             placeholder="0x..."
           />
         </div>
-        
+
         <div className="flex space-x-4">
           <Button
             onClick={handleClaimSingle}
             disabled={isLoading || !tokenAddress}
             className="bg-green-600 hover:bg-green-700"
           >
-            {isLoading ? 'Claiming...' : 'Claim Single Token'}
+            {isLoading ? "Claiming..." : "Claim Single Token"}
           </Button>
-          
+
           <Button
             onClick={handleClaimAll}
             disabled={isLoading}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            {isLoading ? 'Claiming...' : 'Claim All Tokens'}
+            {isLoading ? "Claiming..." : "Claim All Tokens"}
           </Button>
         </div>
-        
+
         {error && (
           <div className="p-4 bg-red-900/30 text-red-300 rounded">
             <p className="font-bold">Error:</p>
@@ -93,7 +97,7 @@ export default function ClaimTest() {
           </div>
         )}
       </div>
-      
+
       <SuccessfulTxModal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}

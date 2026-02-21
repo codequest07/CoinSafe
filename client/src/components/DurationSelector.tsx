@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { getContractFeePercentage } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
 import { Skeleton } from "./ui/skeleton";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 interface PillOption {
   value: number;
@@ -54,12 +55,13 @@ export function DurationSelector({
   const isCustomDateDisabled = true;
   const account = useActiveAccount();
   const address = account?.address;
+  const { chain, diamondAddress } = useChainConfig();
 
   const [apys, setApys] = useState<Record<number, number>>(
     Object.fromEntries(options.map(({ value }) => [value, apy])) as Record<
       number,
       number
-    >
+    >,
   );
 
   // if a date should be disabled
@@ -87,11 +89,13 @@ export function DurationSelector({
             console.log(option);
             const percent = await getContractFeePercentage(
               option.value * 24 * 60 * 60,
-              address
+              address,
+              chain,
+              diamondAddress,
             );
             const newApy = ((100 - Number(percent) / 100) / 100) * apy;
             return [option.value, newApy] as const;
-          })
+          }),
         );
 
         // Convert results array to object
@@ -103,7 +107,7 @@ export function DurationSelector({
     };
 
     getApyByDuration();
-  }, [options, apy, address]);
+  }, [options, apy, address, chain, diamondAddress]);
 
   return (
     <div className={`flex flex-col space-y-3`}>
