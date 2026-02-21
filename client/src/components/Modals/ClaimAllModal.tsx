@@ -14,10 +14,11 @@ import { useActiveAccount } from "thirdweb/react";
 import { useSmartAccountTransactionInterceptorContext } from "@/hooks/useSmartAccountTransactionInterceptor";
 import { Abi, formatUnits } from "viem";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { toast } from "sonner";
 import { getSignedApr, getSignedAprForClaimAll } from "@/lib/apr-api";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 interface Token {
   token: string;
@@ -45,6 +46,7 @@ export default function ClaimAllModal({
   const [totalLskUsd, setTotalLskUsd] = useState<number | null>(null);
   const account = useActiveAccount();
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain, diamondAddress } = useChainConfig();
 
   useEffect(() => {
     if (!isOpen || !safeDetails) return;
@@ -52,7 +54,10 @@ export default function ClaimAllModal({
     const fetchUsdValues = async () => {
       const values: Record<string, number> = {};
       for (const token of safeDetails.tokenAmounts) {
-        const usdValue = await convertTokenAmountToUsd(token.token, token.amount);
+        const usdValue = await convertTokenAmountToUsd(
+          token.token,
+          token.amount,
+        );
         values[token.token] = usdValue;
       }
       setUsdValues(values);
@@ -65,7 +70,7 @@ export default function ClaimAllModal({
     if (!isOpen || !safeDetails?.id || !account) return;
     const fetchLskRewards = async () => {
       try {
-        const lsk = await getSafeLSKRewards(safeDetails.id.toString(), account);
+        const lsk = await getSafeLSKRewards(safeDetails.id.toString(), account, chain, diamondAddress);
         setTotalLsk(lsk);
         const usd = await getLskToUsd(Number(lsk));
         setTotalLskUsd(usd);
@@ -83,8 +88,8 @@ export default function ClaimAllModal({
     try {
       const contract = getContract({
         client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain: chain,
+        address: diamondAddress,
         abi: facetAbis.targetSavingsFacet as Abi,
       });
       const aprData = await getSignedApr(token);
@@ -125,8 +130,8 @@ export default function ClaimAllModal({
     try {
       const contract = getContract({
         client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain: chain,
+        address: diamondAddress,
         abi: facetAbis.targetSavingsFacet as Abi,
       });
       const aprData = await getSignedAprForClaimAll();
@@ -165,7 +170,9 @@ export default function ClaimAllModal({
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="max-w-[390px] sm:max-w-[480px] border-0 text-white bg-[#17171C] rounded-xl">
           <h2 className="text-lg font-semibold text-white">Claim all assets</h2>
-          <p className="text-gray-400 text-sm">Unable to load safe details. Please try again later.</p>
+          <p className="text-gray-400 text-sm">
+            Unable to load safe details. Please try again later.
+          </p>
         </DialogContent>
       </Dialog>
     );
@@ -195,7 +202,10 @@ export default function ClaimAllModal({
           {loading ? (
             <div className="p-4 space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-3 py-3 border-b border-white/10">
+                <div
+                  key={i}
+                  className="flex items-center gap-3 py-3 border-b border-white/10"
+                >
                   <Skeleton className="h-10 w-10 rounded-lg" />
                   <div className="flex-1 space-y-1">
                     <Skeleton className="h-4 w-20" />
@@ -250,7 +260,7 @@ export default function ClaimAllModal({
                     <p className="font-medium text-white text-sm">
                       {formatUnits(
                         tokenEntry.amount,
-                        getTokenDecimals(tokenEntry.token)
+                        getTokenDecimals(tokenEntry.token),
                       )}{" "}
                       {tokenData[tokenEntry.token]?.symbol}
                     </p>
@@ -277,7 +287,9 @@ export default function ClaimAllModal({
 
         {/* Total rewards from savings */}
         <div className="px-5 py-4 border-t border-white/10 bg-black/20">
-          <p className="text-xs text-gray-400 mb-1">Total rewards from savings</p>
+          <p className="text-xs text-gray-400 mb-1">
+            Total rewards from savings
+          </p>
           <div className="flex items-center justify-between">
             <span className="font-medium text-white">
               {totalLsk != null

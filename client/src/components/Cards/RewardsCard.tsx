@@ -2,6 +2,7 @@ import { getSafeLSKRewards } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { ReactNode } from "react";
 import { useActiveAccount } from "thirdweb/react";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 const RewardsCard = ({
   title,
@@ -22,18 +23,24 @@ const RewardsCard = ({
 }) => {
   const [value, setValue] = useState(0.0);
   const account = useActiveAccount();
+  const { chain, diamondAddress } = useChainConfig();
 
   useEffect(() => {
     async function run() {
       if (!safeId) return;
-      const reward = await getSafeLSKRewards(safeId.toString(), account);
+      const reward = await getSafeLSKRewards(
+        safeId.toString(),
+        account,
+        chain,
+        diamondAddress,
+      );
 
-      setValue(Number(reward))
+      setValue(Number(reward));
 
       console.log("Some reward", reward);
     }
     run();
-  }, [safeId]);
+  }, [safeId, account, chain, diamondAddress]);
 
   return (
     <div className="border-[1px] border-[#FFFFFF17] rounded-[12px] p-6 w-full">

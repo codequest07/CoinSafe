@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import ConnectModal from "./Modals/ConnectModal";
 import { useActiveAccount } from "thirdweb/react";
 import { Coins } from "lucide-react";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { base } from "@/lib/config";
 
 const Sidebar = () => {
   const [openConnectModal, setOpenConnectModal] = useState(false);
@@ -13,6 +15,7 @@ const Sidebar = () => {
 
   const account = useActiveAccount();
   const isConnected = !!account?.address;
+  const { chain } = useChainConfig();
 
   const handleNavigate = (e: any) => {
     if (!isConnected) {
@@ -55,27 +58,31 @@ const Sidebar = () => {
             <div className="flex-1">
               {/* Main nav links */}
               <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-                {NavLinks.map((link) => (
-                  <NavLink
-                    key={link.label}
-                    to={link.to}
-                    onClick={handleNavigate}
-                    className={() =>
-                      isLinkActive(link.to)
-                        ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#F1F1F1] bg-[#1E1E1E99] transition-all"
-                        : "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
-                    }
-                  >
-                    <>
-                      {isLinkActive(link.to) ? (
-                        <link.activeIcon className="w-5 h-5" />
-                      ) : (
-                        <link.icon className="w-5 h-5" />
-                      )}
-                      {link.label}
-                    </>
-                  </NavLink>
-                ))}
+                {NavLinks.map((link) => {
+                  if (chain.id === base.id && link.label === "Swap")
+                    return null;
+                  return (
+                    <NavLink
+                      key={link.label}
+                      to={link.to}
+                      onClick={handleNavigate}
+                      className={() =>
+                        isLinkActive(link.to)
+                          ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#F1F1F1] bg-[#1E1E1E99] transition-all"
+                          : "flex items-center gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
+                      }
+                    >
+                      <>
+                        {isLinkActive(link.to) ? (
+                          <link.activeIcon className="w-5 h-5" />
+                        ) : (
+                          <link.icon className="w-5 h-5" />
+                        )}
+                        {link.label}
+                      </>
+                    </NavLink>
+                  );
+                })}
               </nav>
 
               {/* On-ramp link */}

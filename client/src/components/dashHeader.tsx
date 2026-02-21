@@ -46,7 +46,6 @@ const getRandomMessage = () => {
   return messages[Math.floor(Math.random() * messages.length)];
 };
 
-
 const chains = [liskMainnet, base];
 
 const DashHeader = () => {
@@ -62,14 +61,14 @@ const DashHeader = () => {
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-
   // Get streak information
   const { getStreakInfo } = useStreakSystem();
   const currentStreak = useRecoilValue(userCurrentStreakState);
 
   // Format streak with fire emoji
-  const formattedStreak = `${currentStreak > 0 ? currentStreak.toString() : "0"
-    } days 🔥`;
+  const formattedStreak = `${
+    currentStreak > 0 ? currentStreak.toString() : "0"
+  } days 🔥`;
 
   // Check if we're on a vault detail page
   const isVaultDetailPage = location.pathname.includes("/vault/") && params.id;
@@ -239,21 +238,25 @@ const DashHeader = () => {
                     </div>
                   )}
 
-                  {MobileNavLinks.map((link) => (
-                    <NavLink
-                      key={link.label}
-                      to={link.to}
-                      onClick={() => setIsSheetOpen(false)}
-                      className={({ isActive }) =>
-                        isActive
-                          ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
-                          : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
-                      }
-                    >
-                      <link.icon className="w-5 h-5" />
-                      {link.label}
-                    </NavLink>
-                  ))}
+                  {MobileNavLinks.map((link) => {
+                    if (chainToUse.id === base.id && link.label === "Swap")
+                      return null;
+                    return (
+                      <NavLink
+                        key={link.label}
+                        to={link.to}
+                        onClick={() => setIsSheetOpen(false)}
+                        className={({ isActive }) =>
+                          isActive
+                            ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
+                            : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
+                        }
+                      >
+                        <link.icon className="w-5 h-5" />
+                        {link.label}
+                      </NavLink>
+                    );
+                  })}
                 </nav>
 
                 <nav className="grid items-start px-2 text-sm font-medium lg:px-4">

@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { useActiveAccount, useConnect } from "thirdweb/react";
-// import { liskMainnet } from 'viem/chains'; // Still used for chain ID reference
-import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
+// import { Chain } from 'thirdweb';
+import { Chain, getContract, prepareContractCall } from "thirdweb";
+import { client } from "@/lib/config";
 import { Account } from "thirdweb/wallets";
 import { getTokenDecimals } from "@/lib/utils";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
@@ -15,7 +15,7 @@ interface UseWithdrawAssetParams {
   amount?: number;
   coinSafeAddress: `0x${string}`;
   coinSafeAbi: any;
-  chainId?: number;
+  chain: Chain;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
   toast: any;
@@ -33,6 +33,7 @@ export const useWithdrawAsset = ({
   amount,
   coinSafeAddress,
   coinSafeAbi,
+  chain,
   onSuccess,
   onError,
   toast,
@@ -50,7 +51,7 @@ export const useWithdrawAsset = ({
 
   const contract = getContract({
     client,
-    chain: liskMainnet,
+    chain,
     address: coinSafeAddress,
   });
 
@@ -65,7 +66,7 @@ export const useWithdrawAsset = ({
         if (!address) {
           try {
             // await connect(async () => ({
-            //   chainId: liskMainnet.id,
+            //   chainId: chain.id,
             //   // Assuming a smart wallet setup; adjust based on your configuration
             //   wallet: wallet || { id: "inApp" }, // Fallback to in-app wallet if none specified
             //   client: config.client, // Assuming config.client contains Thirdweb client
@@ -145,7 +146,7 @@ export const useWithdrawAsset = ({
       toast,
       connect,
       contract,
-    ]
+    ],
   );
 
   return {

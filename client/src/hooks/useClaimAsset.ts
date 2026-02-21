@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
-import { useActiveAccount, useConnect } from "thirdweb/react";
+import { useActiveAccount } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
+import { client } from "@/lib/config";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { Account } from "thirdweb/wallets";
 import { toBigInt } from "ethers";
 import { useSmartAccountTransactionInterceptorContext } from "./useSmartAccountTransactionInterceptor";
@@ -40,15 +41,15 @@ export const useClaimAsset = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { connect } = useConnect();
   const activeAccount = useActiveAccount();
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
   const address = activeAccount?.address || providedAddress;
+  const { chain } = useChainConfig();
 
   // Initialize contract
   const contract = getContract({
     client,
-    chain: liskMainnet,
+    chain: chain,
     address: coinSafeAddress,
     abi: coinSafeAbi,
   });
@@ -136,12 +137,9 @@ export const useClaimAsset = ({
       address,
       token,
       safeId,
-      coinSafeAddress,
-      coinSafeAbi,
       onSuccess,
       onError,
       toast,
-      connect,
       contract,
       account,
       sendTransaction,
@@ -221,12 +219,9 @@ export const useClaimAsset = ({
     [
       address,
       safeId,
-      coinSafeAddress,
-      coinSafeAbi,
       onSuccess,
       onError,
       toast,
-      connect,
       contract,
       account,
       sendTransaction,

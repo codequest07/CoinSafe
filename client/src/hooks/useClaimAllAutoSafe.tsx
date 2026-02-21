@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
-import { liskMainnet } from "@/lib/config";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { Account } from "thirdweb/wallets";
 import { Abi } from "viem";
 // import { getTokenDecimals } from "@/lib/utils";
@@ -32,6 +32,7 @@ export const useClaimAllAutoSafe = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain } = useChainConfig();
 
   const claimAllAutoSafe = useCallback(
     async (e: React.FormEvent) => {
@@ -53,7 +54,7 @@ export const useClaimAllAutoSafe = ({
 
         const contract = getContract({
           client,
-          chain: liskMainnet,
+          chain: chain,
           address: coinSafeAddress,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
@@ -92,7 +93,15 @@ export const useClaimAllAutoSafe = ({
         setIsLoading(false);
       }
     },
-    [account, coinSafeAddress, onSuccess, onError, toast]
+    [
+      account,
+      coinSafeAddress,
+      onSuccess,
+      onError,
+      toast,
+      chain,
+      sendTransaction,
+    ],
   );
 
   return {

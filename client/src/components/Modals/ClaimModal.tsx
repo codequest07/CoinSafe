@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { LoaderCircle } from "lucide-react";
 import { useActiveAccount } from "thirdweb/react";
 import { useClaimAsset } from "@/hooks/useClaimAsset";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { facetAbis } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { toast } from "sonner";
 import { tokenData, getTokenDecimals } from "@/lib/utils";
 import MemoBackIcon from "@/icons/BackIcon";
@@ -46,6 +47,7 @@ export default function ClaimModal({
 
   // Hooks
   const account = useActiveAccount();
+  const { diamondAddress } = useChainConfig();
   const { safeDetails, isLoading: isSafeLoading } = useGetSafeById(safeId);
 
   // Determine if this is a target saving
@@ -57,7 +59,7 @@ export default function ClaimModal({
     account,
     safeId: Number(safeId),
     token: selectedToken as `0x${string}`,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     // Use the correct ABI based on the safe type
     coinSafeAbi: isTargetSaving
       ? facetAbis.targetSavingsFacet

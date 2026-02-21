@@ -13,9 +13,9 @@ import { convertFrequency, getTokenDecimals, tokenData } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { formatUnits } from "viem";
 import { getContract, readContract } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract } from "@/lib/contract";
+import { client } from "@/lib/config";
 import { useActiveAccount } from "thirdweb/react";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { useTokenPrices } from "@/lib/price-service";
 import { useMemo } from "react";
 // import { useClaimableBalanceAutomatedSafe } from "@/hooks/useClaimableBalanceAutomatedSafe";
@@ -23,11 +23,13 @@ import { useMemo } from "react";
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
   tokenAddress: string,
+  chain: any,
+  diamondAddress: string,
 ) {
   const contract = getContract({
     client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
+    address: diamondAddress,
+    chain: chain,
   });
 
   const balance = await readContract({
@@ -79,8 +81,8 @@ export default function AutoSavedAssetTable({
   // const [usdValues, setUsdValues] = useState<{ [key: string]: string }>({});
   // const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const account = useActiveAccount();
-  // const isConnected = !!account?.address;
   const address = account?.address;
+  const { chain, diamondAddress } = useChainConfig();
 
   const [tokenDetails, setTokenDetails] = useState<ITokenDetails[]>([]);
 
@@ -110,6 +112,8 @@ export default function AutoSavedAssetTable({
           const autosaved = await checkIsTokenAutoSaved(
             address! as `0x${string}`,
             asset.token,
+            chain,
+            diamondAddress,
           );
           _tokenDetails.push({ ...asset, autosaved });
         }
@@ -119,7 +123,7 @@ export default function AutoSavedAssetTable({
     if (address) {
       fetchAutosaveStatus();
     }
-  }, [assets, address]); // Re-run if assets change
+  }, [assets, address, chain, diamondAddress]); // Re-run if assets change
 
   return (
     <div className="w-full overflow-x-auto">

@@ -129,7 +129,7 @@ export function useGetSafeById(id: string | undefined) {
           maximumFractionDigits: 6,
         }),
         tokenShares:
-          safe.initialShares.find(
+          safe?.initialShares?.find(
             (share) => share.token.toLowerCase() === token.token.toLowerCase(),
           )?.amount || 0n,
       };

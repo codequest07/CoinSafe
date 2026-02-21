@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
-import { liskMainnet } from "@/lib/config";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { Account } from "thirdweb/wallets";
 import { Abi } from "viem";
 import { getTokenDecimals } from "@/lib/utils";
@@ -15,7 +15,6 @@ interface UseAddTokenToAutomatedPlanParams {
   frequency?: number; // In seconds
   coinSafeAddress: `0x${string}`;
   onSuccess?: () => void;
-  onApprove?: () => void;
   onError?: (error: Error) => void;
   toast: any;
 }
@@ -33,13 +32,13 @@ export const useAddTokenToAutomatedPlan = ({
   frequency,
   coinSafeAddress,
   onSuccess,
-  onApprove,
   onError,
   toast,
 }: UseAddTokenToAutomatedPlanParams): AddTokenToAutomatedPlanResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain } = useChainConfig();
 
   const addTokenToPlan = useCallback(
     async (e: React.FormEvent) => {
@@ -72,7 +71,7 @@ export const useAddTokenToAutomatedPlan = ({
 
         const contract = getContract({
           client,
-          chain: liskMainnet,
+          chain: chain,
           address: coinSafeAddress,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
@@ -103,7 +102,7 @@ export const useAddTokenToAutomatedPlan = ({
 
           await sendTransaction(addTokenTx);
 
-          toast.success("Token added to plan successfully")
+          toast.success("Token added to plan successfully");
           onSuccess?.();
         } catch (txError: any) {
           let errorMsg = "Failed to add token to plan";
@@ -138,10 +137,11 @@ export const useAddTokenToAutomatedPlan = ({
       frequency,
       coinSafeAddress,
       onSuccess,
-      onApprove,
       onError,
       toast,
-    ]
+      chain,
+      sendTransaction,
+    ],
   );
 
   return {

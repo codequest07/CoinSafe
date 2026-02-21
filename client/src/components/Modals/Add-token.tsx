@@ -3,7 +3,8 @@ import { useState, useEffect, useMemo } from "react";
 // import { Badge } from "@/components/ui/badge";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
+import { tokens } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { balancesState, supportedTokensState } from "@/store/atoms/balance";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -42,19 +43,19 @@ export default function AddToken({
   onClose,
   onSuccess,
 }: AddTokenModalProps) {
-  if (!open) return null; // If the modal is not open, return null
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [supportedTokens] = useRecoilState(supportedTokensState);
   const [balances] = useRecoilState(balancesState);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [autoSafeTokenOptions, setAutoSafeTokenOptions] = useState<string[]>(
-    []
+    [],
   );
 
   console.log(details, "details in add token modal");
 
   const smartAccount = useActiveAccount();
+  const { diamondAddress } = useChainConfig();
 
   // Get available balances
   const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
@@ -69,7 +70,7 @@ export default function AddToken({
     token: saveState.token as `0x${string}`,
     amount: saveState.amount,
     frequency: saveState.frequency,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     toast: toast,
     onSuccess: () => {
       console.log("Token added successfully");
@@ -102,7 +103,7 @@ export default function AddToken({
       setAutoSafeTokenOptions(tokens);
     }
     run();
-  }, [supportedTokens]);
+  }, [supportedTokens, hasCreatedAutoSafe]);
 
   useEffect(() => {
     // Only set token if not set and options are available
@@ -112,7 +113,7 @@ export default function AddToken({
       autoSafeTokenOptions.length > 0
     ) {
       const availableTokens = supportedTokens.filter(
-        (token) => !autoSafeTokenOptions.includes(token)
+        (token) => !autoSafeTokenOptions.includes(token),
       );
       if (availableTokens.length > 0) {
         setSaveState((prev) => ({
@@ -133,7 +134,7 @@ export default function AddToken({
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
 
       // Get the correct decimals for the token
-      let tokenDecimals = getTokenDecimals(saveState.token);
+      const tokenDecimals = getTokenDecimals(saveState.token);
 
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, tokenDecimals)));
     }
@@ -149,7 +150,7 @@ export default function AddToken({
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(
-      (frequency) => frequency.value === value
+      (frequency) => frequency.value === value,
     );
     return frequency ? frequency.label : undefined; // Return the label or null if not found
   }
@@ -174,6 +175,8 @@ export default function AddToken({
       amount: _amount,
     }));
   };
+
+  if (!open) return null; // If the modal is not open, return null
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-transparent z-50">
@@ -232,7 +235,7 @@ export default function AddToken({
                     <SelectContent>
                       {supportedTokens
                         .filter(
-                          (token) => !autoSafeTokenOptions.includes(token)
+                          (token) => !autoSafeTokenOptions.includes(token),
                         )
                         .map((token) => (
                           <SelectItem value={token} key={token}>
@@ -364,8 +367,8 @@ export default function AddToken({
               saveState.token == tokens.safu
                 ? "SAFU"
                 : saveState.token === tokens.lsk
-                ? "LSK"
-                : "USDT"
+                  ? "LSK"
+                  : "USDT"
             }
             isOpen={showSuccessModal}
             onClose={() => setShowSuccessModal(false)}

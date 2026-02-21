@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
-import { useActiveAccount } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
+import { client } from "@/lib/config";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { toBigInt } from "ethers";
 import { toast } from "sonner";
 import { tokenDecimals } from "@/lib/utils";
@@ -17,7 +17,6 @@ interface UseTopUpSafeParams {
   address?: `0x${string}`;
   topUpState: TopUpState;
   coinSafeAddress: `0x${string}`;
-  coinSafeAbi: any;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
@@ -32,14 +31,13 @@ export const useTopUpSafe = ({
   //address,
   topUpState,
   coinSafeAddress,
-  coinSafeAbi,
   onSuccess,
   onError,
 }: UseTopUpSafeParams): UseTopUpSafeResult => {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const account = useActiveAccount();
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain } = useChainConfig();
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     const decimals = tokenDecimals[token] || tokenDecimals.DEFAULT;
@@ -89,13 +87,13 @@ export const useTopUpSafe = ({
       try {
         const contract = getContract({
           client,
-          chain: liskMainnet,
+          chain: chain,
           address: coinSafeAddress,
         });
 
         const amountWithDecimals = getAmountWithDecimals(
           topUpState.amount,
-          topUpState.token
+          topUpState.token,
         );
 
         const transaction = prepareContractCall({
@@ -119,7 +117,9 @@ export const useTopUpSafe = ({
         setError(error);
 
         console.error(error);
-        toast.error(`Error: ${error?.message || "An unexpected error occured"}`)
+        toast.error(
+          `Error: ${error?.message || "An unexpected error occured"}`,
+        );
 
         onError?.(error);
         throw error;
@@ -127,7 +127,7 @@ export const useTopUpSafe = ({
         setIsPending(false);
       }
     },
-    [account, topUpState, coinSafeAddress, coinSafeAbi, onSuccess, onError]
+    [topUpState, coinSafeAddress, onSuccess, onError, chain, sendTransaction],
   );
 
   return {

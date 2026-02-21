@@ -13,13 +13,12 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { CoinsafeDiamondContract } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 // import savingsFacetAbi from "../../abi/SavingsFacet.json";
-import fundingFacetAbi from "../../abi/FundingFacet.json";
+
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import SuccessfulTxModal from "./SuccessfulTxModal";
-import ApproveTxModal from "./ApproveTxModal";
 import { formatUnits } from "viem";
 import { useActiveAccount } from "thirdweb/react";
 import { getTokenPrice } from "@/lib";
@@ -38,9 +37,9 @@ export default function WithdrawEmergencySafe({
   AvailableBalance: Record<string, unknown>;
 }) {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
   const account = useActiveAccount();
   const address = account?.address;
+  const { diamondAddress } = useChainConfig();
 
   const [amount, setAmount] = useState<number>();
   const [token, setToken] = useState("");
@@ -48,17 +47,9 @@ export default function WithdrawEmergencySafe({
   const [selectedTokenBalance, setSelectedTokenBalance] = useState(0);
   const [supportedTokens] = useRecoilState(supportedTokensState);
 
-  const showApprovalModal = () => {
-    console.log("Showing approval modal");
-    setIsApproveModalOpen(true);
-
-    setTimeout(() => setIsApproveModalOpen(false), 800);
-  };
-
   const openSuccessModal = () => {
     console.log("Opening success modal");
     // Hide the approval modal and show the success modal
-    setIsApproveModalOpen(false);
     setIsSuccessModalOpen(true);
     setIsWithdrawModalOpen(false);
 
@@ -70,17 +61,13 @@ export default function WithdrawEmergencySafe({
     account,
     token: token as `0x${string}`,
     amount,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-    coinSafeAbi: fundingFacetAbi,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     onSuccess: () => {
       console.log("Withdrawal successful");
       // Success is handled in the onClick handler
     },
     onError: (error) => {
       console.error("Withdrawal error:", error);
-      // Hide the approval modal
-      setIsApproveModalOpen(false);
-
       toast.error(error.message);
     },
     toast,
@@ -109,7 +96,7 @@ export default function WithdrawEmergencySafe({
       const tokenBalance = (AvailableBalance[token] as bigint) || 0n;
 
       setSelectedTokenBalance(
-        Number(formatUnits(tokenBalance, getTokenDecimals(token)))
+        Number(formatUnits(tokenBalance, getTokenDecimals(token))),
       );
     }
   }, [token, address, AvailableBalance]);
@@ -266,9 +253,6 @@ export default function WithdrawEmergencySafe({
                 console.log("Starting withdrawal process");
 
                 try {
-                  // First show the approval modal
-                  showApprovalModal();
-
                   // Wait a bit to ensure the modal is visible
                   await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -288,7 +272,6 @@ export default function WithdrawEmergencySafe({
                   }, 1000);
                 } catch (error) {
                   console.error("Withdrawal failed:", error);
-                  setIsApproveModalOpen(false);
                   toast.error("Withdrawal Failed", {
                     description:
                       error instanceof Error
@@ -316,7 +299,7 @@ export default function WithdrawEmergencySafe({
         </DialogFooter>
       </DialogContent>
       {/* Approval Transaction Modal */}
-      <ApproveTxModal
+      {/* <ApproveTxModal
         isOpen={isApproveModalOpen}
         onClose={() => {
           setIsApproveModalOpen(false);
@@ -325,7 +308,7 @@ export default function WithdrawEmergencySafe({
         token={tokenData[token]?.symbol || "tokens"}
         text="To Withdraw"
         disableAutoClose={true}
-      />
+      /> */}
 
       {/* Success Modal */}
       <SuccessfulTxModal

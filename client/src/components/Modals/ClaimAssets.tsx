@@ -11,8 +11,9 @@ import { LoaderCircle } from "lucide-react";
 import { useSmartAccountTransactionInterceptorContext } from "@/hooks/useSmartAccountTransactionInterceptor";
 import { Abi, formatUnits } from "viem";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { toast } from "sonner";
 import { getSignedApr, getSignedAprForClaimAll } from "@/lib/apr-api";
 import { getMorphoVaultAddressForToken } from "@/lib/utils";
@@ -51,6 +52,7 @@ export default function ClaimAssets({
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain, diamondAddress } = useChainConfig();
 
   useEffect(() => {
     setLoading(true);
@@ -74,10 +76,14 @@ export default function ClaimAssets({
 
   const checkLiquidity = async (
     tokenAddress: string,
-    amount: bigint
+    amount: bigint,
   ): Promise<boolean> => {
     try {
-      const vaultAddress = await getMorphoVaultAddressForToken(tokenAddress);
+      const vaultAddress = await getMorphoVaultAddressForToken(
+        tokenAddress,
+        chain,
+        diamondAddress,
+      );
 
       if (
         !vaultAddress ||
@@ -88,7 +94,7 @@ export default function ClaimAssets({
 
       const contract = getContract({
         client,
-        chain: liskMainnet,
+        chain: chain,
         address: vaultAddress,
         abi: morphoVaultAbi as Abi,
       });
@@ -96,23 +102,23 @@ export default function ClaimAssets({
       const maxWithdrawable = await readContract({
         contract,
         method: "function maxWithdraw(address owner) view returns (uint256)",
-        params: [CoinsafeDiamondContract.address],
+        params: [diamondAddress],
       });
 
       console.log(
         `Liquidity Check: Token ${tokenAddress}, User Amount: ${formatUnits(
           amount,
-          getTokenDecimals(tokenAddress)
+          getTokenDecimals(tokenAddress),
         )}, Max Withdrawable: ${formatUnits(
           maxWithdrawable,
-          getTokenDecimals(tokenAddress)
-        )}`
+          getTokenDecimals(tokenAddress),
+        )}`,
       );
 
       if (amount > maxWithdrawable) {
         const tokenSymbol = tokenData[tokenAddress]?.symbol || "Token";
         toast.error(
-          `Withdrawals for ${tokenSymbol} are temporarily limited by vault liquidity. Please try again later.`
+          `Withdrawals for ${tokenSymbol} are temporarily limited by vault liquidity. Please try again later.`,
         );
         return false;
       }
@@ -132,8 +138,8 @@ export default function ClaimAssets({
     try {
       const contract = getContract({
         client: client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain: chain,
+        address: diamondAddress,
         abi: facetAbis.targetSavingsFacet as Abi,
       });
 
@@ -163,7 +169,7 @@ export default function ClaimAssets({
 
       // Find the specific token amount for the liquidity check
       const tokenAmount = safeDetails.tokenAmounts.find(
-        (t) => t.token.toLowerCase() === token.toLowerCase()
+        (t) => t.token.toLowerCase() === token.toLowerCase(),
       );
 
       if (tokenAmount) {
@@ -205,8 +211,8 @@ export default function ClaimAssets({
 
       const contract = getContract({
         client: client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain: chain,
+        address: diamondAddress,
         abi: facetAbis.targetSavingsFacet as Abi,
       });
 

@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { useActiveAccount } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
+import { client } from "@/lib/config";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { toBigInt } from "ethers";
 import { toast } from "sonner";
 import { useRecoilState } from "recoil";
@@ -26,7 +27,10 @@ interface UseUnlockSafeProps {
 }
 
 interface UseUnlockSafeResult {
-  unlockSafe: (e: React.FormEvent) => Promise<any>;
+  unlockSafe: (
+    e: React.FormEvent,
+    overrides?: Partial<UnlockState>,
+  ) => Promise<any>;
   isPending: boolean;
   error: Error | null;
   isSuccess: boolean;
@@ -49,6 +53,7 @@ export const useUnlockSafe = ({
   const [isSuccess, setIsSuccess] = useRecoilState(unlockSuccessState);
   const account = useActiveAccount();
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain } = useChainConfig();
 
   const getAmountWithDecimals = (amount: number, token: string): bigint => {
     // Ensure amount is greater than zero
@@ -100,7 +105,7 @@ export const useUnlockSafe = ({
   };
 
   const unlockSafe = useCallback(
-    async (e: React.FormEvent) => {
+    async (e: React.FormEvent, overrides?: Partial<UnlockState>) => {
       e.preventDefault();
       setError(null);
 
@@ -114,14 +119,15 @@ export const useUnlockSafe = ({
         return;
       }
 
-      // Get the latest state directly from Recoil with null check
-      console.log("Current unlockState:", unlockState);
+      // Get the latest state directly from Recoil merged with overrides
+      const currentState = { ...unlockState, ...overrides };
+      console.log("Current unlockState merged with overrides:", currentState);
 
-      if (!unlockState || !unlockState.token || !unlockState.safeId) {
+      if (!currentState || !currentState.token || !currentState.safeId) {
         console.error("Invalid unlock state detected:", {
-          state: unlockState,
-          token: unlockState?.token,
-          safeId: unlockState?.safeId,
+          state: currentState,
+          token: currentState?.token,
+          safeId: currentState?.safeId,
         });
         const error = new Error("Invalid unlock state");
         setError(error);
@@ -129,8 +135,6 @@ export const useUnlockSafe = ({
         onError?.(error);
         return;
       }
-
-      const currentState = unlockState;
 
       // Log the current unlock state for debugging
       console.log("useUnlockSafe - Proceeding with state:", {
@@ -206,7 +210,7 @@ export const useUnlockSafe = ({
 
         const contract = getContract({
           client,
-          chain: liskMainnet,
+          chain: chain,
           address: coinSafeAddress,
           abi: coinSafeAbi, // Explicitly provide the ABI
         });
@@ -221,14 +225,31 @@ export const useUnlockSafe = ({
           amountWithDecimals.toString(),
         );
 
-        // Fetch signed APR data from the backend
-        console.log("Fetching signed APR data for token:", currentState.token);
-        const aprData = await getSignedApr(currentState.token);
-        console.log("APR data received:", {
-          avgAPR: aprData.avgAPR.toString(),
-          aprNonce: aprData.aprNonce.toString(),
-          signatureLength: aprData.aprSignature.length,
-        });
+        // Fetch signed APR data — Base chain doesn't have Merkl APRs so use dummy values
+        let aprData: {
+          avgAPR: bigint;
+          aprNonce: bigint;
+          aprSignature: `0x${string}`;
+        };
+        const BASE_CHAIN_ID = 8453;
+        if (chain.id === BASE_CHAIN_ID) {
+          aprData = {
+            avgAPR: BigInt(4),
+            aprNonce: BigInt(0),
+            aprSignature: "0x00" as `0x${string}`,
+          };
+        } else {
+          console.log(
+            "Fetching signed APR data for token:",
+            currentState.token,
+          );
+          aprData = await getSignedApr(currentState.token);
+          console.log("APR data received:", {
+            avgAPR: aprData.avgAPR.toString(),
+            aprNonce: aprData.aprNonce.toString(),
+            signatureLength: aprData.aprSignature.length,
+          });
+        }
 
         // Prepare the contract call with new signature:
         // function withdrawSavings(uint256 _safeId, address _tokenAddress, uint256 _amount, bool _acceptEarlyWithdrawalFee, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
@@ -317,7 +338,11 @@ export const useUnlockSafe = ({
       coinSafeAbi,
       onSuccess,
       onError,
-      setUnlockState,
+      chain,
+      sendTransaction,
+      setIsPending,
+      setIsSuccess,
+      setError,
     ],
   );
 

@@ -9,17 +9,19 @@ import { useActiveAccount } from "thirdweb/react";
 import { tokenData } from "@/lib/utils";
 import { getTokenPrice } from "@/lib";
 import { getContract, readContract } from "thirdweb";
-import { CoinsafeDiamondContract } from "@/lib/contract";
-import { client, liskMainnet } from "@/lib/config";
+import { client } from "@/lib/config";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 async function checkIsTokenAutoSaved(
   userAddress: `0x${string}`,
-  tokenAddress: string
+  tokenAddress: string,
+  chain: any,
+  diamondAddress: string,
 ) {
   const contract = getContract({
     client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
+    address: diamondAddress,
+    chain: chain,
   });
 
   const balance = await readContract({
@@ -110,6 +112,7 @@ export default function MobileAssetTable({
   const account = useActiveAccount();
   //   const isConnected = !!account?.address;
   const address = account?.address;
+  const { chain, diamondAddress } = useChainConfig();
 
   //   const hasNonZeroAssets = assets.some(
   //     (asset) => Number.parseFloat(asset.balance) > 0
@@ -130,10 +133,10 @@ export default function MobileAssetTable({
           autosaved: null,
           isMature: safeDetails
             ? safeDetails.id !== "911" &&
-            safeDetails.unlockTime &&
-            safeDetails.unlockTime < new Date() &&
-            safeDetails.target &&
-            safeDetails.target !== "Emergency Safe"
+              safeDetails.unlockTime &&
+              safeDetails.unlockTime < new Date() &&
+              safeDetails.target &&
+              safeDetails.target !== "Emergency Safe"
             : false,
           tokenInfo: tokenData[asset.token.toLowerCase()] || {
             symbol: "Unknown",
@@ -152,12 +155,14 @@ export default function MobileAssetTable({
 
             const savedUsd = await getTokenPrice(
               asset.token,
-              Number(asset.saved)
+              Number(asset.saved),
             );
 
             const autosaved = await checkIsTokenAutoSaved(
               address! as `0x${string}`,
-              asset.token
+              asset.token,
+              chain,
+              diamondAddress,
             );
 
             let isMature = transformedAssets[index].isMature;
