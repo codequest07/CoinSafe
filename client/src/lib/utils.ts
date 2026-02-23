@@ -153,43 +153,52 @@ export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
   [liskMainnet.id]: [
     {
       address: chainConfigs[liskMainnet.id].tokens.usdt!,
-      icon: tokenData[chainConfigs[liskMainnet.id].tokens.usdt?.toLowerCase()]
-        ?.image,
-      name: tokenData[chainConfigs[liskMainnet.id].tokens.usdt?.toLowerCase()]
-        ?.name,
+      icon: tokenData[
+        chainConfigs[liskMainnet.id].tokens.usdt?.toLowerCase() || ""
+      ]?.image,
+      name: tokenData[
+        chainConfigs[liskMainnet.id].tokens.usdt?.toLowerCase() || ""
+      ]?.symbol,
       symbol:
-        tokenData[chainConfigs[liskMainnet.id].tokens.usdt?.toLowerCase()]
+        tokenData[chainConfigs[liskMainnet.id].tokens.usdt?.toLowerCase() || ""]
           ?.symbol,
     },
     {
-      address: chainConfigs[liskMainnet.id].tokens.usdc,
-      icon: tokenData[chainConfigs[liskMainnet.id].tokens.usdc?.toLowerCase()]
-        ?.image,
-      name: tokenData[chainConfigs[liskMainnet.id].tokens.usdc?.toLowerCase()]
-        ?.name,
+      address: chainConfigs[liskMainnet.id].tokens.usdc!,
+      icon: tokenData[
+        chainConfigs[liskMainnet.id].tokens.usdc?.toLowerCase() || ""
+      ]?.image,
+      name: tokenData[
+        chainConfigs[liskMainnet.id].tokens.usdc?.toLowerCase() || ""
+      ]?.symbol,
       symbol:
-        tokenData[chainConfigs[liskMainnet.id].tokens.usdc?.toLowerCase()]
+        tokenData[chainConfigs[liskMainnet.id].tokens.usdc?.toLowerCase() || ""]
           ?.symbol,
     },
     {
       address: chainConfigs[liskMainnet.id].tokens.lsk!,
-      icon: tokenData[chainConfigs[liskMainnet.id].tokens.lsk?.toLowerCase()]
-        ?.image,
-      name: tokenData[chainConfigs[liskMainnet.id].tokens.lsk?.toLowerCase()]
-        ?.name,
+      icon: tokenData[
+        chainConfigs[liskMainnet.id].tokens.lsk?.toLowerCase() || ""
+      ]?.image,
+      name: tokenData[
+        chainConfigs[liskMainnet.id].tokens.lsk?.toLowerCase() || ""
+      ]?.symbol,
       symbol:
-        tokenData[chainConfigs[liskMainnet.id].tokens.lsk?.toLowerCase()]
+        tokenData[chainConfigs[liskMainnet.id].tokens.lsk?.toLowerCase() || ""]
           ?.symbol,
     },
     {
       address: chainConfigs[liskMainnet.id].tokens.usdt0!,
-      icon: tokenData[chainConfigs[liskMainnet.id].tokens.usdt0?.toLowerCase()]
-        ?.image,
-      name: tokenData[chainConfigs[liskMainnet.id].tokens.usdt0?.toLowerCase()]
-        ?.name,
+      icon: tokenData[
+        chainConfigs[liskMainnet.id].tokens.usdt0?.toLowerCase() || ""
+      ]?.image,
+      name: tokenData[
+        chainConfigs[liskMainnet.id].tokens.usdt0?.toLowerCase() || ""
+      ]?.symbol,
       symbol:
-        tokenData[chainConfigs[liskMainnet.id].tokens.usdt0?.toLowerCase()]
-          ?.symbol,
+        tokenData[
+          chainConfigs[liskMainnet.id].tokens.usdt0?.toLowerCase() || ""
+        ]?.symbol,
     },
   ],
   [base.id]: [
