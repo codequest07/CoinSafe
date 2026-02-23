@@ -4,7 +4,7 @@ declare module "viem" {
   export function formatEther(value: bigint): string;
 
   // Client functions
-  export function http(): any;
+  export function http(url?: string, options?: any): any;
   export function createPublicClient(config: any): any;
   export function parseAbiItem(item: string): any;
   export function stringify(obj: any, replacer?: any, space?: any): string;

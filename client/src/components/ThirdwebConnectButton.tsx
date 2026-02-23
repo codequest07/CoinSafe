@@ -1,15 +1,20 @@
-import { ConnectButton } from "thirdweb/react";
+import { ConnectButton, useActiveWalletChain } from "thirdweb/react";
 import { darkTheme } from "thirdweb/react";
 import { client, liskMainnet } from "@/lib/config";
 import { wallets } from "@/lib/wallets";
 import { thirdwebSupportedTokens } from "@/lib/utils";
 
 export default function ThirdwebConnectButton() {
+  const activeChain = useActiveWalletChain();
+  
+  // Use active chain if connected, otherwise default to Lisk
+  const chainToUse = activeChain || liskMainnet;
+  
   return (
     <ConnectButton
       client={client}
       wallets={wallets}
-      chain={liskMainnet}
+      chain={chainToUse}
       supportedTokens={thirdwebSupportedTokens}
       theme={darkTheme({
         colors: { accentText: "hsl(144, 100%, 39%)" },
@@ -30,10 +35,10 @@ export default function ThirdwebConnectButton() {
           border: "1px solid #fff",
         },
       }}
-      // accountAbstraction={{
-      //   // chain: liskMainnet,
-      //   // sponsorGas: true,
-      // }}
+    // accountAbstraction={{
+    //   // chain: liskMainnet,
+    //   // sponsorGas: true,
+    // }}
     />
   );
 }

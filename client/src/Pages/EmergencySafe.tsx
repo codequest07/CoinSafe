@@ -3,9 +3,7 @@ import TopUpEmergencySafe from "@/components/Modals/TopUpEmegencySafe";
 import WithdrawEmergencySafe from "@/components/Modals/WithdrawEmergencySafe";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { publicClient } from "@/lib/client";
-import { liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis, tokens } from "@/lib/contract";
+import { tokens } from "@/lib/contract";
 import { getTokenDecimals } from "@/lib/utils";
 import { useTokenPrices } from "@/lib/price-service";
 import {
@@ -18,75 +16,20 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { useActiveAccount } from "thirdweb/react";
-import { Abi } from "viem";
-
-interface Token {
-  token: string;
-  amount: bigint;
-}
+import { useGetSafes } from "@/hooks/useGetSafes";
 
 const EmergencySafe = () => {
   const navigate = useNavigate();
-  const [safeDetails, setSafeDetails] = useState<any | null>(null);
+  const [safeData, setSafeData] = useState<any | null>(null);
   const [savingsBalance] = useRecoilState(savingsBalanceState);
   const [tokenAmounts, setTokenAmounts] = useState<Record<string, unknown>>({});
   const [supportedTokens] = useRecoilState(supportedTokensState);
+  const { fetchEmergencySafe } = useGetSafes();
 
   const account = useActiveAccount();
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const address = account?.address;
   const isConnected = !!account?.address;
-
-  const fetchEmergencySafe = async () => {
-    // Prepare multicall requests
-    const rawTxs = supportedTokens.map((token: string) => ({
-      address: CoinsafeDiamondContract.address,
-      abi: facetAbis.emergencySavingsFacet as Abi,
-      args: [address, token],
-      functionName: "getEmergencySafeBalance",
-    }));
-
-    // console.log("Preparing multicall with contracts:", rawTxs);
-
-    try {
-      const results = await publicClient.multicall({
-        contracts: rawTxs,
-        chain: liskMainnet,
-      });
-
-      // console.log("Multicall results:", results);
-
-      const tokenAmounts: Token[] = results
-        .filter(({ status }: { status: string }) => status === "success")
-        .map(({ result }: { result: any }, idx: number) => ({
-          token: supportedTokens[idx],
-          amount: result,
-        }));
-
-      // console.log("Processed token amounts:", tokenAmounts);
-
-      return {
-        id: 911n,
-        target: "Emergency Safe",
-        duration: 0n,
-        startTime: 0n,
-        unlockTime: 0n,
-        tokenAmounts,
-      };
-    } catch (err) {
-      console.error("Error in multicall for emergency safe:", err);
-      // Return empty emergency safe on error
-      return {
-        id: 911n,
-        target: "Emergency Safe",
-        duration: 0n,
-        startTime: 0n,
-        unlockTime: 0n,
-        tokenAmounts: [],
-      };
-    }
-  };
 
   // Token address to symbol mapping
   const tokenSymbols: Record<string, string> = useMemo(() => {
@@ -108,8 +51,6 @@ const EmergencySafe = () => {
   const tokenPriceMap = useMemo(() => {
     const map: Record<string, number> = {};
     supportedTokens.forEach((token, index) => {
-      // Note: supportedTokens might differ in casing from what's in tokens object?
-      // But here we use the exact string from supportedTokens to key the map.
       const query = priceQueries[index];
       if (query.data !== undefined) {
         map[token] = query.data;
@@ -124,106 +65,90 @@ const EmergencySafe = () => {
       setIsError(false);
       try {
         const safe = await fetchEmergencySafe();
+        console.log("Emergency safeeee", safe);
 
-        // Format token amounts
+        setSafeData(safe);
+
+        // Format token amounts for immediate display if needed, but derived is better
         setTokenAmounts(
           safe.tokenAmounts.reduce(
-            (acc, token) => {
+            (acc: any, token: any) => {
               if (token && token.token) acc[token.token] = token.amount;
               return acc;
             },
             {} as Record<string, unknown>,
           ),
         );
-
-        const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
-          if (!token || !token.token) {
-            return {
-              token: "unknown",
-              tokenSymbol: "Unknown",
-              amount: 0,
-              formattedAmount: "0.00",
-            };
-          }
-          const tokenAddress = token.token.toLowerCase();
-          const symbol = tokenSymbols[tokenAddress] || "Unknown";
-
-          return {
-            token: token.token,
-            tokenSymbol: symbol,
-            amount: Number(token.amount),
-            formattedAmount: Number(
-              formatUnits(token.amount, getTokenDecimals(token.token)),
-            ).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 6,
-            }),
-          };
-        });
-
-        // Calculate total amount in USD using price map
-        let totalAmountUSD = 0;
-
-        try {
-          totalAmountUSD = formattedTokenAmounts.reduce((sum, token) => {
-            if (!token || !token.tokenSymbol) return sum;
-
-            const price = tokenPriceMap[token.token] || 0;
-            // We have token.amount as "number" (from Number(bigint)) in formattedTokenAmounts?
-            // Wait, formattedTokenAmounts has amount: Number(token.amount) which might lose precision for large bigints but
-            // token.amount in safe.tokenAmounts is bigint.
-
-            // Let's use the raw BigInt from safe.tokenAmounts if possible, but formattedTokenAmounts is easier here.
-            // The original code used convertTokenAmountToUsd which takes token address and bigint amount.
-            // Here we can use the price * formatted amount (which is basically amount / 10^decimals).
-
-            // token.amount in formattedTokenAmounts is Number(bigint).
-            // Wait, if I use Number(bigint), that's the raw unit amount, not formatted?
-            // Yes: Number(token.amount).
-            // Wait, convertTokenAmountToUsd takes BigInt amount.
-            // formatUnits(amount, decimals) gives string "1.5".
-
-            // Correct logic:
-            // Value = (Amount / 10^Decimals) * Price
-
-            const decimals = getTokenDecimals(token.token);
-            // We can reconstruct exact value using safe.tokenAmounts corresponding entry?
-            // Or just use the formattedTokenAmounts data if we trust Number().
-
-            // Let's use the helper to get numeric value from BigInt amount in safe.tokenAmounts
-            const rawToken = safe.tokenAmounts.find(
-              (t) => t.token === token.token,
-            );
-            if (!rawToken) return sum;
-
-            const amountVal = Number(formatUnits(rawToken.amount, decimals));
-            return sum + amountVal * price;
-          }, 0);
-        } catch (error) {
-          console.error("Error calculating token prices:", error);
-        }
-
-        setSafeDetails({
-          id: safe.id.toString(),
-          target: safe.target,
-          tokenAmounts: formattedTokenAmounts,
-          totalAmountUSD,
-        });
       } catch (error) {
         setIsError(true);
-        setSafeDetails(null);
+        setSafeData(null);
         console.error("Error loading safe details:", error);
       } finally {
         setIsLoading(false);
       }
     }
 
-    // Only run when we have price map or savingsBalance changes
-    if (Object.keys(tokenPriceMap).length > 0 || supportedTokens.length === 0) {
+    if (supportedTokens.length > 0 && isConnected) {
       run();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savingsBalance, tokenPriceMap]);
+  }, [savingsBalance, isConnected, supportedTokens, fetchEmergencySafe]); // Removed tokenPriceMap dependency
+
+  // Derive final safeDetails with USD values
+  const safeDetails = useMemo(() => {
+    if (!safeData) return null;
+
+    const formattedTokenAmounts = safeData.tokenAmounts.map((token: any) => {
+      if (!token || !token.token) {
+        return {
+          token: "unknown",
+          tokenSymbol: "Unknown",
+          amount: 0,
+          formattedAmount: "0.00",
+        };
+      }
+      const tokenAddress = token.token.toLowerCase();
+      const symbol = tokenSymbols[tokenAddress] || "Unknown";
+
+      return {
+        token: token.token,
+        tokenSymbol: symbol,
+        amount: Number(token.amount),
+        formattedAmount: Number(
+          formatUnits(token.amount, getTokenDecimals(token.token)),
+        ).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 6,
+        }),
+      };
+    });
+
+    // Calculate total USD synchronously
+    const totalAmountUSD = formattedTokenAmounts.reduce(
+      (sum: number, token: any) => {
+        const price = tokenPriceMap[token.token] || 0;
+
+        // Re-calculate the numeric value from the raw amount to maintain precision if needed
+        // But formattedTokenAmounts has just strings for display.
+        // Let's use the raw safeData amount again
+        const originalToken = safeData.tokenAmounts.find(
+          (t: any) => t.token === token.token,
+        );
+        if (!originalToken) return sum;
+
+        const decimals = getTokenDecimals(token.token);
+        const amountVal = Number(formatUnits(originalToken.amount, decimals));
+
+        return sum + amountVal * price;
+      },
+      0,
+    );
+
+    return {
+      ...safeData,
+      tokenAmounts: formattedTokenAmounts,
+      totalAmountUSD,
+    };
+  }, [safeData, tokenPriceMap, tokenSymbols]);
 
   // const [isLoading, setIsLoading] = useState(true);
   const [showTopUpModal, setShowTopUpModal] = useState(false);

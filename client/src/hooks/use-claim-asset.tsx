@@ -1,17 +1,19 @@
 import { useCallback } from "react";
 import { useSmartAccountTransactionInterceptor } from "./useSmartAccountTransactionInterceptor";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { toast } from "sonner";
 import { Abi } from "viem";
+import { getSignedApr, getSignedAprForClaimAll } from "@/lib/apr-api";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 type ClaimSingle = (assetId: string) => Promise<void>;
 type ClaimAll = () => Promise<void>;
 
 type UseClaimAssetDeps = {
-    safeDetails: { id: number | string | bigint };
-    setClaiming: React.Dispatch<React.SetStateAction<boolean>>;
+  safeDetails: { id: number | string | bigint };
+  setClaiming: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function useClaimAsset({
@@ -22,22 +24,41 @@ export default function useClaimAsset({
   handleClaimAll: ClaimAll;
 } {
   const { sendTransaction } = useSmartAccountTransactionInterceptor();
+  const { chain, diamondAddress } = useChainConfig();
+
   const handleClaimSingle: ClaimSingle = useCallback(
     async (token: string) => {
       setClaiming(true);
       try {
         const contract = getContract({
           client,
-          chain: liskMainnet,
-          address: CoinsafeDiamondContract.address,
+          chain,
+          address: diamondAddress,
           abi: facetAbis.targetSavingsFacet as Abi,
         });
 
+        // Fetch signed APR data from the backend
+        console.log("Fetching signed APR data for token:", token);
+        const aprData = await getSignedApr(token);
+        console.log("APR data received:", {
+          avgAPR: aprData.avgAPR.toString(),
+          aprNonce: aprData.aprNonce.toString(),
+          signatureLength: aprData.aprSignature.length,
+        });
+
+        // Prepare the contract call for claim with new signature:
+        // function claim(uint256 _safeId, address _tokenAddress, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
         const claimTx = prepareContractCall({
           contract,
           method:
-            "function claim(uint256 _safeId, address _tokenAddress) external",
-          params: [BigInt(safeDetails.id), token],
+            "function claim(uint256 _safeId, address _tokenAddress, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external",
+          params: [
+            BigInt(safeDetails.id),
+            token,
+            aprData.avgAPR,
+            aprData.aprNonce,
+            aprData.aprSignature,
+          ],
         });
 
         const { transactionHash } = await sendTransaction(claimTx);
@@ -47,6 +68,12 @@ export default function useClaimAsset({
         }
       } catch (error) {
         console.error("Error claiming token:", error);
+        if (
+          error instanceof Error &&
+          error.message.includes("Failed to fetch signed APR")
+        ) {
+          toast?.error("Failed to fetch APR data. Please try again.");
+        }
       } finally {
         setClaiming(false);
       }
@@ -57,12 +84,12 @@ export default function useClaimAsset({
       setClaiming,
       toast,
       facetAbis,
-      CoinsafeDiamondContract,
-      liskMainnet,
+      chain,
+      diamondAddress,
       getContract,
       prepareContractCall,
       sendTransaction,
-    ]
+    ],
   );
 
   const handleClaimAll: ClaimAll = useCallback(async () => {
@@ -70,15 +97,32 @@ export default function useClaimAsset({
     try {
       const contract = getContract({
         client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain,
+        address: diamondAddress,
         abi: facetAbis.targetSavingsFacet as Abi,
       });
 
+      // Fetch signed APR data for claimAll (no specific token)
+      console.log("Fetching signed APR data for claimAll");
+      const aprData = await getSignedAprForClaimAll();
+      console.log("APR data received for claimAll:", {
+        avgAPR: aprData.avgAPR.toString(),
+        aprNonce: aprData.aprNonce.toString(),
+        signatureLength: aprData.aprSignature.length,
+      });
+
+      // Prepare the contract call for claimAll with new signature:
+      // function claimAll(uint256 _safeId, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
       const claimAllTx = prepareContractCall({
         contract,
-        method: "function claimAll(uint256 _safeId) external",
-        params: [BigInt(safeDetails.id)],
+        method:
+          "function claimAll(uint256 _safeId, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external",
+        params: [
+          BigInt(safeDetails.id),
+          aprData.avgAPR,
+          aprData.aprNonce,
+          aprData.aprSignature,
+        ],
       });
 
       const { transactionHash } = await sendTransaction(claimAllTx);
@@ -88,6 +132,12 @@ export default function useClaimAsset({
       }
     } catch (error) {
       console.error("Error claiming all tokens:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("Failed to fetch signed APR")
+      ) {
+        toast?.error("Failed to fetch APR data. Please try again.");
+      }
     } finally {
       setClaiming(false);
     }
@@ -97,8 +147,8 @@ export default function useClaimAsset({
     setClaiming,
     toast,
     facetAbis,
-    CoinsafeDiamondContract,
-    liskMainnet,
+    chain,
+    diamondAddress,
     getContract,
     prepareContractCall,
     sendTransaction,

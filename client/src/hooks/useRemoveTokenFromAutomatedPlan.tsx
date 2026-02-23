@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { getContract, prepareContractCall } from "thirdweb";
 import { client } from "@/lib/config";
-import { liskMainnet } from "@/lib/config";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { Account } from "thirdweb/wallets";
 import { Abi } from "viem";
 import { facetAbis } from "@/lib/contract";
@@ -33,6 +33,7 @@ export const useRemoveTokenFromAutomatedPlan = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain } = useChainConfig();
 
   const removeTokenFromPlan = useCallback(
     async (e: React.FormEvent) => {
@@ -43,17 +44,17 @@ export const useRemoveTokenFromAutomatedPlan = ({
       try {
         // Input validation
         if (!account) {
-          toast.error("Please connect your wallet")
+          toast.error("Please connect your wallet");
           throw new Error("No account connected");
         }
         if (!token) {
-          toast.error("Please select a token to remove")
+          toast.error("Please select a token to remove");
           throw new Error("Token address is required");
         }
 
         const contract = getContract({
           client,
-          chain: liskMainnet,
+          chain: chain,
           address: coinSafeAddress,
           abi: facetAbis.automatedSavingsFacet as Abi,
         });
@@ -69,7 +70,7 @@ export const useRemoveTokenFromAutomatedPlan = ({
 
           await sendTransaction(removeTokenTx);
 
-          toast.success("Token removed from plan successfully")
+          toast.success("Token removed from plan successfully");
           onSuccess?.();
         } catch (txError: any) {
           let errorMsg = "Failed to remove token from plan";
@@ -89,7 +90,16 @@ export const useRemoveTokenFromAutomatedPlan = ({
         setIsLoading(false);
       }
     },
-    [account, token, coinSafeAddress, onSuccess, onError, toast]
+    [
+      account,
+      token,
+      coinSafeAddress,
+      onSuccess,
+      onError,
+      toast,
+      chain,
+      sendTransaction,
+    ],
   );
 
   return {

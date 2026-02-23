@@ -1,9 +1,10 @@
-import { JsonRpcProvider } from "ethers";
 import { tokens } from "./contract";
 import { API_BASE_URL } from "./api-config";
 // export const base_uri_test = import.meta.env.DEV ? 'http://localhost:1234' : 'https://coinsafe-0q0m.onrender.com';
 export const base_uri = `${API_BASE_URL}`;
 
+import { chainConfigs } from "./chains";
+import { base } from "./config";
 import { getStoredTokenPrice } from "./price-service";
 
 export const getLskToUsd = async (lsk: number) => {
@@ -32,32 +33,36 @@ export async function getTokenPrice(token: string, amount: number | undefined) {
     // Basic mapping or direct usage
     let finalPrice = 0;
 
-    switch (token) {
-      case tokens.safu:
-        // SAFU might be special or just use the same logic
-        // The original code used a sync helper, but we can treat it same if we want consistency
-        // For now, let's stick to the specific helpers which now use the cache
+    const lowerToken = token.toLowerCase();
+
+    switch (lowerToken) {
+      case tokens.safu.toLowerCase():
         finalPrice = await getSafuToUsd(amount);
         break;
-      case tokens.lsk:
+      case tokens.lsk.toLowerCase():
         finalPrice = await getLskToUsd(amount);
         break;
-      case tokens.usdt:
+      case tokens.usdt.toLowerCase():
         finalPrice = await getUsdtToUsd(amount);
         break;
-      case tokens.usdc:
+      case tokens.usdc.toLowerCase():
+      case chainConfigs[base.id].tokens.usdc.toLowerCase():
         finalPrice = await getUsdcToUsd(amount);
         break;
+      case tokens.usdt0.toLowerCase():
+        // Handle usdt0 same as usdt? Or create new helper. assuming same price as usdt for now
+        finalPrice = await getUsdtToUsd(amount);
+        break;
       default:
-        // Attempt generic fetch if it's a known token elsewhere?
-        // For now return 0 as per original
+        // Check if there are other tokens
         return "0.00";
     }
-    return finalPrice.toFixed(2);
+
+    return finalPrice.toFixed(5);
   } catch (error) {
     console.error("Error getting token price:", error);
     return "0.00";
   }
 }
 
-export const jsonRpcProvider = new JsonRpcProvider("https://rpc.api.lisk.com");
+export * from "./apr-api";

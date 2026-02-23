@@ -11,59 +11,114 @@ import {
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { useTokenPrices } from "@/lib/price-service";
+import { getTokenPrice } from "@/lib";
 // import { getContract, readContract } from "thirdweb";
 // import { client, liskMainnet } from "@/lib/config";
 // import { CoinsafeDiamondContract } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
-import { tokenData } from "@/lib/utils";
+import { getTokenDecimals, getUserTokenYield, tokenData } from "@/lib/utils";
+import { useChainConfig } from "@/hooks/useChainConfig";
+
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
+import { useRecoilState } from "recoil";
+import { balancesState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
 import TopUpModal from "./Modals/Top-up-modal";
 import UnlockModal from "./Modals/UnlockModal";
-import WithdrawEmergencySafe from "./Modals/WithdrawEmergencySafe";
+import { formatUnits } from "viem";
+import { saveAtom } from "@/store/atoms/save";
 import TopUpEmergencySafe from "./Modals/TopUpEmegencySafe";
+import WithdrawEmergencySafe from "./Modals/WithdrawEmergencySafe";
 
 interface AssetTableProps {
   safeDetails?: FormattedSafeDetails;
-  isEmergencyPage?: boolean;
 }
 
-export default function TargetAssetTable({
-  safeDetails,
-  isEmergencyPage,
-}: AssetTableProps) {
+export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
-    { token: string; balance: string; saved: string; available: string }[]
+    { token: string; balance: string; yield?: string }[]
   >([]);
 
-  useEffect(() => {
-    // If safeDetails is provided, use the safe-specific token amounts
-    if (
-      safeDetails &&
-      safeDetails.tokenAmounts &&
-      safeDetails.tokenAmounts.length > 0
-    ) {
-      const safeAssetsRes = safeDetails.tokenAmounts.map((tokenInfo) => {
-        return {
-          token: tokenInfo.token,
-          // For a specific safe, the balance is the amount in the safe
-          balance: tokenInfo.formattedAmount,
-          // For a specific safe, all tokens are "saved" in this safe
-          saved: tokenInfo.formattedAmount,
-          // For a specific safe, available is 0 as all tokens are locked in the safe
-          available: "0",
-        };
-      });
+  const [balances] = useRecoilState(balancesState);
+  const { chain, diamondAddress } = useChainConfig();
 
-      setAllAssetData(safeAssetsRes);
-      return;
-    }
-  }, [safeDetails]);
+  const availableTokenBalances = useMemo(
+    () => balances.available,
+    [balances.available],
+  );
+  const totalTokenBalances = useMemo(() => balances.total, [balances.total]);
+  const savedTokenBalances = useMemo(
+    () => balances.savings,
+    [balances.savings],
+  );
+
+  useEffect(() => {
+    const fetchSafeAssets = async () => {
+      if (
+        safeDetails &&
+        safeDetails.tokenAmounts &&
+        safeDetails.tokenAmounts.length > 0
+      ) {
+        // console.log("SafeDetails from target assets table", safeDetails);
+
+        const safeAssetsRes = await Promise.all(
+          safeDetails.tokenAmounts.map(async (tokenInfo) => {
+            let effectiveYield: bigint | null = null;
+
+            // Yield calculations now use the active chain and diamond address.
+            if (
+              safeDetails.id !== "911" &&
+              typeof safeDetails.target === "string" &&
+              safeDetails.target !== "Emergency Safe"
+            ) {
+              try {
+                effectiveYield = await getUserTokenYield(
+                  tokenInfo.token,
+                  safeDetails.feePercentage!,
+                  tokenInfo.tokenShares!,
+                  BigInt(tokenInfo.amount)!,
+                  chain,
+                  diamondAddress,
+                );
+              } catch (error) {
+                console.error("Error fetching token yield:", error);
+                effectiveYield = null;
+              }
+            }
+
+            return {
+              token: tokenInfo.token,
+              // For a specific safe, the balance is the amount in the safe
+              balance: tokenInfo.formattedAmount,
+              saved: tokenInfo.formattedAmount,
+              yield:
+                effectiveYield && effectiveYield > 0n
+                  ? formatUnits(
+                      effectiveYield,
+                      getTokenDecimals(tokenInfo.token),
+                    )
+                  : "0",
+            };
+          }),
+        );
+
+        setAllAssetData(safeAssetsRes);
+      }
+    };
+
+    fetchSafeAssets();
+  }, [
+    availableTokenBalances,
+    totalTokenBalances,
+    savedTokenBalances,
+    safeDetails,
+    chain,
+    diamondAddress,
+  ]);
 
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
@@ -75,11 +130,7 @@ export default function TargetAssetTable({
               }`
             : "Assets"}
         </h1>
-        <AssetTableContent
-          assets={allAssetData}
-          safeDetails={safeDetails}
-          isEmergencyPage={isEmergencyPage}
-        />
+        <AssetTableContent assets={allAssetData} safeDetails={safeDetails} />
       </div>
     </div>
   );
@@ -88,39 +139,26 @@ export default function TargetAssetTable({
 function AssetTableContent({
   assets,
   safeDetails,
-  isEmergencyPage,
 }: {
   assets: any[];
   safeDetails?: FormattedSafeDetails;
-  isEmergencyPage?: boolean;
 }) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
-  const navigate = useNavigate();
+  const [showTopUpEmergencyModal, setShowTopUpEmergencyModal] = useState(false);
+  const [showWithdrawEmergencyModal, setShowWithdrawEmergencyModal] =
+    useState(false);
+  const [selectedToken, setSelectedToken] = useState<string | undefined>();
+  const [updatedAssets, setUpdatedAssets] = useState<any>([]);
+  const [, setSaveState] = useRecoilState(saveAtom);
 
+  const navigate = useNavigate();
+  // console.log("ASSETS FPR TARGET", assets);
   const account = useActiveAccount();
   const isConnected = !!account?.address;
-
-  // 1. Get unique token IDs from assets to fetch prices
-  const uniqueTokenIds = useMemo(() => {
-    return Array.from(new Set(assets.map((a) => a.token))).filter((t) => !!t);
-  }, [assets]);
-
-  // 2. Fetch prices using SWR hook
-  const priceQueries = useTokenPrices(uniqueTokenIds);
-
-  const tokenPriceMap = useMemo(() => {
-    const map: Record<string, number> = {};
-    uniqueTokenIds.forEach((id, index) => {
-      const query = priceQueries[index];
-      if (query.data !== undefined) {
-        map[id] = query.data;
-      }
-    });
-    return map;
-  }, [uniqueTokenIds, priceQueries]);
+  const address = account?.address;
 
   const hasNonZeroAssets = assets.some(
     (asset) => Number.parseFloat(asset.balance) > 0,
@@ -128,47 +166,91 @@ function AssetTableContent({
 
   const handleTopUp = () => {
     // Handle top-up logic here
-    // console.log("Top up clicked");
+    console.log("Top up clicked");
     setShowTopUpModal(false);
   };
 
-  // 3. Compute updated assets derived from assets + price map
-  const updatedAssets = useMemo(() => {
-    return assets.map((asset) => {
-      const unitPrice = tokenPriceMap[asset.token] ?? 0;
+  useEffect(() => {
+    if (!assets || !address) return;
 
-      // Helper to calc value
-      const calcValue = (amountStr: string) => {
-        const amount = Number(amountStr);
-        if (isNaN(amount)) return null;
-        return (amount * unitPrice).toFixed(2);
-      };
+    let isMounted = true;
 
-      const balanceUsd = safeDetails ? null : calcValue(asset.balance);
-      const savedUsd = calcValue(asset.saved);
+    async function updateAssets(assets: any[]) {
+      try {
+        const transformedAssets: any[] = assets.map((asset: any) => ({
+          token: asset.token,
+          balance: asset.balance,
+          saved: asset.saved,
+          yield: asset.yield,
+          balance_usd: null, // Placeholder for loading state
+          saved_usd: null, // Placeholder for loading state
+          autosaved: null, // Placeholder for loading state
+          yield_usd: null,
+          tokenInfo: tokenData[asset.token.toLowerCase()] || {
+            symbol: "Unknown",
+            name: "Lisk",
+            color: "bg-[#440]",
+          },
+        }));
 
-      // Loading state check: provided we have the token ID, query.isLoading could be used
-      // But here we just check if unitPrice is present or if query is still loading.
-      // For simplicity, if unitPrice is 0 it might mean loading OR 0 value.
-      // We can check the specific query loading state if we want strict "Loading..." text.
-      // but checking unitPrice presence in map (or map having entry) is safer.
-      const isLoadingPrice = tokenPriceMap[asset.token] === undefined;
+        if (isMounted) {
+          setUpdatedAssets(transformedAssets);
+        }
 
-      return {
-        token: asset.token,
-        balance: asset.balance,
-        saved: asset.saved,
-        balance_usd: isLoadingPrice ? null : balanceUsd,
-        saved_usd: isLoadingPrice ? null : savedUsd,
-        autosaved: null,
-        tokenInfo: tokenData[asset.token] || {
-          symbol: "Unknown",
-          name: "Lisk",
-          color: "bg-[#440]",
-        },
-      };
-    });
-  }, [assets, tokenPriceMap, safeDetails]);
+        // Fetch additional data asynchronously
+        assets.forEach(async (asset: any, index: number) => {
+          try {
+            // For safe-specific view, we only need the saved USD value
+            // For global view, we need both balance and saved USD values
+            const balanceUsd = safeDetails
+              ? null
+              : await getTokenPrice(asset.token, Number(asset.balance));
+
+            const savedUsd = await getTokenPrice(
+              asset.token,
+              Number(asset.saved),
+            );
+
+            const yieldUsd = await getTokenPrice(
+              asset.token,
+              Number(asset.yield),
+            );
+
+            if (isMounted) {
+              setUpdatedAssets((prev: any) => {
+                // Determine if we should update based on current state length
+                // This prevents out-of-bounds updates if the asset list has changed
+                if (index >= prev.length) return prev;
+
+                // Compare token to ensure we are updating the correct asset
+                // This handles cases where list order might have changed (unlikely with index but good safety)
+                if (prev[index].token !== asset.token) return prev;
+
+                const updated = [...prev];
+                updated[index] = {
+                  ...updated[index],
+                  balance_usd: balanceUsd,
+                  saved_usd: savedUsd,
+                  yield_usd: yieldUsd,
+                };
+                return updated;
+              });
+            }
+          } catch {
+            // Silent error handling
+          }
+        });
+      } catch {
+        // Silent error handling
+      }
+    }
+
+    if (address && assets.length > 0) updateAssets(assets);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [assets, address, safeDetails]);
 
   if (!assets || assets.length === 0 || !hasNonZeroAssets) {
     return (
@@ -188,8 +270,8 @@ function AssetTableContent({
             <Button
               onClick={() => {
                 setShowTopUpModal(true);
-                // console.log("clicked");
-                // console.log(safeDetails);
+                console.log("clicked");
+                console.log(safeDetails);
               }}
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
             >
@@ -236,6 +318,9 @@ function AssetTableContent({
                 AMOUNT
               </TableHead>
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+                YIELD ON SAVINGS
+              </TableHead>
+              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 <span className="sr-only">Actions</span>
               </TableHead>
             </TableRow>
@@ -277,9 +362,34 @@ function AssetTableContent({
                       {asset.saved} {asset.tokenInfo.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
+                      ≈ ${asset.saved !== null ? asset.saved_usd : "Loading..."}
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell className="p-4 text-[#79E7BA] hover:text-[#79E7BA]/80">
+                  <div className="flex flex-col">
+                    <p className="">
+                      {asset?.yield > 0 ? (
+                        <>
+                          +{" "}
+                          {(() => {
+                            const y = Number(asset?.yield);
+                            const precision =
+                              y >= 1 ? 2 : y >= 0.01 ? 3 : y >= 0.001 ? 4 : 5;
+                            return Number(y.toFixed(precision));
+                          })()}{" "}
+                        </>
+                      ) : (
+                        "0.00"
+                      )}{" "}
+                      {asset.tokenInfo.symbol}
+                    </p>
+                    <p className="text-xs">
                       ≈ $
-                      {asset.saved_usd !== null
-                        ? asset.saved_usd
+                      {asset.yield_usd !== null
+                        ? asset.yield_usd > 0
+                          ? asset?.yield_usd
+                          : "0.00"
                         : "Loading..."}
                     </p>
                   </div>
@@ -290,16 +400,41 @@ function AssetTableContent({
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setShowTopUpModal(true)}
+                      onClick={() => {
+                        setSaveState((prevState) => ({
+                          ...prevState,
+                          token: asset.token,
+                        }));
+                        if (
+                          safeDetails?.id &&
+                          BigInt(safeDetails.id) === 911n
+                        ) {
+                          setShowTopUpEmergencyModal(true);
+                        } else {
+                          setShowTopUpModal(true);
+                        }
+                      }}
                     >
                       Top Up
                     </Button>
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                      onClick={() => setShowUnlockModal(true)}
+                      onClick={() => {
+                        setSelectedToken(asset.token);
+                        if (
+                          safeDetails?.id &&
+                          BigInt(safeDetails.id) === 911n
+                        ) {
+                          setShowWithdrawEmergencyModal(true);
+                        } else {
+                          setShowUnlockModal(true);
+                        }
+                      }}
                     >
-                      Unlock
+                      {safeDetails?.id && BigInt(safeDetails.id) === 911n
+                        ? "Withdraw"
+                        : "Unlock"}
                     </Button>
                   </div>
                 </TableCell>
@@ -314,47 +449,46 @@ function AssetTableContent({
         isSecondModalOpen={isSecondModalOpen}
         setIsSecondModalOpen={setIsSecondModalOpen}
       />
-      {safeDetails && showTopUpModal && isEmergencyPage ? (
-        <TopUpEmergencySafe
-          isTopUpModalOpen={showTopUpModal}
-          setIsTopUpModalOpen={setShowTopUpModal}
+      {safeDetails && showTopUpModal && (
+        <TopUpModal
           onClose={() => setShowTopUpModal(false)}
-          onTopUp={() => setShowTopUpModal(false)}
+          onTopUp={handleTopUp}
+          safeId={Number(safeDetails.id)}
         />
-      ) : (
-        safeDetails &&
-        showTopUpModal && (
-          <TopUpModal
-            onClose={() => setShowTopUpModal(false)}
-            onTopUp={handleTopUp}
-            safeId={Number(safeDetails.id)}
-          />
-        )
       )}
 
-      {safeDetails && showUnlockModal && isEmergencyPage ? (
+      {showTopUpEmergencyModal && (
+        <TopUpEmergencySafe
+          isTopUpModalOpen={showTopUpEmergencyModal}
+          setIsTopUpModalOpen={setShowTopUpEmergencyModal}
+          onClose={() => setShowTopUpEmergencyModal(false)}
+        />
+      )}
+
+      {safeDetails && showUnlockModal && (
+        <UnlockModal
+          onClose={() => {
+            setShowUnlockModal(false);
+            setSelectedToken(undefined);
+          }}
+          onUnlock={() => {}}
+          safeId={safeDetails?.id?.toString()}
+          initialToken={selectedToken}
+        />
+      )}
+
+      {showWithdrawEmergencyModal && (
         <WithdrawEmergencySafe
-          isWithdrawModalOpen={showUnlockModal}
-          setIsWithdrawModalOpen={setShowUnlockModal}
-          AvailableBalance={safeDetails.tokenAmounts.reduce(
-            (acc, token) => {
-              if (token && token.token) acc[token.token] = Number(token.amount);
+          isWithdrawModalOpen={showWithdrawEmergencyModal}
+          setIsWithdrawModalOpen={setShowWithdrawEmergencyModal}
+          AvailableBalance={safeDetails?.tokenAmounts.reduce(
+            (acc: any, token: any) => {
+              if (token && token.token) acc[token.token] = token.amount;
               return acc;
             },
-            {} as Record<string, number>,
+            {} as Record<string, unknown>,
           )}
         />
-      ) : (
-        safeDetails &&
-        showUnlockModal && (
-          <UnlockModal
-            onClose={() => {
-              setShowUnlockModal(false);
-            }}
-            onUnlock={() => {}}
-            safeId={safeDetails.id.toString()}
-          />
-        )
       )}
     </div>
   );

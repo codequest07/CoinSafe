@@ -1,13 +1,13 @@
 "use client";
 
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Loader2, LoaderCircle } from "lucide-react";
-import { cn, getTokenDecimals, tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import SavingsTargetInput from "../SavingsTargetInput";
 import AmountInput from "../AmountInput";
 import { useRecoilState, useResetRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { CoinsafeDiamondContract, tokens } from "@/lib/contract";
 import { DurationSelector } from "../DurationSelector";
 import { format, addDays, differenceInDays, startOfDay } from "date-fns";
 import { Label } from "../ui/label";
@@ -22,7 +22,6 @@ import {
 import { useCreateAutoSavings } from "@/hooks/useCreateAutoSavings";
 import { useActiveAccount } from "thirdweb/react";
 import targetSavingsFacetAbi from "../../abi/TargetSavingsFacet.json";
-import { liskMainnet } from "@/lib/config";
 import { toast } from "sonner";
 import { useSaveAsset } from "@/hooks/useSaveAsset";
 import SuccessfulTxModal from "../Modals/SuccessfulTxModal";
@@ -36,16 +35,21 @@ import {
   supportedTokensState,
 } from "@/store/atoms/balance";
 import MemoComingSoonIcon from "@/icons/ComingSoonIcon";
+// import { VaultAPYDisplay } from "../VaultAPYDisplay";
+import { useVaultApy } from "@/hooks/useVaultApy";
+import UsdtWarningModal from "../Modals/UsdtWarningModal";
+import UsdtSavingsBanner from "./UsdtSavingsBanner";
 
 export default function SaveAssetsCard() {
   const navigate = useNavigate();
   const [saveState, setSaveState] = useRecoilState(saveAtom);
   const resetSaveState = useResetRecoilState(saveAtom);
 
-  const initialSaveType = saveState.typeName === "manual" ? "auto" : "one-time";
-  const [saveType, setSaveType] = useState<"one-time" | "auto">(
-    initialSaveType
-  );
+  const chainConfig = useChainConfig();
+  const { chain, diamondAddress } = chainConfig;
+
+  const initialSaveType = "one-time";
+  const [saveType] = useState<"one-time" | "auto">(initialSaveType);
 
   useEffect(() => {
     if (saveState.typeName === "manual") {
@@ -65,7 +69,7 @@ export default function SaveAssetsCard() {
 
   function getFrequencyLabel(value: string) {
     const frequency = frequencies.find(
-      (frequency) => frequency.value === value
+      (frequency) => frequency.value === value,
     );
     return frequency ? frequency.label : undefined;
   }
@@ -99,9 +103,10 @@ export default function SaveAssetsCard() {
   const today = startOfDay(new Date());
 
   const savingsDurationOptions = [
-    { value: 30, label: "30 days" },
-    { value: 60, label: "60 days" },
-    { value: 120, label: "120 days" },
+    { value: 30, label: "30D" },
+    { value: 60, label: "60D" },
+    { value: 120, label: "120D" },
+    { value: 365, label: "365D" },
   ];
 
   const {
@@ -175,12 +180,17 @@ export default function SaveAssetsCard() {
     transactionPercentage?: string;
     frequency?: string;
   }>({});
+  const [showUsdtModal, setShowUsdtModal] = useState(false);
 
   const handleTokenSelect = (value: string) => {
     // SAFU & LSK check
     setDecimals(getTokenDecimals(value));
 
-    setSaveState((prevState) => ({ ...prevState, token: value }));
+    setSaveState((prevState) => ({ ...prevState, token: value.toLowerCase() }));
+
+    if (tokenData[value]?.symbol === "USDT") {
+      setShowUsdtModal(true);
+    }
   };
 
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -231,9 +241,9 @@ export default function SaveAssetsCard() {
   } = useSaveAsset({
     address: address as `0x${string}`,
     saveState,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     coinSafeAbi: targetSavingsFacetAbi,
-    chainId: liskMainnet.id,
+    chain: chain as any,
     onSuccess: () => {
       openThirdModal();
 
@@ -297,7 +307,7 @@ export default function SaveAssetsCard() {
 
     // Find matching SafeDetails (case-insensitive)
     const matchingSafe = safes.find(
-      (safe) => safe.target.toLowerCase() === value.trim().toLowerCase()
+      (safe) => safe.target.toLowerCase() === value.trim().toLowerCase(),
     );
 
     // Update selectedSavingsTarget
@@ -313,16 +323,10 @@ export default function SaveAssetsCard() {
 
       setIsDurationDisabled(true);
     }
-
-    // // Log for debugging
-    // console.log("Input value:", value);
-    // console.log("Matching Safe:", matchingSafe);
-    // console.log("Selected Savings Target:", matchingSafe || null);
-    // console.log("Save State:", { ...saveState, target: value });
   };
 
   const handleSaveAsset = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     if (address)
       if (!validateForm()) {
@@ -351,14 +355,12 @@ export default function SaveAssetsCard() {
       const tokensData = AvailableBalance;
       if (!tokensData) return;
 
-      // console.log("Tokens Data: ", tokensData);
-
-      const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
+      const normalizedToken = saveState.token.toLowerCase();
+      const tokenBalance = (AvailableBalance[normalizedToken] as bigint) || 0n;
 
       setSelectedTokenBalance(
-        Number(formatUnits(tokenBalance, getTokenDecimals(saveState.token)))
+        Number(formatUnits(tokenBalance, getTokenDecimals(saveState.token))),
       );
-      // console.log("token Balance: ", tokenBalance);
     }
   }, [saveState.token, address, AvailableBalance, savingsBalance]);
 
@@ -366,10 +368,8 @@ export default function SaveAssetsCard() {
     async function run() {
       setCheckingAutoSafe(true);
       try {
-        const { hasAutoSafe, tokens } = await hasCreatedAutoSafe(
-          supportedTokens
-        );
-        // console.log("Has AutoSafe::", hasAutoSafe, "Tokens::", tokens);
+        const { hasAutoSafe, tokens } =
+          await hasCreatedAutoSafe(supportedTokens);
         setHasAutoSafe(hasAutoSafe);
         setAutoSafeTokenOptions(tokens);
       } catch (error) {
@@ -380,6 +380,34 @@ export default function SaveAssetsCard() {
     }
     run();
   }, [supportedTokens, savingsBalance]);
+
+  const [totalApy, setTotalApy] = useState<number | null>(null);
+
+  // Use the updated useVaultApy hook which now handles the mapping internally
+  const { nativeApy, totalApr, fees, loading, error } = useVaultApy(
+    saveState.token as `0x${string}`,
+    "0x00cD58DEEbd7A2F1C55dAec715faF8aed5b27BF8",
+    chain.id,
+  );
+
+  useEffect(() => {
+    if (error) {
+      console.log("Error", error);
+    }
+
+    // Calculate total APY if data is available
+    if (saveState.token && nativeApy && totalApr && fees !== null && !loading) {
+      const computation = (
+        Number(totalApr) +
+        Number(nativeApy) -
+        Number(nativeApy) * Number(fees)
+      ).toFixed(2);
+
+      setTotalApy(Number(computation));
+    } else if (!loading && !nativeApy && !totalApr) {
+      setTotalApy(null);
+    }
+  }, [saveState.token, nativeApy, totalApr, fees, loading, error]);
 
   return (
     <div className="min-h-screen md:min-h-fit flex items-center justify-center md:justify-center bg-[#010104] p-4">
@@ -392,32 +420,7 @@ export default function SaveAssetsCard() {
           <h1 className="text-lg font-medium">Save assets</h1>
         </div>
 
-        {/* Toggle */}
-        <div className="flex rounded-full bg-[#5a5a5a] border-2 border-[#5a5a5a] p-0 mb-6">
-          <button
-            onClick={() => setSaveType("one-time")}
-            className={cn(
-              "flex-1 py-1 px-4 text-sm rounded-full text-center transition-colors",
-              saveType === "one-time"
-                ? "bg-[#79E7BA33] text-white"
-                : "text-gray-300"
-            )}
-          >
-            One-time save
-          </button>
-          <button
-            onClick={() => setSaveType("auto")}
-            className={cn(
-              "flex-1 py-1 text-sm px-4 rounded-full text-center transition-colors",
-              saveType === "auto"
-                ? "bg-[#79E7BA33] text-white"
-                : "text-gray-300"
-            )}
-          >
-            Autosave
-          </button>
-        </div>
-
+        <UsdtSavingsBanner />
         {saveType === "one-time" && (
           <>
             {/* Amount */}
@@ -426,7 +429,6 @@ export default function SaveAssetsCard() {
               handleAmountChange={handleAmountChange}
               handleTokenSelect={handleTokenSelect}
               saveState={saveState}
-              tokens={tokens}
               selectedTokenBalance={selectedTokenBalance}
               validationErrors={validationErrors}
               supportedTokens={supportedTokens}
@@ -512,6 +514,8 @@ export default function SaveAssetsCard() {
                   isCustomSelected={isCustomSelected}
                   className="mb-4"
                   isDisabled={isDurationDisabled}
+                  apy={totalApy || 0}
+                  isLoading={loading}
                 />
 
                 <div className="py-4">
@@ -618,7 +622,7 @@ export default function SaveAssetsCard() {
                     <Loader2 className="w-12 h-12 animate-spin " />
                   </div>
                 ) : supportedTokens.filter(
-                    (token) => !autoSafeTokenOptions.includes(token)
+                    (token) => !autoSafeTokenOptions.includes(token),
                   ).length < 1 ? (
                   <div className="p-4 flex flex-col items-center justify-center text-center gap-5">
                     <h4 className="text-xl sm:text-2xl">You're all set up</h4>
@@ -643,13 +647,13 @@ export default function SaveAssetsCard() {
                       handleAmountChange={handleAmountChange}
                       handleTokenSelect={handleTokenSelect}
                       saveState={saveState}
-                      tokens={tokens}
+                      // tokens={tokens}
                       selectedTokenBalance={selectedTokenBalance}
                       validationErrors={validationErrors}
                       supportedTokens={
                         hasAutoSafe
                           ? supportedTokens.filter(
-                              (token) => !autoSafeTokenOptions.includes(token)
+                              (token) => !autoSafeTokenOptions.includes(token),
                             )
                           : supportedTokens
                       }
@@ -741,7 +745,7 @@ export default function SaveAssetsCard() {
         {selectedOption === "by-frequency" &&
           saveType !== "one-time" &&
           (supportedTokens.filter(
-            (token) => !autoSafeTokenOptions.includes(token)
+            (token) => !autoSafeTokenOptions.includes(token),
           ).length < 1 ? (
             <></>
           ) : (
@@ -826,6 +830,15 @@ export default function SaveAssetsCard() {
         }}
         additionalDetails={{
           frequency: getFrequencyLabel(saveState.frequency.toString()),
+        }}
+      />
+
+      <UsdtWarningModal
+        open={showUsdtModal}
+        onClose={() => setShowUsdtModal(false)}
+        onSwap={() => {
+          setShowUsdtModal(false);
+          navigate("/swap");
         }}
       />
     </div>

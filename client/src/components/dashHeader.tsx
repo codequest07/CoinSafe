@@ -15,20 +15,23 @@ import { Skeleton } from "./ui/skeleton";
 import { useStreakSystem } from "@/hooks/useStreakSystem";
 import { useRecoilValue } from "recoil";
 import { userCurrentStreakState } from "@/store/atoms/streak";
-import { useActiveAccount, useConnectModal } from "thirdweb/react";
+import {
+  useActiveAccount,
+  useConnectModal,
+  useSwitchActiveWalletChain,
+  useActiveWalletChain,
+} from "thirdweb/react";
 import WalletAvatar from "./WalletAvatar";
-import { ChevronDown, Coins, Menu, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { ChevronDown, Coins, Menu, Network } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { client, liskMainnet } from "@/lib/config";
+import { client, liskMainnet, base } from "@/lib/config";
 import { darkTheme } from "thirdweb/react";
 import { wallets } from "@/lib/wallets";
-import { API_BASE_URL } from "@/lib/api-config";
 
 const getRandomMessage = () => {
   const messages = [
@@ -43,12 +46,7 @@ const getRandomMessage = () => {
   return messages[Math.floor(Math.random() * messages.length)];
 };
 
-const currencies = [
-  { code: "USDT", name: "Lisk", rate: 400.56 },
-  { code: "USDC", name: "Bitcoin", rate: 45000 },
-  // { code: "ETH", name: "Ethereum", rate: 2800 },
-  // { code: "ADA", name: "Cardano", rate: 0.45 },
-];
+const chains = [liskMainnet, base];
 
 const DashHeader = () => {
   const location = useLocation();
@@ -58,94 +56,10 @@ const DashHeader = () => {
   const address = account?.address;
   const isConnected = !!account?.address;
 
-  const [amount, setAmount] = useState<string>("0.00");
-  const [selectedCurrency, setSelectedCurrency] = useState("LSK");
-  const [, setUsdValue] = useState<number>(0);
-  const [openOnRampModal, setOpenOnRampModal] = useState(false);
+  const switchChain = useSwitchActiveWalletChain();
+  const activeChain = useActiveWalletChain();
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  /**
-   * Calculates USD equivalent when amount or currency changes
-   * This function runs automatically whenever amount or selectedCurrency state changes
-   * It finds the exchange rate for the selected currency and multiplies by the amount
-   */
-  useEffect(() => {
-    console.log("[v0] calculateUsdValue: Calculating USD equivalent");
-    const numericAmount = Number.parseFloat(amount) || 0;
-    const currency = currencies.find((c) => c.code === selectedCurrency);
-    const calculatedUsd = numericAmount * (currency?.rate || 0);
-    setUsdValue(calculatedUsd);
-    console.log(
-      `[v0] calculateUsdValue: ${numericAmount} ${selectedCurrency} = ${calculatedUsd} USD`
-    );
-  }, [amount, selectedCurrency]);
-
-  /**
-   * Handles input changes for the amount field
-   * Validates input to only allow numbers and decimal points
-   * Updates the amount state which triggers USD recalculation
-   */
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("[v0] handleAmountChange: Processing amount input change");
-    const value = e.target.value;
-    // Allow only numbers and decimal point
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
-      console.log(`[v0] handleAmountChange: Amount updated to ${value}`);
-    } else {
-      console.log("[v0] handleAmountChange: Invalid input rejected");
-    }
-  };
-
-  /**
-   * Handles currency selection from dropdown
-   * Updates the selected currency which triggers USD recalculation
-   */
-  const handleCurrencySelect = (currencyCode: string) => {
-    console.log(
-      `[v0] handleCurrencySelect: Changing currency to ${currencyCode}`
-    );
-    setSelectedCurrency(currencyCode);
-    const selectedCurrencyData = currencies.find(
-      (c) => c.code === currencyCode
-    );
-    console.log(
-      `[v0] handleCurrencySelect: New rate is ${selectedCurrencyData?.rate} USD per ${currencyCode}`
-    );
-  };
-
-  /**
-   * Clears the input field by resetting amount to "0.00"
-   * This also triggers USD recalculation to show $0.00
-   */
-  const handleClear = () => {
-    console.log("[v0] handleClear: Clearing input field");
-    setAmount("0.00");
-    console.log("[v0] handleClear: Amount reset to 0.00");
-  };
-
-  /**
-   * Formats a number as USD currency
-   * Uses Intl.NumberFormat for proper currency formatting
-   */
-  // const formatUsdValue = (value: number) => {
-  //   console.log(`[v0] formatUsdValue: Formatting ${value} as USD currency`);
-  //   return new Intl.NumberFormat("en-US", {
-  //     style: "currency",
-  //     currency: "USD",
-  //     minimumFractionDigits: 2,
-  //     maximumFractionDigits: 2,
-  //   }).format(value);
-  // };
-
-  const [token, setToken] = useState("");
-
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/fonbnk/generate-signature`)
-      .then((res) => res.json())
-      .then((data) => setToken(data?.data?.signature))
-      .catch((err) => console.error("Error fetching token:", err));
-  }, []);
 
   // Get streak information
   const { getStreakInfo } = useStreakSystem();
@@ -161,7 +75,7 @@ const DashHeader = () => {
 
   // Get safe details if we're on a vault detail page
   const { safeDetails, isLoading } = useGetSafeById(
-    isVaultDetailPage ? params.id : undefined
+    isVaultDetailPage ? params.id : undefined,
   );
 
   // Get current route name - only the last segment
@@ -212,13 +126,16 @@ const DashHeader = () => {
   const { connect, isConnecting } = useConnectModal();
   const [localIsConnecting, setLocalIsConnecting] = useState(false);
 
+  // Use active chain if connected, otherwise default to Lisk
+  const chainToUse = activeChain || liskMainnet;
+
   const handleConnect = async () => {
     try {
       setLocalIsConnecting(true);
       await connect({
         client,
         wallets,
-        chain: liskMainnet,
+        chain: chainToUse,
         theme: darkTheme({
           colors: { accentText: "hsl(144, 100%, 39%)" },
         }),
@@ -227,6 +144,17 @@ const DashHeader = () => {
     } catch (error) {
       console.error("Wallet connection failed:", error);
       setLocalIsConnecting(false);
+    }
+  };
+
+  const handleSwitchChain = async (chainId: number) => {
+    try {
+      const chainToSwitch = chains.find((c) => c.id === chainId);
+      if (chainToSwitch) {
+        await switchChain(chainToSwitch);
+      }
+    } catch (error) {
+      console.error("Failed to switch chain:", error);
     }
   };
 
@@ -262,48 +190,88 @@ const DashHeader = () => {
                 </Button>
               </SheetTrigger>
 
-              {/* Mobile Navigation Sidebar */}
               <SheetContent
                 side="right"
-                className="flex flex-col bg-[#010104] border-[#010104] w-full max-w-none">
+                className="flex flex-col bg-[#010104] border-[#010104] w-full max-w-none"
+              >
                 <nav className="grid gap-2 text-lg font-medium">
                   <Link
                     to="/"
                     onClick={() => setIsSheetOpen(false)}
-                    className="flex items-center gap-2 font-semibold">
+                    className="flex items-center gap-2 font-semibold"
+                  >
                     <MemoLogo className="w-32 h-10" />
                   </Link>
 
-                  {MobileNavLinks.map((link) => (
-                    <NavLink
-                      key={link.label}
-                      to={link.to}
-                      onClick={() => setIsSheetOpen(false)}
-                      className={({ isActive }) =>
-                        isActive
-                          ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
-                          : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
-                      }>
-                      <link.icon className="w-5 h-5" />
-                      {link.label}
-                    </NavLink>
-                  ))}
+                  {/* Chain Switcher for Mobile */}
+                  {isConnected && (
+                    <div className="my-2 px-2">
+                      <p className="text-sm text-gray-500 mb-2">Network</p>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-between bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white"
+                          >
+                            <span className="flex items-center gap-2">
+                              <Network className="h-4 w-4" />
+                              {activeChain?.name || "Select Network"}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-full bg-[#1A1A1E] border-[#333] text-white">
+                          {chains.map((c) => (
+                            <DropdownMenuItem
+                              key={c.id}
+                              onClick={() => {
+                                handleSwitchChain(c.id);
+                                setIsSheetOpen(false);
+                              }}
+                              className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white"
+                            >
+                              {c.name}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+
+                  {MobileNavLinks.map((link) => {
+                    if (chainToUse.id === base.id && link.label === "Swap")
+                      return null;
+                    return (
+                      <NavLink
+                        key={link.label}
+                        to={link.to}
+                        onClick={() => setIsSheetOpen(false)}
+                        className={({ isActive }) =>
+                          isActive
+                            ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
+                            : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
+                        }
+                      >
+                        <link.icon className="w-5 h-5" />
+                        {link.label}
+                      </NavLink>
+                    );
+                  })}
                 </nav>
 
                 <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-                  <div
-                    // to={`https://pay.fonbnk.com/?source=o9VjcneL&signature=${token}`}
-                    // target="_blank"
-                    onClick={() => setOpenOnRampModal(true)}
-                    className={
-                      "flex items-center cursor-pointer gap-3 font-[400] rounded-lg px-3 py-3 my-1.5 text-[#B5B5B5] transition-all"
-                    }>
-                    <>
-                      <Coins className="w-5 h-5" />
-                      {"On-ramp"}
-                      {/* <span><ExternalLinkIcon className="w-5 h-5" /></span> */}
-                    </>
-                  </div>
+                  <NavLink
+                    to="/onramp"
+                    onClick={() => setIsSheetOpen(false)}
+                    className={({ isActive }) =>
+                      isActive
+                        ? "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 my-3 text-[#FFFFFF] bg-[#FFFBF833] transition-all hover:text-primary"
+                        : "flex items-center gap-3 font-[400] rounded-lg px-3 py-2 text-[#FFFFFF] transition-all hover:text-primary"
+                    }
+                  >
+                    <Coins className="w-5 h-5" />
+                    On-ramp
+                  </NavLink>
                 </nav>
                 {/* <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
                   <NavLink
@@ -326,7 +294,8 @@ const DashHeader = () => {
                     <Button
                       onClick={handleConnect}
                       disabled={isConnecting || localIsConnecting}
-                      className="w-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5]/80 text-[#010104] font-medium py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                      className="w-full bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5]/80 text-[#010104] font-medium py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       {isConnecting || localIsConnecting
                         ? "Connecting..."
                         : "Connect Wallet"}
@@ -366,92 +335,12 @@ const DashHeader = () => {
             </div>
             <div className="flex items-center sm:space-x-3">
               {/* <ClaimBtn /> */}
-              {/* Icons for connected wallets */}
+              {/* Icons for connected wallets (includes chain switcher when connected) */}
               <SmileFace />
             </div>
           </div>
         </div>
       </header>
-
-      {openOnRampModal && (
-        <Dialog open={openOnRampModal} onOpenChange={setOpenOnRampModal}>
-          <DialogContent className="max-w-[390px] sm:max-w-[400px] border-[1px] border-[#FFFFFF3D] rounded-lg text-white bg-[#17171C] p-4 absolute left-1/2 top-[30%]">
-            <DialogHeader>
-              <DialogTitle className="py-4">On-ramp Details</DialogTitle>
-            </DialogHeader>
-            <div className="w-full max-w-sm">
-              <label
-                htmlFor=""
-                className="text-[#CACACA] font-light text-[14px]">
-                Amount to On-ramp
-              </label>
-              <div className="flex items-center justify-between bg-transaprarent rounded-lg p-4 border-[1px] border-[#FFFFFF3D]">
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={amount}
-                    onChange={handleAmountChange}
-                    className="text-2xl font-medium bg-transparent border-none outline-none w-full"
-                    placeholder="0.00"
-                  />
-                  {/* <div className="text-sm text-gray-500 mt-1">
-                    ≈ {formatUsdValue(usdValue)}
-                  </div> */}
-                </div>
-
-                <div className="flex items-center gap-2 ml-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleClear}
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600">
-                    <X className="h-4 w-4" />
-                  </Button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="secondary"
-                        className="flex items-center gap-2 border-[1px] border-[#FFFFFF21] bg-gray-600 text-[#F1F1F1] hover:bg-gray-700 p-2 text-[14px] rounded-md">
-                        {selectedCurrency}
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="w-32 bg-gray-600 text-white">
-                      {currencies.map((currency) => (
-                        <DropdownMenuItem
-                          key={currency.code}
-                          onClick={() => handleCurrencySelect(currency.code)}
-                          className="cursor-pointer">
-                          <div className="flex flex-col">
-                            <span className="font-medium">{currency.code}</span>
-                            {/* <span className="text-xs text-gray-500">{currency.name}</span> */}
-                          </div>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-              <div className="py-4 flex justify-end">
-                <Link
-                  to={
-                    !amount
-                      ? "#"
-                      : `https://pay.fonbnk.com/auth?source=o9VjcneL&network=LISK&asset=${selectedCurrency}&amount=${amount}&currency=crypto&paymentChannel=bank&countryIsoCode=NG&address=${account?.address}&signature=${token}`
-                  }
-                  target="_blank">
-                  <Button className="bg-[#FFFFFFE5] hover:bg-[#FFFFFFE5] rounded-[100px] border-[1px] border-[#FFFFFF05] text-[#010104] text-[14px]">
-                    Proceed to On-ramp
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </main>
   );
 };

@@ -1,104 +1,23 @@
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useGetSafes } from "@/hooks/useGetSafes";
-import { formatUnits } from "viem";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTokenPrices } from "@/lib/price-service";
-import { useAutomatedSafeForUser } from "@/hooks/useGetAutomatedSafe";
-import { useActiveAccount } from "thirdweb/react";
-import { getTokenDecimals } from "@/lib/utils";
-
-interface DisplaySafe {
-  id: string;
-  name: string;
-  amount: number;
-  status: "Flexible" | "Locked";
-  unlockDate: string;
-}
+import { useSavingsCardsData } from "@/hooks/useSavingsCardsData";
 
 export default function SavingsCards() {
   const navigate = useNavigate();
-  const account = useActiveAccount();
-  const userAddress = account?.address;
-
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { safes, isLoading, isError, fetchSafes } = useGetSafes();
-  const { details } = useAutomatedSafeForUser(userAddress as `0x${string}`);
 
-  const hasActiveAutoSavings =
-    details?.tokenDetails?.some(
-      (token: { amountToSave: number }) => token.amountToSave > 0n,
-    ) ?? false;
-
-  details?.tokenDetails?.some(
-    (token: { amountToSave: number }) => token.amountToSave > 0n,
-  ) ?? false;
-
-  const [displaySafes, setDisplaySafes] = useState<DisplaySafe[]>([]);
-
-  const [totalUsdValue, setTotalUsdValue] = useState<string>("0.00");
-  const [error, setError] = useState<string | null>(null);
-
-  // 1. Gather all unique tokens from both Safes and Automated Savings
-  const uniqueTokenIds = useMemo(() => {
-    const tokens = new Set<string>();
-
-    // From Automated Savings
-    if (details?.tokenDetails) {
-      details.tokenDetails.forEach((t: any) => tokens.add(t.token));
-    }
-
-    // From Safes
-    if (safes) {
-      safes.forEach((safe: any) => {
-        safe.tokenAmounts.forEach((t: any) => tokens.add(t.token));
-      });
-    }
-
-    return Array.from(tokens).filter((t) => !!t);
-  }, [details, safes]);
-
-  // 2. Fetch Prices
-  const priceQueries = useTokenPrices(uniqueTokenIds);
-  const tokenPriceMap = useMemo(() => {
-    const map: Record<string, number> = {};
-    uniqueTokenIds.forEach((id, index) => {
-      const query = priceQueries[index];
-      if (query.data !== undefined) {
-        map[id] = query.data;
-      }
-    });
-    return map;
-  }, [uniqueTokenIds, priceQueries]);
-
-  // 3. Calculate Automated Savings USD Value
-  useEffect(() => {
-    if (!details?.tokenDetails || details.tokenDetails.length === 0) {
-      setTotalUsdValue("0.00");
-      setError(null);
-      return;
-    }
-
-    let totalUsd = 0;
-
-    details.tokenDetails.forEach((item: any) => {
-      const price = tokenPriceMap[item.token] || 0;
-      const decimals = getTokenDecimals(item.token);
-      const amount = Number(formatUnits(item.amountSaved, decimals));
-      totalUsd += amount * price;
-    });
-
-    setTotalUsdValue(totalUsd.toFixed(2));
-    setError(null);
-  }, [details, tokenPriceMap]);
-
-  // Force refresh safes when component mounts
-  useEffect(() => {
-    fetchSafes();
-  }, [fetchSafes]);
+  const {
+    safes,
+    displaySafes,
+    totalUsdValue,
+    isLoading,
+    isError,
+    hasActiveAutoSavings,
+  } = useSavingsCardsData();
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -121,54 +40,6 @@ export default function SavingsCards() {
       });
     }
   };
-
-  // 4. Calculate Safes Display Data
-  useEffect(() => {
-    if (!safes) return;
-
-    const getSafes = () => {
-      const safeList = safes.map((safe: any) => {
-        // Calculate total amount for this safe
-        const totalAmount = safe.tokenAmounts.reduce(
-          (sum: number, token: any) => {
-            const price = tokenPriceMap[token.token] || 0;
-            const decimals = getTokenDecimals(token.token);
-            const amount = Number(formatUnits(token.amount, decimals));
-            return sum + amount * price;
-          },
-          0,
-        );
-
-        let formattedDate = "N/A";
-
-        if (safe.unlockTime) {
-          const unlockDate = new Date(Number(safe.unlockTime) * 1000);
-
-          formattedDate = unlockDate.toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          });
-        }
-
-        const status = Number(safe.duration) > 0 ? "Locked" : "Flexible";
-
-        return {
-          id: safe.id.toString(),
-          name: safe.target,
-          amount: totalAmount,
-          status: status as "Locked" | "Flexible",
-          unlockDate: safe.unlockTime
-            ? `Unlocks on ${formattedDate}`
-            : "Unlocks Anytime",
-        };
-      });
-
-      setDisplaySafes(safeList);
-    };
-
-    getSafes();
-  }, [safes, tokenPriceMap]);
 
   return (
     <div className="bg-black text-white p-4 w-full">
@@ -246,8 +117,20 @@ export default function SavingsCards() {
                     <div className="flex items-baseline">
                       <span className="text-2xl font-[400]">$</span>
                       <span className="text-2xl font-[400] ml-1">
+                        {/* {Number(
+                          formatUnits(
+                            details?.tokenDetails?.reduce(
+                              (total: any, obj: any) => total + obj.amountSaved,
+                              0n
+                            ),
+                            getTokenDecimals(
+                              details?.tokenDetails?.[0]?.token || "0x"
+                            )
+                          )
+                        ).toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                        }) || 0.0} */}
                         {totalUsdValue}
-                        {error ? ` (${error})` : ""}
                       </span>
                       <span className="text-sm text-gray-400 ml-2">USD</span>
                     </div>
@@ -275,6 +158,11 @@ export default function SavingsCards() {
                         bg-[#79E7BA33] font-[400] text-[#F1F1F1] rounded-xl flex items-center p-1 px-2 hover:bg-[#79E7BA33]
                       `}
                       >
+                        {/* {safe.id === "911"
+                          ? safe.status
+                          : safe.id !== "911" && !safe.isLocked
+                          ? "Matured"
+                          : safe.status} */}
                         {safe.status}
                       </Badge>
                     </div>

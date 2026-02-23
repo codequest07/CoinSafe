@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -24,8 +24,10 @@ import SavingOption from "./Modals/SavingOption";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
 import { useActiveAccount } from "thirdweb/react";
 // import { ChevronDown, ExternalLink } from "lucide-react";
-import { convertTokenAmountToUsd, getTokenDecimals, tokenData } from "@/lib/utils";
+import { getTokenDecimals, tokenData } from "@/lib/utils";
 import Deposit from "@/components/Depositt";
+import { useTokenPrices } from "@/lib/price-service";
+import { useMemo } from "react";
 
 enum TxStatus {
   Completed = 0,
@@ -63,10 +65,10 @@ const formatDate = (timestamp: number) => {
     day === 1 || day === 21 || day === 31
       ? "st"
       : day === 2 || day === 22
-      ? "nd"
-      : day === 3 || day === 23
-      ? "rd"
-      : "th";
+        ? "nd"
+        : day === 3 || day === 23
+          ? "rd"
+          : "th";
 
   return `${day}${suffix} ${month}, ${year}`;
 };
@@ -127,21 +129,23 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
 
   const groupedTransactions = groupTransactionsByDate(transactions || []);
 
-  const [usdValues, setUsdValues] = useState<number[]>([]);
-
-  useEffect(() => {
-    const fetchUsdValues = async () => {
-      if (!transactions) return;
-      const values = await Promise.all(
-        transactions.map((transaction) =>
-          convertTokenAmountToUsd(transaction.token, transaction.amount)
-        )
-      );
-      setUsdValues(values);
-    };
-
-    fetchUsdValues();
+  // --- Price Fetching Integration ---
+  const uniqueTokenAddresses = useMemo(() => {
+    if (!transactions) return [];
+    const tokens = new Set<string>();
+    transactions.forEach((tx) => tokens.add(tx.token));
+    return Array.from(tokens);
   }, [transactions]);
+
+  const priceQueries = useTokenPrices(uniqueTokenAddresses);
+
+  const priceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    uniqueTokenAddresses.forEach((addr, idx) => {
+      map[addr] = priceQueries[idx].data || 0;
+    });
+    return map;
+  }, [uniqueTokenAddresses, priceQueries]);
 
   if (!transactions || transactions.length === 0) {
     return (
@@ -164,13 +168,15 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
             <div className="flex gap-4">
               <Button
                 onClick={openDepositModal}
-                className="bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#2a2a2a]">
+                className="bg-[#1E1E1E99] rounded-[2rem] hover:bg-[#2a2a2a]"
+              >
                 Deposit
               </Button>
               <Button
                 onClick={openFirstModal}
                 variant="outline"
-                className="bg-white text-black rounded-[2rem] hover:bg-gray-100">
+                className="bg-white text-black rounded-[2rem] hover:bg-gray-100"
+              >
                 Save
               </Button>
             </div>
@@ -244,7 +250,8 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                         {txs.map((transaction, index) => (
                           <TableRow
                             className="border-b border-[#1D1D1D]"
-                            key={index}>
+                            key={index}
+                          >
                             <TableCell className="py-4 px-4">
                               <span className="font-medium text-white">
                                 {capitalize(transaction.typeOfTransaction)}
@@ -255,11 +262,20 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                               <div className="flex flex-col">
                                 <span className="flex items-center gap-2 text-sm text-gray-400">
                                   <span>
-                                    {formatUnits(transaction.amount, getTokenDecimals(transaction.token))}{" "}
-                                    {tokenData[transaction.token]?.symbol}
+                                    {formatUnits(
+                                      transaction.amount,
+                                      getTokenDecimals(transaction.token),
+                                    )}{" "}
+                                    {
+                                      tokenData[transaction.token.toLowerCase()]
+                                        ?.symbol
+                                    }
                                   </span>
                                   <img
-                                    src={tokenData[transaction.token]?.image}
+                                    src={
+                                      tokenData[transaction.token.toLowerCase()]
+                                        ?.image
+                                    }
                                     width={12}
                                     height={12}
                                     className="w-[14px] h-[14px] rounded-full"
@@ -267,9 +283,21 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                                 </span>
                                 <div className="text-sm text-gray-400 mt-1">
                                   ≈{" "}
-                                  {usdValues[index] !== undefined
-                                    ? `$${usdValues[index]?.toFixed(2)}`
-                                    : "Loading..."}
+                                  {(() => {
+                                    const price =
+                                      priceMap[transaction.token] || 0;
+                                    const decimals = getTokenDecimals(
+                                      transaction.token,
+                                    );
+                                    const val =
+                                      Number(
+                                        formatUnits(
+                                          transaction.amount,
+                                          decimals,
+                                        ),
+                                      ) * price;
+                                    return `$${val.toFixed(2)}`;
+                                  })()}
                                 </div>
                               </div>
                             </TableCell>
@@ -285,8 +313,9 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                             <TableCell className="py-4 px-4">
                               <Badge
                                 className={`border-0 ${getColorClass(
-                                  0
-                                )} px-3 py-1 rounded-full`}>
+                                  0,
+                                )} px-3 py-1 rounded-full`}
+                              >
                                 {getStatusText(0)}
                               </Badge>
                             </TableCell>

@@ -1,10 +1,11 @@
-import { useCallback, useMemo, useEffect, useState } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
 import { useRecoilState } from "recoil";
+import { useQuery } from "@tanstack/react-query";
 
-import { liskMainnet, client } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
 import {
   safesState,
@@ -12,11 +13,10 @@ import {
   safesErrorState,
   targetedSafesState,
 } from "@/store/atoms/safes";
-import {
-  savingsBalanceState,
-  supportedTokensState,
-} from "@/store/atoms/balance";
-import { publicClient } from "@/lib/client";
+import { supportedTokensState } from "@/store/atoms/balance";
+import { getPublicClient } from "@/lib/client";
+import { useChainConfig } from "@/hooks/useChainConfig";
+
 // Define the SafeDetails interface based on the provided struct
 interface Token {
   token: string;
@@ -30,57 +30,50 @@ export interface SafeDetails {
   startTime: bigint;
   unlockTime: bigint;
   tokenAmounts: Token[];
+  feePercentage: number;
+  initialShares: Token[];
 }
 
 export function useGetSafes() {
-  // Use Recoil state instead of local state
-  const [safes, setSafes] = useRecoilState(safesState);
-  const [targetedSafes, setTargetedSafes] = useRecoilState(targetedSafesState);
-  const [isLoading, setIsLoading] = useRecoilState(safesLoadingState);
-  const [error, setError] = useRecoilState(safesErrorState);
+  const [, setSafes] = useRecoilState(safesState);
+  const [, setTargetedSafes] = useRecoilState(targetedSafesState);
+  const [, setIsLoading] = useRecoilState(safesLoadingState);
+  const [, setError] = useRecoilState(safesErrorState);
   const [supportedTokens] = useRecoilState(supportedTokensState);
-  // Derive isError from error state
-  const isError = error !== null;
 
   const account = useActiveAccount();
-  const [savingsBalance] = useRecoilState(savingsBalanceState);
   const address = account?.address;
+  const { chain, diamondAddress } = useChainConfig();
 
   const contract = useMemo(() => {
     return getContract({
       client,
-      address: CoinsafeDiamondContract.address,
-      chain: liskMainnet,
+      address: diamondAddress,
+      chain: chain,
       abi: facetAbis.targetSavingsFacet as Abi,
     });
-  }, []); // <-- Only create once
+  }, [diamondAddress, chain]);
 
-  // Track if we've loaded data at least once
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-
-  // Track the last fetch time to prevent too frequent refreshes
-  const [lastFetchTime, setLastFetchTime] = useState(0);
-
-  // Define fetchEmergencySafe inside the callback
-  const fetchEmergencySafe = async () => {
+  const fetchEmergencySafe = useCallback(async () => {
     // Prepare multicall requests
-    const rawTxs = supportedTokens.map((token: string) => ({
-      address: CoinsafeDiamondContract.address,
+    const uniqueSupportedTokens = Array.from(new Set(supportedTokens));
+    const rawTxs = uniqueSupportedTokens.map((token: string) => ({
+      address: diamondAddress as `0x${string}`,
       abi: facetAbis.emergencySavingsFacet as Abi,
       args: [address, token],
       functionName: "getEmergencySafeBalance",
     }));
 
     try {
-      const results = await publicClient.multicall({
+      const currentPublicClient = getPublicClient(chain.id);
+      const results = await currentPublicClient.multicall({
         contracts: rawTxs,
-        chain: liskMainnet,
       });
 
       const tokenAmounts: Token[] = results
         .filter(({ status }: { status: string }) => status === "success")
         .map(({ result }: { result: any }, idx: number) => ({
-          token: supportedTokens[idx],
+          token: uniqueSupportedTokens[idx],
           amount: result,
         }));
 
@@ -104,115 +97,78 @@ export function useGetSafes() {
         tokenAmounts: [],
       };
     }
-  };
+  }, [address, chain.id, diamondAddress, supportedTokens]);
 
-  const fetchSafes = useCallback(
-    async (force = false) => {
-      if (!address) {
-        return;
-      }
+  const {
+    data: queryData,
+    isLoading: queryIsLoading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: ["safes", address, chain.id],
+    queryFn: async () => {
+      if (!address) return [];
 
-      // Prevent fetching too frequently (at least 5 seconds between any refreshes)
-      const now = Date.now();
-      if (now - lastFetchTime < 5000) {
-        return;
-      }
+      // Get regular safes
+      const result = await readContract({
+        contract,
+        method: resolveMethod("getSafes"),
+        params: [],
+        from: address,
+      });
 
-      // Only fetch if we don't already have data or we're forcing a refresh
-      if (safes.length > 0 && !force && !isLoading) {
-        return;
-      }
-
-      // If we're already loading, don't start another fetch
-      if (isLoading) {
-        return;
-      }
-
-      // Only set loading to true on initial load
-      if (!initialLoadComplete) {
-        setIsLoading(true);
-      }
-      setError(null);
-      setLastFetchTime(now);
-
-      try {
-        // First, ensure we have supported tokens
-        if (!supportedTokens || supportedTokens.length === 0) {
-          console.warn("No supported tokens available, fetching from contract");
-        }
-
-        // Get regular safes
-        const result = await readContract({
-          contract,
-          method: resolveMethod("getSafes"),
-          params: [],
-          from: address,
+      // Update targeted safes state directly here if needed, or in useEffect
+      // Deduplicate tokenAmounts for each safe to prevent "tripling" issue
+      const targetedSafesData = (result as SafeDetails[]).map((safe) => {
+        const uniqueTokens = new Set<string>();
+        const uniqueTokenAmounts = safe.tokenAmounts.filter((t) => {
+          if (uniqueTokens.has(t.token.toLowerCase())) {
+            return false;
+          }
+          uniqueTokens.add(t.token.toLowerCase());
+          return true;
         });
-        setTargetedSafes(result as SafeDetails[]);
+        return {
+          ...safe,
+          tokenAmounts: uniqueTokenAmounts,
+        };
+      });
 
-        // Fetch emergency safe
-        const emergencySafe = await fetchEmergencySafe();
+      // Fetch emergency safe
+      const emergencySafe = await fetchEmergencySafe();
 
-        // Combine and update state for both targeted and emergency safes
-        setSafes([emergencySafe, ...result] as SafeDetails[]);
-      } catch (err: any) {
-        setError(err);
-        setSafes([]);
-      } finally {
-        setIsLoading(false);
-        setInitialLoadComplete(true);
-      }
+      return [emergencySafe, ...targetedSafesData] as SafeDetails[];
     },
-    [
-      contract,
-      address,
-      safes.length,
-      isLoading,
-      setSafes,
-      setError,
-      setIsLoading,
-      initialLoadComplete,
-      setInitialLoadComplete,
-      lastFetchTime,
-      setLastFetchTime,
-      supportedTokens,
-    ],
-  );
+    enabled: !!address && supportedTokens.length > 0,
+    staleTime: 1000 * 30, // 30 seconds stale time
+  });
+
+  // Sync with Recoil state for backward compatibility
+  useEffect(() => {
+    if (queryData) {
+      setSafes(queryData);
+      // Extract targeted safes (excluding emergency safe id 911)
+      const targeted = queryData.filter((safe) => safe.id !== 911n);
+      setTargetedSafes(targeted);
+    }
+  }, [queryData, setSafes, setTargetedSafes]);
 
   useEffect(() => {
-    fetchSafes(true);
-  }, [savingsBalance]);
-  // Add an effect to monitor supportedTokens changes
-  useEffect(() => {
-    // If we have tokens and safes are already loaded, consider refreshing
-    if (supportedTokens.length > 0 && safes.length > 0) {
-      // Check if emergency safe has token amounts
-      const emergencySafe = safes.find((safe) => safe.id === 911n);
-      if (
-        emergencySafe &&
-        (!emergencySafe.tokenAmounts || emergencySafe.tokenAmounts.length === 0)
-      ) {
-        fetchSafes(true); // Force refresh to get emergency safe with tokens
-      }
-    }
-  }, [supportedTokens, safes, fetchSafes]);
+    setIsLoading(queryIsLoading);
+  }, [queryIsLoading, setIsLoading]);
 
-  // Only fetch on initial mount, not on every dependency change
   useEffect(() => {
-    // This will only run once when the component mounts
-    if (safes.length === 0 && !isLoading && address && !initialLoadComplete) {
-      fetchSafes(false); // Explicitly pass false to indicate this is not a forced refresh
-    }
-  }, [address, safes.length, isLoading, fetchSafes, initialLoadComplete]); // Include dependencies to avoid lint warnings
+    setError(queryError as Error | null);
+  }, [queryError, setError]);
 
   return {
-    safes,
-    targetedSafes,
-    isLoading,
-    isError,
-    error,
+    safes: queryData || [],
+    targetedSafes: queryData ? queryData.filter((s) => s.id !== 911n) : [],
+    isLoading: queryIsLoading,
+    isError: !!queryError,
+    error: queryError,
     fetchEmergencySafe,
-    fetchSafes,
-    refetch: () => fetchSafes(true), // Explicitly pass true to force a refresh
+    fetchSafes: refetch, // Alias for refetch
+    refetch,
   };
 }

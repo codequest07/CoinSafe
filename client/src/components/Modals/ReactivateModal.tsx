@@ -7,7 +7,7 @@ import { saveAtom } from "@/store/atoms/save";
 import { DurationSelector } from "../DurationSelector";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import AmountInput from "../AmountInput";
-import { tokens } from "@/lib/contract";
+
 import { formatUnits } from "viem";
 import {
   convertTokenAmountToUsd,
@@ -277,9 +277,8 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                             </div>
                           ) : (
                             <div
-                              className={`w-7 h-7 rounded-full ${
-                                tokenData[token.token].color
-                              } flex items-center justify-center text-white font-medium`}
+                              className={`w-7 h-7 rounded-full ${tokenData[token.token].color
+                                } flex items-center justify-center text-white font-medium`}
                             >
                               {token.tokenSymbol?.charAt(0)}
                             </div>
@@ -362,7 +361,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                 handleAmountChange={handleAmountChange}
                 handleTokenSelect={handleTokenSelect}
                 saveState={saveState}
-                tokens={tokens}
+
                 selectedTokenBalance={selectedTokenBalance}
                 validationErrors={validationErrors}
                 supportedTokens={supportedTokens}
@@ -378,9 +377,9 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     </span>
                   </div>
                   {saveState.token &&
-                  (selectedTokenBalance == 0 ||
-                    (saveState.amount &&
-                      saveState.amount > selectedTokenBalance)) ? (
+                    (selectedTokenBalance == 0 ||
+                      (saveState.amount &&
+                        saveState.amount > selectedTokenBalance)) ? (
                     <Button
                       variant="link"
                       className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"

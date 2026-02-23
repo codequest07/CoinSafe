@@ -1,6 +1,6 @@
 import MemoDashboard from "@/icons/Dashboard";
 import MemoPortfolio from "@/icons/Portfolio";
-import MemoReward from "@/icons/Reward";
+// import MemoReward from "@/icons/Reward";
 // import MemoStaking from "@/icons/Staking";
 import MemoVault from "@/icons/Vault";
 import MemoMagicPen from "@/icons/MagicPen";
@@ -26,8 +26,10 @@ import MemoPortfolioActive from "@/icons/PortfolioActive";
 import MemoDashboardActive from "@/icons/DashboardActive";
 import MemoVaultActive from "@/icons/VaultActive";
 // import MemoStakingActive from "@/icons/StakingActive";
-import MemoRewardActive from "@/icons/RewardActive";
+// import MemoRewardActive from "@/icons/RewardActive";
 import MemoProfile from "@/icons/Profile";
+import MemoSwap from "@/icons/Swap";
+import MemoSwapActive from "@/icons/SwapActive";
 
 export type Asset = {
   symbol: string;
@@ -65,11 +67,17 @@ export const NavLinks = [
     label: "Vault",
   },
   {
-    to: "/rewards",
-    icon: MemoReward,
-    activeIcon: MemoRewardActive,
-    label: "Rewards",
+    to: "/swap",
+    icon: MemoSwap,
+    activeIcon: MemoSwapActive,
+    label: "Swap",
   },
+  // {
+  //   to: "/rewards",
+  //   icon: MemoReward,
+  //   activeIcon: MemoRewardActive,
+  //   label: "Rewards",
+  // },
 ];
 export const MobileNavLinks = [
   {
@@ -91,17 +99,23 @@ export const MobileNavLinks = [
     label: "Vault",
   },
   {
+    to: "/swap",
+    icon: MemoSwap,
+    activeIcon: MemoSwapActive,
+    label: "Swap",
+  },
+  {
     to: "/profile",
     icon: MemoProfile,
     activeIcon: MemoProfile,
     label: "Profile",
   },
-  {
-    to: "/rewards",
-    icon: MemoReward,
-    activeIcon: MemoRewardActive,
-    label: "Rewards",
-  },
+  // {
+  //   to: "/rewards",
+  //   icon: MemoReward,
+  //   activeIcon: MemoRewardActive,
+  //   label: "Rewards",
+  // },
 ];
 
 export const savings = [

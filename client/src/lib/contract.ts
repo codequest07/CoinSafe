@@ -6,6 +6,10 @@ import automatedSavingsFacetAbi from "../abi/AutomatedSavingsFacet.json";
 import emergencySavingsFacetAbi from "../abi/EmergencySavingsFacet.json";
 import fundingFacetAbi from "../abi/FundingFacet.json";
 
+/**
+ * @deprecated Use useChainConfig() hook to access chain-specific tokens.
+ * This object is Lisk-only and will be removed.
+ */
 export const tokens = {
   usdt: "0x05D032ac25d322df992303dCa074EE7392C117b9",
   usdc: "0xF242275d3a6527d877f2c927a82D9b057609cc71",

@@ -4,7 +4,7 @@ import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { tokens, CoinsafeDiamondContract } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import AmountInput from "../AmountInput";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { useActiveAccount } from "thirdweb/react";
@@ -46,6 +46,7 @@ export default function TopUpEmergencySafe({
   const { safeDetails, isLoading: isSafeLoading } = useGetSafeById("911");
   const account = useActiveAccount();
   const address = account?.address;
+  const { diamondAddress } = useChainConfig();
 
   const [balances] = useRecoilState(balancesState);
   const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
@@ -92,7 +93,7 @@ export default function TopUpEmergencySafe({
   useEffect(() => {
     if (AvailableBalance && saveState.token) {
       const tokenBalance = (AvailableBalance[saveState.token] as bigint) || 0n;
-      const decimals = getTokenDecimals(saveState.token)
+      const decimals = getTokenDecimals(saveState.token);
       setSelectedTokenBalance(Number(formatUnits(tokenBalance, decimals)));
     }
   }, [AvailableBalance, saveState.token]);
@@ -104,7 +105,7 @@ export default function TopUpEmergencySafe({
       token: saveState.token,
       amount: saveState.amount,
     },
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     onSuccess: () => {
       setShowSuccessModal(true);
       // If onTopUp is provided, call it as well
@@ -158,7 +159,7 @@ export default function TopUpEmergencySafe({
                         ? `${Math.ceil(
                             (safeDetails.unlockTime.getTime() -
                               new Date().getTime()) /
-                              (1000 * 60 * 60 * 24)
+                              (1000 * 60 * 60 * 24),
                           )} days to unlock`
                         : "Ready to unlock"
                       : "Flexible"}
@@ -179,7 +180,6 @@ export default function TopUpEmergencySafe({
             handleAmountChange={handleAmountChange}
             handleTokenSelect={handleTokenSelect}
             saveState={saveState}
-            tokens={tokens}
             selectedTokenBalance={selectedTokenBalance}
             validationErrors={validationErrors}
             supportedTokens={supportedTokens}

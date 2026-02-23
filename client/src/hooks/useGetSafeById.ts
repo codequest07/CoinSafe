@@ -1,12 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useGetSafes } from "@/hooks/useGetSafes";
 import { formatUnits } from "viem";
-import { tokens } from "@/lib/contract";
-import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { getTokenDecimals } from "@/lib/token-metadata";
+import { useTokenPrices } from "@/lib/price-service";
 
 export interface FormattedSafeDetails {
   id: string;
   target: string;
+  feePercentage?: number;
   duration: number;
   startTime: Date;
   unlockTime: Date;
@@ -16,6 +18,7 @@ export interface FormattedSafeDetails {
     tokenSymbol: string;
     amount: number;
     formattedAmount: string;
+    tokenShares?: bigint;
   }[];
   totalAmountUSD: number;
   isLocked: boolean;
@@ -23,10 +26,15 @@ export interface FormattedSafeDetails {
 
 export function useGetSafeById(id: string | undefined) {
   const { safes, isLoading, isError, error } = useGetSafes();
-  const [safeDetails, setSafeDetails] = useState<FormattedSafeDetails | null>(
-    null,
-  );
-  const [tokenAmounts, setTokenAmounts] = useState<Record<string, unknown>>({});
+
+  // console.log("All safes from getsafe by id ", safes)
+  const { tokens } = useChainConfig();
+
+  // Find the safe with the matching ID
+  const safe = useMemo(() => {
+    if (!safes || !id) return undefined;
+    return safes.find((safe) => safe.id.toString() === id);
+  }, [safes, id]);
 
   // Token address to symbol mapping
   const tokenSymbols: Record<string, string> = useMemo(() => {
@@ -40,7 +48,25 @@ export function useGetSafeById(id: string | undefined) {
       {} as Record<string, string>,
     );
     return mapping;
-  }, []);
+  }, [tokens]);
+
+  // Collect token addresses for price fetching
+  const tokenAddresses = useMemo(() => {
+    if (!safe?.tokenAmounts) return [];
+    return safe.tokenAmounts
+      .map((t) => t.token)
+      .filter((t): t is string => !!t);
+  }, [safe]);
+
+  const priceQueries = useTokenPrices(tokenAddresses);
+
+  const priceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    tokenAddresses.forEach((addr, idx) => {
+      map[addr] = priceQueries[idx].data || 0;
+    });
+    return map;
+  }, [tokenAddresses, priceQueries]);
 
   // Format date to readable string
   const formatDate = (date: Date): string => {
@@ -51,122 +77,81 @@ export function useGetSafeById(id: string | undefined) {
     });
   };
 
-  useEffect(() => {
-    if (!id || !safes || isLoading || isError) return;
+  const safeDetails = useMemo<FormattedSafeDetails | null>(() => {
+    if (!safe) return null;
 
-    async function run() {
-      // Find the safe with the matching ID
-      const safe = safes.find((safe) => safe.id.toString() === id);
+    const startTime = new Date(Number(safe.startTime) * 1000);
+    const unlockTime = new Date(Number(safe.unlockTime) * 1000);
+    const nextUnlockDate = new Date(unlockTime);
 
-      if (!safe) return;
-
-      // Format the safe data
-      const startTime = new Date(Number(safe.startTime) * 1000);
-      const unlockTime = new Date(Number(safe.unlockTime) * 1000);
-
-      // Calculate next unlock date based on duration
-      const nextUnlockDate = new Date(unlockTime);
-
-      // If the unlock time is in the past, calculate the next unlock date
-      if (unlockTime < new Date()) {
-        const currentTime = new Date();
-        const timeSinceUnlock = currentTime.getTime() - unlockTime.getTime();
+    // If the unlock time is in the past, calculate the next unlock date
+    if (unlockTime < new Date()) {
+      const currentTime = new Date();
+      const timeSinceUnlock = currentTime.getTime() - unlockTime.getTime();
+      const safeDuration = Number(safe.duration);
+      if (safeDuration > 0) {
         const cyclesPassed =
-          Math.floor(timeSinceUnlock / Number(safe.duration) / 1000) + 1;
+          Math.floor(timeSinceUnlock / safeDuration / 1000) + 1;
         nextUnlockDate.setTime(
-          unlockTime.getTime() + cyclesPassed * Number(safe.duration) * 1000,
+          unlockTime.getTime() + cyclesPassed * safeDuration * 1000,
         );
       }
-
-      // Format token amounts
-      setTokenAmounts(
-        safe.tokenAmounts.reduce(
-          (acc, token) => {
-            if (token && token.token) acc[token.token] = token.amount;
-            return acc;
-          },
-          {} as Record<string, unknown>,
-        ),
-      );
-
-      const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
-        if (!token || !token.token) {
-          return {
-            token: "unknown",
-            tokenSymbol: "Unknown",
-            amount: 0,
-            formattedAmount: "0.00",
-          };
-        }
-
-        const tokenAddress = token.token.toLowerCase();
-        const symbol = tokenSymbols[tokenAddress] || "Unknown";
-
-        return {
-          token: token.token,
-          tokenSymbol: symbol,
-          amount: Number(token.amount),
-          formattedAmount: Number(
-            formatUnits(token.amount, getTokenDecimals(token.token)),
-          ).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 6,
-          }),
-        };
-      });
-
-      // Calculate total amount in USD using asynchronous getTokenPrice function
-
-      let totalAmountUSD = 0;
-
-      const fetchTokenPrices = async () => {
-        try {
-          const tokenPrices = await Promise.all(
-            formattedTokenAmounts.map(async (token) => {
-              if (!token || !token.tokenSymbol) {
-                return 0;
-              }
-
-              // Fetch the token price using the asynchronous function
-              const price = await convertTokenAmountToUsd(
-                token.token,
-                BigInt(token.amount),
-              );
-
-              return price;
-            }),
-          );
-
-          // Sum up all token values in USD
-          totalAmountUSD = tokenPrices.reduce((sum, value) => sum + value, 0);
-        } catch (error) {
-          // Silent error handling
-          console.error("Error fetching token prices:", error);
-        }
-      };
-
-      // Execute the fetchTokenPrices function
-      await fetchTokenPrices();
-
-      setSafeDetails({
-        id: safe.id.toString(),
-        target: safe.target,
-        duration: Number(safe.duration),
-        startTime,
-        unlockTime,
-        nextUnlockDate: formatDate(nextUnlockDate),
-        tokenAmounts: formattedTokenAmounts,
-        totalAmountUSD,
-        isLocked: Number(safe.duration) > 0,
-      });
     }
 
-    run();
-  }, [id, safes, isLoading, isError, tokenSymbols]);
+    let totalAmountUSD = 0;
+
+    const formattedTokenAmounts = safe.tokenAmounts.map((token) => {
+      if (!token || !token.token) {
+        return {
+          token: "unknown",
+          tokenSymbol: "Unknown",
+          amount: 0,
+          formattedAmount: "0.00",
+          tokenShares: 0n,
+        };
+      }
+
+      const tokenAddress = token.token.toLowerCase();
+      const symbol = tokenSymbols[tokenAddress] || "Unknown";
+      const tokenDecimals = getTokenDecimals(token.token);
+      const amount = Number(token.amount);
+      const formattedValue = Number(formatUnits(token.amount, tokenDecimals));
+
+      const price = priceMap[token.token] || 0;
+      totalAmountUSD += formattedValue * price;
+
+      return {
+        token: token.token,
+        tokenSymbol: symbol,
+        amount: amount,
+        formattedAmount: formattedValue.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 6,
+        }),
+        tokenShares:
+          safe?.initialShares?.find(
+            (share) => share.token.toLowerCase() === token.token.toLowerCase(),
+          )?.amount || 0n,
+      };
+    });
+
+    return {
+      id: safe.id.toString(),
+      target: safe.target,
+      duration: Number(safe.duration),
+      feePercentage: safe.feePercentage,
+      startTime,
+      unlockTime,
+      nextUnlockDate: formatDate(nextUnlockDate),
+      tokenAmounts: formattedTokenAmounts,
+      totalAmountUSD,
+      isLocked: Number(safe.duration) > 0,
+    };
+  }, [safe, tokenSymbols, priceMap]);
 
   return {
     safeDetails,
-    tokenAmounts,
+    tokenAmounts: {}, // Backward compatibility, thought it seems unused in previous code (it was just set but maybe unused)
     isLoading,
     isError,
     error,

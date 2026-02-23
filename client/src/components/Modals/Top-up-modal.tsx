@@ -4,11 +4,11 @@ import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { tokens, CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+// import { facetAbis } from "@/lib/contract";
 import AmountInput from "../AmountInput";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
-import { useActiveAccount } from "thirdweb/react";
 import { useTopUpSafe } from "@/hooks/useTopUpSafe";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import SuccessfulTxModal from "./SuccessfulTxModal";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,10 +41,9 @@ export default function TopUpModal({
 
   // Fetch safe details
   const { safeDetails, isLoading: isSafeLoading } = useGetSafeById(
-    safeId.toString()
+    safeId.toString(),
   );
-  const account = useActiveAccount();
-  const address = account?.address;
+  const { diamondAddress } = useChainConfig();
 
   const [balances] = useRecoilState(balancesState);
   const AvailableBalance = useMemo(() => balances?.available || {}, [balances]);
@@ -98,14 +97,12 @@ export default function TopUpModal({
   }, [AvailableBalance, saveState.token]);
   // Initialize the topUpSafe hook
   const { topUpSafe, isPending } = useTopUpSafe({
-    address: address as `0x${string}`,
     topUpState: {
       id: safeId,
       token: saveState.token,
       amount: saveState.amount,
     },
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
-    coinSafeAbi: facetAbis.targetSavingsFacet,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     onSuccess: () => {
       setShowSuccessModal(true);
       // If onTopUp is provided, call it as well
@@ -156,7 +153,7 @@ export default function TopUpModal({
                       ? `${Math.ceil(
                           (safeDetails.unlockTime.getTime() -
                             new Date().getTime()) /
-                            (1000 * 60 * 60 * 24)
+                            (1000 * 60 * 60 * 24),
                         )} days to unlock`
                       : "Ready to unlock"
                     : "Flexible"}
@@ -177,7 +174,6 @@ export default function TopUpModal({
           handleAmountChange={handleAmountChange}
           handleTokenSelect={handleTokenSelect}
           saveState={saveState}
-          tokens={tokens}
           selectedTokenBalance={selectedTokenBalance}
           validationErrors={validationErrors}
           supportedTokens={supportedTokens}

@@ -1,6 +1,7 @@
 import {
   useActiveWalletConnectionStatus,
   useConnectModal,
+  useActiveWalletChain,
 } from "thirdweb/react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
@@ -20,7 +21,11 @@ const ConnectModal = ({
 }) => {
   const { connect, isConnecting } = useConnectModal();
   const status = useActiveWalletConnectionStatus();
+  const activeChain = useActiveWalletChain();
   const [localIsConnecting, setLocalIsConnecting] = useState(false);
+
+  // Use active chain if connected, otherwise default to Lisk
+  const chainToUse = activeChain || liskMainnet;
 
   const handleConnect = async () => {
     try {
@@ -28,7 +33,7 @@ const ConnectModal = ({
       await connect({
         client,
         wallets,
-        chain: liskMainnet,
+        chain: chainToUse,
         theme: darkTheme({
           colors: { accentText: "hsl(144, 100%, 39%)" },
         }),

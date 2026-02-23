@@ -9,20 +9,19 @@ import {
 } from "@/components/ui/table";
 import { CardContent } from "./ui/card";
 import { formatUnits } from "viem";
-import { publicClient } from "@/lib/client";
-import { useTokenPrices } from "@/lib/price-service";
 import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { Check, X } from "lucide-react";
-import { CoinsafeDiamondContract } from "@/lib/contract";
+// import { Check, X } from "lucide-react";
+import { getTokenPrice } from "@/lib";
 import { useActiveAccount } from "thirdweb/react";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
 import { useNavigate } from "react-router-dom";
+import MobileAssetTable from "./MobileAssetTable";
 
 interface VaultAssetTableProps {
   safeDetails?: FormattedSafeDetails;
@@ -41,12 +40,12 @@ export default function VaultAssetTable({
 
   const availableTokenBalances = useMemo(
     () => balances.available,
-    [balances.available],
+    [balances.available]
   );
   const totalTokenBalances = useMemo(() => balances.total, [balances.total]);
   const savedTokenBalances = useMemo(
     () => balances.savings,
-    [balances.savings],
+    [balances.savings]
   );
 
   useEffect(() => {
@@ -58,8 +57,11 @@ export default function VaultAssetTable({
       const safeAssetsRes = safeDetails.tokenAmounts.map((tokenInfo) => {
         return {
           token: tokenInfo.token,
+
           balance: tokenInfo.formattedAmount,
+
           saved: tokenInfo.formattedAmount,
+
           available: "0",
         };
       });
@@ -83,16 +85,16 @@ export default function VaultAssetTable({
           token,
           balance: formatUnits(
             BigInt((savedTokenBalances[token] as bigint) || 0n),
-            getTokenDecimals(token),
+            getTokenDecimals(token)
           ),
           saved: formatUnits(
             BigInt((savedTokenBalances[token] as bigint) || 0n),
-            getTokenDecimals(token),
+            getTokenDecimals(token)
           ),
 
           available: formatUnits(
             BigInt((availableTokenBalances[token] as bigint) || 0n),
-            getTokenDecimals(token),
+            getTokenDecimals(token)
           ),
         };
       });
@@ -107,15 +109,29 @@ export default function VaultAssetTable({
 
   return (
     <div className="bg-[#1D1D1D73]/40 border border-white/10 text-white p-4 lg:p-5 rounded-lg overflow-hidden w-full">
-      <div className="sm:mx-auto">
+      <div className="hidden md:block sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">
           {safeDetails
-            ? `Assets in ${
-                safeDetails.target ? safeDetails.target : "Auto safe"
-              }`
+            ? `Assets in ${safeDetails.target ? safeDetails.target : "Auto safe"
+            }`
             : "Assets"}
         </h1>
         <VaultAssetTableContent
+          assets={allAssetData}
+          safeDetails={safeDetails}
+          type={type}
+        />
+      </div>
+
+      {/* Mobile display for assets */}
+      <div className="flex flex-col md:hidden sm:mx-auto">
+        <h1 className="text-xl font-semibold mb-4">
+          {safeDetails
+            ? `Assets in ${safeDetails.target ? safeDetails.target : "Auto safe"
+            }`
+            : "Assets"}
+        </h1>
+        <MobileAssetTable
           assets={allAssetData}
           safeDetails={safeDetails}
           type={type}
@@ -143,141 +159,77 @@ function VaultAssetTableContent({
   const address = account?.address;
 
   const hasNonZeroAssets = assets.some(
-    (asset) => Number.parseFloat(asset.balance) > 0,
+    (asset) => Number.parseFloat(asset.balance) > 0
   );
-
-  const uniqueTokenIds = useMemo(() => {
-    if (!assets) return [];
-    return Array.from(new Set(assets.map((a: any) => a.token))).filter(
-      (t) => !!t,
-    ) as string[];
-  }, [assets]);
-
-  const priceQueries = useTokenPrices(uniqueTokenIds);
-
-  const tokenPriceMap = useMemo(() => {
-    const map: Record<string, number> = {};
-    uniqueTokenIds.forEach((id, index) => {
-      const query = priceQueries[index];
-      if (query.data !== undefined) {
-        map[id] = query.data;
-      }
-    });
-    return map;
-  }, [uniqueTokenIds, priceQueries]);
-
-  // Autosaved status state
-  const [autosavedMap, setAutosavedMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!assets || !address) return;
-    let mounted = true;
 
-    const fetchAutosaved = async () => {
+    async function updateAssets(assets: any[]) {
       try {
-        const abi = [
-          {
-            inputs: [
-              { internalType: "address", name: "_user", type: "address" },
-              { internalType: "address", name: "_token", type: "address" },
-            ],
-            name: "isAutosaveEnabledForToken",
-            outputs: [{ internalType: "bool", name: "", type: "bool" }],
-            stateMutability: "view",
-            type: "function",
+        const transformedAssets: any[] = assets.map((asset: any) => ({
+          token: asset.token,
+          balance: asset.balance,
+          saved: asset.saved,
+          available: asset.available,
+          balance_usd: null,
+          saved_usd: null,
+          autosaved: null,
+          isMature: safeDetails
+            ? safeDetails.id !== "911" &&
+            safeDetails.unlockTime &&
+            safeDetails.unlockTime < new Date() &&
+            safeDetails.target &&
+            safeDetails.target !== "Emergency Safe"
+            : false,
+          tokenInfo: tokenData[asset.token.toLowerCase()] || {
+            symbol: "Unknown",
+            name: "Token",
+            color: "bg-[#440]",
           },
-        ] as const;
-
-        const contractAddress =
-          CoinsafeDiamondContract.address as `0x${string}`;
-
-        const calls = assets.map((asset) => ({
-          address: contractAddress,
-          abi,
-          functionName: "isAutosaveEnabledForToken",
-          args: [address, asset.token],
         }));
 
-        const results = await publicClient.multicall({
-          contracts: calls,
-          allowFailure: true, // Allow robust handling
-        });
+        setUpdatedAssets(transformedAssets);
 
-        const map: Record<string, boolean> = {};
-        results.forEach((result: any, index: number) => {
-          const assetToken = assets[index].token;
-          if (result.status === "success") {
-            map[assetToken] = result.result as boolean;
-          } else {
-            console.error(
-              "Error checking autosave for",
-              assetToken,
-              result.error,
+        assets.forEach(async (asset: any, index: number) => {
+          try {
+            const balanceUsd = safeDetails
+              ? null
+              : await getTokenPrice(asset.token, Number(asset.balance));
+
+            const savedUsd = await getTokenPrice(
+              asset.token,
+              Number(asset.saved)
             );
-            map[assetToken] = false;
+
+            let isMature = transformedAssets[index].isMature;
+
+            if (!safeDetails && Number(asset.available) > 0) {
+              isMature = true;
+            }
+
+            setUpdatedAssets((prev: any) => {
+              const updated = [...prev];
+              updated[index] = {
+                ...updated[index],
+                balance_usd: balanceUsd,
+                saved_usd: savedUsd,
+                autosaved: false,
+                isMature,
+              };
+              return updated;
+            });
+          } catch {
+            // Silent error handling
           }
         });
-
-        if (mounted) setAutosavedMap(map);
-      } catch (err) {
-        console.error("Error fetching autosaved status:", err);
+      } catch {
+        // Silent error handling
       }
-    };
+    }
 
-    fetchAutosaved();
-    return () => {
-      mounted = false;
-    };
-  }, [assets, address]);
-
-  // Derive updatedAssets
-  useEffect(() => {
-    if (!assets) return;
-
-    const transformedAssets: any[] = assets.map((asset: any) => {
-      const price = tokenPriceMap[asset.token] || 0;
-
-      // Helper to calc value
-      const calcValue = (amountStr: string) => {
-        const amount = Number(amountStr);
-        if (isNaN(amount)) return null;
-        return (amount * price).toFixed(2);
-      };
-
-      const balanceUsd = safeDetails ? null : calcValue(asset.balance);
-      const savedUsd = calcValue(asset.saved);
-
-      const isMature = safeDetails
-        ? safeDetails.id !== "911" &&
-          safeDetails.unlockTime &&
-          safeDetails.unlockTime < new Date() &&
-          safeDetails.target &&
-          safeDetails.target !== "Emergency Safe"
-        : false;
-
-      // If no safeDetails (e.g. main vault), check available > 0
-      const finalIsMature =
-        !safeDetails && Number(asset.available) > 0 ? true : isMature;
-
-      return {
-        token: asset.token,
-        balance: asset.balance,
-        saved: asset.saved,
-        available: asset.available,
-        balance_usd: balanceUsd,
-        saved_usd: savedUsd,
-        autosaved: autosavedMap[asset.token] ?? null, // Use fetched autosaved status
-        isMature: finalIsMature,
-        tokenInfo: tokenData[asset.token] || {
-          symbol: "Unknown",
-          name: "Token",
-          color: "bg-[#440]",
-        },
-      };
-    });
-
-    setUpdatedAssets(transformedAssets);
-  }, [assets, tokenPriceMap, autosavedMap, safeDetails]);
+    updateAssets(assets);
+  }, [assets, address, safeDetails]);
 
   if (!assets || assets.length === 0 || !hasNonZeroAssets) {
     return (
@@ -333,9 +285,9 @@ function VaultAssetTableContent({
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 AMOUNT IN SAFE
               </TableHead>
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+              {/* <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 AUTOSAVED
-              </TableHead>
+              </TableHead> */}
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 CLAIMABLE AMOUNT
               </TableHead>
@@ -393,7 +345,7 @@ function VaultAssetTableContent({
                     </p>
                   </div>
                 </TableCell>
-                <TableCell className="py-4 px-4">
+                {/* <TableCell className="py-4 px-4">
                   <div className="flex items-center gap-2">
                     {asset.autosaved ? (
                       <>
@@ -411,15 +363,28 @@ function VaultAssetTableContent({
                       </>
                     )}
                   </div>
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="py-4 px-4">
                   <div className="flex items-center gap-2 justify-start">
                     {safeDetails?.unlockTime &&
-                    safeDetails?.unlockTime < new Date()
-                      ? (safeDetails?.totalAmountUSD ?? 0.0)
+                      safeDetails?.unlockTime < new Date()
+                      ? safeDetails?.totalAmountUSD ?? 0.0
                       : "—"}
                   </div>
                 </TableCell>
+
+                {/* Claim button cell - temporarily commented out
+                <TableCell className="py-4 px-4 text-right">
+                  {Number(asset.available) > 0 && asset.isMature ? (
+                    <Button
+                      variant="link"
+                      className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
+                      onClick={() => navigate("/claim")}>
+                      Claim
+                    </Button>
+                  ) : null}
+                </TableCell>
+                */}
               </TableRow>
             ))}
           </TableBody>

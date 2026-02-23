@@ -1,5 +1,6 @@
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { useMemo, useState } from "react";
 import { useActiveAccount } from "thirdweb/react";
 import { Abi } from "viem";
@@ -15,17 +16,18 @@ export function ExecuteAutomatedSavingsButton() {
   const [isExecuting, setIsExecuting] = useState(false);
 
   const smartAccount = useActiveAccount();
+  const { chain, diamondAddress } = useChainConfig();
 
   // Initialize contract
   const contract = useMemo(
     () =>
       getContract({
         client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain: chain,
+        address: diamondAddress,
         abi: facetAbis.automatedSavingsFacet as Abi,
       }),
-    []
+    [chain, diamondAddress],
   );
 
   // Use Thirdweb's usesendAndConfirmTransaction hook for executing the transaction

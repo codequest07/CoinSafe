@@ -16,36 +16,14 @@ import { useEffect, useMemo, useState } from "react";
 import SavingOption from "./Modals/SavingOption";
 import MemoMoney from "@/icons/Money";
 import ThirdwebConnectButton from "./ThirdwebConnectButton";
-import { Check, X } from "lucide-react";
-import { useTokenPrices } from "@/lib/price-service";
-import { getContract, readContract } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract } from "@/lib/contract";
+// import { Check, X } from "lucide-react";
+import { getTokenPrice } from "@/lib";
 import { useActiveAccount } from "thirdweb/react";
 import { getTokenDecimals, tokenData } from "@/lib/utils";
 import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useRecoilState } from "recoil";
 import { balancesState } from "@/store/atoms/balance";
 import { useLocation, useNavigate } from "react-router-dom";
-
-async function checkIsTokenAutoSaved(
-  userAddress: `0x${string}`,
-  tokenAddress: string,
-) {
-  const contract = getContract({
-    client,
-    address: CoinsafeDiamondContract.address,
-    chain: liskMainnet,
-  });
-
-  const balance = await readContract({
-    contract: contract,
-    method:
-      "function isAutosaveEnabledForToken(address _user, address _token) external view returns (bool)",
-    params: [userAddress, tokenAddress],
-  });
-  return balance;
-}
 
 interface AssetTableProps {
   safeDetails?: FormattedSafeDetails;
@@ -60,12 +38,12 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
 
   const availableTokenBalances = useMemo(
     () => balances.available,
-    [balances.available],
+    [balances.available]
   );
   const totalTokenBalances = useMemo(() => balances.total, [balances.total]);
   const savedTokenBalances = useMemo(
     () => balances.savings,
-    [balances.savings],
+    [balances.savings]
   );
 
   useEffect(() => {
@@ -102,15 +80,15 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
         token,
         balance: formatUnits(
           BigInt((totalTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token),
+          getTokenDecimals(token)
         ),
         saved: formatUnits(
           BigInt((savedTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token),
+          getTokenDecimals(token)
         ),
         available: formatUnits(
           BigInt((availableTokenBalances[token] as bigint) || 0),
-          getTokenDecimals(token),
+          getTokenDecimals(token)
         ),
       };
     });
@@ -128,9 +106,8 @@ export default function AssetTable({ safeDetails }: AssetTableProps) {
       <div className="sm:mx-auto">
         <h1 className="text-xl font-semibold mb-4">
           {safeDetails
-            ? `Assets in ${
-                safeDetails.target ? safeDetails.target : "Auto safe"
-              }`
+            ? `Assets in ${safeDetails.target ? safeDetails.target : "Auto safe"
+            }`
             : "Assets"}
         </h1>
         <AssetTableContent assets={allAssetData} safeDetails={safeDetails} />
@@ -148,6 +125,7 @@ function AssetTableContent({
 }) {
   const [isFirstModalOpen, setIsFirstModalOpen] = useState(false);
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+  const [updatedAssets, setUpdatedAssets] = useState<any>([]);
   const navigate = useNavigate();
 
   const account = useActiveAccount();
@@ -157,98 +135,66 @@ function AssetTableContent({
   const location = useLocation();
   const isAutoSavePage = location.pathname === "/vault/auto-safe";
 
-  // 1. Autosaved status state
-  const [autosavedMap, setAutosavedMap] = useState<Record<string, boolean>>({});
-
-  // 2. Get unique token IDs
-  const uniqueTokenIds = useMemo(() => {
-    return Array.from(new Set(assets.map((a) => a.token))).filter((t) => !!t);
-  }, [assets]);
-
-  // 3. Fetch prices
-  const priceQueries = useTokenPrices(uniqueTokenIds);
-
-  const tokenPriceMap = useMemo(() => {
-    const map: Record<string, number> = {};
-    uniqueTokenIds.forEach((id, index) => {
-      const query = priceQueries[index];
-      if (query.data !== undefined) {
-        map[id] = query.data;
-      }
-    });
-    return map;
-  }, [uniqueTokenIds, priceQueries]);
-
   const hasNonZeroAssets = assets.some(
-    (asset) => Number.parseFloat(asset.balance) > 0,
+    (asset) => Number.parseFloat(asset.balance) > 0
   );
 
-  // 4. Fetch autosaved status (separate effect)
   useEffect(() => {
-    if (!address || !assets.length) return;
+    if (!assets || !address) return;
 
-    let mounted = true;
+    async function updateAssets(assets: any[]) {
+      try {
+        const transformedAssets: any[] = assets.map((asset: any) => ({
+          token: asset.token,
+          balance: asset.balance,
+          saved: asset.saved,
+          balance_usd: null, // Placeholder for loading state
+          saved_usd: null, // Placeholder for loading state
+          autosaved: null, // Placeholder for loading state
+          tokenInfo: tokenData[asset.token.toLowerCase()] || {
+            symbol: "Unknown",
+            name: "Lisk",
+            color: "bg-[#440]",
+          },
+        }));
 
-    const fetchAutosaved = async () => {
-      const newMap: Record<string, boolean> = {};
-      await Promise.all(
-        assets.map(async (asset) => {
+        setUpdatedAssets(transformedAssets);
+
+        // Fetch additional data asynchronously
+        assets.forEach(async (asset: any, index: number) => {
           try {
-            const isAutosaved = await checkIsTokenAutoSaved(
-              address as `0x${string}`,
+            // For safe-specific view, we only need the saved USD value
+            // For global view, we need both balance and saved USD values
+            const balanceUsd = safeDetails
+              ? null
+              : await getTokenPrice(asset.token, Number(asset.balance));
+
+            const savedUsd = await getTokenPrice(
               asset.token,
-            );
-            // checkIsTokenAutoSaved returns boolean (or promise of boolean)
-            newMap[asset.token] = !!isAutosaved;
-          } catch (e) {
-            console.error(e);
+              Number(asset.saved)
+            )
+
+            setUpdatedAssets((prev: any) => {
+              const updated = [...prev];
+              updated[index] = {
+                ...updated[index],
+                balance_usd: balanceUsd,
+                saved_usd: savedUsd,
+                autosaved: false
+              };
+              return updated;
+            });
+          } catch {
+            // Silent error handling
           }
-        }),
-      );
-      if (mounted) {
-        setAutosavedMap(newMap);
+        });
+      } catch {
+        // Silent error handling
       }
-    };
+    }
 
-    fetchAutosaved();
-
-    return () => {
-      mounted = false;
-    };
-  }, [assets, address]);
-
-  // 5. Derive updatedAssets
-  const updatedAssets = useMemo(() => {
-    return assets.map((asset) => {
-      const unitPrice = tokenPriceMap[asset.token] ?? 0;
-      const isLoadingPrice = tokenPriceMap[asset.token] === undefined;
-
-      const calcValue = (amountStr: string) => {
-        const amount = Number(amountStr);
-        if (isNaN(amount)) return null;
-        return (amount * unitPrice).toFixed(2);
-      };
-
-      const balanceUsd = safeDetails ? null : calcValue(asset.balance);
-
-      const savedUsd = calcValue(asset.saved);
-      const autosaved = autosavedMap[asset.token] ?? null;
-
-      return {
-        token: asset.token,
-        balance: asset.balance,
-        saved: asset.saved,
-        balance_usd: isLoadingPrice ? null : balanceUsd,
-        saved_usd: isLoadingPrice ? null : savedUsd,
-        autosaved,
-        tokenInfo: tokenData[asset.token] || {
-          symbol: "Unknown",
-          name: "Lisk",
-          color: "bg-[#440]",
-        },
-      };
-    });
-  }, [assets, tokenPriceMap, autosavedMap, safeDetails]);
+    if (address && assets.length > 0) updateAssets(assets);
+  }, [assets, address, safeDetails]);
 
   if (!assets || assets.length === 0 || !hasNonZeroAssets) {
     return (
@@ -267,15 +213,13 @@ function AssetTableContent({
           {safeDetails ? (
             <Button
               onClick={() => setIsFirstModalOpen(true)}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-            >
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
               Top Up Safe
             </Button>
           ) : isConnected ? (
             <Button
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-              onClick={() => navigate("/deposit")}
-            >
+              onClick={() => navigate("/deposit")}>
               Deposit
             </Button>
           ) : (
@@ -320,9 +264,9 @@ function AssetTableContent({
                   </TableHead>
                 </>
               )}
-              <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
+              {/* <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 AUTOSAVED
-              </TableHead>
+              </TableHead> */}
               <TableHead className="text-[#CACACA] font-normal text-sm py-4 px-4">
                 <span className="sr-only">Actions</span>
               </TableHead>
@@ -350,8 +294,7 @@ function AssetTableContent({
                             </div>
                           ) : (
                             <div
-                              className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
-                            >
+                              className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
                               {asset.tokenInfo.symbol?.charAt(0)}
                             </div>
                           )}
@@ -415,7 +358,7 @@ function AssetTableContent({
                           </TableCell>
                         </>
                       )}
-                      <TableCell className="py-4 px-4">
+                      {/* <TableCell className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           {asset.autosaved ? (
                             <>
@@ -433,30 +376,27 @@ function AssetTableContent({
                             </>
                           )}
                         </div>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell className="py-4 px-4 text-right">
                         <div className="flex justify-end gap-4">
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                            onClick={() => navigate("/deposit")}
-                          >
+                            onClick={() => navigate("/deposit")}>
                             Deposit
                           </Button>
                           {safeDetails ? (
                             <Button
                               variant="link"
                               className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                              onClick={() => setIsFirstModalOpen(true)}
-                            >
+                              onClick={() => setIsFirstModalOpen(true)}>
                               Top Up
                             </Button>
                           ) : (
                             <Button
                               variant="link"
                               className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                              onClick={() => setIsFirstModalOpen(true)}
-                            >
+                              onClick={() => setIsFirstModalOpen(true)}>
                               Save
                             </Button>
                           )}
@@ -484,8 +424,7 @@ function AssetTableContent({
                           </div>
                         ) : (
                           <div
-                            className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
-                          >
+                            className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
                             {asset.tokenInfo.symbol?.charAt(0)}
                           </div>
                         )}
@@ -549,7 +488,7 @@ function AssetTableContent({
                         </TableCell>
                       </>
                     )}
-                    <TableCell className="py-4 px-4">
+                    {/* <TableCell className="py-4 px-4">
                       <div className="flex items-center gap-2">
                         {asset.autosaved ? (
                           <>
@@ -567,30 +506,27 @@ function AssetTableContent({
                           </>
                         )}
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell className="py-4 px-4 text-right">
                       <div className="flex justify-end gap-4">
                         <Button
                           variant="link"
                           className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                          onClick={() => navigate("/deposit")}
-                        >
+                          onClick={() => navigate("/deposit")}>
                           Deposit
                         </Button>
                         {safeDetails ? (
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                            onClick={() => setIsFirstModalOpen(true)}
-                          >
+                            onClick={() => setIsFirstModalOpen(true)}>
                             Top Up
                           </Button>
                         ) : (
                           <Button
                             variant="link"
                             className="text-[#79E7BA] hover:text-[#79E7BA]/80 p-0"
-                            onClick={() => setIsFirstModalOpen(true)}
-                          >
+                            onClick={() => setIsFirstModalOpen(true)}>
                             Save
                           </Button>
                         )}

@@ -16,15 +16,16 @@ import { useGetAutomatedSavingsDuePlans } from "@/hooks/useGetAutomatedSavingsDu
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { formatUnits } from "ethers";
 import { ArrowLeft } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "sonner";
-import { CoinsafeDiamondContract } from "@/lib/contract";
 import ExtendSafeModal from "@/components/Modals/extend-safe-modal";
-import { convertTokenAmountToUsd, getTokenDecimals } from "@/lib/utils";
+import { getTokenDecimals } from "@/lib/utils";
+import { useTokenPrices } from "@/lib/price-service";
 import { savingsBalanceState } from "@/store/atoms/balance";
 import { useRecoilState } from "recoil";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 const AutoSave = () => {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ const AutoSave = () => {
   const [showExtendSafeModal, setShowExtendSafeModal] = useState(false);
 
   const userAddress = account?.address;
+  const { diamondAddress } = useChainConfig();
 
   const {
     balances,
@@ -128,7 +130,7 @@ const AutoSave = () => {
     error: claimAllError,
   } = useClaimAllAutoSafe({
     account,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     toast,
     onSuccess: () => {
       console.log("Successfully claimed autosafe");
@@ -138,94 +140,42 @@ const AutoSave = () => {
     },
   });
 
-  const [totalUsdValue, setTotalUsdValue] = useState<string>("0.00");
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchTotalUsdValue = async () => {
-      if (!details?.tokenDetails || details.tokenDetails.length === 0) {
-        setTotalUsdValue("0.00");
-        setError(null);
-        return;
-      }
-
-      try {
-        // Convert each token's amountSaved to USD and sum
-        const usdValues = await Promise.all(
-          details.tokenDetails.map(async (item: any) => {
-            try {
-              const usdValue = await convertTokenAmountToUsd(
-                item.token,
-                item.amountSaved
-              );
-              return usdValue;
-            } catch (err) {
-              console.error(`Error for token ${item.token}:`, err);
-              return 0; // Return 0 for failed conversions
-            }
-          })
-        );
-
-        // Sum all USD values
-        const totalUsd = usdValues.reduce((sum, value) => sum + value, 0);
-        setTotalUsdValue(totalUsd.toFixed(2));
-        setError(null);
-      } catch (err) {
-        console.error("Error converting tokens to USD:", err);
-        setTotalUsdValue("0.00");
-        setError("Failed to load USD value");
-      }
-    };
-
-    fetchTotalUsdValue();
+  // --- Price Fetching Integration ---
+  const tokenAddresses = useMemo(() => {
+    if (!details?.tokenDetails) return [];
+    return details.tokenDetails.map((t: any) => t.token);
   }, [details]);
 
-  // useEffect(() => {
-  //   const fetchTotalUsdValue = async () => {
-  //     console.log("IN FETCHTOTALUSD", details?.tokenDetails);
-  //     if (!details?.tokenDetails) {
-  //       setTotalUsdValue("0.00");
-  //       setError(null);
-  //       return;
-  //     }
+  const priceQueries = useTokenPrices(tokenAddresses);
 
-  //     try {
-  //       // Calculate total amountSaved across all tokens
-  //       const totalAmountSaved = details.tokenDetails.reduce(
-  //         (total: bigint, obj: any) => total + obj.amountSaved,
-  //         0n
-  //       );
+  const priceMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    tokenAddresses.forEach((addr: string, idx: number) => {
+      map[addr] = priceQueries[idx].data || 0;
+    });
+    return map;
+  }, [tokenAddresses, priceQueries]);
 
-  //       console.log("TOTAL AMOUNT SAVED", totalAmountSaved);
+  const totalUsdValue = useMemo(() => {
+    if (!details?.tokenDetails || details.tokenDetails.length === 0) {
+      return "0.00";
+    }
+    let total = 0;
+    details.tokenDetails.forEach((item: any) => {
+      const price = priceMap[item.token] || 0;
+      const decimals = getTokenDecimals(item.token);
+      const amount = Number(formatUnits(item.amountSaved, decimals));
+      total += amount * price;
+    });
+    return total.toFixed(2);
+  }, [details, priceMap]);
 
-  //       // Assuming the first token's type is representative for conversion
-  //       // If tokens have different types, you may need a different approach
-  //       const representativeToken = details.tokenDetails[0]?.token;
-  //       if (!representativeToken) {
-  //         throw new Error("No tokens available for conversion");
-  //       }
-
-  //       // Convert the total amount to USD
-  //       const usdValue = await convertTokenAmountToUsd(
-  //         representativeToken,
-  //         totalAmountSaved
-  //       );
-
-  //       setTotalUsdValue(usdValue.toFixed(2));
-  //       setError(null);
-  //     } catch (err) {
-  //       console.error("Error converting total to USD:", err);
-  //       setTotalUsdValue("0.00");
-  //       setError("Failed to load USD value");
-  //     }
-  //   };
-
-  //   fetchTotalUsdValue();
-  // }, [details]);
+  // Removed unused error state for simpler handling
+  const error = null;
 
   useEffect(() => {
     console.log("Claim Error", claimAllError);
-  }, [claimAllError]);
+  }, [claimAllError, refetch]);
 
   console.log("Due plans details:", duePlanDetails);
 
@@ -247,7 +197,7 @@ const AutoSave = () => {
   useEffect(() => {
     console.log(
       "showManageAutosavings state changed to:",
-      showManageAutosavings
+      showManageAutosavings,
     );
   }, [showManageAutosavings]);
 
@@ -262,7 +212,7 @@ const AutoSave = () => {
   useEffect(() => {
     console.log(
       "showDeactivateSafeModal state changed to:",
-      showDeactivateSafeModal
+      showDeactivateSafeModal,
     );
   }, [showDeactivateSafeModal]);
 
@@ -318,7 +268,7 @@ const AutoSave = () => {
 
   useEffect(() => {
     refetch();
-  }, [savingsBalance]);
+  }, [savingsBalance, refetch]);
 
   return (
     <div className="min-h-screen bg-black text-white p-2 lg:p-6">
@@ -410,7 +360,7 @@ const AutoSave = () => {
                     {Number(details.unlockTime) * 1000 > Date.now()
                       ? `${Math.ceil(
                           (Number(details.unlockTime) * 1000 - Date.now()) /
-                            (1000 * 60 * 60 * 24)
+                            (1000 * 60 * 60 * 24),
                         )} days till unlock`
                       : "Ready to unlock"}
                   </div>
@@ -507,12 +457,12 @@ const AutoSave = () => {
                         formatUnits(
                           balances?.reduce(
                             (total: any, obj: any) => total + obj?.amount,
-                            0n
+                            0n,
                           ),
                           balances && balances.length > 0
                             ? getTokenDecimals(balances[0]?.token || "")
-                            : 18 // fallback to 18 decimals if no balances
-                        )
+                            : 18, // fallback to 18 decimals if no balances
+                        ),
                       ).toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                       })}
@@ -536,12 +486,12 @@ const AutoSave = () => {
                         formatUnits(
                           balances?.reduce(
                             (total: any, obj: any) => total + obj?.amount,
-                            0n
+                            0n,
                           ),
                           balances && balances.length > 0
                             ? getTokenDecimals(balances[0]?.token || "")
-                            : 18 // fallback to 18 decimals if no balances
-                        )
+                            : 18, // fallback to 18 decimals if no balances
+                        ),
                       ) == 0 || claimAllIsLoading
                     }
                   >
@@ -651,7 +601,7 @@ const AutoSave = () => {
       {(() => {
         console.log(
           "Rendering modal section, showManageAutosavings:",
-          showManageAutosavings
+          showManageAutosavings,
         );
         return null;
       })()}
@@ -686,7 +636,7 @@ const AutoSave = () => {
       {(() => {
         console.log(
           "Rendering AddTokenModal section, showAddTokenModal:",
-          showAddTokenModal
+          showAddTokenModal,
         );
         return null;
       })()}
@@ -702,7 +652,7 @@ const AutoSave = () => {
       {(() => {
         console.log(
           "Rendering RemoveTokenModal section, showRemoveTokenModal:",
-          showRemoveTokenModal
+          showRemoveTokenModal,
         );
         return null;
       })()}
@@ -717,7 +667,7 @@ const AutoSave = () => {
       {(() => {
         console.log(
           "Rendering DeactivateSafeModal section, showDeactivateSafeModal:",
-          showDeactivateSafeModal
+          showDeactivateSafeModal,
         );
         return null;
       })()}
@@ -749,7 +699,7 @@ const AutoSave = () => {
       {(() => {
         console.log(
           "Rendering ExtendSafeModal section, showExtendSafeModal:",
-          showExtendSafeModal
+          showExtendSafeModal,
         );
         return null;
       })()}

@@ -1,10 +1,17 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatEther, formatUnits } from "viem";
-import { tokens } from "@/lib/contract";
-import { getLskToUsd, getSafuToUsd, getUsdcToUsd, getUsdtToUsd } from "@/lib";
-import { liskMainnet } from "./config";
+import { chainConfigs } from "@/lib/chains";
+import { getTokenPrice, getSignedAprForClaimAll } from "@/lib";
 import { TokenInfo } from "thirdweb/react";
+import { getContract, readContract } from "thirdweb";
+import { client, base, liskMainnet } from "@/lib/config";
+import {
+  tokenData,
+  getTokenDecimals,
+  tokenDecimals,
+} from "@/lib/token-metadata";
+export { tokenData, getTokenDecimals, tokenDecimals };
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -27,17 +34,8 @@ export function formatNumberToMax7Dp(num: number, maxDecimals = 7) {
   return `${intPart}.${trimmedDecimal}`;
 }
 
-export const tokenDecimals: Record<string, number> = {
-  "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24": 18,
-  DEFAULT: 6,
-};
-
-export const getTokenDecimals = (token: string): number => {
-  return tokenDecimals[token] || tokenDecimals.DEFAULT;
-};
-
 export function transformAndAccumulateTokenBalances(
-  data: Array<any>
+  data: Array<any>,
 ): { token: string; balance: string }[] {
   const tokenMap: { [key: string]: bigint } = {};
 
@@ -61,28 +59,19 @@ export function transformAndAccumulateTokenBalances(
 
 export const convertTokenAmountToUsd = async (
   token: string,
-  amount: bigint
+  amount: bigint,
 ): Promise<number> => {
   const tokenDecimals = getTokenDecimals(token);
-  switch (token) {
-    case tokens.usdt:
-      // this will be changed when going mainnet
-      return await getUsdtToUsd(Number(formatUnits(amount, tokenDecimals)));
-    case tokens.safu:
-      return getSafuToUsd(Number(formatUnits(amount, tokenDecimals)));
-    case tokens.lsk:
-      return await getLskToUsd(Number(formatUnits(amount, tokenDecimals)));
-    case tokens.usdc:
-      return await getUsdcToUsd(Number(formatUnits(amount, tokenDecimals)));
-    default:
-      console.error("Unknown token address:", token);
-      return 0;
-  }
+  const numericAmount = Number(formatUnits(amount, tokenDecimals));
+
+  // Use the central price fetching logic
+  const priceString = await getTokenPrice(token, numericAmount);
+  return Number(priceString) || 0;
 };
 
 export const convertFrequency = (
   frequency: number,
-  inputUnit: "milliseconds" | "seconds" | "minutes" | "hours" = "seconds"
+  inputUnit: "milliseconds" | "seconds" | "minutes" | "hours" = "seconds",
 ) => {
   // Validate input
   if (typeof frequency !== "number" || frequency <= 0) {
@@ -99,7 +88,7 @@ export const convertFrequency = (
 
   if (!unitConversions[inputUnit]) {
     throw new Error(
-      `Unsupported unit: ${inputUnit}. Use milliseconds, seconds, minutes, or hours.`
+      `Unsupported unit: ${inputUnit}. Use milliseconds, seconds, minutes, or hours.`,
     );
   }
 
@@ -145,15 +134,12 @@ export function formatTimeFrequency(frequency: any) {
   return match ? match.label : `Every ${frequency} seconds`;
 }
 
-// Example usage
-// console.log(formatTimeFrequency(172800n)); // Output: "Every 2 days"
-// console.log(formatTimeFrequency(86400n));  // Output: "Every day"
-// console.log(formatTimeFrequency(23n));     // Output: "Every 23 seconds"
+// Example usage removed
 
 export function convertTokenToUSD(
   tokenValue: any,
   decimals: number,
-  usdPrice: number
+  usdPrice: number,
 ) {
   // Convert BigInt to a regular number by dividing by 10^decimals
   const tokenAmount = Number(tokenValue) / Math.pow(10, decimals);
@@ -163,70 +149,146 @@ export function convertTokenToUSD(
   return usdValue.toFixed(2);
 }
 
-export const tokenData = {
-  // "0xBb88E6126FdcD4ae6b9e3038a2255D66645AEA7a": {
-  //   symbol: "SAFU",
-  //   chain: "Lisk",
-  //   color: "bg-[#22c55e]",
-  //   image: "/assets/tokens/safu.png",
-  // },
-  // "0x2728DD8B45B788e26d12B13Db5A244e5403e7eda": {
-  //   symbol: "USDT",
-  //   chain: "Lisk",
-  //   color: "bg-[#d54f]",
-  //   image: "/assets/tokens/usdt.jpg",
-  // },
-  // "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D": {
-  //   symbol: "LSK",
-  //   chain: "Lisk",
-  //   color: "bg-[#55e]",
-  //   image: "/assets/tokens/lsk.jpg",
-  // },
-  // "0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83": {
-  //   symbol: "USDC",
-  //   chain: "Lisk",
-  //   color: "bg-[#2775ca]",
-  //   image: "/assets/tokens/usdc.png",
-  // },
-  "0xac485391EB2d7D88253a7F1eF18C37f4242D1A24": {
-    symbol: "LSK",
-    chain: "Lisk",
-    color: "bg-[#55e]",
-    image: "/assets/tokens/lsk.jpg",
-  },
-  "0xF242275d3a6527d877f2c927a82D9b057609cc71": {
-    symbol: "USDC",
-    chain: "Lisk",
-    color: "bg-[#2775ca]",
-    image: "/assets/tokens/usdc.png",
-  },
-  "0x05D032ac25d322df992303dCa074EE7392C117b9": {
-    symbol: "USDT",
-    chain: "Lisk",
-    color: "bg-[#d54f]",
-    image: "/assets/tokens/usdt.jpg",
-  },
-} as any;
-
 export const thirdwebSupportedTokens: Record<number, Array<TokenInfo>> = {
-    [liskMainnet.id]: [
-      {
-        address: tokens.usdt,
-        icon: tokenData[tokens.usdt]?.image,
-        name: tokenData[tokens.usdt]?.symbol,
-        symbol: tokenData[tokens.usdt]?.symbol,
-      },
-      {
-        address: tokens.lsk,
-        icon: tokenData[tokens.usdc]?.image,
-        name: tokenData[tokens.usdc]?.symbol,
-        symbol: tokenData[tokens.usdc]?.symbol,
-      },
-      {
-        address: tokens.lsk,
-        icon: tokenData[tokens.lsk]?.image,
-        name: tokenData[tokens.lsk]?.symbol,
-        symbol: tokenData[tokens.lsk]?.symbol,
-      },
-    ],
-  };
+  [liskMainnet.id]: [
+    {
+      address: chainConfigs[liskMainnet.id].tokens.usdt!,
+      icon: tokenData[chainConfigs[liskMainnet.id].tokens.usdt!]?.image,
+      name: tokenData[chainConfigs[liskMainnet.id].tokens.usdt!]?.symbol,
+      symbol: tokenData[chainConfigs[liskMainnet.id].tokens.usdt!]?.symbol,
+    },
+    {
+      address: chainConfigs[liskMainnet.id].tokens.usdc,
+      icon: tokenData[chainConfigs[liskMainnet.id].tokens.usdc!]?.image,
+      name: tokenData[chainConfigs[liskMainnet.id].tokens.usdc!]?.symbol,
+      symbol: tokenData[chainConfigs[liskMainnet.id].tokens.usdc!]?.symbol,
+    },
+    {
+      address: chainConfigs[liskMainnet.id].tokens.lsk!,
+      icon: tokenData[chainConfigs[liskMainnet.id].tokens.lsk!]?.image,
+      name: tokenData[chainConfigs[liskMainnet.id].tokens.lsk!]?.symbol,
+      symbol: tokenData[chainConfigs[liskMainnet.id].tokens.lsk!]?.symbol,
+    },
+    {
+      address: chainConfigs[liskMainnet.id].tokens.usdt0!,
+      icon: tokenData[chainConfigs[liskMainnet.id].tokens.usdt0!]?.image,
+      name: tokenData[chainConfigs[liskMainnet.id].tokens.usdt0!]?.symbol,
+      symbol: tokenData[chainConfigs[liskMainnet.id].tokens.usdt0!]?.symbol,
+    },
+  ],
+  [base.id]: [
+    {
+      address: chainConfigs[base.id].tokens.usdc,
+      icon: "/assets/tokens/usdc.png",
+      name: "USDC",
+      symbol: "USDC",
+    },
+  ],
+};
+
+export const getContractFeePercentage = async (
+  duration: number,
+  user: string,
+  chain: any,
+  diamondAddress: string,
+) => {
+  const contract = getContract({
+    client: client,
+    address: diamondAddress,
+    chain: chain,
+  });
+
+  const feePercentage = await readContract({
+    contract: contract,
+    method:
+      "function calculateFeePercentage(uint256 duration,address user) external view returns (uint256)",
+    params: [BigInt(duration), user],
+  });
+
+  return feePercentage;
+};
+
+export const getMorphoVaultAddressForToken = async (
+  tokenAddress: string,
+  chain: any,
+  diamondAddress: string,
+) => {
+  const contract = getContract({
+    client: client,
+    address: diamondAddress,
+    chain: chain,
+  });
+
+  const vault = await readContract({
+    contract: contract,
+    method:
+      "function getMorphoVault(address token) external view returns (address)",
+    params: [tokenAddress],
+  });
+
+  // console.log("Vault address for token", tokenAddress, vault);
+
+  return vault;
+};
+
+export const getUserTokenYield = async (
+  tokenAddress: string,
+  feePercentage: number,
+  tokenShares: bigint,
+  principal: bigint,
+  chain: any,
+  diamondAddress: string,
+) => {
+  const contract = getContract({
+    client: client,
+    address: diamondAddress,
+    chain: chain,
+  });
+
+  const vaultAddress = await getMorphoVaultAddressForToken(
+    tokenAddress,
+    chain,
+    diamondAddress,
+  );
+
+  if (!vaultAddress) throw new Error("Vault address not found!");
+
+  const assets = await readContract({
+    contract: contract,
+    method:
+      "function convertSharesToAssets(uint256 shares, address vaultAddress) external view returns (uint256)",
+    params: [tokenShares, vaultAddress],
+  });
+
+  const effectiveYield =
+    (100 - Number(feePercentage) / 100) * Number(assets - principal);
+
+  // console.log("Effective yiield", effectiveYield);
+
+  return BigInt(effectiveYield);
+};
+
+export const getSafeLSKRewards = async (
+  safeId: string,
+  account: any,
+  chain: any,
+  diamondAddress: string,
+) => {
+  const contract = getContract({
+    client: client,
+    address: diamondAddress,
+    chain: chain,
+  });
+
+  const { avgAPR } = await getSignedAprForClaimAll();
+
+  const rewards = await readContract({
+    contract: contract,
+    method:
+      "function previewWithdrawalLSKRewards(uint256 _safeId, uint256 _avgAPR ) external view returns (uint256 projectedLSK,uint256 availableLSK,uint256 claimableLSK,uint256 claimableWithFeeApplied)",
+    params: [BigInt(safeId), avgAPR],
+    from: account?.address,
+  });
+
+  return formatEther(rewards[0]);
+};

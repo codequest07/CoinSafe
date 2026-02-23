@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
-import { useActiveAccount, useConnect } from "thirdweb/react";
+import { useActiveAccount } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
+import { client } from "@/lib/config";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { Account } from "thirdweb/wallets";
 import { parseUnits } from "ethers";
 import { getTokenDecimals } from "@/lib/utils";
@@ -13,7 +14,6 @@ interface UseWithdrawEmergencySafeParams {
   token?: `0x${string}`;
   amount?: number;
   coinSafeAddress: `0x${string}`;
-  coinSafeAbi: any;
   chainId?: number;
   onSuccess?: () => void;
   onError?: (error: Error) => void;
@@ -31,7 +31,6 @@ export const useWithdrawEmergencySafe = ({
   token,
   amount,
   coinSafeAddress,
-  coinSafeAbi,
   onSuccess,
   onError,
   toast,
@@ -39,7 +38,6 @@ export const useWithdrawEmergencySafe = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { connect } = useConnect();
   const account = useActiveAccount();
   const address = account?.address || providedAddress; // Use active account address
   // const account = useActiveAccount();
@@ -47,9 +45,11 @@ export const useWithdrawEmergencySafe = ({
   // const { contract } = useContract({ address: coinSafeAddress, abi: coinSafeAbi });
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
 
+  const { chain } = useChainConfig();
+
   const contract = getContract({
     client,
-    chain: liskMainnet,
+    chain: chain,
     address: coinSafeAddress,
   });
 
@@ -65,7 +65,7 @@ export const useWithdrawEmergencySafe = ({
         if (!address) {
           try {
             // await connect(async () => ({
-            //   chainId: liskMainnet.id,
+            //   chainId: chain.id,
             //   // Assuming a smart wallet setup; adjust based on your configuration
             //   wallet: wallet || { id: "inApp" }, // Fallback to in-app wallet if none specified
             //   client: config.client, // Assuming config.client contains Thirdweb client
@@ -132,14 +132,13 @@ export const useWithdrawEmergencySafe = ({
       address,
       token,
       amount,
-      coinSafeAddress,
-      coinSafeAbi,
       onSuccess,
       onError,
       toast,
-      connect,
       contract,
-    ]
+      account,
+      sendTransaction,
+    ],
   );
 
   return {

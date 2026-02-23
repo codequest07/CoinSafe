@@ -1,4 +1,4 @@
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import {
   availableBalanceState,
   savingsBalanceState,
@@ -7,231 +7,203 @@ import {
   balancesState,
   loadingState,
 } from "../store/atoms/balance";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { facetAbis } from "@/lib/contract";
 import { useEffect, useMemo } from "react";
-import { getTokenDecimals } from "@/lib/utils";
+import { getValidNumberValue } from "@/lib/utils";
+import { convertTokenAmountToUsd } from "@/lib/utils";
 import { getContract, readContract } from "thirdweb";
-import { liskMainnet } from "@/lib/config";
-import { publicClient } from "@/lib/client";
-import { Abi, formatUnits } from "viem";
-import { useTokenPrices } from "@/lib/price-service";
 import { client } from "@/lib/config";
+import { Abi } from "viem";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { useQuery } from "@tanstack/react-query";
 
 export const useBalances = (address: string) => {
   const setAvailableBalance = useSetRecoilState(availableBalanceState);
   const setSavingsBalance = useSetRecoilState(savingsBalanceState);
   const setTotalBalance = useSetRecoilState(totalBalanceState);
-  const [supportedTokens, setSupportedTokens] =
-    useRecoilState(supportedTokensState);
-  const [balances, setBalances] = useRecoilState(balancesState);
+  const setSupportedTokens = useSetRecoilState(supportedTokensState);
+  const setBalances = useSetRecoilState(balancesState);
   const setLoading = useSetRecoilState(loadingState);
 
-  // 1. Fetch prices for supported tokens
-  const priceQueries = useTokenPrices(supportedTokens);
+  const { chain, diamondAddress } = useChainConfig();
 
-  const tokenPriceMap = useMemo(() => {
-    const map: Record<string, number> = {};
-    supportedTokens.forEach((token, index) => {
-      const query = priceQueries[index];
-      if (query.data !== undefined) {
-        map[token] = query.data;
-      }
-    });
-    return map;
-  }, [supportedTokens, priceQueries]);
+  const contract = useMemo(
+    () =>
+      getContract({
+        client,
+        address: diamondAddress,
+        chain: chain,
+        abi: facetAbis.fundingFacet as unknown as Abi,
+      }),
+    [diamondAddress, chain],
+  );
 
-  // 2. Fetch supported tokens
-  useEffect(() => {
-    if (!address) return;
-
-    async function fetchSupportedTokens() {
+  const { data: supportedTokens = [] } = useQuery({
+    queryKey: ["supportedTokens", chain.id, diamondAddress],
+    queryFn: async () => {
       try {
-        const fundingFacetContract = getContract({
-          client,
-          address: CoinsafeDiamondContract.address,
-          chain: liskMainnet,
-          abi: facetAbis.fundingFacet as unknown as Abi,
-        });
-
         const tokens = (await readContract({
-          contract: fundingFacetContract,
+          contract,
           method:
             "function getAcceptedTokenAddresses() external view returns (address[] memory)",
           params: [],
         })) as string[];
 
-        // Only set tokens if we actually got some from the contract
         if (tokens && tokens.length > 0) {
-          setSupportedTokens(tokens);
+          const uniqueTokens = Array.from(
+            new Set(tokens.map((t) => t.toLowerCase())),
+          );
+          return uniqueTokens;
         }
+        return [];
       } catch (err) {
         console.error("Error fetching supported tokens:", err);
+        return [];
       }
-    }
+    },
+    enabled: !!address && !!chain.id && !!diamondAddress,
+  });
 
-    fetchSupportedTokens();
-  }, [address, setSupportedTokens]);
+  // Stable string key derived from supported tokens to prevent queryKey instability
+  const tokenKey = useMemo(() => supportedTokens.join(","), [supportedTokens]);
 
-  // 3. Fetch Balances (Contract Calls only)
   useEffect(() => {
-    if (!address || supportedTokens.length === 0) return;
-
-    async function fetchBalances() {
-      try {
-        setLoading({
-          available: true,
-          total: true,
-          savings: true,
-        });
-
-        const contractAddress =
-          CoinsafeDiamondContract.address as `0x${string}`;
-        const abi = [
-          {
-            inputs: [
-              { internalType: "address", name: "user", type: "address" },
-              { internalType: "address", name: "token", type: "address" },
-            ],
-            name: "getUserTotalBalance",
-            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-            stateMutability: "view",
-            type: "function",
-          },
-          {
-            inputs: [
-              { internalType: "address", name: "user", type: "address" },
-              { internalType: "address", name: "token", type: "address" },
-            ],
-            name: "getUserAvailableBalance",
-            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-            stateMutability: "view",
-            type: "function",
-          },
-          {
-            inputs: [
-              { internalType: "address", name: "user", type: "address" },
-              { internalType: "address", name: "token", type: "address" },
-            ],
-            name: "getUserSavedBalance",
-            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-            stateMutability: "view",
-            type: "function",
-          },
-        ] as const;
-
-        const calls = supportedTokens.flatMap((token) => [
-          {
-            address: contractAddress,
-            abi,
-            functionName: "getUserTotalBalance",
-            args: [address, token],
-          },
-          {
-            address: contractAddress,
-            abi,
-            functionName: "getUserAvailableBalance",
-            args: [address, token],
-          },
-          {
-            address: contractAddress,
-            abi,
-            functionName: "getUserSavedBalance",
-            args: [address, token],
-          },
-        ]);
-
-        const results = await publicClient.multicall({
-          contracts: calls,
-          allowFailure: false, // Or true if we want to handle partial failures
-        });
-
-        const balancesMap = {
-          total: [] as bigint[],
-          available: [] as bigint[],
-          savings: [] as bigint[],
-        };
-
-        // Results array order matches calls order: [total, available, savings, total, available, savings, ...]
-        results.forEach((result: any, index: any) => {
-          const tokenIndex = Math.floor(index / 3);
-          const remainder = index % 3;
-          // 0 -> total, 1 -> available, 2 -> savings
-
-          const value = typeof result === "bigint" ? result : BigInt(0);
-
-          if (remainder === 0) balancesMap.total[tokenIndex] = value;
-          else if (remainder === 1) balancesMap.available[tokenIndex] = value;
-          else if (remainder === 2) balancesMap.savings[tokenIndex] = value;
-        });
-
-        const updatedTokenBalanceMap = supportedTokens.reduce(
-          (acc, token, index) => {
-            acc.available[token] = balancesMap.available[index];
-            acc.total[token] = balancesMap.total[index];
-            acc.savings[token] = balancesMap.savings[index];
-            return acc;
-          },
-          {
-            available: {} as Record<string, unknown>,
-            total: {} as Record<string, unknown>,
-            savings: {} as Record<string, unknown>,
-          },
-        );
-
-        setBalances(updatedTokenBalanceMap);
-      } catch (err) {
-        console.error("Error fetching balances:", err);
-      } finally {
-        setLoading({
-          available: false,
-          total: false,
-          savings: false,
-        });
-      }
+    if (supportedTokens.length > 0) {
+      setSupportedTokens(supportedTokens);
     }
+  }, [supportedTokens, setSupportedTokens]);
 
-    fetchBalances();
-  }, [address, supportedTokens, setBalances, setLoading]);
+  const { data: balancesData, isLoading: isBalancesLoading } = useQuery({
+    queryKey: ["balances", address, chain.id, tokenKey],
+    queryFn: async () => {
+      if (!address || supportedTokens.length === 0) return null;
 
-  // 4. Calculate USD Values using Price Map and Balances
-  useEffect(() => {
-    if (supportedTokens.length === 0) return;
+      const balanceCalls = supportedTokens.flatMap((token) => [
+        {
+          type: "total",
+          contractCall: {
+            contract,
+            method:
+              "function getUserTotalBalance(address user, address token) external view returns (uint256)",
+            params: [address, token],
+          },
+        },
+        {
+          type: "available",
+          contractCall: {
+            contract,
+            method:
+              "function getUserAvailableBalance(address user, address token) external view returns (uint256)",
+            params: [address, token],
+          },
+        },
+        {
+          type: "savings",
+          contractCall: {
+            contract,
+            method:
+              "function getUserSavedBalance(address user, address token) external view returns (uint256)",
+            params: [address, token],
+          },
+        },
+      ]);
 
-    let totalUsd = 0;
-    let availableUsd = 0;
-    let savedUsd = 0;
+      const results = await Promise.all(
+        balanceCalls.map(({ contractCall }) => readContract(contractCall)),
+      );
 
-    supportedTokens.forEach((token) => {
-      const price = tokenPriceMap[token] || 0;
-      const decimals = getTokenDecimals(token);
-
-      const totalBal =
-        (balances.total as Record<string, bigint>)?.[token] || 0n;
-      const availableBal =
-        (balances.available as Record<string, bigint>)?.[token] || 0n;
-      const savedBal =
-        (balances.savings as Record<string, bigint>)?.[token] || 0n;
-
-      // Helper to convert bigint balance -> number amount -> usd value
-      const getUsd = (bal: bigint) => {
-        const amount = Number(formatUnits(bal, decimals));
-        return amount * price;
+      const balancesMap = {
+        total: [] as bigint[],
+        available: [] as bigint[],
+        savings: [] as bigint[],
       };
 
-      totalUsd += getUsd(totalBal);
-      availableUsd += getUsd(availableBal);
-      savedUsd += getUsd(savedBal);
-    });
+      results.forEach((result, index) => {
+        const tokenIndex = Math.floor(index / 3);
+        const type = balanceCalls[index].type as keyof typeof balancesMap;
+        balancesMap[type][tokenIndex] =
+          typeof result === "bigint" ? result : BigInt(0);
+      });
 
-    setTotalBalance(Number(totalUsd.toFixed(2)));
-    setAvailableBalance(Number(availableUsd.toFixed(2)));
-    setSavingsBalance(Number(savedUsd.toFixed(2)));
+      const updatedTokenBalanceMap = supportedTokens.reduce(
+        (acc, token, index) => {
+          const normalizedToken = token.toLowerCase();
+          acc.available[normalizedToken] = balancesMap.available[index];
+          acc.total[normalizedToken] = balancesMap.total[index];
+          acc.savings[normalizedToken] = balancesMap.savings[index];
+          return acc;
+        },
+        {
+          available: {} as Record<string, unknown>,
+          total: {} as Record<string, unknown>,
+          savings: {} as Record<string, unknown>,
+        },
+      );
+
+      const usdPromises = supportedTokens.map(async (token, i) => {
+        const totalUsdVal = convertTokenAmountToUsd(
+          token,
+          balancesMap.total[i] || 0n,
+        );
+        const availableUsdVal = convertTokenAmountToUsd(
+          token,
+          BigInt(balancesMap.available[i] || 0n),
+        );
+        const savedUsdVal = convertTokenAmountToUsd(
+          token,
+          BigInt(balancesMap.savings[i] || 0n),
+        );
+
+        return Promise.all([totalUsdVal, availableUsdVal, savedUsdVal]);
+      });
+
+      const usdResults = await Promise.all(usdPromises);
+
+      let totalUsd = 0;
+      let availableUsd = 0;
+      let savedUsd = 0;
+
+      usdResults.forEach(([totalUsdVal, availableUsdVal, savedUsdVal]) => {
+        totalUsd += getValidNumberValue(totalUsdVal);
+        availableUsd += getValidNumberValue(availableUsdVal);
+        savedUsd += getValidNumberValue(savedUsdVal);
+      });
+
+      return {
+        tokenBalances: updatedTokenBalanceMap,
+        usd: {
+          total: Number(totalUsd.toFixed(6)),
+          available: Number(availableUsd.toFixed(6)),
+          savings: Number(savedUsd.toFixed(6)),
+        },
+      };
+    },
+    enabled: !!address && supportedTokens.length > 0,
+    staleTime: 1000 * 30, // 30 seconds stale time
+  });
+
+  useEffect(() => {
+    if (balancesData) {
+      setBalances(balancesData.tokenBalances);
+      setTotalBalance(balancesData.usd.total);
+      setAvailableBalance(balancesData.usd.available);
+      setSavingsBalance(balancesData.usd.savings);
+    }
   }, [
-    balances,
-    tokenPriceMap,
-    supportedTokens,
+    balancesData,
+    setBalances,
     setTotalBalance,
     setAvailableBalance,
     setSavingsBalance,
   ]);
+
+  useEffect(() => {
+    setLoading({
+      available: isBalancesLoading,
+      total: isBalancesLoading,
+      savings: isBalancesLoading,
+    });
+  }, [isBalancesLoading, setLoading]);
+
+  return balancesData;
 };

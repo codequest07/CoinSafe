@@ -48,7 +48,12 @@ ExtendTargetSafeModalProps) {
     setCustomDate(date);
     setIsCustomSelected(true);
 
-    const daysDiff = differenceInDays(date, today);
+    const baseDate = details?.unlockTime ? new Date(details.unlockTime) : today;
+    const daysDiff = differenceInDays(date, baseDate);
+
+    // Make sure they don't select a custom date before the base unlock date
+    if (daysDiff <= 0) return;
+
     setSavingsDuration(daysDiff);
     setEndDate(format(date, "dd MMMM yyyy"));
     setUnlockDate(date);
@@ -93,7 +98,7 @@ ExtendTargetSafeModalProps) {
     safeId: Number(safeId),
     saveState,
     onSuccess: () => {
-      // closeAllModals();
+      onClose();
       console.log("Successful extension");
     },
     onError: (error) => {
@@ -109,17 +114,31 @@ ExtendTargetSafeModalProps) {
   ];
 
   const calculateEndDate = (days: number) => {
-    const currentDate = new Date(
-      details?.unlockTime ? Number(details.unlockTime) * 1000 : Date.now()
-    );
-    const futureDate = addDays(currentDate, days);
+    // If there is an existing unlockTime, calculate from that, otherwise calculate from now
+    const baseDate = details?.unlockTime
+      ? new Date(details.unlockTime)
+      : new Date();
+    const futureDate = addDays(baseDate, days);
     return format(futureDate, "dd MMMM yyyy");
   };
 
   // Set initial endDate when component mounts
   useEffect(() => {
     setEndDate(calculateEndDate(savingsDuration));
-  }, [savingsDuration]);
+    const durationInSeconds = savingsDuration * 24 * 60 * 60;
+
+    setSaveState((prevState) => ({
+      ...prevState,
+      duration: durationInSeconds,
+    }));
+
+    const baseDate = details?.unlockTime
+      ? new Date(details.unlockTime)
+      : new Date();
+    const calculatedUnlockDate = addDays(baseDate, savingsDuration);
+    setUnlockDate(calculatedUnlockDate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savingsDuration, details?.unlockTime]);
 
   const handleDurationChange = (duration: number) => {
     setSavingsDuration(duration);
@@ -133,7 +152,10 @@ ExtendTargetSafeModalProps) {
       duration: durationInSeconds,
     }));
 
-    const calculatedUnlockDate = addDays(new Date(), duration);
+    const baseDate = details?.unlockTime
+      ? new Date(details.unlockTime)
+      : new Date();
+    const calculatedUnlockDate = addDays(baseDate, duration);
     setUnlockDate(calculatedUnlockDate);
   };
 
@@ -190,6 +212,9 @@ ExtendTargetSafeModalProps) {
               isDisabled={isDurationDisabled}
               label="New Duration"
               unlockDate={endDate}
+              baseUnlockDate={
+                details?.unlockTime ? new Date(details.unlockTime) : undefined
+              }
             />
           </div>
 

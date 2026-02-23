@@ -2,9 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { getContract, readContract, resolveMethod } from "thirdweb";
 import { Abi } from "viem";
 
-import { liskMainnet, client } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
 import { useActiveAccount } from "thirdweb/react";
+import { useChainConfig } from "@/hooks/useChainConfig";
 
 export interface Transaction {
   id: bigint;
@@ -50,15 +51,16 @@ export function useTransactionHistory({
 
   const account = useActiveAccount();
   const address = account?.address;
+  const { chain, diamondAddress } = useChainConfig();
 
   const contract = useMemo(() => {
     return getContract({
       client,
-      address: CoinsafeDiamondContract.address,
-      chain: liskMainnet,
+      address: diamondAddress,
+      chain: chain,
       abi: facetAbis.fundingFacet as Abi,
     });
-  }, []); // <-- Only create once
+  }, [diamondAddress, chain]);
 
   const fetchTransactions = useCallback(async () => {
     if (!address) return;

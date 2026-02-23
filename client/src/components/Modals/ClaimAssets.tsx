@@ -11,9 +11,23 @@ import { LoaderCircle } from "lucide-react";
 import { useSmartAccountTransactionInterceptorContext } from "@/hooks/useSmartAccountTransactionInterceptor";
 import { Abi, formatUnits } from "viem";
 import { getContract, prepareContractCall } from "thirdweb";
-import { client, liskMainnet } from "@/lib/config";
-import { CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { client } from "@/lib/config";
+import { facetAbis } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { toast } from "sonner";
+import { getSignedApr, getSignedAprForClaimAll } from "@/lib/apr-api";
+import { getMorphoVaultAddressForToken } from "@/lib/utils";
+import { readContract } from "thirdweb";
+
+const morphoVaultAbi = [
+  {
+    inputs: [{ name: "owner", type: "address" }],
+    name: "maxWithdraw",
+    outputs: [{ name: "maxAssets", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const;
 
 interface Token {
   token: string;
@@ -38,6 +52,7 @@ export default function ClaimAssets({
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const { sendTransaction } = useSmartAccountTransactionInterceptorContext();
+  const { chain, diamondAddress } = useChainConfig();
 
   useEffect(() => {
     setLoading(true);
@@ -47,7 +62,7 @@ export default function ClaimAssets({
       for (const token of safeDetails.tokenAmounts) {
         const usdValue = await convertTokenAmountToUsd(
           token.token,
-          token.amount
+          token.amount,
         );
         values[token.token] = usdValue;
       }
@@ -59,22 +74,108 @@ export default function ClaimAssets({
     fetchUsdValues();
   }, [safeDetails]);
 
+  const checkLiquidity = async (
+    tokenAddress: string,
+    amount: bigint,
+  ): Promise<boolean> => {
+    try {
+      const vaultAddress = await getMorphoVaultAddressForToken(
+        tokenAddress,
+        chain,
+        diamondAddress,
+      );
+
+      if (
+        !vaultAddress ||
+        vaultAddress === "0x0000000000000000000000000000000000000000"
+      ) {
+        return true; // Not a Morpho vault or invalid address, skip check
+      }
+
+      const contract = getContract({
+        client,
+        chain: chain,
+        address: vaultAddress,
+        abi: morphoVaultAbi as Abi,
+      });
+
+      const maxWithdrawable = await readContract({
+        contract,
+        method: "function maxWithdraw(address owner) view returns (uint256)",
+        params: [diamondAddress],
+      });
+
+      console.log(
+        `Liquidity Check: Token ${tokenAddress}, User Amount: ${formatUnits(
+          amount,
+          getTokenDecimals(tokenAddress),
+        )}, Max Withdrawable: ${formatUnits(
+          maxWithdrawable,
+          getTokenDecimals(tokenAddress),
+        )}`,
+      );
+
+      if (amount > maxWithdrawable) {
+        const tokenSymbol = tokenData[tokenAddress]?.symbol || "Token";
+        toast.error(
+          `Withdrawals for ${tokenSymbol} are temporarily limited by vault liquidity. Please try again later.`,
+        );
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error checking liquidity:", error);
+      // Fail open or closed? If we can't check, typically we might want to warn but let it try,
+      // or fail safe. Letting it try allows the contract to fail if needed.
+      // But given the task is to prevent the error, let's log and proceed cautiously.
+      return true;
+    }
+  };
+
   const handleClaimSingle = async (token: string) => {
     setClaiming(true);
     try {
       const contract = getContract({
         client: client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain: chain,
+        address: diamondAddress,
         abi: facetAbis.targetSavingsFacet as Abi,
       });
 
+      // Fetch signed APR data from the backend
+      console.log("Fetching signed APR data for token:", token);
+      const aprData = await getSignedApr(token);
+      console.log("APR data received:", {
+        avgAPR: aprData.avgAPR.toString(),
+        aprNonce: aprData.aprNonce.toString(),
+        signatureLength: aprData.aprSignature.length,
+      });
+
+      // Prepare the contract call for claim with new signature:
+      // function claim(uint256 _safeId, address _tokenAddress, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
       const claimTx = prepareContractCall({
         contract,
         method:
-          "function claim(uint256 _safeId, address _tokenAddress) external",
-        params: [BigInt(safeDetails.id), token],
+          "function claim(uint256 _safeId, address _tokenAddress, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external",
+        params: [
+          BigInt(safeDetails.id),
+          token,
+          aprData.avgAPR,
+          aprData.aprNonce,
+          aprData.aprSignature,
+        ],
       });
+
+      // Find the specific token amount for the liquidity check
+      const tokenAmount = safeDetails.tokenAmounts.find(
+        (t) => t.token.toLowerCase() === token.toLowerCase(),
+      );
+
+      if (tokenAmount) {
+        const hasLiquidity = await checkLiquidity(token, tokenAmount.amount);
+        if (!hasLiquidity) return;
+      }
 
       const { transactionHash } = await sendTransaction(claimTx);
 
@@ -85,6 +186,12 @@ export default function ClaimAssets({
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error claiming token:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("Failed to fetch signed APR")
+      ) {
+        toast.error("Failed to fetch APR data. Please try again.");
+      }
     } finally {
       setClaiming(false);
     }
@@ -93,17 +200,43 @@ export default function ClaimAssets({
   const handleClaimAll = async () => {
     setClaiming(true);
     try {
+      // Check liquidity for ALL tokens first
+      for (const token of safeDetails.tokenAmounts) {
+        const hasLiquidity = await checkLiquidity(token.token, token.amount);
+        if (!hasLiquidity) {
+          setClaiming(false);
+          return;
+        }
+      }
+
       const contract = getContract({
         client: client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain: chain,
+        address: diamondAddress,
         abi: facetAbis.targetSavingsFacet as Abi,
       });
 
+      // Fetch signed APR data for claimAll (no specific token)
+      console.log("Fetching signed APR data for claimAll");
+      const aprData = await getSignedAprForClaimAll();
+      console.log("APR data received for claimAll:", {
+        avgAPR: aprData.avgAPR.toString(),
+        aprNonce: aprData.aprNonce.toString(),
+        signatureLength: aprData.aprSignature.length,
+      });
+
+      // Prepare the contract call for claimAll with new signature:
+      // function claimAll(uint256 _safeId, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external nonReentrant
       const claimAllTx = prepareContractCall({
         contract,
-        method: "function claimAll(uint256 _safeId) external",
-        params: [BigInt(safeDetails.id)],
+        method:
+          "function claimAll(uint256 _safeId, uint256 _avgAPR, uint256 _aprNonce, bytes memory _aprSignature) external",
+        params: [
+          BigInt(safeDetails.id),
+          aprData.avgAPR,
+          aprData.aprNonce,
+          aprData.aprSignature,
+        ],
       });
 
       const { transactionHash } = await sendTransaction(claimAllTx);
@@ -115,6 +248,12 @@ export default function ClaimAssets({
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error claiming all tokens:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("Failed to fetch signed APR")
+      ) {
+        toast.error("Failed to fetch APR data. Please try again.");
+      }
     } finally {
       setClaiming(false);
     }
@@ -147,7 +286,8 @@ export default function ClaimAssets({
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg">
+                className="bg-black border-b border-[#FFFFFF17] p-3 rounded-lg"
+              >
                 <div className="flex justify-between items-center">
                   <Skeleton className="h-12 w-24" />
                   <Skeleton className="h-8 w-20" />
@@ -185,7 +325,8 @@ export default function ClaimAssets({
                         <div
                           className={`w-7 h-7 rounded-full ${
                             tokenData[token.token]?.color
-                          } flex items-center justify-center font-medium`}>
+                          } flex items-center justify-center font-medium`}
+                        >
                           {tokenData[token.token]?.symbol?.charAt(0)}
                         </div>
                       )}
@@ -203,7 +344,7 @@ export default function ClaimAssets({
                         <p className="">
                           {formatUnits(
                             token.amount,
-                            getTokenDecimals(token.token)
+                            getTokenDecimals(token.token),
                           )}{" "}
                           {tokenData[token.token]?.symbol}
                         </p>
@@ -220,7 +361,8 @@ export default function ClaimAssets({
                       onClick={() => handleClaimSingle(token.token)}
                       disabled={claiming}
                       variant="link"
-                      className="text-sm text-[#79E7BA] hover:text-[#79E7BA]">
+                      className="text-sm text-[#79E7BA] hover:text-[#79E7BA]"
+                    >
                       Claim
                     </Button>
                   </div>
@@ -233,14 +375,16 @@ export default function ClaimAssets({
           <Button
             onClick={() => setIsModalOpen(false)}
             className="px-10 rounded-[2rem] sm:w-auto text-[#F1F1F1] bg-[#3F3F3F99] hover:bg-[#3F3F3F99]"
-            disabled={claiming}>
+            disabled={claiming}
+          >
             Cancel
           </Button>
           <Button
             onClick={handleClaimAll}
             className="text-black px-8 rounded-[2rem]"
             variant="outline"
-            disabled={claiming}>
+            disabled={claiming}
+          >
             {claiming ? (
               <LoaderCircle className="animate-spin" />
             ) : (

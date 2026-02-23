@@ -3,7 +3,8 @@ import { getTokenDecimals, tokenData } from "@/lib/utils";
 import AmountInput from "../AmountInput";
 import { useRecoilState } from "recoil";
 import { saveAtom } from "@/store/atoms/save";
-import { tokens, CoinsafeDiamondContract, facetAbis } from "@/lib/contract";
+import { tokens, facetAbis } from "@/lib/contract";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { Button } from "../ui/button";
 import { LoaderCircle } from "lucide-react";
 import { supportedTokensState } from "@/store/atoms/balance";
@@ -16,7 +17,7 @@ import { Label } from "../ui/label";
 // import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { getContract, readContract } from "thirdweb";
 import { Abi, formatEther, formatUnits } from "viem";
-import { client, liskMainnet } from "@/lib/config";
+import { client } from "@/lib/config";
 import { useWithdrawAutomatedSafe } from "@/hooks/useWithdrawAutomatedSafe";
 import { format } from "date-fns";
 // import { toast } from "@sonner/toast";
@@ -65,8 +66,9 @@ export default function UnlockAutoSafeModal({
   // Hooks
   //   const { safeDetails, isLoading: isSafeLoading } = useGetSafeById(safeId);
   const { details, isLoading: autoSafeIsLoading } = useAutomatedSafeForUser(
-    account?.address as `0x${string}`
+    account?.address as `0x${string}`,
   );
+  const { chain, diamondAddress } = useChainConfig();
 
   console.log("Details:", details);
   console.log("Details unlockTime", details.unlockTime);
@@ -76,7 +78,7 @@ export default function UnlockAutoSafeModal({
     token: saveState.token as `0x${string}`,
     amount: saveState.amount,
     acceptEarlyWithdrawalFee,
-    coinSafeAddress: CoinsafeDiamondContract.address as `0x${string}`,
+    coinSafeAddress: diamondAddress as `0x${string}`,
     toast,
     onSuccess: () => {
       setShowApproveTxModal(false);
@@ -96,8 +98,8 @@ export default function UnlockAutoSafeModal({
       setIsLoadingFee(true);
       const contract = getContract({
         client,
-        chain: liskMainnet,
-        address: CoinsafeDiamondContract.address,
+        chain: chain,
+        address: diamondAddress,
         abi: facetAbis.automatedSavingsFacet as Abi,
       });
 
@@ -118,7 +120,7 @@ export default function UnlockAutoSafeModal({
     } finally {
       setIsLoadingFee(false);
     }
-  }, [breakingFeePercentage]);
+  }, [breakingFeePercentage, chain, diamondAddress]);
 
   // Calculate breaking fee
   const calculateBreakingFee = useCallback(async () => {
@@ -130,21 +132,21 @@ export default function UnlockAutoSafeModal({
 
     const feeAmount = (saveState.amount * breakingFeePercentage) / 100;
     const formattedFeeAmount = Number(
-      formatUnits(BigInt(feeAmount), getTokenDecimals(saveState.token))
+      formatUnits(BigInt(feeAmount), getTokenDecimals(saveState.token)),
     );
     setBreakingFeeAmount(formattedFeeAmount);
 
     const tokenSymbol = tokenData[saveState.token]?.symbol?.toUpperCase() || "";
     const usdValue = Number(await getTokenPrice(saveState.token, feeAmount));
     const formattedUsdValue = Number(
-      formatUnits(BigInt(usdValue), getTokenDecimals(saveState.token))
+      formatUnits(BigInt(usdValue), getTokenDecimals(saveState.token)),
     );
     setBreakingFeeUsd(formattedUsdValue);
 
     console.log(
       `Breaking fee: ${feeAmount} ${tokenSymbol} (${breakingFeePercentage}% of ${
         saveState.amount
-      }) ≈ $${usdValue.toFixed(2)}`
+      }) ≈ $${usdValue.toFixed(2)}`,
     );
   }, [saveState.amount, saveState.token, breakingFeePercentage]);
 
@@ -168,7 +170,8 @@ export default function UnlockAutoSafeModal({
     if (details?.tokenDetails) {
       try {
         const tokenInfo = details.tokenDetails.find(
-          (t: any) => t?.token?.toLowerCase() === saveState.token?.toLowerCase()
+          (t: any) =>
+            t?.token?.toLowerCase() === saveState.token?.toLowerCase(),
         );
 
         console.log("TOKEN INFO", tokenInfo);
@@ -177,12 +180,12 @@ export default function UnlockAutoSafeModal({
         if (tokenInfo && typeof tokenInfo.amountSaved === "bigint") {
           setSelectedTokenBalance(Number(tokenInfo.amountSaved));
           console.log(
-            `Token ${saveState.token} balance in safe: ${tokenInfo.amount} ${tokenInfo.tokenSymbol}`
+            `Token ${saveState.token} balance in safe: ${tokenInfo.amount} ${tokenInfo.tokenSymbol}`,
           );
         } else {
           setSelectedTokenBalance(0);
           console.log(
-            `Token ${saveState.token} not found in safe or has invalid amount`
+            `Token ${saveState.token} not found in safe or has invalid amount`,
           );
         }
       } catch (error) {
@@ -223,7 +226,7 @@ export default function UnlockAutoSafeModal({
         amount: _amount,
       }));
     },
-    [setSaveState]
+    [setSaveState],
   );
 
   return (
@@ -246,7 +249,7 @@ export default function UnlockAutoSafeModal({
                   ? Number(saveState.amount) % 1 === 0
                     ? formatUnits(
                         BigInt(saveState.amount),
-                        getTokenDecimals(saveState.token)
+                        getTokenDecimals(saveState.token),
                       )
                     : saveState.amount
                   : saveState.amount || ""
@@ -254,7 +257,6 @@ export default function UnlockAutoSafeModal({
               handleAmountChange={handleAmountChange}
               handleTokenSelect={handleTokenSelect}
               saveState={saveState}
-              tokens={tokens}
               selectedTokenBalance={selectedTokenBalance}
               validationErrors={{ token: error?.message }}
               supportedTokens={supportedTokens}
@@ -268,7 +270,7 @@ export default function UnlockAutoSafeModal({
                 <span className="text-gray-400">
                   {formatUnits(
                     BigInt(selectedTokenBalance),
-                    getTokenDecimals(saveState.token)
+                    getTokenDecimals(saveState.token),
                   )}{" "}
                   {tokenData[saveState.token]?.symbol || ""}
                 </span>
@@ -356,7 +358,7 @@ export default function UnlockAutoSafeModal({
                       {new Date(Number(details.unlockTime) * 1000) > new Date()
                         ? format(
                             new Date(Number(details.unlockTime) * 1000),
-                            "dd MMM, yyyy • HH:mm"
+                            "dd MMM, yyyy • HH:mm",
                           )
                         : "Ready to unlock"}
                     </div>
@@ -365,10 +367,10 @@ export default function UnlockAutoSafeModal({
                       <Badge className="bg-[#2a2a2a] text-white hover:bg-[#2a2a2a] rounded-full text-xs py-1">
                         {Math.ceil(
                           (new Date(
-                            Number(details.unlockTime) * 1000
+                            Number(details.unlockTime) * 1000,
                           ).getTime() -
                             new Date().getTime()) /
-                            (1000 * 60 * 60 * 24)
+                            (1000 * 60 * 60 * 24),
                         )}{" "}
                         days left
                       </Badge>
