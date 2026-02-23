@@ -13,7 +13,7 @@ import { useMobileHeader } from "@/hooks/useMobileHeader";
  * and state management through the useMobileHeader hook.
  */
 export default function MobileHeader() {
-  const { routeName, isLoading, formattedStreak } = useMobileHeader();
+  const { routeName, isLoading } = useMobileHeader();
   return (
     <div className="flex flex-col space-y-2 py-2 sm:hidden items-start">
       {/* Current Route Name and Badge */}
@@ -23,9 +23,9 @@ export default function MobileHeader() {
         ) : (
           <span className="text-sm text-[#F1F1F1]">{routeName}</span>
         )}
-        <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
+        {/* <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
           {formattedStreak}
-        </span>
+        </span> */}
       </div>
     </div>
   );

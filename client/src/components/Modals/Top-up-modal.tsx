@@ -107,7 +107,7 @@ export default function TopUpModal({
       setShowSuccessModal(true);
       // If onTopUp is provided, call it as well
       if (onTopUp) {
-        onTopUp(saveState.amount, tokenData[saveState.token]?.symbol || "");
+        onTopUp(saveState.amount, tokenData[saveState?.token?.toLowerCase()]?.symbol || "");
       }
     },
     onError: (error) => {
@@ -185,7 +185,7 @@ export default function TopUpModal({
             <div className="text-sm text-gray-300">
               Wallet balance:{" "}
               <span className="text-gray-400">
-                {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
+                {selectedTokenBalance} {tokenData[saveState?.token?.toLowerCase()]?.symbol}
               </span>
             </div>
             {saveState.token &&
@@ -247,7 +247,7 @@ export default function TopUpModal({
           }}
           transactionType="top-up"
           amount={saveState.amount}
-          token={tokenData[saveState.token]?.symbol || ""}
+          token={tokenData[saveState?.token?.toLowerCase()]?.symbol || ""}
         />
       )}
     </div>

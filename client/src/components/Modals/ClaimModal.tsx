@@ -98,7 +98,7 @@ export default function ClaimModal({
             typeof token.amount === "bigint"
               ? Number(token.amount)
               : Number(token.amount),
-          symbol: tokenData[token.token]?.symbol || "Unknown",
+          symbol: tokenData[token?.token?.toLowerCase()]?.symbol || "Unknown",
         }));
 
       setClaimableTokens(tokens);

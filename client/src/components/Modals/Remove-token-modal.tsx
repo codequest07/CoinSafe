@@ -231,7 +231,7 @@ export default function RemoveTokenModal({
                 }
 
                 console.log("Details coming", _details.amountSaved);
-                console.log("TOKEN DATA", tokenData[token]);
+                console.log("TOKEN DATA", tokenData[token?.toLowerCase()]);
                 return (
                   <div
                     key={token} // Use token address as key
@@ -241,17 +241,17 @@ export default function RemoveTokenModal({
                     <div className="flex items-center">
                       <div className="mr-3 h-8 w-8 rounded-full flex items-center justify-center">
                         <img
-                          src={tokenData[token]?.image}
-                          alt={tokenData[token]?.symbol}
+                          src={tokenData[token?.toLowerCase()]?.image}
+                          alt={tokenData[token?.toLowerCase()]?.symbol}
                           className="h-8 w-8 rounded-full"
                         />
                       </div>
                       <div>
                         <div className="font-medium">
-                          {tokenData[token]?.symbol}
+                          {tokenData[token?.toLowerCase()]?.symbol}
                         </div>
                         <div className="text-sm text-gray-400">
-                          {tokenData[token]?.chain}
+                          {tokenData[token?.toLowerCase()]?.chain}
                         </div>
                       </div>
                     </div>
@@ -266,16 +266,16 @@ export default function RemoveTokenModal({
                         ) : (
                           <Loader2 size={8} />
                         )}{" "}
-                        {tokenData[token]?.symbol} */}
+                        {tokenData[token?.toLowerCase()]?.symbol} */}
                           {_details.amountToSave !== undefined &&
                           _details.amountToSave !== null
                             ? formatUnits(
                                 _details.amountSaved!, // Pass bigint directly
-                                tokenData[token]?.decimals ||
+                                tokenData[token?.toLowerCase()]?.decimals ||
                                   getTokenDecimals(token),
                               )
                             : "0.00"}{" "}
-                          {tokenData[token]?.symbol || "Unknown"}
+                          {tokenData[token?.toLowerCase()]?.symbol || "Unknown"}
                         </div>
                         <div className="flex gap-2">
                           <div className="text-sm text-gray-400">
@@ -324,17 +324,17 @@ export default function RemoveTokenModal({
                 <div className="flex items-center">
                   <div className="mr-3 h-8 w-8 rounded-full flex items-center justify-center">
                     <img
-                      src={tokenData[token.token]?.image}
-                      alt={tokenData[token.token]?.symbol}
+                      src={tokenData[token?.token?.toLowerCase()]?.image}
+                      alt={tokenData[token?.token?.toLowerCase()]?.symbol}
                       className="h-8 w-8 rounded-full"
                     />
                   </div>
                   <div>
                     <div className="font-medium">
-                      {tokenData[token.token]?.symbol}
+                      {tokenData[token?.token?.toLowerCase()]?.symbol}
                     </div>
                     <div className="text-sm text-gray-400">
-                      {tokenData[token.token]?.chain}
+                      {tokenData[token?.token?.toLowerCase()]?.chain}
                     </div>
                   </div>
                 </div>
@@ -343,10 +343,10 @@ export default function RemoveTokenModal({
                     <div className="font-medium">
                       {formatUnits(
                         token.amountToSave,
-                        tokenData[token.token]?.decimals ||
+                        tokenData[token?.token?.toLowerCase()]?.decimals ||
                           getTokenDecimals(token.token)
                       )}{" "}
-                      {tokenData[token.token]?.symbol}
+                      {tokenData[token?.token?.toLowerCase()]?.symbol}
                     </div>
                     <div className="flex gap-2">
                       <div className="text-sm text-gray-400">
@@ -431,7 +431,7 @@ export default function RemoveTokenModal({
             onClose={() => setShowSucessModal(false)}
             transactionType="remove-token"
             token={
-              tokenData[tokens.find((token) => token.selected)?.token || ""]
+              tokenData[(tokens?.find((token)=>token?.selected)?.token||""?.toLowerCase())?.toLowerCase()]
                 ?.symbol || "Unknown"
             }
             additionalDetails={{
@@ -444,7 +444,7 @@ export default function RemoveTokenModal({
                   tokens.find((token) => token.selected)?.token || "",
                 ),
               )} ${
-                tokenData[tokens.find((token) => token.selected)?.token || ""]
+                tokenData[(tokens?.find((token)=>token?.selected)?.token||""?.toLowerCase())?.toLowerCase()]
                   ?.symbol || "Unknown"
               } per month`,
             }}
@@ -641,16 +641,16 @@ export default function RemoveTokenModal({
 //                   <div className="mr-3 h-8 w-8 rounded-full flex items-center justify-center">
 //                     {/* <span className="text-white text-xs"></span> */}
 //                     <img
-//                       src={tokenData[token.token]?.image}
-//                       alt={tokenData[token.token]?.symbol}
+//                       src={tokenData[token?.token?.toLowerCase()]?.image}
+//                       alt={tokenData[token?.token?.toLowerCase()]?.symbol}
 //                     />
 //                   </div>
 //                   <div>
 //                     <div className="font-medium">
-//                       {tokenData[token.token]?.symbol}
+//                       {tokenData[token?.token?.toLowerCase()]?.symbol}
 //                     </div>
 //                     <div className="text-sm text-gray-400">
-//                       {tokenData[token.token]?.chain}
+//                       {tokenData[token?.token?.toLowerCase()]?.chain}
 //                     </div>
 //                   </div>
 //                 </div>

@@ -116,7 +116,7 @@ export default function ClaimAssets({
       );
 
       if (amount > maxWithdrawable) {
-        const tokenSymbol = tokenData[tokenAddress]?.symbol || "Token";
+        const tokenSymbol = tokenData[tokenAddress?.toLowerCase()]?.symbol || "Token";
         toast.error(
           `Withdrawals for ${tokenSymbol} are temporarily limited by vault liquidity. Please try again later.`,
         );
@@ -182,7 +182,7 @@ export default function ClaimAssets({
       if (!transactionHash) {
         toast.error("Claim asset failed");
       }
-      toast.success(`Redeemed ${tokenData[token]?.symbol} successfully`);
+      toast.success(`Redeemed ${tokenData[token?.toLowerCase()]?.symbol} successfully`);
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error claiming token:", error);
@@ -312,10 +312,10 @@ export default function ClaimAssets({
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2">
-                      {tokenData[token.token]?.image ? (
+                      {tokenData[token?.token?.toLowerCase()]?.image ? (
                         <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
                           <img
-                            src={tokenData[token.token]?.image}
+                            src={tokenData[token?.token?.toLowerCase()]?.image}
                             width={30}
                             height={30}
                             className="w-full h-full"
@@ -324,18 +324,18 @@ export default function ClaimAssets({
                       ) : (
                         <div
                           className={`w-7 h-7 rounded-full ${
-                            tokenData[token.token]?.color
+                            tokenData[token?.token?.toLowerCase()]?.color
                           } flex items-center justify-center font-medium`}
                         >
-                          {tokenData[token.token]?.symbol?.charAt(0)}
+                          {tokenData[token?.token?.toLowerCase()]?.symbol?.charAt(0)}
                         </div>
                       )}
                       <div className="flex flex-col">
                         <p className="font-medium">
-                          {tokenData[token.token]?.symbol}
+                          {tokenData[token?.token?.toLowerCase()]?.symbol}
                         </p>
                         <p className="text-xs text-gray-400">
-                          {tokenData[token.token]?.chain}
+                          {tokenData[token?.token?.toLowerCase()]?.chain}
                         </p>
                       </div>
                     </div>
@@ -346,7 +346,7 @@ export default function ClaimAssets({
                             token.amount,
                             getTokenDecimals(token.token),
                           )}{" "}
-                          {tokenData[token.token]?.symbol}
+                          {tokenData[token?.token?.toLowerCase()]?.symbol}
                         </p>
                       </div>
                       <div className="flex flex-col">

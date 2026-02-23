@@ -61,7 +61,7 @@ const AmountInput = ({
   };
 
   // Get the selected token info
-  const selectedTokenInfo = saveState.token ? tokenData[saveState.token] : null;
+  const selectedTokenInfo = saveState.token ? tokenData[saveState?.token?.toLowerCase()] : null;
 
   return (
     <div className="mb-4">
@@ -117,7 +117,7 @@ const AmountInput = ({
               </SelectTrigger>
               <SelectContent>
                 {supportedTokens.map((token) => {
-                  const tokenInfo = tokenData[token];
+                  const tokenInfo = tokenData[token?.toLowerCase()];
                   return (
                     <SelectItem value={token} key={token}>
                       <div className="flex items-center">

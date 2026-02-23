@@ -274,7 +274,7 @@ export const useCreateAutoSavings = ({
       contracts: rawTxs,
     });
 
-    console.log(results);
+    // console.log(results);
 
     let hasAutoSafe: boolean = false;
     const tokens: string[] = [];

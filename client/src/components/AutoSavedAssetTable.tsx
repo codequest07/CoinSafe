@@ -161,17 +161,17 @@ export default function AutoSavedAssetTable({
                   <div className="w-8 h-8 rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold rounded-full">
                       <img
-                        src={`${tokenData[asset.token].image}`}
+                        src={`${tokenData[asset?.token?.toLowerCase()]?.image}`}
                         className="rounded-full"
                       />
                     </span>
                   </div>
                   <div>
                     {/* <div className="text-white font-medium">
-                          <img src={`${tokenData[asset.token].image}`} />
+                          <img src={`${tokenData[asset?.token?.toLowerCase()].image}`} />
                         </div> */}
                     <div className="text-gray-400 text-sm">
-                      {tokenData[asset.token].symbol}
+                      {tokenData[asset?.token?.toLowerCase()]?.symbol}
                     </div>
                   </div>
                 </div>
@@ -189,7 +189,7 @@ export default function AutoSavedAssetTable({
                         getTokenDecimals(asset.token),
                       ) +
                       " " +
-                      tokenData[asset.token].symbol
+                      tokenData[asset?.token?.toLowerCase()]?.symbol
                     }`
                   )}
                 </div>
@@ -206,7 +206,7 @@ export default function AutoSavedAssetTable({
                       asset.amountSaved,
                       getTokenDecimals(asset.token),
                     )}{" "}
-                    {tokenData[asset.token].symbol}
+                    {tokenData[asset?.token?.toLowerCase()]?.symbol}
                   </p>
                   <p className="text-xs text-gray-400">
                     ≈ $
@@ -227,7 +227,7 @@ export default function AutoSavedAssetTable({
                   {/* {`$${asset.amountSaved}`} */}
                   {/* {formatUnits(asset.amountSaved, getTokenDecimals(asset.token)) +
                         " " +
-                        tokenData[asset.token].symbol} */}
+                        tokenData[asset?.token?.toLowerCase()].symbol} */}
                   {/* {`${await getTokenPrice(
                         asset.token,
                         Number(asset.amountSaved)
