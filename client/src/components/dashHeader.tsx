@@ -13,8 +13,8 @@ import ExtensionCard from "./Cards/ExtensionCard";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { Skeleton } from "./ui/skeleton";
 import { useStreakSystem } from "@/hooks/useStreakSystem";
-import { useRecoilValue } from "recoil";
-import { userCurrentStreakState } from "@/store/atoms/streak";
+// import { useRecoilValue } from "recoil";
+// import { userCurrentStreakState } from "@/store/atoms/streak";
 import {
   useActiveAccount,
   useConnectModal,
@@ -63,12 +63,12 @@ const DashHeader = () => {
 
   // Get streak information
   const { getStreakInfo } = useStreakSystem();
-  const currentStreak = useRecoilValue(userCurrentStreakState);
+  // const currentStreak = useRecoilValue(userCurrentStreakState);
 
-  // Format streak with fire emoji
-  const formattedStreak = `${
-    currentStreak > 0 ? currentStreak.toString() : "0"
-  } days 🔥`;
+  // // Format streak with fire emoji
+  // const formattedStreak = `${
+  //   currentStreak > 0 ? currentStreak.toString() : "0"
+  // } days 🔥`;
 
   // Check if we're on a vault detail page
   const isVaultDetailPage = location.pathname.includes("/vault/") && params.id;
@@ -342,9 +342,9 @@ const DashHeader = () => {
                     {getCurrentRouteName()}
                   </span>
                 )}
-                <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
+                {/* <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
                   {formattedStreak}
-                </span>
+                </span> */}
               </div>
               {/* Message */}
               <div className="ml-0 text-sm">
