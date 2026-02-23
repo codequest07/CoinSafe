@@ -6,10 +6,9 @@ import { FormattedSafeDetails } from "@/hooks/useGetSafeById";
 import { useLocation } from "react-router-dom";
 import AutoSavedAssetTable from "./AutoSavedAssetTable";
 import TargetAssetTable from "./TargetAssetTable";
-import MobileAssetTabs from "./MobileAssetTabs";
 
 interface AssetTabsProps {
-  type?: "emergency" | "target" | "automated";
+  type?: 'emergency' | 'target' | 'automated';
   safeDetails?: FormattedSafeDetails;
   isLoading?: boolean;
 }
@@ -19,10 +18,11 @@ export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
   const location = useLocation();
   const isVaultPage = location.pathname === "/vault";
   const isAutoSafePage = location.pathname === "/vault/auto-safe";
+  const isEmergencyPage = location.pathname === "/vault/emergency-safe";
 
   return (
     <div className="w-full mx-auto">
-      <div className="hidden md:flex w-full mx-auto border-b border-[#FFFFFF21] bg-black text-white overflow-x-auto">
+      <div className="flex w-full mx-auto border-b border-[#FFFFFF21] bg-black text-white overflow-x-auto">
         <button
           onClick={() => setActiveTab("assets")}
           className={cn(
@@ -30,8 +30,7 @@ export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
             activeTab === "assets"
               ? "border-b-2 border-[#79E7BA]"
               : "text-gray-400 hover:text-gray-200"
-          )}
-        >
+          )}>
           Assets
         </button>
         <button
@@ -41,20 +40,19 @@ export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
             activeTab === "savings"
               ? "border-b-2 border-[#79E7BA]"
               : "text-gray-400 hover:text-gray-200"
-          )}
-        >
+          )}>
           Savings history
         </button>
       </div>
 
-      <div className="hidden md:block py-2 bg-black text-white">
+      <div className="py-2 bg-black text-white">
         {activeTab === "assets" ? (
           isVaultPage ? (
-            <VaultAssetTable safeDetails={safeDetails} type={type} />
+            <VaultAssetTable safeDetails={safeDetails} type={type}/>
           ) : isAutoSafePage ? (
             <AutoSavedAssetTable assets={safeDetails} isLoading={isLoading} />
           ) : (
-            <TargetAssetTable safeDetails={safeDetails} />
+            <TargetAssetTable safeDetails={safeDetails} isEmergencyPage={isEmergencyPage}/>
           )
         ) : (
           <div className="p-4">
@@ -72,8 +70,7 @@ export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
                   strokeWidth="1"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="text-gray-400 mb-4 animate-bounce"
-                >
+                  className="text-gray-400 mb-4 animate-bounce">
                   <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
                   <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
                   <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
@@ -89,14 +86,6 @@ export function AssetTabs({ safeDetails, isLoading, type }: AssetTabsProps) {
             {/* <TransactionHistory safeId={safeDetails?.id} /> */}
           </div>
         )}
-      </div>
-
-      <div className="md:hidden">
-        <MobileAssetTabs
-          safeDetails={safeDetails}
-          isLoading={isLoading}
-          type={type}
-        />
       </div>
     </div>
   );

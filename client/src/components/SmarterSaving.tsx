@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { useActiveAccount } from "thirdweb/react";
 import MemoGreenMagicPen from "@/icons/GreenMagicPen";
 
-
 export default function SmarterSaving({
   setIsConnectModalOpen,
 }: {

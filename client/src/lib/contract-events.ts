@@ -191,10 +191,6 @@ export const automatedSafeDeactivatedEvent = prepareEvent({
   signature: "event AutomatedSafeDeactivated(address indexed user)",
 });
 
-export const swapExecutedEvent = prepareEvent({
-  signature: "event SwapExecuted(address indexed user, address indexed tokenIn, address indexed tokenOut, uint256 amountIn, uint256 amountOut)",
-})
-
 export const fundingFacetEvents = [depositSuccessfulEvent, withdrawnEvent];
 export const automatedSavingsFacetEvents = [
   automatedPlanCreatedEvent,
@@ -215,5 +211,3 @@ export const targetedSavingsFacetEvents = [
 
 ];
 export const emergencySavingsFacetEvents = [savedToEmergencySuccessfullyEvent, emergencyWithdrawalExecutedEvent];
-
-export const swapFacetEvents = [swapExecutedEvent];

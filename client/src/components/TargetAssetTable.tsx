@@ -36,9 +36,13 @@ import WithdrawEmergencySafe from "./Modals/WithdrawEmergencySafe";
 
 interface AssetTableProps {
   safeDetails?: FormattedSafeDetails;
+  isEmergencyPage?: boolean;
 }
 
-export default function TargetAssetTable({ safeDetails }: AssetTableProps) {
+export default function TargetAssetTable({
+  safeDetails,
+  isEmergencyPage: _isEmergencyPage,
+}: AssetTableProps) {
   const [allAssetData, setAllAssetData] = useState<
     { token: string; balance: string; yield?: string }[]
   >([]);
@@ -273,15 +277,13 @@ function AssetTableContent({
                 console.log("clicked");
                 console.log(safeDetails);
               }}
-              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-            >
+              className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]">
               Top Up Safe
             </Button>
           ) : isConnected ? (
             <Button
               className="mt-4 bg-[#1E1E1E99] px-8 py-2 rounded-[100px] text-[#F1F1F1] hover:bg-[#2a2a2a]"
-              onClick={() => navigate("/deposit")}
-            >
+              onClick={() => navigate("/deposit")}>
               Deposit
             </Button>
           ) : (
@@ -341,8 +343,7 @@ function AssetTableContent({
                       </div>
                     ) : (
                       <div
-                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}
-                      >
+                        className={`w-7 h-7 rounded-full ${asset.tokenInfo.color} flex items-center justify-center text-white font-medium`}>
                         {asset.tokenInfo.symbol?.charAt(0)}
                       </div>
                     )}
@@ -413,8 +414,7 @@ function AssetTableContent({
                         } else {
                           setShowTopUpModal(true);
                         }
-                      }}
-                    >
+                      }}>
                       Top Up
                     </Button>
                     <Button
@@ -430,8 +430,7 @@ function AssetTableContent({
                         } else {
                           setShowUnlockModal(true);
                         }
-                      }}
-                    >
+                      }}>
                       {safeDetails?.id && BigInt(safeDetails.id) === 911n
                         ? "Withdraw"
                         : "Unlock"}

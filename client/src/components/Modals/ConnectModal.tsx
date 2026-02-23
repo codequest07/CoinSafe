@@ -74,7 +74,7 @@ const ConnectModal = ({
         setIsConnectModalOpen(open);
       }}
     >
-      <DialogContent className="max-w-[390px] sm:max-w-[400px] border-0 text-white bg-[#17171C]">
+      <DialogContent className="max-w-[390px] sm:max-w-[400px] border-0 text-white bg-[#17171C]" noX={true}>
         {status === "connecting" ? (
           <div className="h-[150px] rounded-2xl p-8 flex flex-col items-center justify-center">
             <div className="flex items-center justify-center mb-6">

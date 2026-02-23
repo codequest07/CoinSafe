@@ -19,7 +19,7 @@ export interface ChainConfig {
 export const chainConfigs: Record<number, ChainConfig> = {
     [liskMainnet.id]: {
         chain: liskMainnet,
-        diamondAddress: "0x1f9d3d871f5D279e939B0622eCEb130aB35c8FF2",
+        diamondAddress: "0xAb82eA18aA9b0F74DEc7F2e7bAdF9D47eF380ADB",
         tokens: {
             usdt: "0x05D032ac25d322df992303dCa074EE7392C117b9",
             usdt0: "0x43F2376D5D03553aE72F4A8093bbe9de4336EB08",
@@ -30,7 +30,7 @@ export const chainConfigs: Record<number, ChainConfig> = {
     },
     [base.id]: {
         chain: base,
-        diamondAddress: "0xAE7f97004e88afcBF526f0D9c2233A8F3EF14283",
+        diamondAddress: "0xE99CFE97258cA9504c44833D6714FdB10270b032",
         tokens: {
             usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // Placeholder
             // usdt: "0x0000000000000000000000000000000000000000",

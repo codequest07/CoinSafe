@@ -203,7 +203,7 @@ export default function WithdrawCard() {
                 <div className="text-sm font-[300] text-gray-300">
                   Available balance:{" "}
                   <span className="text-gray-400">
-                    {selectedTokenBalance?.toFixed(3)} {tokenData[token]?.symbol}
+                    {selectedTokenBalance} {tokenData[token]?.symbol}
                   </span>
                 </div>
                 <Button

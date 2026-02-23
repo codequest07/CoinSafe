@@ -17,10 +17,14 @@ export class APRSigningService {
   private wallet: ethers.Wallet;
 
   constructor(privateKey?: string) {
-    const pk = privateKey || process.env.APR_SIGNER_PRIVATE_KEY;
+    const pk =
+      privateKey ||
+      process.env.APR_SIGNER_PRIVATE_KEY ||
+      process.env.PRIVATE_KEY ||
+      process.env.WALLET_PRIVATE_KEY;
     if (!pk) {
       throw new Error(
-        "APR_SIGNER_PRIVATE_KEY is not set (required to sign APR payloads)",
+        "APR signer private key is not set (set APR_SIGNER_PRIVATE_KEY or PRIVATE_KEY or WALLET_PRIVATE_KEY)",
       );
     }
     this.wallet = new ethers.Wallet(pk);

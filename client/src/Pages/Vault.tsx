@@ -27,8 +27,7 @@ const Vault = () => {
       <section className="w-full">
         <button
           onClick={openFirstModal}
-          className="rounded-[100px] sm:hidden w-full max-w-[100%] mx-auto my-4 block px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]"
-        >
+          className="rounded-[100px] sm:hidden w-full max-w-[100%] mx-auto my-4 block px-8 py-[8px] bg-[#FFFFFFE5] h-[40px] text-sm text-[#010104]">
           Save
         </button>
         <div className="flex flex-col sm:flex-row gap-2 pb-2 w-full">
@@ -52,7 +51,7 @@ const Vault = () => {
         /> */}
         </div>
 
-        <div className="hidden md:block w-full max-w-full overflow-x-hidden">
+        <div className="w-full max-w-full overflow-x-hidden">
           <SavingsCards />
         </div>
 

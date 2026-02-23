@@ -8,7 +8,6 @@ const Portfolio = () => {
   return (
     <div className="pr-4">
       <MobileHeader />
-
       <div className="sm:rounded-[0.8rem] sm:border sm:border-[#FFFFFF17] mb-5">
         <WalletBalance />
         {/* <CurrencyBreakdown /> */}
