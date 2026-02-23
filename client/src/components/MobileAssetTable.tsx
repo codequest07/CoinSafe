@@ -138,7 +138,7 @@ export default function MobileAssetTable({
               safeDetails.target &&
               safeDetails.target !== "Emergency Safe"
             : false,
-          tokenInfo: tokenData[asset.token.toLowerCase()] || {
+          tokenInfo: tokenData[asset?.token?.toLowerCase()] || {
             symbol: "Unknown",
             name: "Token",
             color: "bg-[#440]",

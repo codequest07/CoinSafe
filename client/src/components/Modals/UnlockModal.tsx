@@ -327,7 +327,7 @@ export default function UnlockModal({
               <div className="text-sm text-gray-300">
                 Saved balance:{" "}
                 <span className="text-gray-400">
-                  {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
+                  {selectedTokenBalance} {tokenData[saveState?.token?.toLowerCase()]?.symbol}
                 </span>
               </div>
               <button
@@ -336,7 +336,7 @@ export default function UnlockModal({
                   if (selectedTokenBalance > 0) {
                     // Get normalized balance for Max button
                     let maxAmount = selectedTokenBalance;
-                    const symbol = tokenData[saveState.token]?.symbol;
+                    const symbol = tokenData[saveState?.token?.toLowerCase()]?.symbol;
 
                     // If it's USDT and the value is very large, normalize it
                     if (symbol === "USDT" && maxAmount >= 1000000) {
@@ -425,7 +425,7 @@ export default function UnlockModal({
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 6,
                             })}{" "}
-                            {tokenData[saveState.token]?.symbol || ""}
+                            {tokenData[saveState?.token?.toLowerCase()]?.symbol || ""}
                           </div>
                         )}
                         <div className="text-xs text-gray-400">
@@ -482,7 +482,7 @@ export default function UnlockModal({
           }
         }}
         amount={saveState.amount}
-        token={tokenData[saveState.token]?.symbol || ""}
+        token={tokenData[saveState?.token?.toLowerCase()]?.symbol || ""}
         text="To Unlock"
       />
 
@@ -498,7 +498,7 @@ export default function UnlockModal({
         }}
         transactionType="withdraw"
         amount={saveState.amount}
-        token={tokenData[saveState.token]?.symbol || ""}
+        token={tokenData[saveState?.token?.toLowerCase()]?.symbol || ""}
         additionalDetails={{
           subText: "Assets will be available in your wallet.",
         }}

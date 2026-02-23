@@ -127,23 +127,23 @@ export default function WithdrawEmergencySafe({
                 <Select onValueChange={handleTokenSelect} value={token}>
                   <SelectTrigger className="w-28 h-12 bg-gray-700 border-[1px] border-[#FFFFFF21] bg-[#1E1E1E99] text-white rounded-lg">
                     <div className="flex items-center">
-                      {token && tokenData[token]?.image ? (
+                      {token && tokenData[token?.toLowerCase()]?.image ? (
                         <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center mr-2">
                           <img
-                            src={tokenData[token].image}
+                            src={tokenData[token?.toLowerCase()].image}
                             width={16}
                             height={16}
                             className="w-full h-full"
-                            alt={tokenData[token].symbol}
+                            alt={tokenData[token?.toLowerCase()].symbol}
                           />
                         </div>
-                      ) : token && tokenData[token] ? (
+                      ) : token && tokenData[token?.toLowerCase()] ? (
                         <div
                           className={`w-4 h-4 rounded-full ${
-                            tokenData[token]?.color || "bg-gray-600"
+                            tokenData[token?.toLowerCase()]?.color || "bg-gray-600"
                           } flex items-center justify-center text-white text-xs font-medium mr-2`}
                         >
-                          {tokenData[token]?.symbol?.charAt(0) || "?"}
+                          {tokenData[token?.toLowerCase()]?.symbol?.charAt(0) || "?"}
                         </div>
                       ) : (
                         <></>
@@ -151,7 +151,7 @@ export default function WithdrawEmergencySafe({
                       )}
                       {token ? (
                         <span className="text-white text-sm">
-                          {tokenData[token]?.symbol}
+                          {tokenData[token?.toLowerCase()]?.symbol}
                         </span>
                       ) : (
                         <SelectValue placeholder="Token" />
@@ -160,7 +160,7 @@ export default function WithdrawEmergencySafe({
                   </SelectTrigger>
                   <SelectContent>
                     {supportedTokens.map((tokenAddress) => {
-                      const tokenInfo = tokenData[tokenAddress];
+                      const tokenInfo = tokenData[tokenAddress?.toLowerCase()];
                       return (
                         <SelectItem value={tokenAddress} key={tokenAddress}>
                           <div className="flex items-center">
@@ -208,7 +208,7 @@ export default function WithdrawEmergencySafe({
                 <div className="text-sm font-[300] text-gray-300">
                   Safe token balance:{" "}
                   <span className="text-gray-400">
-                    {selectedTokenBalance} {tokenData[token]?.symbol}
+                    {selectedTokenBalance} {tokenData[token?.toLowerCase()]?.symbol}
                   </span>
                 </div>
                 <Button
@@ -266,7 +266,7 @@ export default function WithdrawEmergencySafe({
                     // Show a toast notification
                     toast.success("Withdrawal Successful", {
                       description: `Successfully withdrew ${amount} ${
-                        tokenData[token]?.symbol || "tokens"
+                        tokenData[token?.toLowerCase()]?.symbol || "tokens"
                       }`,
                     });
                   }, 1000);
@@ -305,7 +305,7 @@ export default function WithdrawEmergencySafe({
           setIsApproveModalOpen(false);
         }}
         amount={amount || 0}
-        token={tokenData[token]?.symbol || "tokens"}
+        token={tokenData[token?.toLowerCase()]?.symbol || "tokens"}
         text="To Withdraw"
         disableAutoClose={true}
       /> */}
@@ -314,7 +314,7 @@ export default function WithdrawEmergencySafe({
       <SuccessfulTxModal
         transactionType="withdraw"
         amount={amount || 0}
-        token={tokenData[token]?.symbol || "tokens"}
+        token={tokenData[token?.toLowerCase()]?.symbol || "tokens"}
         isOpen={isSuccessModalOpen}
         onClose={() => {
           setIsSuccessModalOpen(false);

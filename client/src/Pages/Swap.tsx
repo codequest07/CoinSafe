@@ -343,7 +343,7 @@ const Swap = () => {
                   Wallet balance:{" "}
                   <span className="text-[#E5E5E5]">
                     {selectedTokenBalance.toFixed(4)}{" "}
-                    {tokenData[fromToken]?.symbol || ""}
+                    {tokenData[fromToken?.toLowerCase()]?.symbol || ""}
                   </span>
                 </p>
                 <Button
@@ -408,7 +408,7 @@ const Swap = () => {
 
           {insufficientBalance && (
             <div className="rounded-[8px]  bg-[#1F1F20] text-[#F1F1F1] text-center py-3 px-4 text-sm">
-              Not enough {tokenData[fromToken]?.symbol || "tokens"} to swap
+              Not enough {tokenData[fromToken?.toLowerCase()]?.symbol || "tokens"} to swap
             </div>
           )}
 
@@ -423,12 +423,12 @@ const Swap = () => {
               <div className="flex items-center justify-between text-sm text-[#E5E5E5]">
                 <div className="flex items-center sm:gap-2">
                   <span className="text-xs sm:text-sm">
-                    1 {tokenData[fromToken]?.symbol} ≈{" "}
+                    1 {tokenData[fromToken?.toLowerCase()]?.symbol} ≈{" "}
                     {(
                       Number(formattedQuote?.expectedAmountOut) /
                       Number(fromAmount)
                     ).toFixed(4)}{" "}
-                    {tokenData[toToken]?.symbol}
+                    {tokenData[toToken?.toLowerCase()]?.symbol}
                   </span>
                   {/* <span className="text-[#9FA0A3]">•</span>
                   <span>&lt;$0.01</span> */}
@@ -457,7 +457,7 @@ const Swap = () => {
                     Min Received
                   </span>
                   <span className="text-right text-[#E5E5E5]">
-                    {formattedQuote?.minAmountOut} {tokenData[toToken]?.symbol}
+                    {formattedQuote?.minAmountOut} {tokenData[toToken?.toLowerCase()]?.symbol}
                   </span>
 
                   <span className="flex items-center gap-2 text-[#B5B5B5]">

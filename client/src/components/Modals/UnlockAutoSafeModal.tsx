@@ -136,7 +136,7 @@ export default function UnlockAutoSafeModal({
     );
     setBreakingFeeAmount(formattedFeeAmount);
 
-    const tokenSymbol = tokenData[saveState.token]?.symbol?.toUpperCase() || "";
+    const tokenSymbol = tokenData[saveState?.token?.toLowerCase()]?.symbol?.toUpperCase() || "";
     const usdValue = Number(await getTokenPrice(saveState.token, feeAmount));
     const formattedUsdValue = Number(
       formatUnits(BigInt(usdValue), getTokenDecimals(saveState.token)),
@@ -272,7 +272,7 @@ export default function UnlockAutoSafeModal({
                     BigInt(selectedTokenBalance),
                     getTokenDecimals(saveState.token),
                   )}{" "}
-                  {tokenData[saveState.token]?.symbol || ""}
+                  {tokenData[saveState?.token?.toLowerCase()]?.symbol || ""}
                 </span>
               </div>
               <button
@@ -284,7 +284,7 @@ export default function UnlockAutoSafeModal({
                   if (selectedTokenBalance > 0) {
                     const maxAmount = selectedTokenBalance;
                     console.log("Max before all that", maxAmount);
-                    // const symbol = tokenData[saveState.token]?.symbol;
+                    // const symbol = tokenData[saveState?.token?.toLowerCase()]?.symbol;
                     // if (symbol === "USDT" && maxAmount >= 1000000) {
                     //   maxAmount = maxAmount / 1000000;
                     // }
@@ -392,7 +392,7 @@ export default function UnlockAutoSafeModal({
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 6,
                               })}{" "}
-                              {tokenData[saveState.token]?.symbol || ""}
+                              {tokenData[saveState?.token?.toLowerCase()]?.symbol || ""}
                             </div>
                           )}
                           <div className="text-xs text-gray-400">
@@ -467,7 +467,7 @@ export default function UnlockAutoSafeModal({
             ? formatEther(BigInt(saveState.amount))
             : saveState.amount
         }
-        token={tokenData[saveState.token]?.symbol || ""}
+        token={tokenData[saveState?.token?.toLowerCase()]?.symbol || ""}
         text="To Unlock"
       />
 
@@ -483,7 +483,7 @@ export default function UnlockAutoSafeModal({
             ? formatEther(BigInt(saveState.amount))
             : saveState.amount
         }
-        token={tokenData[saveState.token]?.symbol || ""}
+        token={tokenData[saveState?.token?.toLowerCase()]?.symbol || ""}
         additionalDetails={{
           subText: "Assets will be available in your wallet.",
         }}

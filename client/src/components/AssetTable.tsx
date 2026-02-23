@@ -151,7 +151,7 @@ function AssetTableContent({
           balance_usd: null, // Placeholder for loading state
           saved_usd: null, // Placeholder for loading state
           autosaved: null, // Placeholder for loading state
-          tokenInfo: tokenData[asset.token.toLowerCase()] || {
+          tokenInfo: tokenData[asset?.token?.toLowerCase()] || {
             symbol: "Unknown",
             name: "Lisk",
             color: "bg-[#440]",

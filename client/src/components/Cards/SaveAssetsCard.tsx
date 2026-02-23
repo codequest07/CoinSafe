@@ -188,7 +188,7 @@ export default function SaveAssetsCard() {
 
     setSaveState((prevState) => ({ ...prevState, token: value.toLowerCase() }));
 
-    if (tokenData[value]?.symbol === "USDT") {
+    if (tokenData[value?.toLowerCase()]?.symbol === "USDT") {
       setShowUsdtModal(true);
     }
   };
@@ -439,7 +439,7 @@ export default function SaveAssetsCard() {
               <div className="text-sm text-gray-300">
                 Wallet balance:{" "}
                 <span className="text-gray-400">
-                  {selectedTokenBalance} {tokenData[saveState.token]?.symbol}
+                  {selectedTokenBalance} {tokenData[saveState?.token?.toLowerCase()]?.symbol}
                 </span>
               </div>
               {saveState.token &&
@@ -664,7 +664,7 @@ export default function SaveAssetsCard() {
                           Wallet balance:{" "}
                           <span className="text-gray-400">
                             {selectedTokenBalance}{" "}
-                            {tokenData[saveState.token]?.symbol}
+                            {tokenData[saveState?.token?.toLowerCase()]?.symbol}
                           </span>
                         </div>
                         {saveState.token &&
@@ -807,7 +807,7 @@ export default function SaveAssetsCard() {
 
       <SaveSuccessful
         amount={saveState.amount}
-        token={tokenData[saveState.token]?.symbol}
+        token={tokenData[saveState?.token?.toLowerCase()]?.symbol}
         duration={saveState.duration}
         isOpen={isThirdModalOpen && saveType === "one-time"}
         onClose={() => {
@@ -818,7 +818,7 @@ export default function SaveAssetsCard() {
       <SuccessfulTxModal
         transactionType="setup-recurring-save"
         amount={saveState.amount}
-        token={tokenData[saveState.token]?.symbol}
+        token={tokenData[saveState?.token?.toLowerCase()]?.symbol}
         isOpen={
           isThirdModalOpen &&
           saveType === "auto" &&
