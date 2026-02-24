@@ -48,6 +48,16 @@ const getRandomMessage = () => {
 
 const chains = [liskMainnet, base];
 
+const chainLogo: Record<number, string> = {
+  [liskMainnet.id]: "/assets/lisk.png",
+  [base.id]: "/assets/base.png",
+};
+
+const chainDisplayName: Record<number, string> = {
+  [liskMainnet.id]: "Lisk",
+  [base.id]: "Base",
+};
+
 const DashHeader = () => {
   const location = useLocation();
   const params = useParams();
@@ -186,9 +196,23 @@ const DashHeader = () => {
                       className="h-9 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all duration-300 shadow-lg backdrop-blur-md flex items-center gap-2 relative overflow-hidden group"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-[#10B981]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <Network className="h-4 w-4 text-[#10B981] relative z-10" />
-                      <span className="text-[13px] font-medium max-w-[80px] truncate relative z-10 text-gray-100 tracking-wide">
-                        {activeChain?.name || "Network"}
+                      {activeChain?.id != null && chainLogo[activeChain.id] ? (
+                        <div className="w-5 h-5 rounded-full object-contain bg-white p-[2px] relative z-10 flex items-center justify-center">
+                          <img
+                            src={chainLogo[activeChain.id]}
+                            className="w-full h-full rounded-full object-contain"
+                            alt=""
+                          />
+                        </div>
+                      ) : (
+                        <Network className="h-4 w-4 text-[#10B981] relative z-10" />
+                      )}
+                      {/* hidden text on mobile */}
+                      <span className="hidden md:block text-[13px] font-medium max-w-[80px] truncate relative z-10 text-gray-100 tracking-wide">
+                        {(activeChain?.id != null &&
+                          chainDisplayName[activeChain.id]) ||
+                          activeChain?.name ||
+                          "Network"}
                       </span>
                       <ChevronDown className="h-3.5 w-3.5 text-gray-400 opacity-80 ml-0.5 relative z-10 group-hover:text-gray-200 transition-colors" />
                     </Button>
@@ -209,20 +233,19 @@ const DashHeader = () => {
                               : "text-gray-300 hover:bg-white/5 hover:text-white"
                           }`}
                         >
-                          <div className="relative flex items-center justify-center w-3 h-3">
-                            {isActive && (
-                              <div className="absolute inset-0 bg-[#10B981] opacity-30 rounded-full animate-ping" />
+                          <div className="relative flex items-center justify-center w-5 h-5 rounded-full bg-white p-[2px]">
+                            {chainLogo[c.id] ? (
+                              <img
+                                src={chainLogo[c.id]}
+                                className="w-full h-full rounded-full object-contain"
+                                alt=""
+                              />
+                            ) : (
+                              <div className="w-full h-full rounded-full bg-gray-500" />
                             )}
-                            <div
-                              className={`w-2 h-2 rounded-full relative z-10 ${
-                                isActive
-                                  ? "bg-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.8)]"
-                                  : "bg-gray-500"
-                              }`}
-                            />
                           </div>
                           <span className="text-sm font-semibold tracking-wide">
-                            {c.name}
+                            {chainDisplayName[c.id] || c.name}
                           </span>
                         </DropdownMenuItem>
                       );
