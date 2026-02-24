@@ -277,7 +277,7 @@ export default function ClaimAssets({
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DialogContent className="w-full max-w-md rounded-xl bg-[#17171C] text-white shadow-lg p-5 border border-white/15">
-        <DialogTitle className="text-white flex items-center text-4xl">
+        <DialogTitle className="text-white flex items-center text-xl">
           Claim matured assets
         </DialogTitle>
 

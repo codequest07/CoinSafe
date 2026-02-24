@@ -54,6 +54,8 @@ export async function getSignedApr(
 
     const response = await fetch(url.toString());
 
+    // console.log("APR RESPONSE", response);
+
     if (!response.ok) {
       throw new Error(
         `Failed to fetch signed APR: ${response.status} ${response.statusText}`,

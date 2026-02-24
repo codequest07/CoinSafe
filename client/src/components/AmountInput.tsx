@@ -1,5 +1,5 @@
 // import React from 'react'
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -39,8 +39,23 @@ const AmountInput = ({
   validationErrors,
   supportedTokens,
 }: IAmountInput) => {
-  // number input stuff
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [localAmount, setLocalAmount] = useState<string | number>(
+    amount === 0 ? "" : amount,
+  );
+
+  useEffect(() => {
+    if (Number(localAmount) !== Number(amount)) {
+      setLocalAmount(amount === 0 ? "" : amount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [amount]);
+
+  const handleLocalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalAmount(e.target.value);
+    handleAmountChange(e);
+  };
 
   const handleFocus = () => {
     if (inputRef.current) {
@@ -48,20 +63,18 @@ const AmountInput = ({
     }
   };
 
-  // Enhanced token select handler that clears amount
   const handleTokenSelectWithClear = (value: string) => {
-    // Clear the amount by triggering a change event with empty value
     const clearEvent = {
       target: { value: "" },
     } as React.ChangeEvent<HTMLInputElement>;
+    setLocalAmount("");
     handleAmountChange(clearEvent);
-
-    // Then handle the token selection
     handleTokenSelect(value);
   };
 
-  // Get the selected token info
-  const selectedTokenInfo = saveState.token ? tokenData[saveState?.token?.toLowerCase()] : null;
+  const selectedTokenInfo = saveState.token
+    ? tokenData[saveState?.token?.toLowerCase()]
+    : null;
 
   return (
     <div className="mb-4">
@@ -72,8 +85,8 @@ const AmountInput = ({
           <div className="flex-1">
             <input
               type="number"
-              value={amount === 0 ? "" : amount}
-              onChange={handleAmountChange}
+              value={localAmount}
+              onChange={handleLocalChange}
               ref={inputRef}
               onFocus={handleFocus}
               placeholder="0.00"
@@ -100,8 +113,9 @@ const AmountInput = ({
                     </div>
                   ) : saveState.token && selectedTokenInfo ? (
                     <div
-                      className={`w-4 h-4 rounded-full ${selectedTokenInfo?.color || "bg-gray-600"
-                        } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                      className={`w-4 h-4 rounded-full ${
+                        selectedTokenInfo?.color || "bg-gray-600"
+                      } flex items-center justify-center text-white text-xs font-medium mr-2`}
                     >
                       {selectedTokenInfo?.symbol?.charAt(0) || "?"}
                     </div>
@@ -133,8 +147,9 @@ const AmountInput = ({
                           </div>
                         ) : (
                           <div
-                            className={`w-4 h-4 rounded-full ${tokenInfo?.color || "bg-gray-600"
-                              } flex items-center justify-center text-white text-xs font-medium mr-2`}
+                            className={`w-4 h-4 rounded-full ${
+                              tokenInfo?.color || "bg-gray-600"
+                            } flex items-center justify-center text-white text-xs font-medium mr-2`}
                           >
                             {tokenInfo?.symbol?.charAt(0) || "?"}
                           </div>
