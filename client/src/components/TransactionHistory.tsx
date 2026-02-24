@@ -267,13 +267,13 @@ const TransactionHistory = ({ safeId }: TransactionHistoryProps) => {
                                       getTokenDecimals(transaction.token),
                                     )}{" "}
                                     {
-                                      tokenData[transaction.token.toLowerCase()]
+                                      tokenData[transaction?.token?.toLowerCase()]
                                         ?.symbol
                                     }
                                   </span>
                                   <img
                                     src={
-                                      tokenData[transaction.token.toLowerCase()]
+                                      tokenData[transaction?.token?.toLowerCase()]
                                         ?.image
                                     }
                                     width={12}

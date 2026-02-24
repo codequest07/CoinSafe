@@ -239,7 +239,7 @@ export default function AddToken({
                         )
                         .map((token) => (
                           <SelectItem value={token} key={token}>
-                            {tokenData[token]?.symbol}
+                            {tokenData[token?.toLowerCase()]?.symbol}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -276,7 +276,7 @@ export default function AddToken({
                 Wallet balance:{" "}
                 <span className="text-gray-400">
                   {selectedTokenBalance}{" "}
-                  {tokenData[saveState.token]?.symbol || ""}
+                  {tokenData[saveState?.token?.toLowerCase()]?.symbol || ""}
                 </span>
               </div>
               <Button

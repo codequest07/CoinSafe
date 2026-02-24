@@ -266,10 +266,10 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     <div className="flex justify-between items-center">
                       <div>
                         <div className="flex items-center gap-2">
-                          {tokenData[token.token]?.image ? (
+                          {tokenData[token?.token?.toLowerCase()]?.image ? (
                             <div className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center">
                               <img
-                                src={tokenData[token.token]?.image}
+                                src={tokenData[token?.token?.toLowerCase()]?.image}
                                 width={30}
                                 height={30}
                                 className="w-full h-full"
@@ -277,7 +277,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                             </div>
                           ) : (
                             <div
-                              className={`w-7 h-7 rounded-full ${tokenData[token.token].color
+                              className={`w-7 h-7 rounded-full ${tokenData[token?.token?.toLowerCase()].color
                                 } flex items-center justify-center text-white font-medium`}
                             >
                               {token.tokenSymbol?.charAt(0)}
@@ -288,7 +288,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                               {token.tokenSymbol}
                             </p>
                             <p className="text-xs text-gray-400">
-                              {tokenData[token.token].chain}
+                              {tokenData[token?.token?.toLowerCase()].chain}
                             </p>
                           </div>
                         </div>
@@ -373,7 +373,7 @@ const ReactivateModal: React.FC<ReactivateModalProps> = ({
                     Wallet balance:{" "}
                     <span className="text-gray-400">
                       {selectedTokenBalance}{" "}
-                      {tokenData[saveState.token]?.symbol}
+                      {tokenData[saveState?.token?.toLowerCase()]?.symbol}
                     </span>
                   </div>
                   {saveState.token &&

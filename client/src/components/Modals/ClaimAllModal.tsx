@@ -108,7 +108,7 @@ export default function ClaimAllModal({
       const { transactionHash } = await sendTransaction(claimTx);
       if (!transactionHash) toast.error("Claim asset failed");
       else {
-        toast.success(`Redeemed ${tokenData[token]?.symbol} successfully`);
+        toast.success(`Redeemed ${tokenData[token?.toLowerCase()]?.symbol} successfully`);
         onClose();
       }
     } catch (error) {
@@ -228,10 +228,10 @@ export default function ClaimAllModal({
                 >
                   {/* Asset icon */}
                   <div className="flex-shrink-0">
-                    {tokenData[tokenEntry.token]?.image ? (
+                    {tokenData[tokenEntry?.token?.toLowerCase()]?.image ? (
                       <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center bg-white/5">
                         <img
-                          src={tokenData[tokenEntry.token]?.image}
+                          src={tokenData[tokenEntry?.token?.toLowerCase()]?.image}
                           alt=""
                           className="w-full h-full object-cover"
                         />
@@ -239,20 +239,20 @@ export default function ClaimAllModal({
                     ) : (
                       <div
                         className={`w-10 h-10 rounded-lg flex items-center justify-center font-semibold text-sm ${
-                          tokenData[tokenEntry.token]?.color || "bg-white/10"
+                          tokenData[tokenEntry?.token?.toLowerCase()]?.color || "bg-white/10"
                         }`}
                       >
-                        {tokenData[tokenEntry.token]?.symbol?.charAt(0) || "?"}
+                        {tokenData[tokenEntry?.token?.toLowerCase()]?.symbol?.charAt(0) || "?"}
                       </div>
                     )}
                   </div>
                   {/* Asset name + network */}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-white truncate">
-                      {tokenData[tokenEntry.token]?.symbol ?? "Unknown"}
+                      {tokenData[tokenEntry?.token?.toLowerCase()]?.symbol ?? "Unknown"}
                     </p>
                     <p className="text-xs text-gray-400 truncate">
-                      {tokenData[tokenEntry.token]?.chain ?? "—"}
+                      {tokenData[tokenEntry?.token?.toLowerCase()]?.chain ?? "—"}
                     </p>
                   </div>
                   {/* Amount + USD */}
@@ -262,7 +262,7 @@ export default function ClaimAllModal({
                         tokenEntry.amount,
                         getTokenDecimals(tokenEntry.token),
                       )}{" "}
-                      {tokenData[tokenEntry.token]?.symbol}
+                      {tokenData[tokenEntry?.token?.toLowerCase()]?.symbol}
                     </p>
                     <p className="text-xs text-gray-400">
                       {usdValues[tokenEntry.token] !== undefined

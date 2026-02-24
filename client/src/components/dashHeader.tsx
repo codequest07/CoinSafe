@@ -13,8 +13,8 @@ import ExtensionCard from "./Cards/ExtensionCard";
 import { useGetSafeById } from "@/hooks/useGetSafeById";
 import { Skeleton } from "./ui/skeleton";
 import { useStreakSystem } from "@/hooks/useStreakSystem";
-import { useRecoilValue } from "recoil";
-import { userCurrentStreakState } from "@/store/atoms/streak";
+// import { useRecoilValue } from "recoil";
+// import { userCurrentStreakState } from "@/store/atoms/streak";
 import {
   useActiveAccount,
   useConnectModal,
@@ -63,12 +63,12 @@ const DashHeader = () => {
 
   // Get streak information
   const { getStreakInfo } = useStreakSystem();
-  const currentStreak = useRecoilValue(userCurrentStreakState);
+  // const currentStreak = useRecoilValue(userCurrentStreakState);
 
-  // Format streak with fire emoji
-  const formattedStreak = `${
-    currentStreak > 0 ? currentStreak.toString() : "0"
-  } days 🔥`;
+  // // Format streak with fire emoji
+  // const formattedStreak = `${
+  //   currentStreak > 0 ? currentStreak.toString() : "0"
+  // } days 🔥`;
 
   // Check if we're on a vault detail page
   const isVaultDetailPage = location.pathname.includes("/vault/") && params.id;
@@ -175,8 +175,61 @@ const DashHeader = () => {
             <MemoLogo className="w-20 h-6" />
           </Link>
 
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 md:hidden">
+              {isConnected && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all duration-300 shadow-lg backdrop-blur-md flex items-center gap-2 relative overflow-hidden group"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#10B981]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <Network className="h-4 w-4 text-[#10B981] relative z-10" />
+                      <span className="text-[13px] font-medium max-w-[80px] truncate relative z-10 text-gray-100 tracking-wide">
+                        {activeChain?.name || "Network"}
+                      </span>
+                      <ChevronDown className="h-3.5 w-3.5 text-gray-400 opacity-80 ml-0.5 relative z-10 group-hover:text-gray-200 transition-colors" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-[180px] bg-[#09090B]/95 backdrop-blur-xl border border-white/10 text-white rounded-2xl shadow-2xl mt-2 p-1.5"
+                  >
+                    {chains.map((c) => {
+                      const isActive = activeChain?.id === c.id;
+                      return (
+                        <DropdownMenuItem
+                          key={c.id}
+                          onClick={() => handleSwitchChain(c.id)}
+                          className={`cursor-pointer transition-all duration-200 flex items-center gap-3 rounded-xl px-3 py-2.5 outline-none mb-1 last:mb-0 ${
+                            isActive
+                              ? "bg-[#10B981]/10 text-[#10B981]"
+                              : "text-gray-300 hover:bg-white/5 hover:text-white"
+                          }`}
+                        >
+                          <div className="relative flex items-center justify-center w-3 h-3">
+                            {isActive && (
+                              <div className="absolute inset-0 bg-[#10B981] opacity-30 rounded-full animate-ping" />
+                            )}
+                            <div
+                              className={`w-2 h-2 rounded-full relative z-10 ${
+                                isActive
+                                  ? "bg-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+                                  : "bg-gray-500"
+                              }`}
+                            />
+                          </div>
+                          <span className="text-sm font-semibold tracking-wide">
+                            {c.name}
+                          </span>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               {/* <ClaimBtn /> */}
               <WalletAvatar />
             </div>
@@ -202,41 +255,6 @@ const DashHeader = () => {
                   >
                     <MemoLogo className="w-32 h-10" />
                   </Link>
-
-                  {/* Chain Switcher for Mobile */}
-                  {isConnected && (
-                    <div className="my-2 px-2">
-                      <p className="text-sm text-gray-500 mb-2">Network</p>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-between bg-[#FFFBF833] border-none text-white hover:bg-[#FFFBF855] hover:text-white"
-                          >
-                            <span className="flex items-center gap-2">
-                              <Network className="h-4 w-4" />
-                              {activeChain?.name || "Select Network"}
-                            </span>
-                            <ChevronDown className="h-4 w-4 opacity-50" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-full bg-[#1A1A1E] border-[#333] text-white">
-                          {chains.map((c) => (
-                            <DropdownMenuItem
-                              key={c.id}
-                              onClick={() => {
-                                handleSwitchChain(c.id);
-                                setIsSheetOpen(false);
-                              }}
-                              className="cursor-pointer hover:bg-[#333] focus:bg-[#333] text-white"
-                            >
-                              {c.name}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  )}
 
                   {MobileNavLinks.map((link) => {
                     if (chainToUse.id === base.id && link.label === "Swap")
@@ -324,9 +342,9 @@ const DashHeader = () => {
                     {getCurrentRouteName()}
                   </span>
                 )}
-                <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
+                {/* <span className="text-xs bg-[#F3B42324] text-[#F1F1F1] py-1 px-2 rounded-full">
                   {formattedStreak}
-                </span>
+                </span> */}
               </div>
               {/* Message */}
               <div className="ml-0 text-sm">
