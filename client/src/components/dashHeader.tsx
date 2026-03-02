@@ -48,6 +48,16 @@ const getRandomMessage = () => {
 
 const chains = [liskMainnet, base];
 
+const chainLogo: Record<number, string> = {
+  [liskMainnet.id]: "/assets/lisk.png",
+  [base.id]: "/assets/base.png",
+};
+
+const chainDisplayName: Record<number, string> = {
+  [liskMainnet.id]: "Lisk",
+  [base.id]: "Base",
+};
+
 const DashHeader = () => {
   const location = useLocation();
   const params = useParams();
@@ -58,6 +68,7 @@ const DashHeader = () => {
 
   const switchChain = useSwitchActiveWalletChain();
   const activeChain = useActiveWalletChain();
+  const [isSwitchingChain, setIsSwitchingChain] = useState(false);
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -148,6 +159,7 @@ const DashHeader = () => {
   };
 
   const handleSwitchChain = async (chainId: number) => {
+    setIsSwitchingChain(true);
     try {
       const chainToSwitch = chains.find((c) => c.id === chainId);
       if (chainToSwitch) {
@@ -155,6 +167,8 @@ const DashHeader = () => {
       }
     } catch (error) {
       console.error("Failed to switch chain:", error);
+    } finally {
+      setIsSwitchingChain(false);
     }
   };
 
@@ -183,14 +197,28 @@ const DashHeader = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-9 px-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all duration-300 shadow-lg backdrop-blur-md flex items-center gap-2 relative overflow-hidden group"
+                      className="h-10 px-3 rounded-full bg-[#272727B2] hover:bg-[#272727B2]/80 border-none text-white transition-all duration-300 shadow-lg backdrop-blur-md flex items-center gap-2 relative overflow-hidden group mb-0"
+                      disabled={isSwitchingChain}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#10B981]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <Network className="h-4 w-4 text-[#10B981] relative z-10" />
-                      <span className="text-[13px] font-medium max-w-[80px] truncate relative z-10 text-gray-100 tracking-wide">
-                        {activeChain?.name || "Network"}
-                      </span>
-                      <ChevronDown className="h-3.5 w-3.5 text-gray-400 opacity-80 ml-0.5 relative z-10 group-hover:text-gray-200 transition-colors" />
+                      <div className="flex items-center gap-2 relative z-10">
+                        {activeChain?.id != null && chainLogo[activeChain.id] ? (
+                          <div className="w-6 h-6 rounded-full object-contain bg-white p-1 flex items-center justify-center shrink-0">
+                            <img
+                              src={chainLogo[activeChain.id]}
+                              alt=""
+                              className="h-4 w-4 rounded-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <Network className="h-4 w-4 text-[#10B981] shrink-0" />
+                        )}
+                        <span className="text-[13px] font-medium max-w-[80px] truncate text-gray-100 tracking-wide">
+                          {isSwitchingChain
+                            ? "Switching..."
+                            : (activeChain?.id != null && chainDisplayName[activeChain.id]) || activeChain?.name || "Network"}
+                        </span>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-gray-400 opacity-80 ml-0.5 relative z-10 group-hover:text-gray-200 transition-colors shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
@@ -203,27 +231,33 @@ const DashHeader = () => {
                         <DropdownMenuItem
                           key={c.id}
                           onClick={() => handleSwitchChain(c.id)}
-                          className={`cursor-pointer transition-all duration-200 flex items-center gap-3 rounded-xl px-3 py-2.5 outline-none mb-1 last:mb-0 ${
-                            isActive
+                          className={`cursor-pointer transition-all duration-200 flex items-center gap-3 rounded-xl px-3 py-2.5 outline-none mb-1 last:mb-0 ${isActive
                               ? "bg-[#10B981]/10 text-[#10B981]"
-                              : "text-gray-300 hover:bg-white/5 hover:text-white"
-                          }`}
+                              : "text-gray-300 hover:bg-[#333] hover:text-white"
+                            }`}
                         >
-                          <div className="relative flex items-center justify-center w-3 h-3">
-                            {isActive && (
+                          <div className="relative flex justify-center items-center w-5 h-5">
+                            {chainLogo[c.id] ? (
+                              <div className="w-5 h-5 rounded-full object-contain bg-white p-0.5 flex items-center justify-center shrink-0">
+                                <img
+                                  src={chainLogo[c.id]}
+                                  alt=""
+                                  className="h-4 w-4 rounded-full object-contain"
+                                />
+                              </div>
+                            ) : isActive ? (
+                              <div className="w-2 h-2 rounded-full bg-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.8)] relative z-10" />
+                            ) : (
+                              <div className="w-2 h-2 rounded-full bg-gray-500 relative z-10" />
+                            )}
+                            {isActive && !chainLogo[c.id] && (
                               <div className="absolute inset-0 bg-[#10B981] opacity-30 rounded-full animate-ping" />
                             )}
-                            <div
-                              className={`w-2 h-2 rounded-full relative z-10 ${
-                                isActive
-                                  ? "bg-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.8)]"
-                                  : "bg-gray-500"
-                              }`}
-                            />
                           </div>
                           <span className="text-sm font-semibold tracking-wide">
-                            {c.name}
+                            {chainDisplayName[c.id] ?? c.name}
                           </span>
+                          {isActive && <span className="ml-auto text-[#10B981]">✓</span>}
                         </DropdownMenuItem>
                       );
                     })}
