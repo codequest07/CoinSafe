@@ -37,6 +37,7 @@
     "ethers": "^6.13.5",
     "express": "^4.20.0",
     "express-validator": "^7.2.0",
+    "firebase-admin": "^13.7.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.4",

@@ -2,9 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { getToken, onMessage } from "firebase/messaging";
 import { messaging } from "@/services/firebase";
 import { toast } from "sonner";
+import axios from "axios";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface UseFCMNotificationsConfig {
   vapidKey: string;
+  walletAddress?: string;
   onTokenReceived?: (token: string) => void;
   onError?: (error: Error) => void;
 }
@@ -60,10 +63,21 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
     return () => unsubscribe();
   }, []);
 
+  const saveTokenToBackend = async (token: string) => {
+    if (!config.walletAddress) return;
+    try {
+      await axios.post(`${API_BASE_URL}/notifications/save-token`, {
+        walletAddress: config.walletAddress,
+        token,
+      });
+    } catch (err) {
+      console.error("Failed to save FCM token to backend:", err);
+    }
+  };
+
   const retrieveToken = async () => {
     try {
       console.log("Get navigator ready......");
-      // Ensure service worker is registered before accessing ready
       let registration: ServiceWorkerRegistration;
       if (navigator.serviceWorker.controller) {
         registration = await navigator.serviceWorker.ready;
@@ -87,11 +101,20 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
         console.log("FCM Token:", token);
         setFcmToken(token);
         config.onTokenReceived?.(token);
+        await saveTokenToBackend(token);
       }
     } catch (err) {
       console.error("Error retrieving FCM token:", err);
     }
   };
+
+  // If the user connected their wallet AFTER we already obtained an FCM token,
+  // sync that token to the backend once walletAddress becomes available.
+  useEffect(() => {
+    if (config.walletAddress && fcmToken) {
+      void saveTokenToBackend(fcmToken);
+    }
+  }, [config.walletAddress, fcmToken]);
 
   const subscribe = useCallback(async (): Promise<boolean> => {
     if (!isSupported) {
@@ -141,6 +164,7 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
       console.log("FCM Token obtained:", token);
       setFcmToken(token);
       config.onTokenReceived?.(token);
+      await saveTokenToBackend(token);
 
       toast.success("Notifications enabled! You'll receive updates.");
 
@@ -163,6 +187,11 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
     setError(null);
 
     try {
+      if (config.walletAddress) {
+        await axios.delete(`${API_BASE_URL}/notifications/unsubscribe`, {
+          data: { walletAddress: config.walletAddress },
+        });
+      }
       setFcmToken(null);
       toast.success("Notifications disabled");
       setIsLoading(false);
@@ -176,7 +205,7 @@ export const useFCMNotifications = (config: UseFCMNotificationsConfig) => {
       setIsLoading(false);
       return false;
     }
-  }, []);
+  }, [config.walletAddress]);
 
   /**
    * Sends a test push notification using the browser Notification API.

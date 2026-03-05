@@ -99,8 +99,9 @@ const App = () => {
         </Routes>
         <PushNotificationPopup
           vapidKey={import.meta.env.VITE_FIREBASE_VAPID_KEY}
+          walletAddress={account?.address}
           onTokenReceived={handleTokenReceived}
-          autoShowDelay={5000} // Show after 5 seconds
+          autoShowDelay={5000}
           position="bottom-right"
         />
       </SmartAccountTransactionProvider>

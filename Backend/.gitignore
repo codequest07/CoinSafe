@@ -6,3 +6,4 @@ build/
 *.js.map
 dist/
 .DS_Store
+package-lock.json
