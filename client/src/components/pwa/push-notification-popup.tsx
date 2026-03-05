@@ -4,6 +4,7 @@ import { useFCMNotifications } from "../../hooks/useFCMNotifications";
 
 interface PushNotificationPopupProps {
   vapidKey: string;
+  walletAddress?: string;
   onTokenReceived?: (token: string) => void;
   autoShowDelay?: number;
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
@@ -11,6 +12,7 @@ interface PushNotificationPopupProps {
 
 export const PushNotificationPopup: React.FC<PushNotificationPopupProps> = ({
   vapidKey,
+  walletAddress,
   onTokenReceived,
   autoShowDelay = 5000,
   position = "bottom-right",
@@ -26,6 +28,7 @@ export const PushNotificationPopup: React.FC<PushNotificationPopupProps> = ({
     subscribe,
   } = useFCMNotifications({
     vapidKey,
+    walletAddress,
     onTokenReceived,
   });
 

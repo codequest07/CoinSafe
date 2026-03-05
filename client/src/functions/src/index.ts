@@ -70,7 +70,7 @@ export const sendDailyMorningNotification = functions.pubsub
 
       console.log(
         `Successfully sent ${successCount} notifications, ` +
-          `${failureCount} failed`
+          `${failureCount} failed`,
       );
 
       // Clean up invalid tokens
@@ -132,7 +132,7 @@ export const sendDailyEveningNotification = functions.pubsub
 
     console.log(
       `Successfully sent ${successCount} notifications, ` +
-        `${failureCount} failed`
+        `${failureCount} failed`,
     );
 
     // Clean up invalid tokens
@@ -141,7 +141,7 @@ export const sendDailyEveningNotification = functions.pubsub
     }
 
     console.log(
-      `Evening notifications sent: ${response.successCount} successful`
+      `Evening notifications sent: ${response.successCount} successful`,
     );
 
     return null;
@@ -290,7 +290,7 @@ export const saveFCMToken = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
       "unauthenticated",
-      "User must be authenticated"
+      "User must be authenticated",
     );
   }
 
@@ -308,7 +308,7 @@ export const saveFCMToken = functions.https.onCall(async (data, context) => {
         preferences: preferences || {},
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       },
-      { merge: true }
+      { merge: true },
     );
 
   return { success: true };
@@ -322,7 +322,7 @@ export const updateNotificationPreferences = functions.https.onCall(
     if (!context.auth) {
       throw new functions.https.HttpsError(
         "unauthenticated",
-        "User must be authenticated"
+        "User must be authenticated",
       );
     }
 
@@ -349,7 +349,7 @@ export const updateNotificationPreferences = functions.https.onCall(
       });
 
     return { success: true };
-  }
+  },
 );
 
 /**
@@ -359,7 +359,7 @@ export const createReminder = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
       "unauthenticated",
-      "User must be authenticated"
+      "User must be authenticated",
     );
   }
 
@@ -373,7 +373,7 @@ export const createReminder = functions.https.onCall(async (data, context) => {
   if (!userData?.fcmToken) {
     throw new functions.https.HttpsError(
       "failed-precondition",
-      "User has not enabled notifications"
+      "User has not enabled notifications",
     );
   }
 
@@ -405,7 +405,7 @@ export const deleteReminder = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
       "unauthenticated",
-      "User must be authenticated"
+      "User must be authenticated",
     );
   }
 
@@ -432,7 +432,7 @@ export const deleteReminder = functions.https.onCall(async (data, context) => {
 
 async function cleanupInvalidTokens(
   responses: admin.messaging.SendResponse[],
-  tokens: string[]
+  tokens: string[],
 ) {
   const invalidTokens: string[] = [];
 
