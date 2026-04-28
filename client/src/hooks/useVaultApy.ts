@@ -3,14 +3,14 @@ import { createPublicClient, http, formatUnits } from "viem";
 import { type PublicClient, type Address } from "viem/";
 import { parseAbi } from "viem/utils";
 import { lisk, base } from "viem/chains";
-import { getChainAddresses, Vault } from "@morpho-org/blue-sdk";
-import "@morpho-org/blue-sdk-viem/lib/augment";
+import { getChainAddresses } from "@morpho-org/blue-sdk";
 import axios, { AxiosError } from "axios";
 
 // ABIs (unchanged from prior)
 const METAMORPHO_ABI = parseAbi([
   "function withdrawQueue(uint256) external view returns (bytes32)",
   "function withdrawQueueLength() external view returns (uint256)",
+  "function fee() external view returns (uint256)",
 ]);
 
 const MORPHO_BLUE_ABI = parseAbi([
@@ -576,16 +576,18 @@ export const useVaultApy = (
           ),
         });
 
-        const vault = await Vault.fetch(
-          vaultAddress[
-            tokenAddress.toLowerCase() as keyof typeof vaultAddress
-          ] as `0x${string}`,
-          client,
-        );
-        // console.log("VAULT", vault)
+        const vaultAddress_ = vaultAddress[
+          tokenAddress.toLowerCase() as keyof typeof vaultAddress
+        ] as `0x${string}`;
+
+        const fee = (await client.readContract({
+          address: vaultAddress_,
+          abi: METAMORPHO_ABI,
+          functionName: "fee",
+        })) as bigint;
 
         // Set fees (original logic)
-        const formattedFees = formatUnits(vault.fee, 18);
+        const formattedFees = formatUnits(fee, 18);
         setFees(Number(formattedFees));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch fees");
