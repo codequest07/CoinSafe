@@ -10,11 +10,18 @@ export interface IUser extends Document {
   verificationTokenExpires?: Date;
   verificationCode?: string;
   verificationCodeExpires?: Date;
+  fcmToken?: string;
+  notificationsEnabled: boolean;
   notificationPreferences: {
     deposit: boolean;
     withdrawal: boolean;
     safeMaturing: boolean;
+    morningReminders: boolean;
+    eveningReminders: boolean;
+    weeklyDigest: boolean;
   };
+  timezone?: string;
+  preferredNotificationHour?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -40,11 +47,18 @@ const UserSchema: Schema = new Schema({
   verificationTokenExpires: { type: Date },
   verificationCode: { type: String },
   verificationCodeExpires: { type: Date },
+  fcmToken: { type: String, default: null },
+  notificationsEnabled: { type: Boolean, default: false },
   notificationPreferences: {
     deposit: { type: Boolean, default: true },
     withdrawal: { type: Boolean, default: true },
     safeMaturing: { type: Boolean, default: true },
+    morningReminders: { type: Boolean, default: true },
+    eveningReminders: { type: Boolean, default: true },
+    weeklyDigest: { type: Boolean, default: true },
   },
+  timezone: { type: String, default: "America/New_York" },
+  preferredNotificationHour: { type: Number, default: 8 },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

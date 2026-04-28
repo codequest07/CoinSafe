@@ -13,6 +13,7 @@ import WaitlistRouter from "./Routes/WaitlistRouter";
 import faucetRouter from "./Routes/FaucetClaimRoute";
 import FonbnkRouter from "./Routes/FonbnkRouter";
 import MerklRouter from "./Routes/MerklRouter";
+import NotificationRouter from "./Routes/NotificationRoutes";
 
 // Models and Services
 import { TransactionModel } from "./Models/TransactionModel";
@@ -21,6 +22,7 @@ import { SavingsPlanController } from "./controllers/SavingsPlanController";
 import { savingsPlanRoutes } from "./Routes/SavingsAiRoutes";
 import profileRoutes from "./Routes/ProfileRoutes";
 import { batchAutomatedSavingsProcessor } from "./services/batchProcessor";
+import { notificationService } from "./services/notificationService";
 
 dotenv.config();
 const app = express();
@@ -69,6 +71,7 @@ app.use("/api/coingecko", CoinGeckoApiRouter);
 app.use("/api/profile", profileRoutes);
 app.use("/api/fonbnk", FonbnkRouter);
 app.use("/api/merkl", MerklRouter);
+app.use("/api/notifications", NotificationRouter);
 
 // MongoDB Connection
 const mongodbUri = process.env.MONGO_URI || "";
@@ -153,8 +156,56 @@ const merklCronJob = cron.schedule("0 12 * * *", async () => {
   }
 });
 
+// Schedule morning notification at 8 AM daily
+console.log(
+  "⏰ Setting up cron job for morning notifications (daily at 8:00 AM)"
+);
+const morningNotifCron = cron.schedule("0 8 * * *", async () => {
+  console.log("🌅 Sending morning notifications...");
+  try {
+    const result = await notificationService.sendMorningReminders();
+    console.log(
+      `✅ Morning notifications: ${result.successCount} sent, ${result.failureCount} failed`
+    );
+  } catch (error) {
+    console.error("❌ Morning notifications failed:", error);
+  }
+});
+
+// Schedule evening notification at 8 PM daily
+console.log(
+  "⏰ Setting up cron job for evening notifications (daily at 8:00 PM)"
+);
+const eveningNotifCron = cron.schedule("0 20 * * *", async () => {
+  console.log("🌙 Sending evening notifications...");
+  try {
+    const result = await notificationService.sendEveningReminders();
+    console.log(
+      `✅ Evening notifications: ${result.successCount} sent, ${result.failureCount} failed`
+    );
+  } catch (error) {
+    console.error("❌ Evening notifications failed:", error);
+  }
+});
+
+// Schedule weekly summary every Monday at 9 AM
+console.log(
+  "⏰ Setting up cron job for weekly summary (Mondays at 9:00 AM)"
+);
+const weeklySummaryCron = cron.schedule("0 9 * * 1", async () => {
+  console.log("📊 Sending weekly summary...");
+  try {
+    const result = await notificationService.sendWeeklySummary();
+    console.log(
+      `✅ Weekly summary: ${result.successCount} sent, ${result.failureCount} failed`
+    );
+  } catch (error) {
+    console.error("❌ Weekly summary failed:", error);
+  }
+});
+
 // Log cron job status
-console.log("�� Cron job scheduled successfully");
+console.log("🔔 Notification cron jobs scheduled successfully");
 
 // Start server
 app.listen(port, () => {

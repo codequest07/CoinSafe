@@ -1,23 +1,23 @@
 import React, { useState } from "react";
 import { Bell, Clock } from "lucide-react";
-import { getFunctions, httpsCallable } from "firebase/functions";
+import axios from "axios";
+import { API_BASE_URL } from "@/lib/api-config";
 
 interface NotificationPreferencesProps {
-  userId: string;
+  walletAddress: string;
 }
 
 export const NotificationPreferences: React.FC<
   NotificationPreferencesProps
-> = ({  }) => {
+> = ({ walletAddress }) => {
   const [preferences, setPreferences] = useState({
     morningReminders: true,
     eveningReminders: true,
     weeklyDigest: true,
-    preferredTime: 8,
+    preferredNotificationHour: 8,
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
-//   const [customReminders, setCustomReminders] = useState<any[]>([]);
   const [newReminder, setNewReminder] = useState({
     title: "",
     message: "",
@@ -25,15 +25,12 @@ export const NotificationPreferences: React.FC<
     frequency: "daily",
   });
 
-  const functions = getFunctions();
-
   const savePreferences = async () => {
     try {
-      const updatePrefs = httpsCallable(
-        functions,
-        "updateNotificationPreferences"
+      await axios.put(
+        `${API_BASE_URL}/notifications/preferences/${walletAddress}`,
+        preferences
       );
-      await updatePrefs(preferences);
       alert("Preferences saved!");
     } catch (error) {
       console.error("Error saving preferences:", error);
@@ -48,11 +45,15 @@ export const NotificationPreferences: React.FC<
     }
 
     try {
-      const create = httpsCallable(functions, "createReminder");
-      await create(newReminder);
+      await axios.post(`${API_BASE_URL}/notifications/send`, {
+        title: newReminder.title,
+        body: newReminder.message,
+        type: "custom_reminder",
+        targetAudience: "specific",
+        walletAddresses: [walletAddress],
+      });
       alert("Reminder created!");
 
-      // Reset form
       setNewReminder({
         title: "",
         message: "",
